@@ -1,0 +1,16 @@
+Package: async
+Title: Asynchronous HTTP
+Version: 0.0.0.9000
+Author: Gábor Csárdi
+Maintainer: Gábor Csárdi <csardi.gabor@gmail.com>
+Description: Define tasks, that can stop on an HTTP request, and then
+    continue later, once the HTTP response is in. An event loop keeps the
+    tasks running.
+License: MIT + file LICENSE
+LazyData: true
+URL: https://github.com/gaborcsardi/async#readme
+BugReports: https://github.com/gaborcsardi/async/issues
+RoxygenNote: 6.0.1
+Suggests: 
+    testthat
+Encoding: UTF-8
