@@ -14,6 +14,10 @@ event_loop <- R6Class(
       el_await_all(self, private),
     await_any = function(ids)
       el_await_any(self, private, ids),
+    cancel = function(ids)
+      el_cancel(self, private, ids),
+    cancel_all = function()
+      el_cancel_all(self, private, ids),
     run_http = function(handle, callback)
       el_run_http(self, private, handle, callback)
   ),
@@ -69,6 +73,22 @@ el_await_all <- function(self, private) {
 
 el_await_any <- function(self, private, ids) {
   while (all(ids %in% names(private$tasks))) private$poll()
+}
+
+#' @importFrom curl multi_cancel
+
+el_cancel <- function(self, private, ids) {
+  for (id in ids) {
+    if (id %in% names(private$tasks)) {
+      multi_cancel(private$tasks[[id]]$data$handle)
+      private$finish_task(id, error = "Cancelled by user", result = NULL)
+    }
+  }
+  private$poll()
+}
+
+el_cancel_all <- function(self, private) {
+  el_cancel(self, private, names(private$tasks))
 }
 
 el__finish_task <- function(self, private, id, error, result) {

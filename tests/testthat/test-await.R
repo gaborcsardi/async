@@ -37,8 +37,7 @@ test_that("await_any", {
   await_any(c(ax1, ax2))
   expect_null(status1)
   expect_equal(status2, 200)
-  await(ax1)
-  expect_equal(status1, 200)
+  cancel(ax1)
 })
 
 test_that("await_all", {
