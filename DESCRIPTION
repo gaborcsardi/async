@@ -14,3 +14,8 @@ RoxygenNote: 6.0.1
 Suggests: 
     testthat
 Encoding: UTF-8
+Imports:
+    curl (>= 2.8.1),
+    later,
+    R6,
+    uuid
