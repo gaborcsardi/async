@@ -13,7 +13,10 @@ http_get <- function(url, callback) {
 }
 
 #' @export
+#' @importFrom curl handle_setopt
 
 http_head <- function(url, callback) {
-  ## TODO
+  handle <- new_handle(url = url)
+  handle_setopt(handle, customrequest = "HEAD", nobody = TRUE)
+  get_default_event_loop()$run_http(handle, callback)
 }

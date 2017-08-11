@@ -1,7 +1,7 @@
 
 context("async")
 
-test_that("async works", {
+test_that("GET", {
 
   skip_if_offline()
 
@@ -16,4 +16,18 @@ test_that("async works", {
 
   expect_false(is.null(result))
   expect_match(result, "\"q\": \"42\"", fixed = TRUE)
+})
+
+test_that("HEAD", {
+
+  skip_if_offline()
+
+  ax <- http_head(
+    "https://eu.httpbin.org",
+    function(err, res) {
+      expect_null(err)
+      expect_equal(res$status_code, 200)
+    }
+  )
+  await(ax)
 })
