@@ -37,7 +37,7 @@ event_loop <- R6Class(
 
 el_init <- function(self, private) {
   reg.finalizer(self, function(me) me$await_all(), onexit = TRUE)
-  later::later(function() private$poll)
+  later::later(function() private$poll())
 }
 
 #' @importFrom curl multi_add
