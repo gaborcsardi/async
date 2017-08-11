@@ -1,5 +1,5 @@
 
-context("async")
+context("HTTP")
 
 test_that("GET", {
 
