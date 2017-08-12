@@ -36,3 +36,31 @@ test_that("empty task list", {
   await_all()
   expect_identical(result, list())
 })
+
+test_that("limit", {
+
+  test_limit <- function(limit) {
+    error <- NULL
+    result <- NULL
+    parallel(
+      list(
+        function(cb) cb(NULL, 1),
+        function(cb) cb(NULL, 2),
+        function(cb) cb(NULL, 3),
+        function(cb) cb(NULL, 4),
+        function(cb) cb(NULL, 5)
+      ),
+      function(err, res) { error <<- err; result <<- res },
+      limit = limit
+    )
+    await_all()
+    expect_null(error)
+    expect_equal(result, as.list(1:5))
+  }
+
+  test_limit(1)
+  test_limit(2)
+  test_limit(4)
+  test_limit(5)
+  test_limit(10)
+})
