@@ -28,3 +28,11 @@ test_that("parallel", {
   expect_match(res[[1]], "\"q\": \"foo\"", fixed = TRUE)
   expect_match(res[[2]], "\"q\": \"bar\"", fixed = TRUE)
 })
+
+test_that("empty task list", {
+
+  result <- NULL
+  parallel(list(), function(err, res) { result <<- res })
+  await_all()
+  expect_identical(result, list())
+})

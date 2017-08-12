@@ -4,6 +4,7 @@
 parallel <- function(tasks, callback) {
   force(tasks) ; force(callback)
   l <- length(tasks)
+  if (l == 0) return(callback(NULL, list()))
   result <- vector(mode = "list", length = l)
   lapply(seq_along(tasks), function(i) {
     tasks[[i]](function(err, res) {
