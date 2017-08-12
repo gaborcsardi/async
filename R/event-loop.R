@@ -5,6 +5,7 @@
 #' @export
 
 event_loop <- R6Class(
+  "event_loop",
   public = list(
     initialize = function()
       el_init(self, private),
