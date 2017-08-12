@@ -11,7 +11,7 @@ amap <- function(list, async_function, callback) {
 
   lapply(seq_along(list), function(i) {
     async_function(list[[i]], function(err, res) {
-      if (!is.null(err)) callback(err)
+      if (!is.null(err)) return(callback(err))
       l <<- l - 1
       result[[i]] <<- res
       if (l == 0) callback(NULL, result)

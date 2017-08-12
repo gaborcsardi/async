@@ -11,15 +11,12 @@ retry <- function(async_function, callback, times) {
   force(async_function) ; force(callback); force(times)
 
   mycallback <- function(err, res) {
-    if (is.null(err)) {
-      callback(NULL, res)
+    if (is.null(err)) return(callback(NULL, res))
+    times <<- times - 1
+    if (times) {
+      async_function(mycallback)
     } else {
-      times <<- times - 1
-      if (times) {
-        async_function(mycallback)
-      } else {
-        callback(err, NULL)
-      }
+      callback(err, NULL)
     }
   }
 
