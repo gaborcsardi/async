@@ -21,3 +21,25 @@ test_that("whilst", {
   expect_false(is.null(nn))
   expect_equal(nn, 5)
 })
+
+test_that("whilst with false test", {
+
+  result <- NULL
+
+  expect_silent({
+    whilst(
+      function() FALSE,
+      function(callback) {
+        stop("Not reached")
+        callback(NULL, "Not here")
+      },
+      function(err, res) {
+        result <<- res
+      }
+    )
+
+    await_all()
+  })
+
+  expect_null(result)
+})
