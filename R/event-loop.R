@@ -14,10 +14,6 @@ event_loop <- R6Class(
       el_await_all(self, private),
     await_any = function(ids)
       el_await_any(self, private, ids),
-    cancel = function(ids)
-      el_cancel(self, private, ids),
-    cancel_all = function()
-      el_cancel_all(self, private, ids),
 
     run_http = function(handle, callback)
       el_run_http(self, private, handle, callback),
@@ -26,9 +22,6 @@ event_loop <- R6Class(
   ),
 
   private = list(
-
-    finish_task = function(id, error, result)
-      el__finish_task(self, private, id, error, result),
     poll = function()
       el__poll(self, private),
     create_task = function(callback, ...)
@@ -59,21 +52,24 @@ el_run_http <- function(self, private, handle, callback) {
     handle = handle,
     pool = private$pool,
     done = function(response) {
-      private$finish_task(id, error = NULL, result = response)
+      private$tasks[[id]]$callback(NULL, response)
+      private$tasks[[id]] <- NULL
     },
     fail = function(error) {
-      private$finish_task(id, error = error, result = NULL)
+      private$tasks[[id]]$callback(error, NULL)
+      private$tasks[[id]] <- NULL
     }
   )
   id
 }
 
 el_run_set_timeout <- function(self, private, delay, callback) {
-  force(self); force(private); force(delay); force(callback)
+  force(self) ; force(private) ; force(delay) ; force(callback)
   id <- private$create_task(callback, data = list(delay = delay))
   later(
     function() {
-      private$finish_task(id, error = NULL, result = delay)
+      private$tasks[[id]]$callback()
+      private$tasks[[id]] <- NULL
     },
     delay
   )
@@ -92,28 +88,6 @@ el_await_any <- function(self, private, ids) {
   while (all(ids %in% names(private$tasks))) private$poll()
 }
 
-#' @importFrom curl multi_cancel
-
-el_cancel <- function(self, private, ids) {
-  for (id in ids) {
-    if (id %in% names(private$tasks)) {
-      multi_cancel(private$tasks[[id]]$data$handle)
-      private$finish_task(id, error = "Cancelled by user", result = NULL)
-    }
-  }
-  private$poll()
-}
-
-el_cancel_all <- function(self, private) {
-  el_cancel(self, private, names(private$tasks))
-}
-
-el__finish_task <- function(self, private, id, error, result) {
-  private$tasks[[id]]$error <- error
-  private$tasks[[id]]$result <- result
-  private$done <- c(private$done, id)
-}
-
 #' @importFrom curl multi_run
 
 el__poll <- function(self, private) {
@@ -128,8 +102,7 @@ el__poll <- function(self, private) {
     if (id %in% names(private$tasks)) {
       task <- private$tasks[[id]]
       task$callback(task$error, task$result)
-      private$tasks[[id]] <- NULL
-      private$done <- setdiff(private$done, id)
+      private$finish_task(id)
     }
   }
 }
