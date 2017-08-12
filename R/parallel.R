@@ -2,6 +2,7 @@
 #' @export
 
 parallel <- function(tasks, callback) {
+  force(tasks) ; force(callback)
   l <- length(tasks)
   result <- vector(mode = "list", length = l)
   lapply(seq_along(tasks), function(i) {
