@@ -19,3 +19,4 @@ Imports:
     later,
     R6,
     uuid
+Roxygen: list(markdown = TRUE)
