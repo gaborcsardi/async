@@ -18,8 +18,11 @@ event_loop <- R6Class(
       el_cancel(self, private, ids),
     cancel_all = function()
       el_cancel_all(self, private, ids),
+
     run_http = function(handle, callback)
-      el_run_http(self, private, handle, callback)
+      el_run_http(self, private, handle, callback),
+    run_set_timeout = function(delay, callback)
+      el_run_set_timeout(self, private, delay, callback)
   ),
 
   private = list(
@@ -39,9 +42,11 @@ event_loop <- R6Class(
   )
 )
 
+#' @importFrom later later
+
 el_init <- function(self, private) {
   reg.finalizer(self, function(me) me$await_all(), onexit = TRUE)
-  later::later(function() private$poll())
+  later(function() private$poll())
 }
 
 #' @importFrom curl multi_add
@@ -59,6 +64,18 @@ el_run_http <- function(self, private, handle, callback) {
     fail = function(error) {
       private$finish_task(id, error = error, result = NULL)
     }
+  )
+  id
+}
+
+el_run_set_timeout <- function(self, private, delay, callback) {
+  force(self); force(private); force(delay); force(callback)
+  id <- private$create_task(callback, data = list(delay = delay))
+  later(
+    function() {
+      private$finish_task(id, error = NULL, result = delay)
+    },
+    delay
   )
   id
 }
