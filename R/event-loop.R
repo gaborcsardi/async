@@ -43,6 +43,7 @@ event_loop <- R6Class(
 el_init <- function(self, private) {
   reg.finalizer(self, function(me) me$await_all(), onexit = TRUE)
   later(function() private$poll())
+  invisible(self)
 }
 
 #' @importFrom curl multi_add
