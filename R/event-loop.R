@@ -28,10 +28,12 @@ event_loop <- R6Class(
       el__create_task(self, private, callback, ...),
     ensure_pool = function(...)
       el__ensure_pool(self, private, ...),
+    get_poll_timeout = function(current)
+      el__get_poll_timeout(self, private, current),
 
     tasks = list(),
-    pool = NULL,
-    done = character()
+    timers = Sys.time()[numeric()],
+    pool = NULL
   )
 )
 
@@ -66,10 +68,12 @@ el_run_http <- function(self, private, handle, callback) {
 el_run_set_timeout <- function(self, private, delay, callback) {
   force(self) ; force(private) ; force(delay) ; force(callback)
   id <- private$create_task(callback, data = list(delay = delay))
+  private$timers[id] <- Sys.time() + as.difftime(delay, units = "secs")
   later(
     function() {
       private$tasks[[id]]$callback()
       private$tasks[[id]] <- NULL
+      private$timers <- private$timers[setdiff(names(private$times), id)]
     },
     delay
   )
@@ -89,22 +93,15 @@ el_await_any <- function(self, private, ids) {
 }
 
 #' @importFrom curl multi_run
+#' @importFrom later run_now
 
 el__poll <- function(self, private) {
-  if (is.null(private$pool)) return()
-
-  if (length(private$done) == 0) {
-    multi_run(timeout = Inf, poll = TRUE, pool = private$pool)
+  current <- Sys.time()
+  timeout <- private$get_poll_timeout(current)
+  if (!is.null(private$pool)) {
+    multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
   }
-
-  to_be_done <- private$done
-  for (id in to_be_done) {
-    if (id %in% names(private$tasks)) {
-      task <- private$tasks[[id]]
-      task$callback(task$error, task$result)
-      private$finish_task(id)
-    }
-  }
+  run_now()
 }
 
 #' @importFrom uuid UUIDgenerate
@@ -125,4 +122,11 @@ el__create_task <- function(self, private, callback, data, ...) {
 
 el__ensure_pool <- function(self, private, ...) {
   if (is.null(private$pool)) private$pool <- new_pool(...)
+}
+
+el__get_poll_timeout <- function(self, private, current) {
+  min(
+    Inf,
+    max(0, min(Inf, private$timers - current))
+  )
 }
