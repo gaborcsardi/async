@@ -10,7 +10,7 @@ test_that("whilst", {
     function() count < 5,
     function(callback) {
       count <<- count + 1
-      callback(NULL)
+      callback(NULL, count)
     },
     function (err, n) {
       nn <<- n
