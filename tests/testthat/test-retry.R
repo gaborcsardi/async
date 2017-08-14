@@ -5,9 +5,9 @@ test_that("unsuccessful retry", {
   x <- 5
   err <- res <- NULL
   await(retry(
-    function(cb) {
+    function(callback) {
       x <<- x - 1
-      if (x) cb("error") else cb(NULL, "OK")
+      if (x) callback("error") else callback(NULL, "OK")
     },
     function(err, res) {
       err <<- err
@@ -24,9 +24,9 @@ test_that("successful retry", {
   x <- 5
   err <- res <- NULL
   await(retry(
-    function(cb) {
+    function(callback) {
       x <<- x - 1
-      if (x) cb("error") else cb(NULL, "OK")
+      if (x) callback("error") else callback(NULL, "OK")
     },
     function(err, res) {
       err <<- err
