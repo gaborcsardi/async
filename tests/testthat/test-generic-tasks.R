@@ -8,13 +8,13 @@ test_that("await on a generic task", {
   res <- NULL
   p1 <- parallel(
     list(
-      function(cb) {
+      function(callback) {
         http_get("https://eu.httpbin.org/delay/1",
-                 function(err, res) cb(err, rawToChar(res$content)))
+                 function(err, res) callback(err, rawToChar(res$content)))
       },
-      function(cb) {
+      function(callback) {
         http_get("https://eu.httpbin.org/delay/1",
-                 function(err, res) cb(err, rawToChar(res$content)))
+                 function(err, res) callback(err, rawToChar(res$content)))
       }
     ),
     function(err, result) { res <<- result }
@@ -24,7 +24,7 @@ test_that("await on a generic task", {
   tic <- Sys.time()
   p2 <- parallel(
     list(
-      function(cb) cb(NULL, "I am done")
+      function(callback) callback(NULL, "I am done")
     ),
     function(err, result) res2 <<- result
   )

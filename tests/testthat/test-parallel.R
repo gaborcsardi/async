@@ -9,13 +9,13 @@ test_that("parallel", {
 
   await(parallel(
     list(
-      function(cb) {
+      function(callback) {
         http_get("https://eu.httpbin.org/get?q=foo",
-                 function(err, res) cb(err, rawToChar(res$content)))
+                 function(err, res) callback(err, rawToChar(res$content)))
       },
-      function(cb) {
+      function(callback) {
         http_get("https://eu.httpbin.org/get?q=bar",
-                 function(err, res) cb(err, rawToChar(res$content)))
+                 function(err, res) callback(err, rawToChar(res$content)))
       }
     ),
     function(err, result) { res <<- result }
@@ -42,11 +42,11 @@ test_that("limit", {
     result <- NULL
     await(parallel(
       list(
-        function(cb) cb(NULL, 1),
-        function(cb) cb(NULL, 2),
-        function(cb) cb(NULL, 3),
-        function(cb) cb(NULL, 4),
-        function(cb) cb(NULL, 5)
+        function(callback) callback(NULL, 1),
+        function(callback) callback(NULL, 2),
+        function(callback) callback(NULL, 3),
+        function(callback) callback(NULL, 4),
+        function(callback) callback(NULL, 5)
       ),
       function(err, res) { error <<- err; result <<- res },
       limit = limit

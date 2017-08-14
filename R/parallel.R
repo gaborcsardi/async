@@ -13,7 +13,7 @@ parallel <- function(tasks, callback, limit = Inf) {
 
   result <- vector(mode = "list", length = l)
   lapply(seq_along(tasks), function(i) {
-    tasks[[i]](function(err, res) {
+    tasks[[i]](callback = function(err, res) {
       if (!is.null(err)) return(task$callback(err, NULL))
       l <<- l - 1
       result[[i]] <<- res
@@ -42,7 +42,7 @@ parallel_limit <- function(tasks, callback, limit) {
     if (nextone <= l) {
       i <- nextone
       nextone <<- nextone + 1
-      tasks[[i]](function(err, res) mycallback(err, res, i))
+      tasks[[i]](callback = function(err, res) mycallback(err, res, i))
     }
   }
 
@@ -51,7 +51,7 @@ parallel_limit <- function(tasks, callback, limit) {
     local({
       i <- ii
       nextone <<- nextone + 1
-      tasks[[i]](function(err, res) mycallback(err, res, i))
+      tasks[[i]](callback = function(err, res) mycallback(err, res, i))
     })
   }
 
