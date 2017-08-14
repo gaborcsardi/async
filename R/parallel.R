@@ -5,19 +5,23 @@ parallel <- function(tasks, callback, limit = Inf) {
   force(tasks) ; force(callback)
 
   l <- length(tasks)
-  if (l == 0) return(callback(NULL, list()))
+  if (l > 0 && limit != Inf) return(parallel_limit(tasks, callback, limit))
 
-  if (limit != Inf) return(parallel_limit(tasks, callback, limit))
+  task <- get_default_event_loop()$run_generic(callback)
+
+  if (l == 0) return(task$callback(NULL, list()))
 
   result <- vector(mode = "list", length = l)
   lapply(seq_along(tasks), function(i) {
     tasks[[i]](function(err, res) {
-      if (!is.null(err)) return(callback(err))
+      if (!is.null(err)) return(task$callback(err, NULL))
       l <<- l - 1
       result[[i]] <<- res
-      if (l == 0) callback(NULL, result)
+      if (l == 0) task$callback(NULL, result)
     })
   })
+
+  task$id
 }
 
 parallel_limit <- function(tasks, callback, limit) {
@@ -26,15 +30,14 @@ parallel_limit <- function(tasks, callback, limit) {
   done <- 0
   result <- vector(mode = "list", length = l)
 
-  ## We start the first 'limit' tasks manually,
-  ## and the rest from the callback. We need to mark the manually
-  ## started ones as running
+  task <- get_default_event_loop()$run_generic(callback)
+
   nextone <- 1
   mycallback <- function(err, res, i) {
-    if (!is.null(err)) return(callback(err, NULL))
+    if (!is.null(err)) return(task$callback(err, NULL))
     done <<- done + 1
     result[[i]] <<- res
-    if (done == l) return(callback(NULL, result))
+    if (done == l) return(task$callback(NULL, result))
     ## Of one has finished, then we can run another one
     if (nextone <= l) {
       i <- nextone
@@ -51,4 +54,6 @@ parallel_limit <- function(tasks, callback, limit) {
       tasks[[i]](function(err, res) mycallback(err, res, i))
     })
   }
+
+  task$id
 }

@@ -19,7 +19,9 @@ event_loop <- R6Class(
     run_http = function(handle, callback)
       el_run_http(self, private, handle, callback),
     run_set_timeout = function(delay, callback)
-      el_run_set_timeout(self, private, delay, callback)
+      el_run_set_timeout(self, private, delay, callback),
+    run_generic = function(callback, ...)
+      el_run_generic(self, private, callback, ...)
   ),
 
   private = list(
@@ -56,12 +58,14 @@ el_run_http <- function(self, private, handle, callback) {
     handle = handle,
     pool = private$pool,
     done = function(response) {
-      private$tasks[[id]]$callback(NULL, response)
+      task <- private$tasks[[id]]
       private$tasks[[id]] <- NULL
+      task$callback(NULL, response)
     },
     fail = function(error) {
-      private$tasks[[id]]$callback(error, NULL)
+      task <- private$tasks[[id]]
       private$tasks[[id]] <- NULL
+      task$callback(error, NULL)
     }
   )
   id
@@ -73,13 +77,28 @@ el_run_set_timeout <- function(self, private, delay, callback) {
   private$timers[id] <- Sys.time() + as.difftime(delay, units = "secs")
   later(
     function() {
-      private$tasks[[id]]$callback()
+      task <- private$tasks[[id]]
       private$tasks[[id]] <- NULL
       private$timers <- private$timers[setdiff(names(private$times), id)]
+      task$callback()
     },
     delay
   )
   id
+}
+
+el_run_generic <- function(self, private, callback, ...) {
+  force(self) ; force(private); force(callback)
+  data <- list(...)
+  force(data)
+
+  id <- private$create_task(callback, data = data)
+  mycallback <-function(...) {
+    private$tasks[[id]] <- NULL
+    callback(...)
+    id
+  }
+  list(id = id, callback = mycallback)
 }
 
 el_await <- function(self, private, ids) {

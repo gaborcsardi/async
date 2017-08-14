@@ -10,15 +10,18 @@
 retry <- function(async_function, callback, times) {
   force(async_function) ; force(callback); force(times)
 
+  task <- get_default_event_loop()$run_generic(callback)
+
   mycallback <- function(err, res) {
-    if (is.null(err)) return(callback(NULL, res))
+    if (is.null(err)) return(task$callback(NULL, res))
     times <<- times - 1
     if (times) {
       async_function(mycallback)
     } else {
-      callback(err, NULL)
+      task$callback(err, NULL)
     }
   }
 
   async_function(mycallback)
+  task$id
 }

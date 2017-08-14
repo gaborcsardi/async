@@ -7,7 +7,7 @@ test_that("parallel", {
 
   res <- NULL
 
-  parallel(
+  await(parallel(
     list(
       function(cb) {
         http_get("https://eu.httpbin.org/get?q=foo",
@@ -19,9 +19,8 @@ test_that("parallel", {
       }
     ),
     function(err, result) { res <<- result }
-  )
+  ))
 
-  await_all()
   expect_equal(length(res), 2)
   expect_false(is.null(res[[1]]))
   expect_false(is.null(res[[2]]))
@@ -32,8 +31,7 @@ test_that("parallel", {
 test_that("empty task list", {
 
   result <- NULL
-  parallel(list(), function(err, res) { result <<- res })
-  await_all()
+  await(parallel(list(), function(err, res) { result <<- res }))
   expect_identical(result, list())
 })
 
@@ -42,7 +40,7 @@ test_that("limit", {
   test_limit <- function(limit) {
     error <- NULL
     result <- NULL
-    parallel(
+    await(parallel(
       list(
         function(cb) cb(NULL, 1),
         function(cb) cb(NULL, 2),
@@ -52,8 +50,7 @@ test_that("limit", {
       ),
       function(err, res) { error <<- err; result <<- res },
       limit = limit
-    )
-    await_all()
+    ))
     expect_null(error)
     expect_equal(result, as.list(1:5))
   }
