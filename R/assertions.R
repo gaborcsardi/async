@@ -11,7 +11,7 @@ on_failure(is_vector) <- function(call, env) {
 }
 
 is_task <- function(x) {
-  is.function(x) && "callback" %in% names(formals(x))
+  is.function(x)
 }
 
 on_failure(is_task) <- function(call, env) {
