@@ -80,7 +80,7 @@ el_run_set_timeout <- function(self, private, delay, callback) {
       task <- private$tasks[[id]]
       private$tasks[[id]] <- NULL
       private$timers <- private$timers[setdiff(names(private$times), id)]
-      task$callback()
+      tryCatch(task$callback(), error = function(e) NULL)
     },
     delay
   )
