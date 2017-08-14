@@ -2,7 +2,11 @@
 #' @export
 
 parallel <- function(tasks, callback, limit = Inf) {
-  force(tasks) ; force(callback)
+  assert_that(
+    is_task_list(tasks),
+    is_callback(callback),
+    is_numeric_scalar(limit)
+  )
 
   l <- length(tasks)
   if (l > 0 && limit != Inf) return(parallel_limit(tasks, callback, limit))

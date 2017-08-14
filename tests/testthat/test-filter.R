@@ -3,7 +3,7 @@ context("filter")
 
 test_that("filter", {
 
-  is_odd <- function(x, cb) cb(NULL, as.logical(x %% 2))
+  is_odd <- function(x, callback) callback(NULL, as.logical(x %% 2))
   save <- function(err, res) result <<- res
 
   result <- NULL

@@ -2,7 +2,11 @@
 #' @export
 
 every <- function(list, async_function, callback) {
-  force(list) ; force(async_function) ; force(callback)
+  assert_that(
+    is_vector(list),
+    is_async_function(async_function),
+    is_callback(callback)
+  )
 
   task <- get_default_event_loop()$run_generic(callback)
 

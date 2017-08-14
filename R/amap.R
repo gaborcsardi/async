@@ -2,7 +2,12 @@
 #' @export
 
 amap <- function(list, async_function, callback) {
-  force(list) ; force(async_function) ; force(callback)
+  assert_that(
+    is_vector(list),
+    is_async_function(async_function),
+    is_callback(callback)
+  )
+
   l <- length(list)
   result <- structure(
     vector(mode = "list", length = l),

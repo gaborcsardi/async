@@ -1,0 +1,67 @@
+
+#' @importFrom assertthat assert_that on_failure<-
+NULL
+
+is_vector <- function(x) {
+  is.atomic(x) || is.list(x)
+}
+
+on_failure(is_vector) <- function(call, env) {
+  paste0(deparse(call$x), " is not a vector or list")
+}
+
+is_async_function <- function(x) {
+  is.function(x) && "callback" %in% names(formals(x))
+}
+
+on_failure(is_async_function) <- function(call, env) {
+  paste0(deparse(call$x), " is not an async function (see ?async)")
+}
+
+is_callback <- function(x) {
+  is.function(x) && length(formals(x)) >= 1
+}
+
+on_failure(is_callback) <- function(call, env) {
+  paste0(deparse(call$x), " is not a callback function (see ?async)")
+}
+
+is_callback_or_null <- function(x) {
+  is.function(x) && length(formals(x)) >= 1
+}
+
+on_failure(is_callback_or_null) <- function(call, env) {
+  paste0(
+    deparse(call$x),
+    " is not a callback function or NULL (see ?async)")
+}
+
+is_task_list <- function(x) {
+  is.list(x) && all(vlapply(x, is_async_function))
+}
+
+on_failure(is_task_list) <- function(call, env) {
+  paste0(deparse(call$x), " is not a list of tasks (see ?async)")
+}
+
+is_numeric_scalar <- function(x) {
+  is.numeric(x) && length(x) == 1 && !is.na(x)
+}
+
+on_failure(is_numeric_scalar) <- function(call, env) {
+  paste0(deparse(call$x), " is not a numeric scalar")
+}
+
+is_string <- function(x) {
+  is.character(x) && length(x) == 1 && !is.na(x)
+}
+
+on_failure(is_string) <- function(call, env) {
+  paste0(deparse(call$x), " is not a string (length 1 character)")
+}
+
+## Note that this allows Inf!
+
+is_count <- function(x) {
+  is.numeric(x) && length(x) == 1 && !is.na(x) && round(x) == x && x >= 0
+}

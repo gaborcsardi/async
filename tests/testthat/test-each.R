@@ -8,7 +8,7 @@ test_that("each", {
 
   await(each(
     letters[1:10],
-    function(item, cb) { done <<- c(done, item); cb(NULL)  },
+    function(item, callback) { done <<- c(done, item); callback(NULL)  },
     function(err) { if (is.null(err)) ok <<- TRUE }
   ))
 

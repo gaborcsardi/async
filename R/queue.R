@@ -2,6 +2,11 @@
 #' @export
 
 make_queue <- function(worker_function, concurrency = 1) {
+  assert_that(
+    is_async_function(worker_function),
+    is_count(concurrency),
+    concurrency >= 1
+  )
   queue$new(worker_function, concurrency)
 }
 
@@ -87,6 +92,7 @@ q_push <- function(self, private, task, callback) {
 }
 
 q_unshift <- function(self, private, task, callback, after = 0) {
+  assert_that(is_callback_or_null(callback))
   new_item <- list(
     task = task,
     callback = callback,
@@ -97,6 +103,7 @@ q_unshift <- function(self, private, task, callback, after = 0) {
 }
 
 q_remove <- function(self, private, test_function) {
+  assert_that(is.function(test_function))
   private$workers <- Filter(
     function(w) ! test_function(w$task),
     private$workers
@@ -113,30 +120,35 @@ q_resume <- function(self, private) {
 }
 
 q_call_if_saturated <- function(self, private, callback) {
+  assert_that(is.function(callback))
   old <- private$cb_saturated
   private$cb_saturated <- callback
   invisible(old)
 }
 
 q_call_if_unsaturated <- function(self, private, callback) {
+  assert_that(is.function(callback))
   old <- private$cb_unsaturated
   private$cb_unsaturated <- callback
   invisible(old)
 }
 
 q_call_if_empty <- function(self, private, callback) {
+  assert_that(is.function(callback))
   old <- private$cb_empty
   private$cb_empty <- callback
   invisible(old)
 }
 
 q_call_if_drained <- function(self, private, callback) {
+  assert_that(is.function(callback))
   old <- private$cb_drained
   private$cb_drained <- callback
   invisible(old)
 }
 
 q_call_if_error <- function(self, private, callback) {
+  assert_that(is.function(callback))
   old <- private$cb_error
   private$cb_error <- callback
   invisible(old)

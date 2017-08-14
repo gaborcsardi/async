@@ -8,7 +8,7 @@ test_that("amap", {
 
   await(amap(
     list,
-    function(item, cb) { cb(NULL, item * 2) },
+    function(item, callback) { callback(NULL, item * 2) },
     function(err, res) { result <<- res }
   ))
 

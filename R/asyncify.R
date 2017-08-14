@@ -2,7 +2,7 @@
 #' @export
 
 asyncify <- function(func) {
-  force(func)
+  assert_that(is.function(func))
   function(..., callback) {
     tryCatch(
       callback(NULL, func(...)),
