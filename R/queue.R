@@ -3,7 +3,7 @@
 
 make_queue <- function(worker_function, concurrency = 1) {
   assert_that(
-    is_async_function(worker_function),
+    is_task(worker_function),
     is_count(concurrency),
     concurrency >= 1
   )

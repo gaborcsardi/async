@@ -1,27 +1,27 @@
 
 #' @export
 
-filter <- function(list, async_function, callback) {
+filter <- function(list, task, callback) {
   assert_that(
     is_vector(list),
-    is_async_function(async_function),
+    is_task(task),
     is_callback(callback)
   )
 
-  task <- get_default_event_loop()$run_generic(callback)
+  etask <- get_default_event_loop()$run_generic(callback)
 
   l <- length(list)
-  if (l == 0) return(task$callback(NULL, list))
+  if (l == 0) return(etask$callback(NULL, list))
 
   keep <- logical(l)
   lapply(seq_along(list), function(i) {
-    async_function(list[[i]], callback = function(err, res) {
-      if (!is.null(err)) return(task$callback(err))
+    task(list[[i]], callback = function(err, res) {
+      if (!is.null(err)) return(etask$callback(err))
       l <<- l - 1
       keep[i] <<- res
-      if (l == 0) task$callback(NULL, list[keep])
+      if (l == 0) etask$callback(NULL, list[keep])
     })
   })
 
-  task$id
+  etask$id
 }

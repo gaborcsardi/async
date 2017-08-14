@@ -1,10 +1,10 @@
 
 #' @export
 
-retryable <- function(async_function) {
-  force(async_function)
+retryable <- function(task) {
+  assert_that(is_task(task))
   function(..., callback, times) {
     args <- list(...) ; force(args) ; force(callback) ; force(times)
-    retry(async_function, callback, times)
+    retry(task, callback, times)
   }
 }

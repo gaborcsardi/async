@@ -1,25 +1,29 @@
 
 #' @export
 
-whilst <- function(test_function, async_function, callback) {
-  force(test_function) ; force(async_function) ; force(callback)
+whilst <- function(test_function, task, callback) {
+  assert_that(
+    is.function(test_function),
+    is_task(task),
+    is_callback(callback)
+  )
 
-  task <- get_default_event_loop()$run_generic(callback)
+  etask <- get_default_event_loop()$run_generic(callback)
 
   if (test_function()) {
     mycallback <- function(err, ...) {
-      if (!is.null(err)) return(task$callback(err, ...))
+      if (!is.null(err)) return(etask$callback(err, ...))
       if (test_function()) {
-        async_function(mycallback)
+        task(mycallback)
       } else {
-        task$callback(NULL, ...)
+        etask$callback(NULL, ...)
       }
     }
-    async_function(mycallback)
+    task(mycallback)
 
   } else {
-    task$callback(NULL, NULL)
+    etask$callback(NULL, NULL)
   }
 
-  task$id
+  etask$id
 }

@@ -1,10 +1,10 @@
 
 #' @export
 
-amap <- function(list, async_function, callback) {
+amap <- function(list, task, callback) {
   assert_that(
     is_vector(list),
-    is_async_function(async_function),
+    is_task(task),
     is_callback(callback)
   )
 
@@ -14,16 +14,16 @@ amap <- function(list, async_function, callback) {
     names = names(list)
   )
 
-  task <- get_default_event_loop()$run_generic(callback)
+  etask <- get_default_event_loop()$run_generic(callback)
 
   lapply(seq_along(list), function(i) {
-    async_function(list[[i]], function(err, res) {
-      if (!is.null(err)) return(task$callback(err))
+    task(list[[i]], function(err, res) {
+      if (!is.null(err)) return(etask$callback(err))
       l <<- l - 1
       result[[i]] <<- res
-      if (l == 0) task$callback(NULL, result)
+      if (l == 0) etask$callback(NULL, result)
     })
   })
 
-  task$id
+  etask$id
 }

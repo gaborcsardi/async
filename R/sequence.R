@@ -3,7 +3,7 @@
 
 sequence <- function(...) {
   funcs <- list(...)
-  force(funcs)
+  assert_that(is_task_list(funcs))
   i <- 1
 
   function(..., callback) {

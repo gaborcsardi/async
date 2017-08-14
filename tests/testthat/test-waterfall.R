@@ -7,9 +7,9 @@ test_that("waterfall", {
 
   await(waterfall(
     list(
-      function(cb) cb(NULL, "one", "two"),
-      function(cb, arg1, arg2) cb(NULL, c(arg1, arg2, "three")),
-      function(cb, arg1) cb(NULL, c(arg1, "done"))
+      function(callback) callback(NULL, "one", "two"),
+      function(callback, arg1, arg2) callback(NULL, c(arg1, arg2, "three")),
+      function(callback, arg1) callback(NULL, c(arg1, "done"))
     ),
     function(err, res) {
       result <<- res

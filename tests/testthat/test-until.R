@@ -8,9 +8,9 @@ test_that("until", {
 
   await(until(
     function() count == 5,
-    function(cb) {
+    function(callback) {
       count <<- count + 1
-      cb(NULL, count)
+      callback(NULL, count)
     },
     function(err, res) {
       result <<- res
@@ -28,9 +28,9 @@ test_that("until is always called once", {
 
   await(until(
     function() TRUE,
-    function(cb) {
+    function(callback) {
       called <<- TRUE
-      cb(NULL, called)
+      callback(NULL, called)
     },
     function(err, res) {
       result <<- res

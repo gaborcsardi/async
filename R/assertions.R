@@ -10,11 +10,11 @@ on_failure(is_vector) <- function(call, env) {
   paste0(deparse(call$x), " is not a vector or list")
 }
 
-is_async_function <- function(x) {
+is_task <- function(x) {
   is.function(x) && "callback" %in% names(formals(x))
 }
 
-on_failure(is_async_function) <- function(call, env) {
+on_failure(is_task) <- function(call, env) {
   paste0(deparse(call$x), " is not an async function (see ?async)")
 }
 
@@ -37,7 +37,7 @@ on_failure(is_callback_or_null) <- function(call, env) {
 }
 
 is_task_list <- function(x) {
-  is.list(x) && all(vlapply(x, is_async_function))
+  is.list(x) && all(vlapply(x, is_task))
 }
 
 on_failure(is_task_list) <- function(call, env) {

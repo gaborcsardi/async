@@ -2,7 +2,7 @@
 #' @export
 
 waterfall <- function(tasks, callback) {
-  force(tasks) ; force(callback)
+  assert_that(is_task_list(tasks), is_callback(callback))
   l <- length(tasks)
   if (l == 0) return()
 
