@@ -6,7 +6,7 @@ test_that("whilst", {
   count <- 0
   nn <- NULL
 
-  whilst(
+  await(whilst(
     function() count < 5,
     function(callback) {
       count <<- count + 1
@@ -15,9 +15,8 @@ test_that("whilst", {
     function (err, n) {
       nn <<- n
     }
-  )
+  ))
 
-  await_all()
   expect_false(is.null(nn))
   expect_equal(nn, 5)
 })
@@ -27,7 +26,7 @@ test_that("whilst with false test", {
   result <- NULL
 
   expect_silent({
-    whilst(
+    await(whilst(
       function() FALSE,
       function(callback) {
         stop("Not reached")
@@ -36,9 +35,7 @@ test_that("whilst with false test", {
       function(err, res) {
         result <<- res
       }
-    )
-
-    await_all()
+    ))
   })
 
   expect_null(result)
@@ -48,7 +45,7 @@ test_that("error", {
 
   i <- 1
   error <- result <- NULL
-  whilst(
+  await(whilst(
     function() i < 5,
     function(callback) {
       i <<- i + 1
@@ -59,9 +56,7 @@ test_that("error", {
       }
     },
     function(err, res) { error <<- err; result <<- res }
-  )
-
-  await_all()
+  ))
 
   expect_null(result)
   expect_equal(error, "This is bad")

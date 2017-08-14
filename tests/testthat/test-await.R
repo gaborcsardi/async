@@ -40,7 +40,7 @@ test_that("await_any", {
   await(c(ax1, ax2))
 })
 
-test_that("await_all", {
+test_that("await all", {
 
   skip_if_offline()
 
@@ -54,7 +54,7 @@ test_that("await_all", {
     function(err, res) { status2 <<- res$status_code }
   )
 
-  await_all()
+  await()
   expect_equal(status1, 200)
   expect_equal(status2, 200)
 })

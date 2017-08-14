@@ -3,7 +3,6 @@
 export(amap)
 export(asyncify)
 export(await)
-export(await_all)
 export(await_any)
 export(detect)
 export(each)
