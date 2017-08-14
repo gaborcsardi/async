@@ -6,5 +6,4 @@
 #'
 #' @docType package
 #' @name async
-#' @import rlang
 NULL
