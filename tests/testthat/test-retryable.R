@@ -9,10 +9,10 @@ test_that("retryable", {
     if (i < 5) callback("error") else callback(NULL, "OK")
   }
 
-  rf <- retryable(f)
+  rf <- retryable(f, 5)
 
   result <- NULL
-  await(rf(callback = function(err, res) result <<- res, times = 5))
+  await(rf(callback = function(err, res) result <<- res))
 
   expect_identical(result, "OK")
 })

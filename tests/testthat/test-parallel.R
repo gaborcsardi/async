@@ -40,7 +40,7 @@ test_that("limit", {
   test_limit <- function(limit) {
     error <- NULL
     result <- NULL
-    await(parallel(
+    await(parallel_limit(
       list(
         function(callback) callback(NULL, 1),
         function(callback) callback(NULL, 2),
@@ -48,8 +48,8 @@ test_that("limit", {
         function(callback) callback(NULL, 4),
         function(callback) callback(NULL, 5)
       ),
-      function(err, res) { error <<- err; result <<- res },
-      limit = limit
+      limit = limit,
+      function(err, res) { error <<- err; result <<- res }
     ))
     expect_null(error)
     expect_equal(result, as.list(1:5))

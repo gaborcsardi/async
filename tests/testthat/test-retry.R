@@ -9,11 +9,11 @@ test_that("unsuccessful retry", {
       x <<- x - 1
       if (x) callback("error") else callback(NULL, "OK")
     },
+    times = 3,
     function(err, res) {
       err <<- err
       res <<- res
-    },
-    3
+    }
   ))
 
   expect_equal(err, "error")
@@ -28,11 +28,11 @@ test_that("successful retry", {
       x <<- x - 1
       if (x) callback("error") else callback(NULL, "OK")
     },
+    times = 5,
     function(err, res) {
       err <<- err
       res <<- res
-    },
-    5
+    }
   ))
 
   expect_null(err)

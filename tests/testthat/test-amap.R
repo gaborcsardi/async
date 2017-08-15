@@ -12,8 +12,5 @@ test_that("amap", {
     function(err, res) { result <<- res }
   ))
 
-  expect_identical(
-    result,
-    structure(as.list(1:10 * 2), names = names(list))
-  )
+  expect_identical(result, as.list(1:10 * 2))
 })

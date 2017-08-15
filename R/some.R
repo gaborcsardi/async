@@ -1,20 +1,44 @@
 
+#' Returns `TRUE` if at least one element in a collection satisfies an
+#' async test
+#'
+#' If any iteratee call returns true, the main callback is
+#' immediately called.
+#'
+#' @param coll	A collection to iterate over.
+#' @param iteratee An async truth test to apply to each item in the
+#'   collections in parallel. The iteratee should complete with a boolean
+#'   result value. Invoked with `(item, callback)`.
+#' @param callback A callback which is called as soon as any iteratee
+#'   returns `TRUE`, or after all the iteratee functions have finished.
+#'   Result will be either `TRUE` or `FALSE` depending on the values of the
+#'   async tests. Invoked with `(err, result)`.
+#' @return A task id, that can be waited on with [await()].
+#'
+#' @family async iterators
 #' @export
+#' @examples
+#' ## Check if one of these sites are up
+#' await(some(
+#'   c("https://eu.httpbin.org", "https://httpbin.org"),
+#'   sequence(http_head, asyncify(function(x) x$status_code)),
+#'   function(err, res) print(res)
+#' ))
 
-some <- function(list, task, callback) {
+some <- function(coll, iteratee, callback) {
   assert_that(
-    is.vector(list),
-    is_task(task),
+    is.vector(coll),
+    is_task(iteratee),
     is_callback(callback)
   )
 
   etask <- get_default_event_loop()$run_generic(callback)
 
-  l <- length(list)
+  l <- length(coll)
   if (l == 0) return(etask$callback(NULL, FALSE))
 
-  lapply(seq_along(list), function(i) {
-    task(list[[i]], function(err, res) {
+  lapply(seq_len(l), function(i) {
+    iteratee(coll[[i]], callback = function(err, res) {
       if (!is.null(err)) return(etask$callback(err, NULL))
       if (res) return(etask$callback(NULL, TRUE))
       l <<- l - 1

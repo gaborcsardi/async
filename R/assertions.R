@@ -2,11 +2,14 @@
 #' @importFrom assertthat assert_that on_failure<-
 NULL
 
-is_vector <- function(x) {
-  is.atomic(x) || is.list(x)
+## TODO: we don't check now, because all we need is a `[[` and a `length`
+## method.
+
+is_collection <- function(x) {
+  TRUE
 }
 
-on_failure(is_vector) <- function(call, env) {
+on_failure(is_collection) <- function(call, env) {
   paste0(deparse(call$x), " is not a vector or list")
 }
 
@@ -16,6 +19,14 @@ is_task <- function(x) {
 
 on_failure(is_task) <- function(call, env) {
   paste0(deparse(call$x), " is not an async function (see ?async)")
+}
+
+is_iteratee <- function(x) {
+  is.function(x)
+}
+
+on_failure(is_iteratee) <- function(call, env) {
+  paste0(deparse(call$x), " is not an async iteratee (see ?async)")
 }
 
 is_callback <- function(x) {
