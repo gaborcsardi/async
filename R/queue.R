@@ -1,4 +1,22 @@
 
+#' Creates a queue object with the specified concurrency
+#'
+#' Items added to the queue are processed in parallel (up to the
+#' concurrency limit). If all workers are in progress, the item is queued
+#' until one becomes available. Once a worker completes work on an item,
+#' that item's callback is called.
+#'
+#' @param worker_function Worker function. It will be called for each
+#'   item inserted in the queue. It will be called with two arguments,
+#'   the item, and a callback function. The callback function
+#'   is to be called once the worker finished its job. The callback
+#'   function has two arguments, the first one is used to report errors,
+#'   it `NULL` if no errors happened. The second argument is the result
+#'   of the worker's computation.
+#' @param concurrency Number of parallel asynchronous workers allowed.
+#' @return A [queue] object, that can be used to manage the workers.
+#'
+#' @seealso [queue] to manage the workers of a queue.
 #' @export
 
 make_queue <- function(worker_function, concurrency = 1) {
@@ -9,6 +27,102 @@ make_queue <- function(worker_function, concurrency = 1) {
   )
   queue$new(worker_function, concurrency)
 }
+
+#' Asynchronous queue
+#'
+#' Create the queue with [make_queue()].
+#'
+#' @section Usage:
+#' ```
+#' q$get_length()
+#' q$is_started()
+#' q$get_concurrency()
+#' q$is_paused()
+#' q$get_running()
+#' q$is_idle()
+#'
+#' q$push(item, callback)
+#' q$unshift(item, callback)
+#' q$remove(test_function)
+#' q$pause()
+#' q$resume()
+#'
+#' q$call_if_saturated(callback)
+#' q$call_if_unsaturated(callback)
+#' q$call_if_empty(callback)
+#' q$call_if_drained(callback)
+#' q$call_if_error(callback)
+#'
+#' @section Arguments:
+#' \describe{
+#'   \item{item}{An item to work on. It can be any object that the worker
+#'     function of the queue can interpret.}
+#'   \item{callback}{A callback function to call. See the details below
+#'     on how it will be called for the various methods.}
+#'   \item{test_function}{A test function that is called with the item
+#'     as the single argument. It must return a logical value, that is
+#'     `TRUE` is the item is to be removed from the queue.}
+#' }
+#'
+#' @section Details:
+#' `$get_length()` returns the number of items in the queue.
+#'  Completed items are not included in the count.
+#'
+#' `$is_started()` returns `TRUE` if the queue has already started
+#' running workers. This happens when the first item is added, if the
+#' queue is not paused. Otherwise it happens at a `$resume()` call.
+#'
+#' `$get_concurrency()` returns the concurrency parameter of the queue.
+#'
+#' `$is_paused()` returns whether the queue is paused.
+#'
+#' `$get_running()` returns the number of items being processed. Only items
+#' with running workers are included.
+#'
+#' `$is_idle()` returns whether the queue is idle.
+#'
+#' `$push(item, callback)` adds an item to the queue. If `callback` is not
+#' `NULL`, then it must be a fucntion. This function will be called with
+#' two arguments, the first one is the error object or message or `NULL` if
+#' no error happened. The second one is the result of the worker on the
+#' item.
+#'
+#' `$unshift(item, callback)` is like `$push()` but it inserts the item at
+#' the beginning of the queue.
+#'
+#' `$remove(test_function)` removes all tasks from the queue that satisfy
+#' a synchronous test function. The test function is called with the item
+#' as the single argument, and must return `TRUE` if the item is to be
+#' removed, and `FALSE` otherwise.
+#'
+#' `$pause()` stops the queue. No more workers are started until
+#' `$resume()` is called on the queue.
+#'
+#' `$resume()` resumed a queue, that was stopped with `$pause()`.
+#'
+#' `$call_if_saturated(callback)` sets the callback function to call when
+#' the queue is saturated. The callback is called without any arguments.
+#' Setting it to `NULL` cancels these calls.
+#'
+#' `$call_if_unsaturated(callback)` sets the callback that is called when
+#' the queue is unsaturated. The callback is called without any arguments.
+#' Setting it to `NULL` cancels these calls.
+#'
+#' `$call_if_empty(callback)` sets the callback that is called when
+#' the queue is empty, i.e. no items are waiting to be executed.
+#' The callback is called without any arguments. Setting it to `NULL`
+#' cancels these calls.
+#'
+#' `$call_if_drained(callback)` sets the callback that is called when there
+#' are no running or waiting items in the queue. The callback is called
+#' without any arguments. Setting it to `NULL` cancels these calls.
+#'
+#' `q$call_if_error(callback)` sets the callback to call when a worker
+#' reports an error. The callback will be called with two arguments, the
+#' error object or message and the item that errored.
+#'
+#' @name queue
+NULL
 
 #' @export
 
@@ -28,10 +142,10 @@ queue <- R6Class(
     is_idle = function()         q_is_idle(self, private),
 
     ## Manipulation
-    push = function(task, callback)
-      q_push(self, private, task, callback),
-    unshift = function(task, callback)
-      q_unshift(self, private, task, callback),
+    push = function(item, callback)
+      q_push(self, private, item, callback),
+    unshift = function(item, callback)
+      q_unshift(self, private, item, callback),
     remove = function(test_function)
       q_remove(self, private, test_function),
     pause = function()
@@ -87,14 +201,14 @@ q_is_idle <- function(self, private) {
   length(private$workers) == 0
 }
 
-q_push <- function(self, private, task, callback) {
-  q_unshift(self, private, task, callback, length(private$workers))
+q_push <- function(self, private, item, callback) {
+  q_unshift(self, private, item, callback, length(private$workers))
 }
 
-q_unshift <- function(self, private, task, callback, after = 0) {
+q_unshift <- function(self, private, item, callback, after = 0) {
   assert_that(is_callback_or_null(callback))
   new_item <- list(
-    task = task,
+    item = item,
     callback = callback,
     running = FALSE
   )
@@ -105,7 +219,7 @@ q_unshift <- function(self, private, task, callback, after = 0) {
 q_remove <- function(self, private, test_function) {
   assert_that(is.function(test_function))
   private$workers <- Filter(
-    function(w) ! test_function(w$task),
+    function(w) ! test_function(w$item),
     private$workers
   )
 }
@@ -161,16 +275,16 @@ q__schedule <- function(self, private) {
     private$started <- TRUE
     local({
       to_start <- which(!running)[1]
-      task <- private$workers[[to_start]]
+      item <- private$workers[[to_start]]
       private$workers[[to_start]]$running <- TRUE
       private$worker_function(
-        task$task,
+        item$item,
         function(err, res) {
           private$workers[[to_start]] <- NULL
           if (!is.null(err) && !is.null(private$cb_error)) {
-            private$cb_error(err, task$task)
+            private$cb_error(err, item$item)
           }
-          if (!is.null(task$callback)) task$callback(err, res)
+          if (!is.null(item$callback)) item$callback(err, res)
         }
       )
     })

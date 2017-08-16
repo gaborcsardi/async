@@ -6,9 +6,9 @@ test_that("basic queue", {
   hist <- character()
 
   q <- make_queue(
-    function(task, callback) {
-      if (task$name == "err") return(callback("ouch", NULL))
-      hist <<- c(hist, paste("hello", task$name))
+    function(item, callback) {
+      if (item$name == "err") return(callback("ouch", NULL))
+      hist <<- c(hist, paste("hello", item$name))
       callback(NULL, NULL)
     },
     concurrency = 2
@@ -21,8 +21,8 @@ test_that("basic queue", {
     hist <<- c(hist, "all items have been processed")
   })
 
-  q$call_if_error(function(err, task) {
-    hist <<- c(hist, paste("error", err, task$name))
+  q$call_if_error(function(err, item) {
+    hist <<- c(hist, paste("error", err, item$name))
   })
 
   q$call_if_empty(function() {
