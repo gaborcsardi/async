@@ -7,6 +7,7 @@
 #' @param task The asynchronous function to wrap. This function will be
 #'   passed any arguments passed to the returned wrapper. Invoked with
 #'   `(..., callback)`.
+#' @param times The number of attempts to make before giving up.
 #' @return The wrapped asynchronous function.
 #'
 #' @family async control flow
