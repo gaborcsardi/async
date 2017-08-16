@@ -30,3 +30,18 @@ test_that("detect", {
   await(detect(1:10 * 2, is_odd, function(err, res) result <<- res))
   expect_null(result)
 })
+
+test_that("detect_limit", {
+
+  num <- 0
+  task <- function(x, callback) {
+    expect_equal(num, 0)
+    num <<- num + 1
+    set_timeout(1/10, function() { num <<- num - 1; callback(NULL, FALSE) })
+  }
+
+  result <- "not null"
+  await(detect_series(1:5, task, function(err, res) result <<- res))
+
+  expect_null(result)
+})

@@ -36,6 +36,7 @@ await(some(
 }
 \seealso{
 Other async iterators: \code{\link{amap}},
+  \code{\link{detect_limit}}, \code{\link{detect_series}},
   \code{\link{detect}}, \code{\link{each}},
   \code{\link{every}}, \code{\link{filter}}
 }
