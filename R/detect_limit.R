@@ -34,7 +34,7 @@ detect_limit <- function(coll, iteratee, limit, callback) {
   task <- get_default_event_loop()$run_generic(callback)
 
   l <- length(coll)
-  if (l == 0) return(etask$callback(NULL, NULL))
+  if (l == 0) return(task$callback(NULL, NULL))
 
   done <- 0
   nextone <- 1
