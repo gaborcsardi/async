@@ -1,6 +1,58 @@
 
 ## TODO: think about error handling
 
+#' Event loop
+#'
+#' @section Usage:
+#' ```
+#' el <- event_loop$new()
+#'
+#' el$await(ids)
+#' el$await_all()
+#' el$await_any(ids)
+#'
+#' el$run_http(handle, callback)
+#' el$run_set_timeout(delay, callback)
+#' el$run_generic(callback, ...)
+#' ```
+#'
+#' @section Arguments:
+#' \describe{
+#'   \item{ids}{The task ids to wait for.}
+#'   \item{handle}{A `curl` handle to use for the `HTTP` operation.}
+#'   \item{callback}{Callback function to call when the asynchronous
+#'      operation is done. See details below.}
+#'   \item{delay}{Number of seconds to delay the execution of the callback.}
+#'   \item{...}{Additional arguments to store in the task. These are
+#'      currently not used for anything.}
+#' }
+#'
+#' @section Details:
+#' `$await()` waits for all specified tasks to finish.
+#'
+#' `$await_all()` waits for all tasks managed by the event loop to finish.
+#'
+#' `$await_any()` waits for any of the listed tasks to finish.
+#'
+#' `$run_http()` starts an asynchronous HTTP request, with the specified
+#' `curl` handle. Once the request is done, and the response is available
+#' (or an error happens), the callback is called with two arguments, the
+#' error object or message (if any) and the `curl` response object.
+#'
+#' `$run_set_timeout()` starts a task with the specified delay.
+#'
+#' `$run_generic()` creates a generic task. It is supposed to take care of
+#' calling its own callback itself. Tasks created by the asynchronous
+#' control flow structures and the asynchronous iterators generic tasks.
+#'
+#' @section The default event loop:
+#'
+#' The `async` package creates a default event loop when it is loaded.
+#' All asyncronous constructs use this event loop by default.
+#'
+#' @name event_loop
+NULL
+
 #' @importFrom R6 R6Class
 #' @export
 

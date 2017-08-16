@@ -52,6 +52,7 @@ make_queue <- function(worker_function, concurrency = 1) {
 #' q$call_if_empty(callback)
 #' q$call_if_drained(callback)
 #' q$call_if_error(callback)
+#' ```
 #'
 #' @section Arguments:
 #' \describe{
