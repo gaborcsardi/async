@@ -27,3 +27,6 @@ f <- function(x) { Sys.sleep(1/100); x + 42 }
 af <- asyncify(f)
 amap(c(0, 42), af, function(err, res) print(res))
 }
+\seealso{
+Other async utilities: \code{\link{reflect}}
+}
