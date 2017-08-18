@@ -4,10 +4,14 @@
 \alias{asyncify}
 \title{Create an async task from a synchronous function}
 \usage{
-asyncify(func)
+asyncify(func, return = TRUE)
 }
 \arguments{
 \item{func}{The function to convert to asyncronous.}
+
+\item{return}{Whether the callback has a return value argument, in
+addition to the error. Most callbacks have return values, so they
+have two arguments.}
 }
 \value{
 A task, which has the same arguments as the original function,

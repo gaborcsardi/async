@@ -33,22 +33,3 @@ await <- function(ids = NULL) {
     get_default_event_loop()$await(ids)
   }
 }
-
-#' Wait for any of the listed tasks to finish
-#'
-#' @param ids A (non-empty) list of tasks ids to wait on.
-#'
-#' @family synchronization functions
-#' @export
-#' @examples
-#' d1 <- http_get("http://httpbin.org/delay/1",
-#'                function(err, res) print(res$url))
-#' d2 <- http_get("http://httpbin.org/get",
-#'                function(err, res) print(res$url))
-#' await_any(c(d1, d2))
-#' await(c(d1, d2))
-
-await_any <- function(ids) {
-  assert_that(is.character(ids))
-  get_default_event_loop()$await_any(ids)
-}

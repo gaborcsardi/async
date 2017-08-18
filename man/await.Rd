@@ -31,6 +31,3 @@ id <- parallel(
 )
 await(id)
 }
-\seealso{
-Other synchronization functions: \code{\link{await_any}}
-}

@@ -11,7 +11,6 @@ Event loop
 
 el$await(ids)
 el$await_all()
-el$await_any(ids)
 
 el$run_http(handle, callback)
 el$run_set_timeout(delay, callback)
@@ -37,8 +36,6 @@ currently not used for anything.}
 \code{$await()} waits for all specified tasks to finish.
 
 \code{$await_all()} waits for all tasks managed by the event loop to finish.
-
-\code{$await_any()} waits for any of the listed tasks to finish.
 
 \code{$run_http()} starts an asynchronous HTTP request, with the specified
 \code{curl} handle. Once the request is done, and the response is available

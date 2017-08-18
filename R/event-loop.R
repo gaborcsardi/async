@@ -9,7 +9,6 @@
 #'
 #' el$await(ids)
 #' el$await_all()
-#' el$await_any(ids)
 #'
 #' el$run_http(handle, callback)
 #' el$run_set_timeout(delay, callback)
@@ -31,8 +30,6 @@
 #' `$await()` waits for all specified tasks to finish.
 #'
 #' `$await_all()` waits for all tasks managed by the event loop to finish.
-#'
-#' `$await_any()` waits for any of the listed tasks to finish.
 #'
 #' `$run_http()` starts an asynchronous HTTP request, with the specified
 #' `curl` handle. Once the request is done, and the response is available
@@ -65,8 +62,6 @@ event_loop <- R6Class(
       el_await(self, private, ids),
     await_all = function()
       el_await_all(self, private),
-    await_any = function(ids)
-      el_await_any(self, private, ids),
 
     run_http = function(handle, callback)
       el_run_http(self, private, handle, callback),
@@ -159,10 +154,6 @@ el_await <- function(self, private, ids) {
 
 el_await_all <- function(self, private) {
   while (length(private$tasks)) private$poll()
-}
-
-el_await_any <- function(self, private, ids) {
-  while (all(ids %in% names(private$tasks))) private$poll()
 }
 
 #' @importFrom curl multi_run
