@@ -1,7 +1,7 @@
 
-context("await")
+context("wait_for")
 
-test_that("await with multiple tasks", {
+test_that("wait_for with multiple tasks", {
 
   skip_if_offline()
 
@@ -15,12 +15,12 @@ test_that("await with multiple tasks", {
     function(err, res) { status2 <<- res$status_code }
   )
 
-  await(c(ax1, ax2))
+  wait_for(c(ax1, ax2))
   expect_equal(status1, 200)
   expect_equal(status2, 200)
 })
 
-test_that("await all", {
+test_that("wait_for all", {
 
   skip_if_offline()
 
@@ -34,7 +34,7 @@ test_that("await all", {
     function(err, res) { status2 <<- res$status_code }
   )
 
-  await()
+  wait_for()
   expect_equal(status1, 200)
   expect_equal(status2, 200)
 })

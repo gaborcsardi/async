@@ -25,7 +25,7 @@ next function is not executed, and the main
 callback is immediately called with the error.
 }
 \examples{
-await(waterfall(
+wait_for(waterfall(
   list(
     function(callback) callback(NULL, 'one', 'two'),
     function(arg1, arg2, callback) {

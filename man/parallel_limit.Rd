@@ -23,7 +23,7 @@ time.
 }
 \examples{
 error <- result <- NULL
-await(parallel_limit(
+wait_for(parallel_limit(
   list(
     function(callback) set_timeout(1/100, function() callback(NULL, 1)),
     function(callback) set_timeout(2/100, function() callback(NULL, 2)),

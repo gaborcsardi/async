@@ -18,7 +18,7 @@
 #'   http_get,
 #'   asyncify(function(x) x$status_code)
 #' )
-#' await(http_status(
+#' wait_for(http_status(
 #'   "https://httpbin.org",
 #'   callback = function(err, res) print(res)
 #' ))

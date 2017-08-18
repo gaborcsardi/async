@@ -7,7 +7,7 @@ test_that("parallel", {
 
   res <- NULL
 
-  await(parallel(
+  wait_for(parallel(
     list(
       function(callback) {
         http_get("https://eu.httpbin.org/get?q=foo",
@@ -31,7 +31,7 @@ test_that("parallel", {
 test_that("empty task list", {
 
   result <- NULL
-  await(parallel(list(), function(err, res) { result <<- res }))
+  wait_for(parallel(list(), function(err, res) { result <<- res }))
   expect_identical(result, list())
 })
 
@@ -40,7 +40,7 @@ test_that("limit", {
   test_limit <- function(limit) {
     error <- NULL
     result <- NULL
-    await(parallel_limit(
+    wait_for(parallel_limit(
       list(
         function(callback) callback(NULL, 1),
         function(callback) callback(NULL, 2),
@@ -67,7 +67,7 @@ test_that("limit, asyncify", {
   test_limit <- function(limit) {
     error <- NULL
     result <- NULL
-    await(parallel_limit(
+    wait_for(parallel_limit(
       list(
         asyncify(function() 1),
         asyncify(function() 2),

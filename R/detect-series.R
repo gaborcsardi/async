@@ -11,7 +11,7 @@
 #' @examples
 #' nums <- NULL
 #' result <- "not null"
-#' await(detect_series(
+#' wait_for(detect_series(
 #'   1:5,
 #'   function(x, callback) { nums <<- c(nums, x) ; callback(NULL, FALSE) },
 #'   function(err, res) result <<- res

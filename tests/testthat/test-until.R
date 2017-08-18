@@ -6,7 +6,7 @@ test_that("until", {
   count <- 1
   result <- NULL
 
-  await(until(
+  wait_for(until(
     function() count == 5,
     function(callback) {
       count <<- count + 1
@@ -26,7 +26,7 @@ test_that("until is always called once", {
   called <- FALSE
   result <- NULL
 
-  await(until(
+  wait_for(until(
     function() TRUE,
     function(callback) {
       called <<- TRUE
@@ -46,7 +46,7 @@ test_that("until, asyncify", {
   count <- 1
   result <- NULL
 
-  await(until(
+  wait_for(until(
     function() count == 5,
     asyncify(function() { count <<- count + 1; count }),
     function(err, res) result <<- res

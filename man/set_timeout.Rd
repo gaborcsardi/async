@@ -15,7 +15,7 @@ second.}
 called without arguments.}
 }
 \value{
-Task id, it can be waited on with \code{\link[=await]{await()}}.
+Task id, it can be waited on with \code{\link[=wait_for]{wait_for()}}.
 }
 \description{
 Since R is single-threaded, the callback might be executed (much) later
@@ -25,6 +25,6 @@ than the specified time period.
 result <- NULL
 id <- set_timeout(1, function() result <<- "done")
 result
-await(id)
+wait_for(id)
 result
 }

@@ -16,14 +16,14 @@ object, or an error message from \code{curl}. The second argument contains
 the response from \code{curl}.}
 }
 \value{
-Task id that can be waited on with \code{\link[=await]{await()}}.
+Task id that can be waited on with \code{\link[=wait_for]{wait_for()}}.
 }
 \description{
 Asynchronous HTTP HEAD request
 }
 \examples{
 error <- result <- NULL
-await(http_head(
+wait_for(http_head(
   "https://httpbin.org/get",
   function(err, res) { error <<- err ; result <<- res }
 ))

@@ -13,13 +13,13 @@
 #'   returns `TRUE`, or after all the iteratee functions have finished.
 #'   Result will be either `TRUE` or `FALSE` depending on the values of the
 #'   async tests. Invoked with `(err, result)`.
-#' @return A task id, that can be waited on with [await()].
+#' @return A task id, that can be waited on with [wait_for()].
 #'
 #' @family async iterators
 #' @export
 #' @examples
 #' ## Check if one of these sites are up
-#' await(some(
+#' wait_for(some(
 #'   c("https://eu.httpbin.org", "https://httpbin.org"),
 #'   sequence(http_head, asyncify(function(x) x$status_code)),
 #'   function(err, res) print(res)

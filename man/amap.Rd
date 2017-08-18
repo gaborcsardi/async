@@ -19,7 +19,7 @@ have finished, or an error occurs. The result is a list of the
 transformed items from the \code{coll}. Invoked with \code{(err, result)}.}
 }
 \value{
-A task id, that can be waited on with \code{\link[=await]{await()}}.
+A task id, that can be waited on with \code{\link[=wait_for]{wait_for()}}.
 }
 \description{
 The \code{iteratee} is called with an item from \code{coll} and a callback for
@@ -46,7 +46,7 @@ id <- amap(
 error
 result
 
-await(id)
+wait_for(id)
 error
 result
 }

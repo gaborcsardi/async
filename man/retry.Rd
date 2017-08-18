@@ -29,7 +29,7 @@ attempt.
 \examples{
 ## Try a download at most 5 times
 result <- NULL
-await(retry(
+wait_for(retry(
   function(callback) http_get("https://httpbin.org", callback),
   times = 5,
   function(err, res) result <<- res$status_code

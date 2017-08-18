@@ -28,7 +28,7 @@
 #' @export
 #' @examples
 #' res <- NULL
-#' await(parallel(
+#' wait_for(parallel(
 #'   list(
 #'     function(callback) {
 #'       http_get("https://eu.httpbin.org/get?q=foo",
@@ -80,7 +80,7 @@ parallel <- function(tasks, callback) {
 #' @export
 #' @examples
 #' error <- result <- NULL
-#' await(parallel_limit(
+#' wait_for(parallel_limit(
 #'   list(
 #'     function(callback) set_timeout(1/100, function() callback(NULL, 1)),
 #'     function(callback) set_timeout(2/100, function() callback(NULL, 2)),

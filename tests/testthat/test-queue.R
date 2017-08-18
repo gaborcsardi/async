@@ -62,7 +62,7 @@ test_that("basic queue", {
   expect_equal(q$is_started(), TRUE)
   expect_equal(q$is_paused(), FALSE)
 
-  await()
+  wait_for()
 
   expect_equal(
     hist,

@@ -6,8 +6,8 @@ async_env <- new.env(parent = emptyenv())
 }
 
 .onUnload <- function(libpath) {
-  message("Unloading async package, awaiting all tasks...")
-  get_default_event_loop()$await_all()
+  message("Unloading async package, waiting for all tasks...")
+  get_default_event_loop()$wait_for_all()
 }
 
 #' Default event loop of the R session.

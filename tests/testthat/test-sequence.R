@@ -14,7 +14,7 @@ test_that("sequence", {
 
   add1mul3 <- sequence(add1, mul3)
   result <- NULL
-  await(add1mul3(4, callback = function (err, res) {
+  wait_for(add1mul3(4, callback = function (err, res) {
     result <<- res
   }))
 
@@ -35,7 +35,7 @@ test_that("sequence, asyncify", {
 
   add1mul3sub14 <- sequence(add1, mul3, sub14)
   result <- NULL
-  await(add1mul3sub14(4, callback = function (err, res) {
+  wait_for(add1mul3sub14(4, callback = function (err, res) {
     result <<- res
   }))
 

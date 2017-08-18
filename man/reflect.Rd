@@ -23,7 +23,7 @@ badfun <- asyncify(function() stop("oh no!"))
 safefun <- reflect(badfun)
 
 result <- NULL
-await(parallel(
+wait_for(parallel(
   list(safefun, safefun, safefun),
   function(err, res) result <<- res
 ))

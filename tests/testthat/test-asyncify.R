@@ -7,7 +7,7 @@ test_that("asyncify", {
   g <- asyncify(function() 42 * 42)
 
   result <- NULL
-  await(parallel(
+  wait_for(parallel(
     list(f, g),
     function(err, res) result <<- res
   ))

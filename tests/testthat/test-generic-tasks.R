@@ -1,7 +1,7 @@
 
 context("generic tasks")
 
-test_that("await on a generic task", {
+test_that("wait_for on a generic task", {
 
   skip_if_offline()
 
@@ -29,11 +29,11 @@ test_that("await on a generic task", {
     function(err, result) res2 <<- result
   )
 
-  await(p2)
+  wait_for(p2)
   expect_true(Sys.time() - tic < as.difftime(1, units = "secs"))
   expect_equal(res2, list("I am done"))
 
-  await(p1)
+  wait_for(p1)
   expect_false(is.null(res))
   expect_true(Sys.time() - tic > as.difftime(1, units = "secs"))
 })

@@ -35,7 +35,7 @@ id <- detect(
   sequence(http_get, asyncify(function(x) x$status_code)),
   function(err, res) print(res)
 )
-await(id)
+wait_for(id)
 }
 \seealso{
 Other async iterators: \code{\link{amap}},

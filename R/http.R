@@ -15,14 +15,14 @@
 #'   The first argument is not `NULL` on error and it contains an error
 #'   object, or an error message from `curl`. The second argument contains
 #'   the response from `curl`.
-#' @return Task id that can be waited on with [await()].
+#' @return Task id that can be waited on with [wait_for()].
 #'
 #' @family asyncronous HTTP calls
 #' @export
 #' @importFrom curl new_handle
 #' @examples
 #' error <- result <- NULL
-#' await(http_get(
+#' wait_for(http_get(
 #'   "https://httpbin.org/get",
 #'   function(err, res) { error <<- err ; result <<- res }
 #' ))
@@ -38,14 +38,14 @@ http_get <- function(url, callback) {
 #' Asynchronous HTTP HEAD request
 #'
 #' @inheritParams http_get
-#' @return Task id that can be waited on with [await()].
+#' @return Task id that can be waited on with [wait_for()].
 #'
 #' @family asyncronous HTTP calls
 #' @export
 #' @importFrom curl handle_setopt
 #' @examples
 #' error <- result <- NULL
-#' await(http_head(
+#' wait_for(http_head(
 #'   "https://httpbin.org/get",
 #'   function(err, res) { error <<- err ; result <<- res }
 #' ))

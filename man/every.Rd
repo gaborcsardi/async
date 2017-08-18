@@ -28,7 +28,7 @@ called.
 \examples{
 ## Check if all numbers are odd
 result <- NULL
-await(every(
+wait_for(every(
   c(1,3,5,7,10,11),
   function(x, callback) callback(NULL, as.logical(x \%\% 2)),
   function(err, res) result <<- res

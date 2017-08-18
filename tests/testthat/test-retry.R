@@ -4,7 +4,7 @@ context("retry")
 test_that("unsuccessful retry", {
   x <- 5
   err <- res <- NULL
-  await(retry(
+  wait_for(retry(
     function(callback) {
       x <<- x - 1
       if (x) callback("error") else callback(NULL, "OK")
@@ -23,7 +23,7 @@ test_that("unsuccessful retry", {
 test_that("successful retry", {
   x <- 5
   err <- res <- NULL
-  await(retry(
+  wait_for(retry(
     function(callback) {
       x <<- x - 1
       if (x) callback("error") else callback(NULL, "OK")
@@ -48,7 +48,7 @@ test_that("retry and asyncify", {
 
   x <- 5
   err <- res <- NULL
-  await(retry(
+  wait_for(retry(
     asyncify(fun),
     times = 5,
     function(err, res) {

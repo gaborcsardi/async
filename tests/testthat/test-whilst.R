@@ -6,7 +6,7 @@ test_that("whilst", {
   count <- 0
   nn <- NULL
 
-  await(whilst(
+  wait_for(whilst(
     function() count < 5,
     function(callback) {
       count <<- count + 1
@@ -26,7 +26,7 @@ test_that("whilst with false test", {
   result <- NULL
 
   expect_silent({
-    await(whilst(
+    wait_for(whilst(
       function() FALSE,
       function(callback) {
         stop("Not reached")
@@ -45,7 +45,7 @@ test_that("error", {
 
   i <- 1
   error <- result <- NULL
-  await(whilst(
+  wait_for(whilst(
     function() i < 5,
     function(callback) {
       i <<- i + 1
@@ -67,7 +67,7 @@ test_that("whilst, asyncify", {
   count <- 0
   nn <- NULL
 
-  await(whilst(
+  wait_for(whilst(
     function() count < 5,
     asyncify(function() count <<- count + 1),
     function (err, n) nn <<- n

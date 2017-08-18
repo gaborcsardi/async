@@ -28,7 +28,7 @@ Calls callback when stopped, or an error occurs.
 ## Keep calling while result is bigger than 0.1
 calls <- 0
 number <- Inf
-await(whilst(
+wait_for(whilst(
   function() number > 0.1,
   function(callback) {
     number <<- runif(1)

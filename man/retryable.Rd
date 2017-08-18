@@ -23,7 +23,7 @@ retryable, rather than immediately calling it with retries.
 \examples{
 http_get_harder <- retryable(http_get, 5)
 result <- NULL
-await(http_get_harder(
+wait_for(http_get_harder(
   url = "https://httpbin.org",
   callback = function(err, res) result <<- res
 ))

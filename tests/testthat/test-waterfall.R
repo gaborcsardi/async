@@ -5,7 +5,7 @@ test_that("waterfall", {
 
   result <- NULL
 
-  await(waterfall(
+  wait_for(waterfall(
     list(
       function(callback) callback(NULL, "one", "two"),
       function(arg1, arg2, callback) callback(NULL, c(arg1, arg2, "three")),
@@ -23,7 +23,7 @@ test_that("waterfall, asyncify", {
 
   result <- NULL
 
-  await(waterfall(
+  wait_for(waterfall(
     list(
       asyncify(function() c("one", "two")),
       asyncify(function(arg12) c(arg12, "three")),

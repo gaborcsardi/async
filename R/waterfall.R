@@ -17,7 +17,7 @@
 #' @family async control flow
 #' @export
 #' @examples
-#' await(waterfall(
+#' wait_for(waterfall(
 #'   list(
 #'     function(callback) callback(NULL, 'one', 'two'),
 #'     function(arg1, arg2, callback) {

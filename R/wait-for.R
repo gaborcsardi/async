@@ -23,13 +23,13 @@
 #'   ),
 #'   function(err, res) print(res)
 #' )
-#' await(id)
+#' wait_for(id)
 
-await <- function(ids = NULL) {
+wait_for <- function(ids = NULL) {
   assert_that(is.character(ids) || is.null(ids))
   if (is.null(ids)) {
-    get_default_event_loop()$await_all()
+    get_default_event_loop()$wait_for_all()
   } else {
-    get_default_event_loop()$await(ids)
+    get_default_event_loop()$wait_for(ids)
   }
 }

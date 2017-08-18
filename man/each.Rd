@@ -46,7 +46,7 @@ check_url <- function(url, callback) {
 }
 
 error <- NULL
-await(each(urls, check_url, function(err) error <<- err))
+wait_for(each(urls, check_url, function(err) error <<- err))
 error
 }
 \seealso{

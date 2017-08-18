@@ -7,8 +7,8 @@
 #' ```
 #' el <- event_loop$new()
 #'
-#' el$await(ids)
-#' el$await_all()
+#' el$wait_for(ids)
+#' el$wait_for_all()
 #'
 #' el$run_http(handle, callback)
 #' el$run_set_timeout(delay, callback)
@@ -27,9 +27,9 @@
 #' }
 #'
 #' @section Details:
-#' `$await()` waits for all specified tasks to finish.
+#' `$wait_for()` waits for all specified tasks to finish.
 #'
-#' `$await_all()` waits for all tasks managed by the event loop to finish.
+#' `$wait_for_all()` waits for all tasks managed by the event loop to finish.
 #'
 #' `$run_http()` starts an asynchronous HTTP request, with the specified
 #' `curl` handle. Once the request is done, and the response is available
@@ -58,10 +58,10 @@ event_loop <- R6Class(
   public = list(
     initialize = function()
       el_init(self, private),
-    await = function(ids)
-      el_await(self, private, ids),
-    await_all = function()
-      el_await_all(self, private),
+    wait_for = function(ids)
+      el_wait_for(self, private, ids),
+    wait_for_all = function()
+      el_wait_for_all(self, private),
 
     run_http = function(handle, callback)
       el_run_http(self, private, handle, callback),
@@ -90,7 +90,7 @@ event_loop <- R6Class(
 #' @importFrom later later
 
 el_init <- function(self, private) {
-  reg.finalizer(self, function(me) me$await_all(), onexit = TRUE)
+  reg.finalizer(self, function(me) me$wait_for_all(), onexit = TRUE)
   later(function() private$poll())
   invisible(self)
 }
@@ -148,11 +148,11 @@ el_run_generic <- function(self, private, callback, ...) {
   list(id = id, callback = mycallback)
 }
 
-el_await <- function(self, private, ids) {
+el_wait_for <- function(self, private, ids) {
   while (any(ids %in% names(private$tasks))) private$poll()
 }
 
-el_await_all <- function(self, private) {
+el_wait_for_all <- function(self, private) {
   while (length(private$tasks)) private$poll()
 }
 

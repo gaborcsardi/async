@@ -33,7 +33,7 @@ The inverse of \code{\link[=whilst]{whilst()}}.
 ## Keep calling until it "returns" a number less than < 0.1
 calls <- 0
 number <- Inf
-await(until(
+wait_for(until(
   function() number < 0.1,
   function(callback) {
     number <<- runif(1)

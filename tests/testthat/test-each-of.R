@@ -7,7 +7,7 @@ test_that("each_of", {
   done <- character()
   index <- numeric()
 
-  await(each_of(
+  wait_for(each_of(
     letters[1:10],
     function(item, idx, callback) {
       done <<- c(done, item)
@@ -27,7 +27,7 @@ test_that("with asyncify", {
   done <- character()
   index <- numeric()
 
-  await(each_of(
+  wait_for(each_of(
     letters[1:10],
     asyncify(return = FALSE, function(item, idx) {
       done <<- c(done, item)

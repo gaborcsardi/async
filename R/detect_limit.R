@@ -20,7 +20,7 @@
 #' }
 #'
 #' result <- "not null"
-#' await(detect_limit(1:5, task, 2, function(err, res) result <<- res))
+#' wait_for(detect_limit(1:5, task, 2, function(err, res) result <<- res))
 #' result
 
 detect_limit <- function(coll, iteratee, limit, callback) {

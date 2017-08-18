@@ -9,14 +9,14 @@
 #'   second.
 #' @param callback The function to call after `delay` seconds. It will be
 #'   called without arguments.
-#' @return Task id, it can be waited on with [await()].
+#' @return Task id, it can be waited on with [wait_for()].
 #'
 #' @export
 #' @examples
 #' result <- NULL
 #' id <- set_timeout(1, function() result <<- "done")
 #' result
-#' await(id)
+#' wait_for(id)
 #' result
 
 set_timeout <- function(delay, callback) {

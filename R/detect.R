@@ -26,7 +26,7 @@
 #'   sequence(http_get, asyncify(function(x) x$status_code)),
 #'   function(err, res) print(res)
 #' )
-#' await(id)
+#' wait_for(id)
 
 detect <- function(coll, iteratee, callback) {
   assert_that(

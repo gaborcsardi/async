@@ -27,7 +27,7 @@
 #' }
 #'
 #' result <- NULL
-#' await(filter(urls, test_url, function(err, res) result <<- res))
+#' wait_for(filter(urls, test_url, function(err, res) result <<- res))
 #' result
 
 filter <- function(coll, iteratee, callback) {

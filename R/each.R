@@ -36,7 +36,7 @@
 #' }
 #'
 #' error <- NULL
-#' await(each(urls, check_url, function(err) error <<- err))
+#' wait_for(each(urls, check_url, function(err) error <<- err))
 #' error
 
 each <- function(coll, iteratee, callback) {

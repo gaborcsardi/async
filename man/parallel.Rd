@@ -37,7 +37,7 @@ task fails.
 }
 \examples{
 res <- NULL
-await(parallel(
+wait_for(parallel(
   list(
     function(callback) {
       http_get("https://eu.httpbin.org/get?q=foo",

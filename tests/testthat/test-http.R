@@ -12,7 +12,7 @@ test_that("GET", {
       result <<- rawToChar(res$content)
     }
   )
-  await(ax)
+  wait_for(ax)
 
   expect_false(is.null(result))
   expect_match(result, "\"q\": \"42\"", fixed = TRUE)
@@ -29,5 +29,5 @@ test_that("HEAD", {
       expect_equal(res$status_code, 200)
     }
   )
-  await(ax)
+  wait_for(ax)
 })

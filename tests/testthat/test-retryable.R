@@ -12,7 +12,7 @@ test_that("retryable", {
   rf <- retryable(f, 5)
 
   result <- NULL
-  await(rf(callback = function(err, res) result <<- res))
+  wait_for(rf(callback = function(err, res) result <<- res))
 
   expect_identical(result, "OK")
 })
@@ -28,7 +28,7 @@ test_that("retryable, asyncify", {
   rf <- retryable(asyncify(f), 5)
 
   result <- NULL
-  await(rf(callback = function(err, res) result <<- res))
+  wait_for(rf(callback = function(err, res) result <<- res))
 
   expect_identical(result, "OK")
 })

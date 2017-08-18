@@ -20,7 +20,7 @@
 #' @param callback A callback which is called when all iteratee functions
 #'   have finished, or an error occurs. The result is a list of the
 #'   transformed items from the `coll`. Invoked with `(err, result)`.
-#' @return A task id, that can be waited on with [await()].
+#' @return A task id, that can be waited on with [wait_for()].
 #'
 #' @family async iterators
 #' @export
@@ -36,7 +36,7 @@
 #' error
 #' result
 #'
-#' await(id)
+#' wait_for(id)
 #' error
 #' result
 

@@ -20,7 +20,7 @@ Result will be either \code{TRUE} or \code{FALSE} depending on the values of the
 async tests. Invoked with \code{(err, result)}.}
 }
 \value{
-A task id, that can be waited on with \code{\link[=await]{await()}}.
+A task id, that can be waited on with \code{\link[=wait_for]{wait_for()}}.
 }
 \description{
 If any iteratee call returns true, the main callback is
@@ -28,7 +28,7 @@ immediately called.
 }
 \examples{
 ## Check if one of these sites are up
-await(some(
+wait_for(some(
   c("https://eu.httpbin.org", "https://httpbin.org"),
   sequence(http_head, asyncify(function(x) x$status_code)),
   function(err, res) print(res)
