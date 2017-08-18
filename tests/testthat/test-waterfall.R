@@ -8,12 +8,28 @@ test_that("waterfall", {
   await(waterfall(
     list(
       function(callback) callback(NULL, "one", "two"),
-      function(callback, arg1, arg2) callback(NULL, c(arg1, arg2, "three")),
-      function(callback, arg1) callback(NULL, c(arg1, "done"))
+      function(arg1, arg2, callback) callback(NULL, c(arg1, arg2, "three")),
+      function(arg1, callback) callback(NULL, c(arg1, "done"))
     ),
     function(err, res) {
       result <<- res
     }
+  ))
+
+  expect_identical(result, c("one", "two", "three", "done"))
+})
+
+test_that("waterfall, asyncify", {
+
+  result <- NULL
+
+  await(waterfall(
+    list(
+      asyncify(function() c("one", "two")),
+      asyncify(function(arg12) c(arg12, "three")),
+      asyncify(function(arg1) c(arg1, "done"))
+    ),
+    function(err, res) result <<- res
   ))
 
   expect_identical(result, c("one", "two", "three", "done"))

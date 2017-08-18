@@ -46,10 +46,8 @@ detect_limit <- function(coll, iteratee, limit, callback) {
     if (nextone <= l) {
       i <- nextone
       nextone <<- nextone + 1
-      iteratee(
-        coll[[i]],
-        callback = function(err, res) mycallback(err, res, i)
-      )
+      async_call(iteratee, list(coll[[i]]),
+                 function(err, res) mycallback(err, res, i))
     }
   }
 
@@ -58,10 +56,8 @@ detect_limit <- function(coll, iteratee, limit, callback) {
     local({
       i <- ii
       nextone <<- nextone + 1
-      iteratee(
-        coll[[i]],
-        callback = function(err, res) mycallback(err, res, i)
-      )
+      async_call(iteratee, list(coll[[i]]),
+                 function(err, res) mycallback(err, res, i))
     })
   }
 

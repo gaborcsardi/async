@@ -53,7 +53,7 @@ amap <- function(coll, iteratee, callback) {
   etask <- get_default_event_loop()$run_generic(callback)
 
   lapply(seq_len(l), function(i) {
-    iteratee(coll[[i]], callback = function(err, res) {
+    async_call(iteratee, list(coll[[i]]), function(err, res) {
       if (!is.null(err)) return(etask$callback(err))
       l <<- l - 1
       result[[i]] <<- res

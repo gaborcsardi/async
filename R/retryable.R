@@ -26,7 +26,7 @@ retryable <- function(task, times) {
   function(..., callback) {
     force(times) ; force(callback)
     retry(
-      function(callback) task(..., callback = callback),
+      function(callback) async_call(task, list(...), callback),
       times,
       callback
     )

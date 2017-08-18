@@ -44,10 +44,10 @@ waterfall <- function(tasks, callback) {
     if (!is.null(err)) return(task$callback(err, NULL))
     w <<- w + 1
     if (w > l) return(task$callback(NULL, ...))
-    tasks[[w]](..., callback = mycallback)
+    async_call(tasks[[w]], list(...), mycallback)
   }
 
-  tasks[[1]](callback = mycallback)
+  async_call(tasks[[1]], list(), mycallback)
 
   task$id
 }

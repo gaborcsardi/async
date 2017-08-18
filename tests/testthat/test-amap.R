@@ -14,3 +14,16 @@ test_that("amap", {
 
   expect_identical(result, as.list(1:10 * 2))
 })
+
+test_that("amap and asyncify", {
+
+  result <- NULL
+
+  await(amap(
+    1:10,
+    asyncify(function(item) item * 2),
+    function(err, res) result <<- res
+  ))
+
+  expect_identical(result, as.list(1:10 * 2))
+})

@@ -39,7 +39,7 @@ every <- function(coll, iteratee, callback) {
   if (l == 0) return(etask$callback(NULL, TRUE))
 
   lapply(seq_len(l), function(i) {
-    iteratee(coll[[i]], function(err, res) {
+    async_call(iteratee, list(coll[[i]]), function(err, res) {
       if (!is.null(err)) return(etask$callback(err, NULL))
       if (!res) return(etask$callback(NULL, FALSE))
       l <<- l - 1

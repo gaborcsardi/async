@@ -35,9 +35,9 @@ sequence <- function(..., .list = NULL) {
       if (!is.null(err)) return(task$callback(err, ...))
       i <<- i + 1
       if (i > length(funcs)) return(task$callback(NULL ,...))
-      funcs[[i]](..., callback = mycallback)
+      async_call(funcs[[i]], list(...), mycallback)
     }
-    funcs[[i]](..., callback = mycallback)
+    async_call(funcs[[i]], list(...), mycallback)
     task$id
   }
 }

@@ -45,3 +45,21 @@ test_that("detect_limit", {
 
   expect_null(result)
 })
+
+test_that("with asyncify", {
+
+  is_odd <- asyncify(function(x) as.logical(x %% 2))
+
+  result <- NULL
+  await(detect(1:10, is_odd, function(err, res) result <<- res))
+  expect_true(result %in% c(1L, 3L, 5L, 7L, 9L))
+})
+
+test_that("detect_limit & asyncify", {
+
+  is_odd <- asyncify(function(x) as.logical(x %% 2))
+
+  result <- NULL
+  await(detect_limit(1:10, is_odd, 2, function(err, res) result <<- res))
+  expect_true(result %in% c(1L, 3L, 5L, 7L, 9L))
+})

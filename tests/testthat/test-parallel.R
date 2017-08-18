@@ -61,3 +61,30 @@ test_that("limit", {
   test_limit(5)
   test_limit(10)
 })
+
+test_that("limit, asyncify", {
+
+  test_limit <- function(limit) {
+    error <- NULL
+    result <- NULL
+    await(parallel_limit(
+      list(
+        asyncify(function() 1),
+        asyncify(function() 2),
+        asyncify(function() 3),
+        asyncify(function() 4),
+        asyncify(function() 5)
+      ),
+      limit = limit,
+      function(err, res) { error <<- err; result <<- res }
+    ))
+    expect_null(error)
+    expect_equal(result, as.list(1:5))
+  }
+
+  test_limit(1)
+  test_limit(2)
+  test_limit(4)
+  test_limit(5)
+  test_limit(10)
+})

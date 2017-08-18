@@ -38,7 +38,7 @@ some <- function(coll, iteratee, callback) {
   if (l == 0) return(etask$callback(NULL, FALSE))
 
   lapply(seq_len(l), function(i) {
-    iteratee(coll[[i]], callback = function(err, res) {
+    async_call(iteratee, list(coll[[i]]), function(err, res) {
       if (!is.null(err)) return(etask$callback(err, NULL))
       if (res) return(etask$callback(NULL, TRUE))
       l <<- l - 1

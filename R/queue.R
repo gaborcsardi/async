@@ -278,9 +278,8 @@ q__schedule <- function(self, private) {
       to_start <- which(!running)[1]
       item <- private$workers[[to_start]]
       private$workers[[to_start]]$running <- TRUE
-      private$worker_function(
-        item$item,
-        function(err, res) {
+      async_call(
+        private$worker_function, list(item$item), function(err, res) {
           private$workers[[to_start]] <- NULL
           if (!is.null(err) && !is.null(private$cb_error)) {
             private$cb_error(err, item$item)

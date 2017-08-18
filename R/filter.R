@@ -44,7 +44,7 @@ filter <- function(coll, iteratee, callback) {
 
   keep <- logical(l)
   lapply(seq_len(l), function(i) {
-    iteratee(coll[[i]], callback = function(err, res) {
+    async_call(iteratee, list(coll[[i]]), function(err, res) {
       if (!is.null(err)) return(etask$callback(err))
       l <<- l - 1
       keep[i] <<- res

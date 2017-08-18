@@ -46,12 +46,12 @@ until <- function(test_function, task, callback) {
   mycallback <- function(err, ...) {
     if (!is.null(err)) return(etask$callback(err, ...))
     if (!test_function()) {
-      task(mycallback)
+      async_call(task, list(), mycallback)
     } else {
       etask$callback(NULL, ...)
     }
   }
-  task(mycallback)
+  async_call(task, list(), mycallback)
 
   etask$id
 }

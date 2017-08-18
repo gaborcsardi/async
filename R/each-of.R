@@ -20,7 +20,7 @@ each_of <- function(coll, iteratee, callback) {
   l <- length(coll)
   lapply(seq_len(l), function(i) {
     item <- coll[[i]]
-    iteratee(item, i, function(err) {
+    async_call(iteratee, list(item, i), function(err) {
       if (!is.null(err)) return(etask$callback(err))
       l <<- l -1
       if (l == 0) etask$callback(NULL)

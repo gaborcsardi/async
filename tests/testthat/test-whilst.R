@@ -61,3 +61,18 @@ test_that("error", {
   expect_null(result)
   expect_equal(error, "This is bad")
 })
+
+test_that("whilst, asyncify", {
+
+  count <- 0
+  nn <- NULL
+
+  await(whilst(
+    function() count < 5,
+    asyncify(function() count <<- count + 1),
+    function (err, n) nn <<- n
+  ))
+
+  expect_false(is.null(nn))
+  expect_equal(nn, 5)
+})

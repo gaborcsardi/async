@@ -40,12 +40,12 @@ retry <- function(task, times, callback) {
     if (is.null(err)) return(etask$callback(NULL, res))
     times <<- times - 1
     if (times) {
-      task(callback = mycallback)
+      async_call(task, args = list(), mycallback)
     } else {
       etask$callback(err, NULL)
     }
   }
 
-  task(callback = mycallback)
+  async_call(task, args = list(), mycallback)
   etask$id
 }
