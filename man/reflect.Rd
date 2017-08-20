@@ -31,5 +31,5 @@ result
 }
 \seealso{
 Other async utilities: \code{\link{async_apply}},
-  \code{\link{asyncify}}
+  \code{\link{asyncify}}, \code{\link{syncify}}
 }

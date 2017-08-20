@@ -35,5 +35,5 @@ result
 }
 \seealso{
 Other async utilities: \code{\link{asyncify}},
-  \code{\link{reflect}}
+  \code{\link{reflect}}, \code{\link{syncify}}
 }

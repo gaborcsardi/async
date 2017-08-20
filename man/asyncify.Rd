@@ -33,5 +33,5 @@ amap(c(0, 42), af, function(err, res) print(res))
 }
 \seealso{
 Other async utilities: \code{\link{async_apply}},
-  \code{\link{reflect}}
+  \code{\link{reflect}}, \code{\link{syncify}}
 }
