@@ -3,6 +3,8 @@ context("queue")
 
 test_that("basic queue", {
 
+  skip("Need to rethink queue")
+
   hist <- character()
 
   q <- make_queue(
@@ -19,6 +21,7 @@ test_that("basic queue", {
 
   q$call_if_drained(function() {
     hist <<- c(hist, "all items have been processed")
+    q$kill()
   })
 
   q$call_if_error(function(err, item) {
@@ -62,7 +65,7 @@ test_that("basic queue", {
   expect_equal(q$is_started(), TRUE)
   expect_equal(q$is_paused(), FALSE)
 
-  wait_for()
+  wait_for(q$get_id())
 
   expect_equal(
     hist,

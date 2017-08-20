@@ -25,11 +25,15 @@
 
 sync <- function(func, ..., .args = list()) {
   assert_that(is_task(func), is.list(.args))
+
   error <- result <- NULL
-  wait_for(async_call(func, c(list(...), .args), function(err, res) {
+  callback <- function(err, res) {
     error  <<- if (missing(err)) NULL else err
     result <<- if (missing(res)) NULL else res
-  }))
+  }
+
+  wait_for(do.call(func, c(list(...), .args, list(callback))))
+
   if (!is.null(error)) stop(error)
   result
 }

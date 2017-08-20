@@ -68,7 +68,10 @@ event_loop <- R6Class(
     run_set_timeout = function(delay, callback)
       el_run_set_timeout(self, private, delay, callback),
     run_generic = function(callback, ...)
-      el_run_generic(self, private, callback, ...)
+      el_run_generic(self, private, callback, ...),
+
+    defer_next_tick = function(callback, args)
+      el_defer_next_tick(self, private, callback, args)
   ),
 
   private = list(
@@ -80,10 +83,13 @@ event_loop <- R6Class(
       el__ensure_pool(self, private, ...),
     get_poll_timeout = function(current)
       el__get_poll_timeout(self, private, current),
+    do_next_tick = function()
+      el__do_next_tick(self, private),
 
     tasks = list(),
     timers = Sys.time()[numeric()],
-    pool = NULL
+    pool = NULL,
+    next_ticks = list()
   )
 )
 
@@ -142,7 +148,7 @@ el_run_generic <- function(self, private, callback, ...) {
   id <- private$create_task(callback, data = data)
   mycallback <-function(...) {
     private$tasks[[id]] <- NULL
-    callback(...)
+    if (!is.null(callback)) callback(...)
     id
   }
   list(id = id, callback = mycallback)
@@ -156,6 +162,13 @@ el_wait_for_all <- function(self, private) {
   while (length(private$tasks)) private$poll()
 }
 
+el_defer_next_tick <- function(self, private, callback, args) {
+  private$next_ticks <- append(
+    private$next_ticks,
+    list(list(callback, args))
+  )
+}
+
 #' @importFrom curl multi_run
 #' @importFrom later run_now
 
@@ -165,7 +178,16 @@ el__poll <- function(self, private) {
   if (!is.null(private$pool)) {
     multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
   }
+  private$do_next_tick()
   run_now()
+}
+
+el__do_next_tick <- function(self, private) {
+  next_ticks <- private$next_ticks
+  private$next_ticks <- list()
+  for (nt in next_ticks) {
+    do.call(nt[[1]], nt[[2]])
+  }
 }
 
 #' @importFrom uuid UUIDgenerate

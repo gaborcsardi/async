@@ -141,6 +141,7 @@ queue <- R6Class(
     is_paused = function()       private$paused,
     get_running = function()     q_get_running(self, private),
     is_idle = function()         q_is_idle(self, private),
+    get_id = function()          private$etask$id,
 
     ## Manipulation
     push = function(item, callback)
@@ -153,6 +154,8 @@ queue <- R6Class(
       q_pause(self, private),
     resume = function()
       q_resume(self, private),
+    kill = function()
+      q_kill(self, private),
 
     ## Callbacks
     call_if_saturated = function(callback)
@@ -179,6 +182,7 @@ queue <- R6Class(
     workers = list(),
     started = FALSE,
     paused = FALSE,
+    etask = NULL,
 
     cb_saturated = NULL,
     cb_unsaturated = NULL,
@@ -191,7 +195,8 @@ queue <- R6Class(
 q_init <- function(self, private, worker_function, concurrency) {
   private$worker_function <- worker_function
   private$concurrency     <- concurrency
-  invisible(self)
+  private$etask           <- get_default_event_loop()$run_generic(NULL)
+  self
 }
 
 q_get_running <- function(self, private) {
@@ -232,6 +237,10 @@ q_pause <- function(self, private) {
 q_resume <- function(self, private) {
   private$paused <- FALSE
   private$schedule()
+}
+
+q_kill <- function(self, private) {
+  private$etask$callback()
 }
 
 q_call_if_saturated <- function(self, private, callback) {
@@ -285,6 +294,7 @@ q__schedule <- function(self, private) {
             private$cb_error(err, item$item)
           }
           if (!is.null(item$callback)) item$callback(err, res)
+          private$schedule()
         }
       )
     })
@@ -296,8 +306,11 @@ q__schedule <- function(self, private) {
 
 q__call_callbacks <- function(self, private) {
   running <- vlapply(private$workers, "[[", "running")
-  if (sum(!running) == 0 && !is.null(cb <- private$cb_empty)) cb()
-  if (all(running) && !is.null(cb <- private$cb_drained)) cb()
+  print(running)
+  if (sum(!running) == 0 &&
+      !is.null(cb <- private$cb_empty)) cb()
+  if (length(private$workers) == 0 &&
+      !is.null(cb <- private$cb_drained)) cb()
   if (sum(running) == private$concurrency &&
       !is.null(cb <- private$cb_saturated)) cb()
   if (sum(running) < private$concurrency &&

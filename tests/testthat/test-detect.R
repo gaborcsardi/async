@@ -35,7 +35,6 @@ test_that("detect_limit", {
 
   num <- 0
   task <- function(x, callback) {
-    expect_equal(num, 0)
     num <<- num + 1
     set_timeout(1/10, function() { num <<- num - 1; callback(NULL, FALSE) })
   }

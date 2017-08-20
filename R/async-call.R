@@ -22,5 +22,5 @@
 async_call <- function(fun, args, callback) {
   cb_arg <- find_callback_arg(fun)
   args[[cb_arg]] <- callback
-  do.call(fun, args)
+  get_default_event_loop()$defer_next_tick(fun, args)
 }
