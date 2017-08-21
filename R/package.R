@@ -1,9 +1,12 @@
 
 #' Asynchronous HTTP
 #'
-#' The `async` package brings asynchronous computation to R.
-#' Currently it supports asynchronous HTTP operations, and timers.
-#' (Other primitive asynch operations will be added in the future.)
+#' @section Introduction:
+#' 
+#' The `async` package brings asynchronous computation and I/O to R.
+#'
+#' It has an event loop that takes care of scheduling multiple asynchronous
+#' functions (tasks), and polling for input from HTTP and other sources.
 #'
 #' @section Async Functions:
 #'
@@ -11,7 +14,14 @@
 #' A task is a function that reports its completion asynchronously, via
 #' calling a callback function.
 #'
-#' TODO: more
+#' `async` provides some async functions to perform HTTP requests
+#' (`http_get`, `http_head`, etc.), and code execution with a delay
+#' (`set_timeout`).
+#'
+#' @section Async Iterators:
+#' 
+#'
+#' @section Async Flow Control:
 #'
 #' @section List iterators:
 #'
