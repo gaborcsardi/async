@@ -6,10 +6,17 @@
 \alias{async-package}
 \title{Asynchronous HTTP}
 \description{
-The \code{async} package brings asynchronous computation to R.
-Currently it supports asynchronous HTTP operations, and timers.
-(Other primitive asynch operations will be added in the future.)
+Asynchronous HTTP
 }
+\section{Introduction}{
+
+
+The \code{async} package brings asynchronous computation and I/O to R.
+
+It has an event loop that takes care of scheduling multiple asynchronous
+functions (tasks), and polling for input from HTTP and other sources.
+}
+
 \section{Async Functions}{
 
 
@@ -17,7 +24,17 @@ Asynchronous computation happens in special functions called tasks.
 A task is a function that reports its completion asynchronously, via
 calling a callback function.
 
-TODO: more
+\code{async} provides some async functions to perform HTTP requests
+(\code{http_get}, \code{http_head}, etc.), and code execution with a delay
+(\code{set_timeout}).
+}
+
+\section{Async Iterators}{
+
+}
+
+\section{Async Flow Control}{
+
 }
 
 \section{List iterators}{
