@@ -39,18 +39,16 @@ deferred <- R6Class(
 )
 
 def_init <- function(self, private, action) {
-  ## TODO
-  ## assert_that(is_action_function(action))
+  assert_that(is_action_function(action))
   action(private$resolve, private$reject)
   invisible(self)
 }
 
 def_then <- function(self, private, on_fulfilled, on_rejected) {
-  ## TODO
-  ## assert_that(
-  ##   is_function_or_null(on_fulfilled),
-  ##   is_function_or_null(on_rejected)
-  ## )
+  assert_that(
+    is_function_or_null(on_fulfilled),
+    is_function_or_null(on_rejected)
+  )
   force(on_fulfilled)
   force(on_rejected)
   def <- deferred$new(function(resolve, reject) {
@@ -166,6 +164,7 @@ get_value_x <- function(x) {
 #' @export
 
 async <- function(fun) {
+  assert_that(is.function(fun))
   attr(fun, "async") <- list(TRUE)
   fun
 }

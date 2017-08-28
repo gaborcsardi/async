@@ -84,3 +84,19 @@ is_flag <- function(x) {
 on_failure(is_flag) <- function(call, env) {
   paste0(deparse(call$x), " is not a flag (length 1 logical)")
 }
+
+is_action_function <- function(x) {
+  is.function(x) && length(formals(x)) == 2
+}
+
+on_failure(is_action_function) <- function(call, env) {
+  paste0(deparse(call$x), " is not a function with two arguments")
+}
+
+is_function_or_null <- function(x) {
+  is.null(x) || is.function(x)
+}
+
+on_failure(is_function_or_null) <- function(call, env) {
+  paste0(deparse(call$x), " must be a function or NULL")
+}
