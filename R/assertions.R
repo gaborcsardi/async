@@ -38,7 +38,7 @@ on_failure(is_callback) <- function(call, env) {
 }
 
 is_callback_or_null <- function(x) {
-  is.function(x) && length(formals(x)) >= 1
+  is.null(x) || is_callback(x)
 }
 
 on_failure(is_callback_or_null) <- function(call, env) {

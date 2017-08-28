@@ -70,7 +70,7 @@ event_loop <- R6Class(
     run_generic = function(callback, ...)
       el_run_generic(self, private, callback, ...),
 
-    defer_next_tick = function(callback, args)
+    defer_next_tick = function(callback, args = list())
       el_defer_next_tick(self, private, callback, args)
   ),
 

@@ -4,7 +4,7 @@
 \alias{http_get}
 \title{Asynchronous HTTP GET request}
 \usage{
-http_get(url, callback)
+http_get(url, callback = NULL)
 }
 \arguments{
 \item{url}{URL to connect to.}
