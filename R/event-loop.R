@@ -85,6 +85,8 @@ event_loop <- R6Class(
       el__get_poll_timeout(self, private, current),
     do_next_tick = function()
       el__do_next_tick(self, private),
+    fire_timers = function(current)
+      el__fire_timers(self, private, current),
 
     tasks = list(),
     timers = Sys.time()[numeric()],
@@ -93,11 +95,8 @@ event_loop <- R6Class(
   )
 )
 
-#' @importFrom later later
-
 el_init <- function(self, private) {
   reg.finalizer(self, function(me) me$wait_for_all(), onexit = TRUE)
-  later(function() private$poll())
   invisible(self)
 }
 
@@ -128,15 +127,6 @@ el_run_set_timeout <- function(self, private, delay, callback) {
   force(self) ; force(private) ; force(delay) ; force(callback)
   id <- private$create_task(callback, data = list(delay = delay))
   private$timers[id] <- Sys.time() + as.difftime(delay, units = "secs")
-  later(
-    function() {
-      task <- private$tasks[[id]]
-      private$tasks[[id]] <- NULL
-      private$timers <- private$timers[setdiff(names(private$times), id)]
-      tryCatch(task$callback(), error = function(e) NULL)
-    },
-    delay
-  )
   id
 }
 
@@ -170,7 +160,6 @@ el_defer_next_tick <- function(self, private, callback, args) {
 }
 
 #' @importFrom curl multi_run
-#' @importFrom later run_now
 
 el__poll <- function(self, private) {
   current <- Sys.time()
@@ -178,8 +167,8 @@ el__poll <- function(self, private) {
   if (!is.null(private$pool)) {
     multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
   }
+  if (timeout == 0) private$fire_timers(current)
   private$do_next_tick()
-  run_now()
 }
 
 el__do_next_tick <- function(self, private) {
@@ -215,4 +204,14 @@ el__get_poll_timeout <- function(self, private, current) {
     Inf,
     max(0, min(Inf, private$timers - current))
   )
+}
+
+el__fire_timers <- function(self, private, current) {
+  expired <- names(which(private$timers < current))
+  for (id in expired) {
+    task <- private$tasks[[id]]
+    private$tasks[[id]] <- NULL
+    private$timers <- private$timers[setdiff(names(private$times), id)]
+    task$callback()
+  }
 }

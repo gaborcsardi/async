@@ -17,7 +17,6 @@ Encoding: UTF-8
 Imports:
     assertthat,
     curl (>= 2.8.1),
-    later,
     R6,
     rlang,
     uuid
