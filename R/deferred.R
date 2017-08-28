@@ -18,6 +18,7 @@ deferred <- R6Class(
   private = list(
     state = c("pending", "fulfilled", "rejected")[1],
     id = NULL,
+    task = NULL,
     value = NULL,
     on_fulfilled = list(),
     on_rejected = list(),
@@ -29,7 +30,11 @@ deferred <- R6Class(
 
     ## TODO: this is temporary
     set_id = function(id)
-      private$id <- id
+      private$id <- id,
+    set_task = function(task) {
+      private$task <- task
+      private$id <- task$id
+    }
   )
 )
 
@@ -54,19 +59,15 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
 
     handle_fulfill <- function(value) {
       if (is.function(on_fulfilled)) value <- on_fulfilled(value)
-      val <- resolve(value)
-      task$callback()
-      val
+      resolve(value)
     }
 
     handle_reject <- function(reason) {
-      val <- if (is.function(on_rejected)) {
+      if (is.function(on_rejected)) {
         resolve(on_rejected(reason))
       } else {
         reject(reason)
       }
-      task$callback()
-      val
     }
 
     if (private$state == "pending") {
@@ -79,8 +80,9 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
     }
   })
 
-  task <- get_default_event_loop()$run_generic(NULL)
-  def$.__enclos_env__$private$set_id(task$id)
+  def$.__enclos_env__$private$set_task(
+    get_default_event_loop()$run_generic(NULL)
+  )
 
   def
 }
@@ -97,20 +99,30 @@ def_get_value <- function(self, private) {
 
 def__resolve <- function(self, private, value) {
   if (private$state != "pending") stop("Deferred value already resolved")
-  private$state <- "fulfilled"
-  private$value <- value
-  loop <- get_default_event_loop()
-  for (f in private$on_fulfilled) loop$defer_next_tick(f, list(value))
-  private$on_fulfilled <- list()
+  if (is.deferred(value)) {
+    value$then(private$resolve, private$reject)
+  } else {
+    private$state <- "fulfilled"
+    private$value <- value
+    loop <- get_default_event_loop()
+    for (f in private$on_fulfilled) loop$defer_next_tick(f, list(value))
+    private$on_fulfilled <- list()
+    if (!is.null(private$task)) private$task$callback()
+  }
 }
 
 def__reject <- function(self, private, reason) {
   if (private$state != "pending") stop("Deferred value already resolved")
-  private$state <- "rejected"
-  private$value <- reason
-  loop <- get_default_event_loop()
-  for (f in private$on_rejected) loop$defer_next_tick(f, list(reason))
-  private$on_rejected <- list()
+  if (is.deferred(reason)) {
+    reason$then(private$reject, private$preject)
+  } else {
+    private$state <- "rejected"
+    private$value <- reason
+    loop <- get_default_event_loop()
+    for (f in private$on_rejected) loop$defer_next_tick(f, list(reason))
+    private$on_rejected <- list()
+    if (!is.null(private$task)) private$task$callback()
+  }
 }
 
 #' @export
@@ -118,6 +130,10 @@ def__reject <- function(self, private, reason) {
 is.deferred <- function(x) {
   inherits(x, "deferred")
 }
+
+## TODO: better API, default should not be a list, but a single one,
+## so maybe add await_list() or await_all() or sg like that.
+## Maybe also await_any().
 
 #' @export
 

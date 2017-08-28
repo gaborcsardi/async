@@ -4,7 +4,7 @@
 \alias{http_head}
 \title{Asynchronous HTTP HEAD request}
 \usage{
-http_head(url, callback)
+http_head(url, callback = NULL)
 }
 \arguments{
 \item{url}{URL to connect to.}
