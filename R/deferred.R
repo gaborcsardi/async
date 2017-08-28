@@ -131,14 +131,15 @@ is.deferred <- function(x) {
   inherits(x, "deferred")
 }
 
-## TODO: better API, default should not be a list, but a single one,
-## so maybe add await_list() or await_all() or sg like that.
-## Maybe also await_any().
+#' @export
+
+await <- function(def) {
+  await_list(def)[[1]]
+}
 
 #' @export
 
-await <- function(..., .list = list()) {
-  ## TODO: convert to deferred if needed
+await_list <- function(..., .list = list()) {
   defs <- c(list(...), .list)
   states <- vcapply(defs, get_state_x)
   while (any(states == "pending")) {
