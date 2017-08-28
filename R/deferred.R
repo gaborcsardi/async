@@ -168,3 +168,10 @@ async <- function(fun) {
   attr(fun, "async") <- list(TRUE)
   fun
 }
+
+#' @export
+
+is_async <- function(fun) {
+  assert_that(is.function(fun))
+  is.list(a <- attr(fun, "async")) && identical(a[[1]], TRUE)
+}
