@@ -26,3 +26,12 @@ test_that("HTTP HEAD & async then", {
   expect_equal(dx$get_value()$status_code, 200)
   expect_equal(await(dx)$status_code, 200)
 })
+
+test_that("then for fulfilled", {
+  skip_if_offline()
+
+  await(dx <- http_head("https://eu.httpbin.org/status/404"))
+  result <- await(dx$then(function(value) value$status_code))
+
+  expect_equal(result, 404)
+})

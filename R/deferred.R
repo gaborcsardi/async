@@ -71,10 +71,14 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
     if (private$state == "pending") {
       private$on_fulfilled <- c(private$on_fulfilled, list(handle_fulfill))
       private$on_rejected <- c(private$on_rejected, list(handle_reject))
+
     } else if (private$state == "fulfilled") {
-      TODO
+      get_default_event_loop()$defer_next_tick(
+        handle_fulfill, list(private$value))
+
     } else if (private$state == "rejected") {
-      TODO
+      get_default_event_loop()$defer_next_tick(
+        handle_reject, list(private$value))
     }
   })
 
