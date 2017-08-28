@@ -19,5 +19,6 @@ Imports:
     curl (>= 2.8.1),
     later,
     R6,
+    rlang,
     uuid
 Roxygen: list(markdown = TRUE)

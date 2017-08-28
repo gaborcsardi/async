@@ -44,13 +44,11 @@ def_init <- function(self, private, action) {
   invisible(self)
 }
 
+#' @importFrom rlang as_function
+
 def_then <- function(self, private, on_fulfilled, on_rejected) {
-  assert_that(
-    is_function_or_null(on_fulfilled),
-    is_function_or_null(on_rejected)
-  )
-  force(on_fulfilled)
-  force(on_rejected)
+  on_fulfilled <- if (!is.null(on_fulfilled)) as_function(on_fulfilled)
+  on_rejected  <- if (!is.null(on_rejected))  as_function(on_rejected)
   def <- deferred$new(function(resolve, reject) {
     force(resolve)
     force(reject)

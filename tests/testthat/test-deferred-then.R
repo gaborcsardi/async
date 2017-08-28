@@ -68,3 +68,17 @@ test_that("multiple then clauses", {
   expect_equal(dx3$get_value(), 404)
   expect_equal(dx4$get_value()$url, dx$get_value()$url)
 })
+
+test_that("compact function notation", {
+  skip_if_offline()
+
+  result <- await(
+    dx <- http_head("https://eu.httpbin.org") $
+    then(~ http_get(.$url)) $
+    then(~ .$status_code)
+  )
+
+  expect_equal(result, 200)
+  expect_equal(dx$get_value(), 200)
+  expect_equal(await(dx), 200)
+})
