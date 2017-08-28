@@ -29,7 +29,7 @@
 #' error
 #' cat(rawToChar(result$content))
 
-http_get <- function(url, callback = NULL) {
+http_get <- async(function(url, callback = NULL) {
   assert_that(is_string(url), is_callback_or_null(callback))
   handle <- new_handle(url = url)
 
@@ -38,7 +38,7 @@ http_get <- function(url, callback = NULL) {
   } else {
     get_default_event_loop()$run_http(handle, callback)
   }
-}
+})
 
 #' Asynchronous HTTP HEAD request
 #'
@@ -57,7 +57,7 @@ http_get <- function(url, callback = NULL) {
 #' error
 #' curl::parse_headers(result$headers)
 
-http_head <- function(url, callback = NULL) {
+http_head <- async(function(url, callback = NULL) {
   assert_that(is_string(url), is_callback_or_null(callback))
   handle <- new_handle(url = url)
   handle_setopt(handle, customrequest = "HEAD", nobody = TRUE)
@@ -67,7 +67,7 @@ http_head <- function(url, callback = NULL) {
   } else {
     get_default_event_loop()$run_http(handle, callback)
   }
-}
+})
 
 make_deferred_http <- function(handle) {
   id <- NULL
