@@ -3,6 +3,8 @@ context("sequence")
 
 test_that("sequence", {
 
+  skip("need to rewrite with deferred")  
+  
   add1 <- function(n, callback) {
     force(n) ; force(callback)
     set_timeout(10/1000, function() callback(NULL, n + 1))
@@ -23,6 +25,8 @@ test_that("sequence", {
 
 test_that("sequence, asyncify", {
 
+  skip("need to rewrite with deferred")  
+  
   add1 <- function(n, callback) {
     force(n) ; force(callback)
     set_timeout(10/1000, function() callback(NULL, n + 1))

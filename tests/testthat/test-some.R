@@ -3,6 +3,8 @@ context("some")
 
 test_that("some", {
 
+  skip("need to rewrite with deferred")  
+  
   is_odd <- function(x, callback) callback(NULL, as.logical(x %% 2))
 
   result <- NULL
@@ -21,6 +23,8 @@ test_that("some", {
 
 test_that("some, asyncify", {
 
+  skip("need to rewrite with deferred")  
+  
   is_odd <- asyncify(function(x) as.logical(x %% 2))
 
   result <- NULL

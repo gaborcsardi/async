@@ -3,6 +3,8 @@ context("until")
 
 test_that("until", {
 
+  skip("need to rewrite with deferred")  
+  
   count <- 1
   result <- NULL
 
@@ -23,6 +25,8 @@ test_that("until", {
 
 test_that("until is always called once", {
 
+  skip("need to rewrite with deferred")  
+  
   called <- FALSE
   result <- NULL
 
@@ -43,6 +47,8 @@ test_that("until is always called once", {
 
 test_that("until, asyncify", {
 
+  skip("need to rewrite with deferred")  
+  
   count <- 1
   result <- NULL
 

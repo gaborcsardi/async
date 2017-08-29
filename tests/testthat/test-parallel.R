@@ -5,37 +5,21 @@ test_that("parallel", {
 
   skip_if_offline()
 
-  res <- NULL
+  dx1 <- http_get("https://eu.httpbin.org/get?q=foo")$
+    then( ~ rawToChar(.$content))
+  dx2 <- http_get("https://eu.httpbin.org/get?q=bar")$
+    then( ~ rawToChar(.$content))
 
-  wait_for(parallel(
-    list(
-      function(callback) {
-        http_get("https://eu.httpbin.org/get?q=foo",
-                 function(err, res) callback(err, rawToChar(res$content)))
-      },
-      function(callback) {
-        http_get("https://eu.httpbin.org/get?q=bar",
-                 function(err, res) callback(err, rawToChar(res$content)))
-      }
-    ),
-    function(err, result) { res <<- result }
-  ))
+  await(dx1)
+  await(dx2)
 
-  expect_equal(length(res), 2)
-  expect_false(is.null(res[[1]]))
-  expect_false(is.null(res[[2]]))
-  expect_match(res[[1]], "\"q\": \"foo\"", fixed = TRUE)
-  expect_match(res[[2]], "\"q\": \"bar\"", fixed = TRUE)
-})
-
-test_that("empty task list", {
-
-  result <- NULL
-  wait_for(parallel(list(), function(err, res) { result <<- res }))
-  expect_identical(result, list())
+  expect_match(dx1$get_value(), "\"q\": \"foo\"", fixed = TRUE)
+  expect_match(dx2$get_value(), "\"q\": \"bar\"", fixed = TRUE)
 })
 
 test_that("limit", {
+
+  skip("need to rewrite with deferred")  
 
   test_limit <- function(limit) {
     error <- NULL
@@ -47,33 +31,6 @@ test_that("limit", {
         function(callback) callback(NULL, 3),
         function(callback) callback(NULL, 4),
         function(callback) callback(NULL, 5)
-      ),
-      limit = limit,
-      function(err, res) { error <<- err; result <<- res }
-    ))
-    expect_null(error)
-    expect_equal(result, as.list(1:5))
-  }
-
-  test_limit(1)
-  test_limit(2)
-  test_limit(4)
-  test_limit(5)
-  test_limit(10)
-})
-
-test_that("limit, asyncify", {
-
-  test_limit <- function(limit) {
-    error <- NULL
-    result <- NULL
-    wait_for(parallel_limit(
-      list(
-        asyncify(function() 1),
-        asyncify(function() 2),
-        asyncify(function() 3),
-        asyncify(function() 4),
-        asyncify(function() 5)
       ),
       limit = limit,
       function(err, res) { error <<- err; result <<- res }

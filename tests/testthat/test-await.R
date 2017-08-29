@@ -1,40 +1,14 @@
 
-context("wait_for")
+context("await")
 
-test_that("wait_for with multiple tasks", {
-
-  skip_if_offline()
-
-  status1 <- status2 <- NULL
-  ax1 <- http_get(
-    "https://eu.httpbin.org/get",
-    function(err, res) { status1 <<- res$status_code }
-  )
-  ax2 <- http_get(
-    "https://eu.httpbin.org/get?q=42",
-    function(err, res) { status2 <<- res$status_code }
-  )
-
-  wait_for(c(ax1, ax2))
-  expect_equal(status1, 200)
-  expect_equal(status2, 200)
-})
-
-test_that("wait_for all", {
+test_that("await with multiple tasks", {
 
   skip_if_offline()
 
-  status1 <- status2 <- NULL
-  ax1 <- http_get(
-    "https://eu.httpbin.org/get",
-    function(err, res) { status1 <<- res$status_code }
-  )
-  ax2 <- http_get(
-    "https://eu.httpbin.org/get?q=42",
-    function(err, res) { status2 <<- res$status_code }
-  )
+  dx1 <- http_get("https://eu.httpbin.org/get")$then(~ .$status_code)
+  dx2 <- http_get("https://eu.httpbin.org/get?q=42")$then(~ .$status_code)
 
-  wait_for()
-  expect_equal(status1, 200)
-  expect_equal(status2, 200)
+  await_list(dx1, dx2)
+  expect_equal(await(dx1), 200)
+  expect_equal(await(dx2), 200)
 })

@@ -3,6 +3,8 @@ context("retryable")
 
 test_that("retryable", {
 
+  skip("need to rewrite with deferred")  
+  
   i <- 1
   f <- function(callback) {
     i <<- i + 1
@@ -19,6 +21,8 @@ test_that("retryable", {
 
 test_that("retryable, asyncify", {
 
+  skip("need to rewrite with deferred")  
+  
   i <- 1
   f <- function() {
     i <<- i + 1
