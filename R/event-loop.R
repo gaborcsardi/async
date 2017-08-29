@@ -75,8 +75,8 @@ event_loop <- R6Class(
   ),
 
   private = list(
-    poll = function()
-      el__poll(self, private),
+    poll = function(mode = c("once", "done-one"))
+      el__poll(self, private, mode = match.arg(mode)),
     create_task = function(callback, ...)
       el__create_task(self, private, callback, ...),
     ensure_pool = function(...)
@@ -145,11 +145,11 @@ el_run_generic <- function(self, private, callback, ...) {
 }
 
 el_wait_for <- function(self, private, ids) {
-  while (any(ids %in% names(private$tasks))) private$poll()
+  while (any(ids %in% names(private$tasks))) private$poll(mode = "done-one")
 }
 
 el_wait_for_all <- function(self, private) {
-  while (length(private$tasks)) private$poll()
+  while (length(private$tasks)) private$poll(mode = "done-one")
 }
 
 el_defer_next_tick <- function(self, private, callback, args) {
@@ -159,21 +159,25 @@ el_defer_next_tick <- function(self, private, callback, args) {
   )
 }
 
-## TODO: this can be busy waiting if await() is called and there are
-## only timers, because in this case we do not poll, and await() keeps
-## calling us
-
 #' @importFrom curl multi_run
 
-el__poll <- function(self, private) {
+el__poll <- function(self, private, mode) {
   if (!length(private$tasks)) return()
   current <- Sys.time()
   timeout <- private$get_poll_timeout(current)
-  if (!is.null(private$pool)) {
-    multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
+  if (mode == "once") {
+    if (!is.null(private$pool)) {
+      multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
+    }
+  } else if (mode == "done-one") {
+    if (!is.null(private$pool)) {
+      multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
+    } else {
+      Sys.sleep(timeout)
+    }
   }
-  private$do_next_tick()
   private$fire_timers(Sys.time())
+  private$do_next_tick()
 }
 
 el__do_next_tick <- function(self, private) {
