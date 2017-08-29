@@ -27,6 +27,6 @@ result <- sync_parallel(list(
 result
 }
 \seealso{
-Other async utilities: \code{\link{async_apply}},
-  \code{\link{asyncify}}, \code{\link{reflect}}
+Other async utilities: \code{\link{asyncify}},
+  \code{\link{reflect}}
 }

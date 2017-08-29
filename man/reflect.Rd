@@ -30,6 +30,6 @@ wait_for(parallel(
 result
 }
 \seealso{
-Other async utilities: \code{\link{async_apply}},
-  \code{\link{asyncify}}, \code{\link{syncify}}
+Other async utilities: \code{\link{asyncify}},
+  \code{\link{syncify}}
 }
