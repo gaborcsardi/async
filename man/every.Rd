@@ -36,8 +36,8 @@ wait_for(every(
 result
 }
 \seealso{
-Other async iterators: \code{\link{amap}},
-  \code{\link{detect_limit}}, \code{\link{detect_series}},
-  \code{\link{detect}}, \code{\link{each}},
-  \code{\link{filter}}, \code{\link{some}}
+Other async iterators: \code{\link{detect_limit}},
+  \code{\link{detect_series}}, \code{\link{detect}},
+  \code{\link{each}}, \code{\link{filter}},
+  \code{\link{some}}
 }

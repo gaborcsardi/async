@@ -159,16 +159,21 @@ el_defer_next_tick <- function(self, private, callback, args) {
   )
 }
 
+## TODO: this can be busy waiting if await() is called and there are
+## only timers, because in this case we do not poll, and await() keeps
+## calling us
+
 #' @importFrom curl multi_run
 
 el__poll <- function(self, private) {
+  if (!length(private$tasks)) return()
   current <- Sys.time()
   timeout <- private$get_poll_timeout(current)
   if (!is.null(private$pool)) {
     multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
   }
-  if (timeout == 0) private$fire_timers(current)
   private$do_next_tick()
+  private$fire_timers(Sys.time())
 }
 
 el__do_next_tick <- function(self, private) {
@@ -200,18 +205,15 @@ el__ensure_pool <- function(self, private, ...) {
 }
 
 el__get_poll_timeout <- function(self, private, current) {
-  min(
-    Inf,
-    max(0, min(Inf, private$timers - current))
-  )
+  max(0, min(Inf, private$timers - current))
 }
 
 el__fire_timers <- function(self, private, current) {
-  expired <- names(which(private$timers < current))
+  expired <- names(private$timers)[private$timers <= current]
   for (id in expired) {
     task <- private$tasks[[id]]
     private$tasks[[id]] <- NULL
-    private$timers <- private$timers[setdiff(names(private$times), id)]
+    private$timers <- private$timers[setdiff(names(private$timers), id)]
     task$callback()
   }
 }

@@ -4,7 +4,7 @@
 \alias{set_timeout}
 \title{Run a function after the specified time interval}
 \usage{
-set_timeout(delay, callback)
+set_timeout(delay, callback = NULL)
 }
 \arguments{
 \item{delay}{Time interval in seconds, the amount of time to delay

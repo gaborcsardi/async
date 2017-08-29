@@ -40,8 +40,8 @@ wait_for(detect_limit(1:5, task, 2, function(err, res) result <<- res))
 result
 }
 \seealso{
-Other async iterators: \code{\link{amap}},
-  \code{\link{detect_series}}, \code{\link{detect}},
-  \code{\link{each}}, \code{\link{every}},
-  \code{\link{filter}}, \code{\link{some}}
+Other async iterators: \code{\link{detect_series}},
+  \code{\link{detect}}, \code{\link{each}},
+  \code{\link{every}}, \code{\link{filter}},
+  \code{\link{some}}
 }

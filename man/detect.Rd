@@ -38,8 +38,8 @@ id <- detect(
 wait_for(id)
 }
 \seealso{
-Other async iterators: \code{\link{amap}},
-  \code{\link{detect_limit}}, \code{\link{detect_series}},
-  \code{\link{each}}, \code{\link{every}},
-  \code{\link{filter}}, \code{\link{some}}
+Other async iterators: \code{\link{detect_limit}},
+  \code{\link{detect_series}}, \code{\link{each}},
+  \code{\link{every}}, \code{\link{filter}},
+  \code{\link{some}}
 }

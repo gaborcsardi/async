@@ -27,7 +27,7 @@ set_timeout <- async(function(delay, callback = NULL) {
       force(reject)
       id <<- get_default_event_loop()$run_set_timeout(
         delay,
-        function() resolve(NULL)
+        function() resolve(TRUE)
       )
     })
     def$.__enclos_env__$private$set_id(id)
