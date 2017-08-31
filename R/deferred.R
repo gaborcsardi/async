@@ -54,16 +54,27 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
     force(reject)
 
     handle_fulfill <- function(value) {
-      if (is.function(on_fulfilled)) value <- on_fulfilled(value)
-      resolve(value)
+      tryCatch(
+        {
+          if (is.function(on_fulfilled)) value <- on_fulfilled(value)
+          resolve(value)
+        },
+        error = function(e) reject(e)
+      )
     }
 
     handle_reject <- function(reason) {
-      if (is.function(on_rejected)) {
-        resolve(on_rejected(reason))
-      } else {
-        reject(reason)
-      }
+      tryCatch(
+        {
+          if (is.function(on_rejected)) {
+            reason <- on_rejected(reason)
+            resolve(reason)
+          } else {
+            reject(reason)
+          }
+        },
+        error = function(e) reject(e)
+      )
     }
 
     if (private$state == "pending") {
