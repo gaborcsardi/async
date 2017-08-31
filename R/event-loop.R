@@ -75,19 +75,25 @@ event_loop <- R6Class(
   ),
 
   private = list(
-    poll = function(mode = c("once", "done-one"))
+    poll = function(mode = c("default", "nowait", "once"))
       el__poll(self, private, mode = match.arg(mode)),
     create_task = function(callback, ...)
       el__create_task(self, private, callback, ...),
     ensure_pool = function(...)
       el__ensure_pool(self, private, ...),
-    get_poll_timeout = function(current)
-      el__get_poll_timeout(self, private, current),
-    do_next_tick = function()
-      el__do_next_tick(self, private),
-    fire_timers = function(current)
-      el__fire_timers(self, private, current),
+    get_poll_timeout = function()
+      el__get_poll_timeout(self, private),
+    run_pending = function()
+      el__run_pending(self, private),
+    run_timers = function()
+      el__run_timers(self, private),
+    is_alive = function()
+      el__is_alive(self, private),
+    update_time = function()
+      el__update_time(self, private),
 
+    time = Sys.time(),
+    stop_flag = FALSE,
     tasks = list(),
     timers = Sys.time()[numeric()],
     pool = NULL,
@@ -145,11 +151,11 @@ el_run_generic <- function(self, private, callback, ...) {
 }
 
 el_wait_for <- function(self, private, ids) {
-  while (any(ids %in% names(private$tasks))) private$poll(mode = "done-one")
+  while (any(ids %in% names(private$tasks))) private$poll(mode = "once")
 }
 
 el_wait_for_all <- function(self, private) {
-  while (length(private$tasks)) private$poll(mode = "done-one")
+  while (length(private$tasks)) private$poll(mode = "once")
 }
 
 el_defer_next_tick <- function(self, private, callback, args) {
@@ -162,30 +168,50 @@ el_defer_next_tick <- function(self, private, callback, args) {
 #' @importFrom curl multi_run
 
 el__poll <- function(self, private, mode) {
-  if (!length(private$tasks)) return()
-  current <- Sys.time()
-  timeout <- private$get_poll_timeout(current)
-  if (mode == "once") {
-    if (!is.null(private$pool)) {
-      multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
+
+  ## This is closely modeled after the libuv event loop, on purpose,
+  ## because some time we might switch to that.
+  alive <- private$is_alive()
+  if (! alive) private$update_time()
+
+  while (alive && ! private$stop_flag) {
+    private$update_time()
+    private$run_timers()
+    ran_pending <- private$run_pending()
+    ## private$run_idle()
+    ## private$run_prepare()
+
+    timeout <- 0
+    if (mode == "once" && !ran_pending || mode == "default") {
+      timeout <- private$get_poll_timeout()
     }
-  } else if (mode == "done-one") {
-    if (!is.null(private$pool)) {
-      multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
-    } else {
-      Sys.sleep(timeout)
+    multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
+
+    ## private$run_check()
+    ## private$run_closing_handles()
+
+    if (mode == "once") {
+      private$update_time()
+      private$run_timers()
     }
+
+    alive <- private$is_alive()
+    if (mode == "once" || mode == "nowait") break
   }
-  private$fire_timers(Sys.time())
-  private$do_next_tick()
+
+  private$stop_flag <- FALSE
+
+  alive
 }
 
-el__do_next_tick <- function(self, private) {
+el__run_pending <- function(self, private) {
   next_ticks <- private$next_ticks
   private$next_ticks <- list()
   for (nt in next_ticks) {
     do.call(nt[[1]], nt[[2]])
   }
+
+  length(next_ticks) > 0
 }
 
 #' @importFrom uuid UUIDgenerate
@@ -208,16 +234,24 @@ el__ensure_pool <- function(self, private, ...) {
   if (is.null(private$pool)) private$pool <- new_pool(...)
 }
 
-el__get_poll_timeout <- function(self, private, current) {
-  max(0, min(Inf, private$timers - current))
+el__get_poll_timeout <- function(self, private) {
+  max(0, min(Inf, private$timers - private$time))
 }
 
-el__fire_timers <- function(self, private, current) {
-  expired <- names(private$timers)[private$timers <= current]
+el__run_timers <- function(self, private) {
+  expired <- names(private$timers)[private$timers <= private$time]
   for (id in expired) {
     task <- private$tasks[[id]]
     private$tasks[[id]] <- NULL
     private$timers <- private$timers[setdiff(names(private$timers), id)]
     task$callback()
   }
+}
+
+el__is_alive <- function(self, private) {
+  length(private$tasks) > 0
+}
+
+el__update_time <- function(self, private) {
+  private$time <- Sys.time()
 }
