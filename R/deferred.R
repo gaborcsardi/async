@@ -174,12 +174,37 @@ get_value_x <- function(x) {
   if (is.deferred(x)) x$get_value() else x
 }
 
+make_resolved_deferred <- function(x) {
+  force(x)
+  deferred$new(function(resolve, reject) {
+    resolve(x)
+  })
+}
+
+make_rejected_deferred <- function(x) {
+  force(x)
+  deferred$new(function(resolve, reject) {
+    reject(x)
+  })
+}
+
 #' @export
 
 async <- function(fun) {
   assert_that(is.function(fun))
-  attr(fun, "async") <- list(TRUE)
-  fun
+  async_fun <- function(...) {
+    tryCatch(
+      {
+        r <- fun(...)
+        if (is.deferred(r)) r else make_resolved_deferred(r)
+      },
+      error = function(e) {
+        make_rejected_deferred(e)
+      }
+    )
+  }
+  attr(async_fun, "async") <- list(TRUE)
+  async_fun
 }
 
 #' @export
