@@ -125,7 +125,7 @@ def__resolve <- function(self, private, value) {
 def__reject <- function(self, private, reason) {
   if (private$state != "pending") stop("Deferred value already resolved")
   if (is.deferred(reason)) {
-    reason$then(private$reject, private$preject)
+    reason$then(private$resolve, private$reject)
   } else {
     private$state <- "rejected"
     private$value <- reason
