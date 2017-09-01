@@ -5,7 +5,7 @@ test_that("creates a promise as needed", {
   expect_equal(await("foo"), "foo")
 })
 
-test_that("suspends suspendable functions", {
+test_that("multiple async functions run in parallel", {
 
   ## This is timing based
   skip_on_cran()
@@ -27,6 +27,61 @@ test_that("suspends suspendable functions", {
   dx <- foo()
 
   await_list(dx, dy)
+})
+
+test_that("resumes with the value of the awaited expression", {
+  foo <- async(function() {
+    await(delay(1/1000)$then(function(value) "blah"))
+  })
+
+  dx <- foo()$
+    then(function(result) expect_equal(result, "blah"))
+
+  await(dx)
+})
+
+test_that("throws into the suspendable function", {
+  foo <- async(function() {
+    await(delay(1/1000)$then(function(value) stop("blah")))
+  })
+
+  dx <- foo()$
+    then(NULL, function(reason) expect_equal(reason$message, "blah"))
+
+  await(dx)
+})
+
+test_that("resumes with all values of the awaited expressions", {
+  foo <- async(function() {
+    await(delay(1/1000)$then(function(value) "foo"))
+  })
+  bar <- async(function() {
+    await(delay(2/1000)$then(function(value) "bar"))
+  })
+  all <- async(function() await_list(foo(), bar()))
+
+  dx <- all()$
+    then(function(result) expect_equal(result, list("foo", "bar")))
+
+  await(dx)
+})
+
+test_that("throws into the suspendable function the first error", {
+
+  skip("Does not work currently")
+
+  foo <- async(function() {
+    delay(1)$then(function(value) stop("foo"))
+  })
+  bar <- async(function() {
+    delay(1/100)$then(function(value) stop("bar"))
+  })
+  all <- async(function() await_list(foo(), bar()))
+
+  dx <- all()$
+    then(NULL, function(reason) expect_equal(reason$message, "bar"))
+
+  await(dx)
 })
 
 test_that("await with multiple tasks", {
