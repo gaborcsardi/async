@@ -71,12 +71,14 @@ event_loop <- R6Class(
       el_run_generic(self, private, callback, ...),
 
     defer_next_tick = function(callback, args = list())
-      el_defer_next_tick(self, private, callback, args)
+      el_defer_next_tick(self, private, callback, args),
+
+    run = function(mode = c("default", "nowait", "once"))
+      el_run(self, private, mode = match.arg(mode))
+
   ),
 
   private = list(
-    poll = function(mode = c("default", "nowait", "once"))
-      el__poll(self, private, mode = match.arg(mode)),
     create_task = function(callback, ...)
       el__create_task(self, private, callback, ...),
     ensure_pool = function(...)
@@ -151,11 +153,11 @@ el_run_generic <- function(self, private, callback, ...) {
 }
 
 el_wait_for <- function(self, private, ids) {
-  while (any(ids %in% names(private$tasks))) private$poll(mode = "once")
+  while (any(ids %in% names(private$tasks))) self$run(mode = "once")
 }
 
 el_wait_for_all <- function(self, private) {
-  while (length(private$tasks)) private$poll(mode = "once")
+  while (length(private$tasks)) self$run(mode = "once")
 }
 
 el_defer_next_tick <- function(self, private, callback, args) {
@@ -167,7 +169,7 @@ el_defer_next_tick <- function(self, private, callback, args) {
 
 #' @importFrom curl multi_run
 
-el__poll <- function(self, private, mode) {
+el_run <- function(self, private, mode) {
 
   ## This is closely modeled after the libuv event loop, on purpose,
   ## because some time we might switch to that.
