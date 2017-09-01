@@ -8,24 +8,23 @@ test_that("creates a promise as needed", {
 test_that("suspends suspendable functions", {
 
   ## This is timing based
-  skip("Not working yet")
   skip_on_cran()
 
   x <- 5
   foo <- async(function() {
-    await(set_timeout(40/1000))
+    await(set_timeout(40/100))
     x <<- 7
-    await(set_timeout(40/1000))
+    await(set_timeout(40/100))
     x <<- 9
   })
 
-  dx <- foo()
-  dy <- set_timeout(20/1000)$
+  dy <- set_timeout(20/100)$
     then(function(value) expect_equal(x, 5))$
-    then(function(value) set_timeout(40/1000))$
+    then(function(value) set_timeout(40/100))$
     then(function(value) expect_equal(x, 7))$
-    then(function(value) set_timeout(40/1000))$
+    then(function(value) set_timeout(40/100))$
     then(function(value) expect_equal(x, 9))
+  dx <- foo()
 
   await_list(dx, dy)
 })

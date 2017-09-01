@@ -89,10 +89,6 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
     }
   })
 
-  def$.__enclos_env__$private$set_task(
-    get_default_event_loop()$run_generic(NULL)
-  )
-
   def
 }
 
@@ -152,9 +148,7 @@ await_list <- function(..., .list = list()) {
   defs <- c(list(...), .list)
   states <- vcapply(defs, get_state_x)
   while (any(states == "pending")) {
-    ids <- na.omit(vcapply(defs, get_id_x))
-    get_default_event_loop()$wait_for(ids)
-    defs <- lapply(defs, get_value_x)
+    get_default_event_loop()$run("once")
     states <- vcapply(defs, get_state_x)
   }
   lapply(defs, get_value_x)
@@ -164,38 +158,22 @@ get_state_x <- function(x) {
   if (is.deferred(x)) x$get_state() else "not-deferred"
 }
 
-get_id_x <- function(x) {
-  if (is.deferred(x)) x$.__enclos_env__$private$id else NA_character_
-}
-
 get_value_x <- function(x) {
   if (is.deferred(x)) x$get_value() else x
 }
 
 make_resolved_deferred <- function(x) {
   force(x)
-  def <- deferred$new(function(resolve, reject) {
+  deferred$new(function(resolve, reject) {
     resolve(x)
   })
-
-  def$.__enclos_env__$private$set_task(
-    get_default_event_loop()$run_generic(NULL)
-  )
-
-  def
 }
 
 make_rejected_deferred <- function(x) {
   force(x)
-  def <- deferred$new(function(resolve, reject) {
+  deferred$new(function(resolve, reject) {
     reject(x)
   })
-
-  def$.__enclos_env__$private$set_task(
-    get_default_event_loop()$run_generic(NULL)
-  )
-
-  def
 }
 
 #' @export

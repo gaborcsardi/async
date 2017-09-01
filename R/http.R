@@ -48,14 +48,11 @@ http_head <- function(url, callback = NULL) {
 }
 
 make_deferred_http <- function(handle) {
-  id <- NULL
-  def <- deferred$new(function(resolve, reject) {
+  deferred$new(function(resolve, reject) {
     force(resolve)
     force(reject)
-    id <<- get_default_event_loop()$run_http(handle, function(err, res) {
+    get_default_event_loop()$run_http(handle, function(err, res) {
       if (is.null(err)) resolve(res) else reject(err)
     })
   })
-  def$.__enclos_env__$private$set_id(id)
-  def
 }

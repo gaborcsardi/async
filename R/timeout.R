@@ -16,15 +16,12 @@
 #' TODO
 
 set_timeout <- function(delay, callback = NULL) {
-  id <- NULL
-  def <- deferred$new(function(resolve, reject) {
+  deferred$new(function(resolve, reject) {
     force(resolve)
     force(reject)
-    id <<- get_default_event_loop()$run_set_timeout(
+    get_default_event_loop()$run_set_timeout(
       delay,
       function() resolve(TRUE)
     )
   })
-  def$.__enclos_env__$private$set_id(id)
-  def
 }

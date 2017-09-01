@@ -7,12 +7,8 @@
 #' ```
 #' el <- event_loop$new()
 #'
-#' el$wait_for(ids)
-#' el$wait_for_all()
-#'
 #' el$run_http(handle, callback)
 #' el$run_set_timeout(delay, callback)
-#' el$run_generic(callback, ...)
 #' ```
 #'
 #' @section Arguments:
@@ -27,20 +23,12 @@
 #' }
 #'
 #' @section Details:
-#' `$wait_for()` waits for all specified tasks to finish.
-#'
-#' `$wait_for_all()` waits for all tasks managed by the event loop to finish.
-#'
 #' `$run_http()` starts an asynchronous HTTP request, with the specified
 #' `curl` handle. Once the request is done, and the response is available
 #' (or an error happens), the callback is called with two arguments, the
 #' error object or message (if any) and the `curl` response object.
 #'
 #' `$run_set_timeout()` starts a task with the specified delay.
-#'
-#' `$run_generic()` creates a generic task. It is supposed to take care of
-#' calling its own callback itself. Tasks created by the asynchronous
-#' control flow structures and the asynchronous iterators generic tasks.
 #'
 #' @section The default event loop:
 #'
@@ -58,17 +46,11 @@ event_loop <- R6Class(
   public = list(
     initialize = function()
       el_init(self, private),
-    wait_for = function(ids)
-      el_wait_for(self, private, ids),
-    wait_for_all = function()
-      el_wait_for_all(self, private),
 
     run_http = function(handle, callback)
       el_run_http(self, private, handle, callback),
     run_set_timeout = function(delay, callback)
       el_run_set_timeout(self, private, delay, callback),
-    run_generic = function(callback, ...)
-      el_run_generic(self, private, callback, ...),
 
     defer_next_tick = function(callback, args = list())
       el_defer_next_tick(self, private, callback, args),
@@ -104,7 +86,8 @@ event_loop <- R6Class(
 )
 
 el_init <- function(self, private) {
-  reg.finalizer(self, function(me) me$wait_for_all(), onexit = TRUE)
+  ## TODO
+  ## reg.finalizer(self, function(me) me$run("default"), onexit = TRUE)
   invisible(self)
 }
 
@@ -136,28 +119,6 @@ el_run_set_timeout <- function(self, private, delay, callback) {
   id <- private$create_task(callback, data = list(delay = delay))
   private$timers[id] <- Sys.time() + as.difftime(delay, units = "secs")
   id
-}
-
-el_run_generic <- function(self, private, callback, ...) {
-  force(self) ; force(private); force(callback)
-  data <- list(...)
-  force(data)
-
-  id <- private$create_task(callback, data = data)
-  mycallback <-function(...) {
-    private$tasks[[id]] <- NULL
-    if (!is.null(callback)) callback(...)
-    id
-  }
-  list(id = id, callback = mycallback)
-}
-
-el_wait_for <- function(self, private, ids) {
-  while (any(ids %in% names(private$tasks))) self$run(mode = "once")
-}
-
-el_wait_for_all <- function(self, private) {
-  while (length(private$tasks)) self$run(mode = "once")
 }
 
 el_defer_next_tick <- function(self, private, callback, args) {
@@ -251,7 +212,9 @@ el__run_timers <- function(self, private) {
 }
 
 el__is_alive <- function(self, private) {
-  length(private$tasks) > 0
+  length(private$tasks) > 0 ||
+    length(private$timers) > 0 ||
+    length(private$next_ticks) > 0
 }
 
 el__update_time <- function(self, private) {
