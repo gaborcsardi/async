@@ -12,17 +12,17 @@ test_that("suspends suspendable functions", {
 
   x <- 5
   foo <- async(function() {
-    await(set_timeout(40/100))
+    await(delay(40/100))
     x <<- 7
-    await(set_timeout(40/100))
+    await(delay(40/100))
     x <<- 9
   })
 
-  dy <- set_timeout(20/100)$
+  dy <- delay(20/100)$
     then(function(value) expect_equal(x, 5))$
-    then(function(value) set_timeout(40/100))$
+    then(function(value) delay(40/100))$
     then(function(value) expect_equal(x, 7))$
-    then(function(value) set_timeout(40/100))$
+    then(function(value) delay(40/100))$
     then(function(value) expect_equal(x, 9))
   dx <- foo()
 

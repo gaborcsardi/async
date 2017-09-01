@@ -82,7 +82,7 @@ test_that("rejects with the thrown error", {
 test_that("works with await", {
 
   foo <- async(function() {
-    await(set_timeout(20/1000)$then(function(value) "blah"))
+    await(delay(20/1000)$then(function(value) "blah"))
   })
 
   dx <- foo()$

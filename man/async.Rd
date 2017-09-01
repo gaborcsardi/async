@@ -26,7 +26,7 @@ calling a callback function.
 
 \code{async} provides some async functions to perform HTTP requests
 (\code{http_get}, \code{http_head}, etc.), and code execution with a delay
-(\code{set_timeout}).
+(\code{delay}).
 }
 
 \section{Async Iterators}{

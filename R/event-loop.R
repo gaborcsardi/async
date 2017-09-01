@@ -8,7 +8,7 @@
 #' el <- event_loop$new()
 #'
 #' el$run_http(handle, callback)
-#' el$run_set_timeout(delay, callback)
+#' el$run_delay(delay, callback)
 #' ```
 #'
 #' @section Arguments:
@@ -28,7 +28,7 @@
 #' (or an error happens), the callback is called with two arguments, the
 #' error object or message (if any) and the `curl` response object.
 #'
-#' `$run_set_timeout()` starts a task with the specified delay.
+#' `$run_delay()` starts a task with the specified delay.
 #'
 #' @section The default event loop:
 #'
@@ -49,8 +49,8 @@ event_loop <- R6Class(
 
     run_http = function(handle, callback)
       el_run_http(self, private, handle, callback),
-    run_set_timeout = function(delay, callback)
-      el_run_set_timeout(self, private, delay, callback),
+    run_delay = function(delay, callback)
+      el_run_delay(self, private, delay, callback),
 
     defer_next_tick = function(callback, args = list())
       el_defer_next_tick(self, private, callback, args),
@@ -114,7 +114,7 @@ el_run_http <- function(self, private, handle, callback) {
   id
 }
 
-el_run_set_timeout <- function(self, private, delay, callback) {
+el_run_delay <- function(self, private, delay, callback) {
   force(self) ; force(private) ; force(delay) ; force(callback)
   id <- private$create_task(callback, data = list(delay = delay))
   private$timers[id] <- Sys.time() + as.difftime(delay, units = "secs")

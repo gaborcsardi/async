@@ -16,7 +16,7 @@
 #'
 #' `async` provides some async functions to perform HTTP requests
 #' (`http_get`, `http_head`, etc.), and code execution with a delay
-#' (`set_timeout`).
+#' (`delay`).
 #'
 #' @section Async Iterators:
 #' 

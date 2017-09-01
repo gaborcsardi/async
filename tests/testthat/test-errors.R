@@ -3,7 +3,7 @@ context("errors")
 
 test_that("rejection", {
 
-  dx <- set_timeout(1/10000)$
+  dx <- delay(1/10000)$
     then(function(value) stop("ohno!"))
 
   expect_error(await(dx, "ohno!"))
@@ -11,7 +11,7 @@ test_that("rejection", {
 
 test_that("error propagates", {
   called <- FALSE
-  dx <- set_timeout(1/10000)$
+  dx <- delay(1/10000)$
     then(function(x) x)$
     then(function(x) stop("ohno!"))$
     then(function(x) called <<- TRUE)
@@ -22,7 +22,7 @@ test_that("error propagates", {
 
 test_that("handled error is not an error any more", {
 
-  dx <- set_timeout(1/10000)$
+  dx <- delay(1/10000)$
     then(function(x) stop("ohno!"))$
     then(NULL, function(x) "OK")
 
