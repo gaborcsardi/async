@@ -176,34 +176,47 @@ get_value_x <- function(x) {
 
 make_resolved_deferred <- function(x) {
   force(x)
-  deferred$new(function(resolve, reject) {
+  def <- deferred$new(function(resolve, reject) {
     resolve(x)
   })
+
+  def$.__enclos_env__$private$set_task(
+    get_default_event_loop()$run_generic(NULL)
+  )
+
+  def
 }
 
 make_rejected_deferred <- function(x) {
   force(x)
-  deferred$new(function(resolve, reject) {
+  def <- deferred$new(function(resolve, reject) {
     reject(x)
   })
+
+  def$.__enclos_env__$private$set_task(
+    get_default_event_loop()$run_generic(NULL)
+  )
+
+  def
 }
 
 #' @export
 
 async <- function(fun) {
   assert_that(is.function(fun))
-  async_fun <- function(...) {
+  async_fun <- fun
+  body(async_fun) <- expr({
     tryCatch(
       {
-        r <- fun(...)
+        r <- evalq({ !!! body(fun) })
         if (is.deferred(r)) r else make_resolved_deferred(r)
       },
-      error = function(e) {
-        make_rejected_deferred(e)
-      }
+      error = function(e) make_rejected_deferred(e)
     )
-  }
+  })
+
   attr(async_fun, "async") <- list(TRUE)
+
   async_fun
 }
 

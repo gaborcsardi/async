@@ -19,21 +19,16 @@
 #' wait_for(id)
 #' result
 
-set_timeout <- async(function(delay, callback = NULL) {
-  if (is.null(callback)) {
-    id <- NULL
-    def <- deferred$new(function(resolve, reject) {
-      force(resolve)
-      force(reject)
-      id <<- get_default_event_loop()$run_set_timeout(
-        delay,
-        function() resolve(TRUE)
-      )
-    })
-    def$.__enclos_env__$private$set_id(id)
-    def
-
-  } else {
-    get_default_event_loop()$run_set_timeout(delay, callback)
-  }
-})
+set_timeout <- function(delay, callback = NULL) {
+  id <- NULL
+  def <- deferred$new(function(resolve, reject) {
+    force(resolve)
+    force(reject)
+    id <<- get_default_event_loop()$run_set_timeout(
+      delay,
+      function() resolve(TRUE)
+    )
+  })
+  def$.__enclos_env__$private$set_id(id)
+  def
+}
