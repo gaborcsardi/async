@@ -21,13 +21,7 @@
 #' @export
 #' @importFrom curl new_handle
 #' @examples
-#' error <- result <- NULL
-#' wait_for(http_get(
-#'   "https://httpbin.org/get",
-#'   function(err, res) { error <<- err ; result <<- res }
-#' ))
-#' error
-#' cat(rawToChar(result$content))
+#' TODO
 
 http_get <- function(url, callback = NULL) {
   assert_that(is_string(url), is_callback_or_null(callback))
@@ -44,13 +38,7 @@ http_get <- function(url, callback = NULL) {
 #' @export
 #' @importFrom curl handle_setopt
 #' @examples
-#' error <- result <- NULL
-#' wait_for(http_head(
-#'   "https://httpbin.org/get",
-#'   function(err, res) { error <<- err ; result <<- res }
-#' ))
-#' error
-#' curl::parse_headers(result$headers)
+#' TODO
 
 http_head <- function(url, callback = NULL) {
   assert_that(is_string(url), is_callback_or_null(callback))

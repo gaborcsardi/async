@@ -22,13 +22,7 @@ Task id that can be waited on with \code{\link[=wait_for]{wait_for()}}.
 Asynchronous HTTP HEAD request
 }
 \examples{
-error <- result <- NULL
-wait_for(http_head(
-  "https://httpbin.org/get",
-  function(err, res) { error <<- err ; result <<- res }
-))
-error
-curl::parse_headers(result$headers)
+TODO
 }
 \seealso{
 Other asyncronous HTTP calls: \code{\link{http_get}}

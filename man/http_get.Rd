@@ -23,13 +23,7 @@ Start an HTTP GET request in the background, and report its completion
 by calling a callback function.
 }
 \examples{
-error <- result <- NULL
-wait_for(http_get(
-  "https://httpbin.org/get",
-  function(err, res) { error <<- err ; result <<- res }
-))
-error
-cat(rawToChar(result$content))
+TODO
 }
 \seealso{
 Other asyncronous HTTP calls: \code{\link{http_head}}

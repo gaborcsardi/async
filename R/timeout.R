@@ -13,11 +13,7 @@
 #'
 #' @export
 #' @examples
-#' result <- NULL
-#' id <- set_timeout(1, function() result <<- "done")
-#' result
-#' wait_for(id)
-#' result
+#' TODO
 
 set_timeout <- function(delay, callback = NULL) {
   id <- NULL

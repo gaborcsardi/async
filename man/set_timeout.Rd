@@ -22,9 +22,5 @@ Since R is single-threaded, the callback might be executed (much) later
 than the specified time period.
 }
 \examples{
-result <- NULL
-id <- set_timeout(1, function() result <<- "done")
-result
-wait_for(id)
-result
+TODO
 }
