@@ -1,12 +1,4 @@
 
-get_state_x <- function(x) {
-  if (is.deferred(x)) x$get_state() else "not-deferred"
-}
-
-get_value_x <- function(x) {
-  if (is.deferred(x)) x$get_value() else x
-}
-
 #' @export
 
 await <- function(def) {
@@ -17,11 +9,20 @@ await <- function(def) {
 
 await_list <- function(..., .list = list()) {
   defs <- c(list(...), .list)
-  states <- vcapply(defs, get_state_x)
-  while (any(states == "pending")) {
-    get_default_event_loop()$run("once")
-    states <- vcapply(defs, get_state_x)
+  num_todo <- length(defs)
+  for (d in defs) {
+    if (!is.deferred(d)) {
+      num_todo <- num_todo - 1
+    } else {
+      d$then(
+        function(value) num_todo <<- num_todo - 1,
+        function(reason) num_todo <<- num_todo - 1
+      )
+    }
   }
+
+  while (num_todo > 0) get_default_event_loop()$run("once")
+
   lapply(defs, get_value_x)
 }
 
@@ -29,10 +30,21 @@ await_list <- function(..., .list = list()) {
 
 await_any <- function(..., .list = list()) {
   defs <- c(list(...), .list)
-  states <- vcapply(defs, get_state_x)
-  while (all(states == "pending")) {
-    get_default_event_loop()$run("once")
-    states <- vcapply(defs, get_state_x)
+  num_done <- 0
+  for (d in defs) {
+    if (!is.deferred(d)) {
+      num_done <- num_done + 1
+      break;
+    } else {
+      d$then(
+        function(value) num_done <<- num_done + 1,
+        function(reason) num_done <<- num_done + 1
+      )
+    }
   }
+
+  while (num_done == 0) get_default_event_loop()$run("once")
+
+  states <- vcapply(defs, get_state_x)
   get_value_x(defs[states != "pending"][[1]])
 }
