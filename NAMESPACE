@@ -2,6 +2,7 @@
 
 export(async)
 export(await)
+export(await_any)
 export(await_list)
 export(deferred)
 export(delay)
