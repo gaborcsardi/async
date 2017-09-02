@@ -2,7 +2,7 @@
 #' @export
 
 detect <- function(.x, .p, ...) {
-  defs <- lapply(.x, async(.p))
+  defs <- lapply(.x, async(.p), ...)
   num_todo <- length(defs)
   done <- FALSE
 
