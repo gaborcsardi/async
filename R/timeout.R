@@ -13,12 +13,15 @@
 #'
 #' @export
 #' @examples
-#' result <- NULL
-#' id <- set_timeout(1, function() result <<- "done")
-#' result
-#' wait_for(id)
-#' result
+#' TODO
 
-set_timeout <- function(delay, callback) {
-  get_default_event_loop()$run_set_timeout(delay, callback)
+delay <- function(delay, callback = NULL) {
+  deferred$new(function(resolve, reject) {
+    force(resolve)
+    force(reject)
+    get_default_event_loop()$run_delay(
+      delay,
+      function() resolve(TRUE)
+    )
+  })
 }

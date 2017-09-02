@@ -3,6 +3,8 @@ context("waterfall")
 
 test_that("waterfall", {
 
+  skip("need to rewrite with deferred")  
+  
   result <- NULL
 
   wait_for(waterfall(
@@ -21,6 +23,8 @@ test_that("waterfall", {
 
 test_that("waterfall, asyncify", {
 
+  skip("need to rewrite with deferred")  
+  
   result <- NULL
 
   wait_for(waterfall(

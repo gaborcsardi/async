@@ -21,18 +21,12 @@
 #' @export
 #' @importFrom curl new_handle
 #' @examples
-#' error <- result <- NULL
-#' wait_for(http_get(
-#'   "https://httpbin.org/get",
-#'   function(err, res) { error <<- err ; result <<- res }
-#' ))
-#' error
-#' cat(rawToChar(result$content))
+#' TODO
 
-http_get <- function(url, callback) {
-  assert_that(is_string(url), is_callback(callback))
+http_get <- function(url, callback = NULL) {
+  assert_that(is_string(url), is_callback_or_null(callback))
   handle <- new_handle(url = url)
-  get_default_event_loop()$run_http(handle, callback)
+  make_deferred_http(handle)
 }
 
 #' Asynchronous HTTP HEAD request
@@ -44,17 +38,21 @@ http_get <- function(url, callback) {
 #' @export
 #' @importFrom curl handle_setopt
 #' @examples
-#' error <- result <- NULL
-#' wait_for(http_head(
-#'   "https://httpbin.org/get",
-#'   function(err, res) { error <<- err ; result <<- res }
-#' ))
-#' error
-#' curl::parse_headers(result$headers)
+#' TODO
 
-http_head <- function(url, callback) {
-  assert_that(is_string(url), is_callback(callback))
+http_head <- function(url, callback = NULL) {
+  assert_that(is_string(url), is_callback_or_null(callback))
   handle <- new_handle(url = url)
   handle_setopt(handle, customrequest = "HEAD", nobody = TRUE)
-  get_default_event_loop()$run_http(handle, callback)
+  make_deferred_http(handle)
+}
+
+make_deferred_http <- function(handle) {
+  deferred$new(function(resolve, reject) {
+    force(resolve)
+    force(reject)
+    get_default_event_loop()$run_http(handle, function(err, res) {
+      if (is.null(err)) resolve(res) else reject(err)
+    })
+  })
 }

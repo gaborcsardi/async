@@ -9,12 +9,8 @@ Event loop
 \section{Usage}{
 \preformatted{el <- event_loop$new()
 
-el$wait_for(ids)
-el$wait_for_all()
-
 el$run_http(handle, callback)
-el$run_set_timeout(delay, callback)
-el$run_generic(callback, ...)
+el$run_delay(delay, callback)
 }
 }
 
@@ -33,20 +29,12 @@ currently not used for anything.}
 
 \section{Details}{
 
-\code{$wait_for()} waits for all specified tasks to finish.
-
-\code{$wait_for_all()} waits for all tasks managed by the event loop to finish.
-
 \code{$run_http()} starts an asynchronous HTTP request, with the specified
 \code{curl} handle. Once the request is done, and the response is available
 (or an error happens), the callback is called with two arguments, the
 error object or message (if any) and the \code{curl} response object.
 
-\code{$run_set_timeout()} starts a task with the specified delay.
-
-\code{$run_generic()} creates a generic task. It is supposed to take care of
-calling its own callback itself. Tasks created by the asynchronous
-control flow structures and the asynchronous iterators generic tasks.
+\code{$run_delay()} starts a task with the specified delay.
 }
 
 \section{The default event loop}{

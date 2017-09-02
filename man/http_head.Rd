@@ -4,7 +4,7 @@
 \alias{http_head}
 \title{Asynchronous HTTP HEAD request}
 \usage{
-http_head(url, callback)
+http_head(url, callback = NULL)
 }
 \arguments{
 \item{url}{URL to connect to.}
@@ -22,13 +22,7 @@ Task id that can be waited on with \code{\link[=wait_for]{wait_for()}}.
 Asynchronous HTTP HEAD request
 }
 \examples{
-error <- result <- NULL
-wait_for(http_head(
-  "https://httpbin.org/get",
-  function(err, res) { error <<- err ; result <<- res }
-))
-error
-curl::parse_headers(result$headers)
+TODO
 }
 \seealso{
 Other asyncronous HTTP calls: \code{\link{http_get}}

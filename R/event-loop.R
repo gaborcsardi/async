@@ -7,12 +7,8 @@
 #' ```
 #' el <- event_loop$new()
 #'
-#' el$wait_for(ids)
-#' el$wait_for_all()
-#'
 #' el$run_http(handle, callback)
-#' el$run_set_timeout(delay, callback)
-#' el$run_generic(callback, ...)
+#' el$run_delay(delay, callback)
 #' ```
 #'
 #' @section Arguments:
@@ -27,20 +23,12 @@
 #' }
 #'
 #' @section Details:
-#' `$wait_for()` waits for all specified tasks to finish.
-#'
-#' `$wait_for_all()` waits for all tasks managed by the event loop to finish.
-#'
 #' `$run_http()` starts an asynchronous HTTP request, with the specified
 #' `curl` handle. Once the request is done, and the response is available
 #' (or an error happens), the callback is called with two arguments, the
 #' error object or message (if any) and the `curl` response object.
 #'
-#' `$run_set_timeout()` starts a task with the specified delay.
-#'
-#' `$run_generic()` creates a generic task. It is supposed to take care of
-#' calling its own callback itself. Tasks created by the asynchronous
-#' control flow structures and the asynchronous iterators generic tasks.
+#' `$run_delay()` starts a task with the specified delay.
 #'
 #' @section The default event loop:
 #'
@@ -58,34 +46,38 @@ event_loop <- R6Class(
   public = list(
     initialize = function()
       el_init(self, private),
-    wait_for = function(ids)
-      el_wait_for(self, private, ids),
-    wait_for_all = function()
-      el_wait_for_all(self, private),
 
     run_http = function(handle, callback)
       el_run_http(self, private, handle, callback),
-    run_set_timeout = function(delay, callback)
-      el_run_set_timeout(self, private, delay, callback),
-    run_generic = function(callback, ...)
-      el_run_generic(self, private, callback, ...),
+    run_delay = function(delay, callback)
+      el_run_delay(self, private, delay, callback),
 
-    defer_next_tick = function(callback, args)
-      el_defer_next_tick(self, private, callback, args)
+    defer_next_tick = function(callback, args = list())
+      el_defer_next_tick(self, private, callback, args),
+
+    run = function(mode = c("default", "nowait", "once"))
+      el_run(self, private, mode = match.arg(mode))
+
   ),
 
   private = list(
-    poll = function()
-      el__poll(self, private),
     create_task = function(callback, ...)
       el__create_task(self, private, callback, ...),
     ensure_pool = function(...)
       el__ensure_pool(self, private, ...),
-    get_poll_timeout = function(current)
-      el__get_poll_timeout(self, private, current),
-    do_next_tick = function()
-      el__do_next_tick(self, private),
+    get_poll_timeout = function()
+      el__get_poll_timeout(self, private),
+    run_pending = function()
+      el__run_pending(self, private),
+    run_timers = function()
+      el__run_timers(self, private),
+    is_alive = function()
+      el__is_alive(self, private),
+    update_time = function()
+      el__update_time(self, private),
 
+    time = Sys.time(),
+    stop_flag = FALSE,
     tasks = list(),
     timers = Sys.time()[numeric()],
     pool = NULL,
@@ -93,11 +85,9 @@ event_loop <- R6Class(
   )
 )
 
-#' @importFrom later later
-
 el_init <- function(self, private) {
-  reg.finalizer(self, function(me) me$wait_for_all(), onexit = TRUE)
-  later(function() private$poll())
+  ## TODO
+  ## reg.finalizer(self, function(me) me$run("default"), onexit = TRUE)
   invisible(self)
 }
 
@@ -124,42 +114,11 @@ el_run_http <- function(self, private, handle, callback) {
   id
 }
 
-el_run_set_timeout <- function(self, private, delay, callback) {
+el_run_delay <- function(self, private, delay, callback) {
   force(self) ; force(private) ; force(delay) ; force(callback)
   id <- private$create_task(callback, data = list(delay = delay))
   private$timers[id] <- Sys.time() + as.difftime(delay, units = "secs")
-  later(
-    function() {
-      task <- private$tasks[[id]]
-      private$tasks[[id]] <- NULL
-      private$timers <- private$timers[setdiff(names(private$times), id)]
-      tryCatch(task$callback(), error = function(e) NULL)
-    },
-    delay
-  )
   id
-}
-
-el_run_generic <- function(self, private, callback, ...) {
-  force(self) ; force(private); force(callback)
-  data <- list(...)
-  force(data)
-
-  id <- private$create_task(callback, data = data)
-  mycallback <-function(...) {
-    private$tasks[[id]] <- NULL
-    if (!is.null(callback)) callback(...)
-    id
-  }
-  list(id = id, callback = mycallback)
-}
-
-el_wait_for <- function(self, private, ids) {
-  while (any(ids %in% names(private$tasks))) private$poll()
-}
-
-el_wait_for_all <- function(self, private) {
-  while (length(private$tasks)) private$poll()
 }
 
 el_defer_next_tick <- function(self, private, callback, args) {
@@ -170,24 +129,52 @@ el_defer_next_tick <- function(self, private, callback, args) {
 }
 
 #' @importFrom curl multi_run
-#' @importFrom later run_now
 
-el__poll <- function(self, private) {
-  current <- Sys.time()
-  timeout <- private$get_poll_timeout(current)
-  if (!is.null(private$pool)) {
+el_run <- function(self, private, mode) {
+
+  ## This is closely modeled after the libuv event loop, on purpose,
+  ## because some time we might switch to that.
+  alive <- private$is_alive()
+  if (! alive) private$update_time()
+
+  while (alive && ! private$stop_flag) {
+    private$update_time()
+    private$run_timers()
+    ran_pending <- private$run_pending()
+    ## private$run_idle()
+    ## private$run_prepare()
+
+    timeout <- 0
+    if (mode == "once" && !ran_pending || mode == "default") {
+      timeout <- private$get_poll_timeout()
+    }
     multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
+
+    ## private$run_check()
+    ## private$run_closing_handles()
+
+    if (mode == "once") {
+      private$update_time()
+      private$run_timers()
+    }
+
+    alive <- private$is_alive()
+    if (mode == "once" || mode == "nowait") break
   }
-  private$do_next_tick()
-  run_now()
+
+  private$stop_flag <- FALSE
+
+  alive
 }
 
-el__do_next_tick <- function(self, private) {
+el__run_pending <- function(self, private) {
   next_ticks <- private$next_ticks
   private$next_ticks <- list()
   for (nt in next_ticks) {
     do.call(nt[[1]], nt[[2]])
   }
+
+  length(next_ticks) > 0
 }
 
 #' @importFrom uuid UUIDgenerate
@@ -210,9 +197,26 @@ el__ensure_pool <- function(self, private, ...) {
   if (is.null(private$pool)) private$pool <- new_pool(...)
 }
 
-el__get_poll_timeout <- function(self, private, current) {
-  min(
-    Inf,
-    max(0, min(Inf, private$timers - current))
-  )
+el__get_poll_timeout <- function(self, private) {
+  max(0, min(Inf, private$timers - private$time))
+}
+
+el__run_timers <- function(self, private) {
+  expired <- names(private$timers)[private$timers <= private$time]
+  for (id in expired) {
+    task <- private$tasks[[id]]
+    private$tasks[[id]] <- NULL
+    private$timers <- private$timers[setdiff(names(private$timers), id)]
+    task$callback()
+  }
+}
+
+el__is_alive <- function(self, private) {
+  length(private$tasks) > 0 ||
+    length(private$timers) > 0 ||
+    length(private$next_ticks) > 0
+}
+
+el__update_time <- function(self, private) {
+  private$time <- Sys.time()
 }
