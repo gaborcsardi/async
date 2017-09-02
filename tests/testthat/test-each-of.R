@@ -3,22 +3,20 @@ context("each_of")
 
 test_that("each_of", {
 
-  skip("need to rewrite with deferred")
-  
-  ok <- NULL
   done <- character()
-  index <- numeric()
+  index <- integer()
 
-  wait_for(each_of(
-    letters[1:10],
-    function(item, idx, callback) {
-      done <<- c(done, item)
-      index <<- c(index, idx)
-      callback(NULL)
-    },
-    function(err) { if (is.null(err)) ok <<- TRUE }
-  ))
+  coll <- letters[1:10]
 
-  expect_true(ok)
-  expect_identical(sort(done), sort(letters[1:10]))
+  dx <- when_all(
+    .list = lapply(seq_along(coll), function(i) {
+      delay(1/1000)$then(function(value) {
+        done <<- c(done, coll[[i]])
+        index <<- c(index, i)
+      })
+    })
+  )$then(function(value) {
+    expect_identical(sort(index), seq_along(coll))
+    expect_identical(sort(done), sort(coll))
+  })
 })

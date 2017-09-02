@@ -3,17 +3,13 @@ context("each")
 
 test_that("each", {
 
-  skip("need to rewrite with deferred")
-  
-  ok <- NULL
   done <- character()
+  dx <- when_all(
+    .list = lapply(letters[1:10], function(x) {
+      delay(1/1000)$then(function(value) done <<- c(done, x))
+    })
+  )$
+  then(function(value) expect_identical(sort(done), sort(letters[1:10])))
 
-  wait_for(each(
-    letters[1:10],
-    function(item, callback) { done <<- c(done, item); callback(NULL)  },
-    function(err) { if (is.null(err)) ok <<- TRUE }
-  ))
-
-  expect_true(ok)
-  expect_identical(sort(done), sort(letters[1:10]))
+  await(dx)
 })
