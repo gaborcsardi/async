@@ -44,3 +44,4 @@ The \code{async} package creates a default event loop when it is loaded.
 All asyncronous constructs use this event loop by default.
 }
 
+\keyword{internal}

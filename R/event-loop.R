@@ -36,10 +36,10 @@
 #' All asyncronous constructs use this event loop by default.
 #'
 #' @name event_loop
+#' @keywords internal
 NULL
 
 #' @importFrom R6 R6Class
-#' @export
 
 event_loop <- R6Class(
   "event_loop",

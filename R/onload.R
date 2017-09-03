@@ -22,8 +22,8 @@ async_env <- new.env(parent = emptyenv())
 #'
 #' @return The default event loop of the R session.
 #'
-#' @export
 #' @seealso [event_loop]
+#' @keywords internal
 
 get_default_event_loop <- function() {
   async_env$default_loop

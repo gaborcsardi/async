@@ -16,3 +16,4 @@ all asyncronous constructs use this event loop by default.
 \seealso{
 \link{event_loop}
 }
+\keyword{internal}
