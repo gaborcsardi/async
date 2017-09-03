@@ -18,3 +18,8 @@ test_that("fails asap", {
   expect_error(await_any(dx1, dx2), "blah")
   expect_true(Sys.time() - tic < as.difftime(1, unit = "secs"))
 })
+
+test_that("non deferred resolves right away", {
+  dx1 <- delay(1/100)$then(function(value) "foo")
+  expect_equal(await_any("foo", dx1), "foo")
+})
