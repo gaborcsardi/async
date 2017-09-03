@@ -4,15 +4,12 @@
 \alias{delay}
 \title{Run a function after the specified time interval}
 \usage{
-delay(delay, callback = NULL)
+delay(delay)
 }
 \arguments{
 \item{delay}{Time interval in seconds, the amount of time to delay
 to delay the execution of the callback. It can be a fraction of a
 second.}
-
-\item{callback}{The function to call after \code{delay} seconds. It will be
-called without arguments.}
 }
 \value{
 Task id, it can be waited on with \code{\link[=wait_for]{wait_for()}}.
