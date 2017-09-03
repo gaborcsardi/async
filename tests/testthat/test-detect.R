@@ -26,19 +26,3 @@ test_that("detect", {
   result <- await(detect(1:10 * 2, is_odd))
   expect_null(result)
 })
-
-test_that("detect_limit", {
-
-  skip("need to rewrite with deferred")
-
-  num <- 0
-  task <- function(x, callback) {
-    num <<- num + 1
-    delay(1/10, function() { num <<- num - 1; callback(NULL, FALSE) })
-  }
-
-  result <- "not null"
-  await(detect_series(1:5, task, function(err, res) result <<- res))
-
-  expect_null(result)
-})
