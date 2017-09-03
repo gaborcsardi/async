@@ -17,6 +17,9 @@ make_rejected_deferred <- function(x) {
 
 async <- function(fun) {
   assert_that(is.function(fun))
+
+  if (is_async(fun)) return(fun)
+
   async_fun <- fun
   body(async_fun) <- expr({
     tryCatch(
