@@ -12,7 +12,7 @@ whilst <- function(test, task) {
 
     xresolve <- function(value) {
       tryCatch(
-        if (!test()) {
+        if (!await(test())) {
           resolve(value)
         } else {
           task()$then(xresolve, xreject)
@@ -22,6 +22,6 @@ whilst <- function(test, task) {
     }
     xreject <- function(reason) reject(reason)
 
-    if (test()) task()$then(xresolve, xreject) else resolve(NULL)
+    if (await(test())) task()$then(xresolve, xreject) else resolve(NULL)
   })
 }

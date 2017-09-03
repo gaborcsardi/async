@@ -12,7 +12,7 @@ until <- function(test, task) {
 
     xresolve <- function(value) {
       tryCatch(
-        if (test()) {
+        if (await(test())) {
           resolve(value)
         } else {
           task()$then(xresolve, xreject)
