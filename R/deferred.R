@@ -26,15 +26,7 @@ deferred <- R6Class(
     resolve = function(value)
       def__resolve(self, private, value),
     reject = function(reason)
-      def__reject(self, private, reason),
-
-    ## TODO: this is temporary
-    set_id = function(id)
-      private$id <- id,
-    set_task = function(task) {
-      private$task <- task
-      private$id <- task$id
-    }
+      def__reject(self, private, reason)
   )
 )
 
