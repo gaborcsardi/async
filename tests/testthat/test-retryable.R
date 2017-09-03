@@ -3,36 +3,13 @@ context("retryable")
 
 test_that("retryable", {
 
-  skip("need to rewrite with deferred")  
-  
-  i <- 1
-  f <- function(callback) {
-    i <<- i + 1
-    if (i < 5) callback("error") else callback(NULL, "OK")
-  }
-
-  rf <- retryable(f, 5)
-
-  result <- NULL
-  wait_for(rf(callback = function(err, res) result <<- res))
-
-  expect_identical(result, "OK")
-})
-
-test_that("retryable, asyncify", {
-
-  skip("need to rewrite with deferred")  
-  
   i <- 1
   f <- function() {
     i <<- i + 1
     if (i < 5) stop("error") else "OK"
   }
 
-  rf <- retryable(asyncify(f), 5)
-
-  result <- NULL
-  wait_for(rf(callback = function(err, res) result <<- res))
-
+  rf <- retryable(f, 5)
+  result <- await(rf())
   expect_identical(result, "OK")
 })
