@@ -3,19 +3,12 @@ context("until")
 
 test_that("until", {
 
-  skip("need to rewrite with deferred")  
-  
   count <- 1
-  result <- NULL
 
-  wait_for(until(
-    function() count == 5,
-    function(callback) {
-      count <<- count + 1
-      callback(NULL, count)
-    },
-    function(err, res) {
-      result <<- res
+  result <- await(until(
+    function(...) count == 5,
+    function() {
+      delay(1/1000)$then(function(value) count <<- count + 1)
     }
   ))
 
@@ -25,19 +18,12 @@ test_that("until", {
 
 test_that("until is always called once", {
 
-  skip("need to rewrite with deferred")  
-  
   called <- FALSE
-  result <- NULL
 
-  wait_for(until(
-    function() TRUE,
-    function(callback) {
-      called <<- TRUE
-      callback(NULL, called)
-    },
-    function(err, res) {
-      result <<- res
+  result <- await(until(
+    function(...) TRUE,
+    function() {
+      delay(1/1000)$then(function(value) called <<- TRUE)
     }
   ))
 
@@ -45,19 +31,15 @@ test_that("until is always called once", {
   expect_true(result)
 })
 
-test_that("until, asyncify", {
+test_that("test function throws", {
 
-  skip("need to rewrite with deferred")  
-  
-  count <- 1
-  result <- NULL
-
-  wait_for(until(
-    function() count == 5,
-    asyncify(function() { count <<- count + 1; count }),
-    function(err, res) result <<- res
-  ))
-
-  expect_equal(count, 5)
-  expect_equal(result, 5)
+  expect_error(
+    await(until(
+      function(...) stop("doh"),
+      function() {
+        delay(1/1000)$then(function(value) called <<- TRUE)
+      }
+    )),
+    "doh"
+  )
 })
