@@ -25,6 +25,7 @@ retry <- function(task, times, ...) {
 
 retryable <- function(task, times) {
   task <- async(task)
+  force(times)
   function(...) {
     retry(task, times, ...)
   }

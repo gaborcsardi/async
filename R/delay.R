@@ -14,6 +14,7 @@
 #' TODO
 
 delay <- function(delay) {
+  force(delay)
   deferred$new(function(resolve, reject) {
     force(resolve)
     force(reject)
