@@ -3,41 +3,28 @@ context("whilst")
 
 test_that("whilst", {
 
-  skip("need to rewrite with deferred")  
-  
   count <- 0
-  nn <- NULL
+  result <- NULL
 
-  wait_for(whilst(
-    function() count < 5,
-    function(callback) {
-      count <<- count + 1
-      callback(NULL, count)
-    },
-    function (err, n) {
-      nn <<- n
+  result <- await(whilst(
+    function(...) count < 5,
+    function() {
+      delay(1/1000)$then(function(value) count <<- count + 1)
     }
   ))
 
-  expect_false(is.null(nn))
-  expect_equal(nn, 5)
+  expect_equal(result, 5)
 })
 
 test_that("whilst with false test", {
 
-  skip("need to rewrite with deferred")  
-  
   result <- NULL
 
   expect_silent({
-    wait_for(whilst(
+    await(whilst(
       function() FALSE,
-      function(callback) {
-        stop("Not reached")
-        callback(NULL, "Not here")
-      },
-      function(err, res) {
-        result <<- res
+      function() {
+        delay(1/1000)$then(function(value) stop("Not reached"))
       }
     ))
   })
@@ -47,40 +34,15 @@ test_that("whilst with false test", {
 
 test_that("error", {
 
-  skip("need to rewrite with deferred")  
-  
   i <- 1
-  error <- result <- NULL
-  wait_for(whilst(
-    function() i < 5,
-    function(callback) {
-      i <<- i + 1
-      if (i < 3) {
-        callback(NULL, "Good so far")
-      } else {
-        callback("This is bad", NULL)
-      }
-    },
-    function(err, res) { error <<- err; result <<- res }
-  ))
-
-  expect_null(result)
-  expect_equal(error, "This is bad")
-})
-
-test_that("whilst, asyncify", {
-
-  skip("need to rewrite with deferred")  
-  
-  count <- 0
-  nn <- NULL
-
-  wait_for(whilst(
-    function() count < 5,
-    asyncify(function() count <<- count + 1),
-    function (err, n) nn <<- n
-  ))
-
-  expect_false(is.null(nn))
-  expect_equal(nn, 5)
+  expect_error(
+    await(whilst(
+      function() i < 5,
+      function() delay(1/1000)$then(function(value) {
+        i <<- i + 1
+        if (i >= 3) stop("This is bad")
+      })
+    )),
+    "This is bad"
+  )
 })
