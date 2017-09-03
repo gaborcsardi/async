@@ -1,6 +1,8 @@
 
 async_env <- new.env(parent = emptyenv())
 
+## nocov start
+
 .onLoad <- function(libname, pkgname) {
   async_env$default_loop <- event_loop$new()
 }
@@ -10,6 +12,8 @@ async_env <- new.env(parent = emptyenv())
   ## TODO
   ## get_default_event_loop()$run()
 }
+
+## nocov end
 
 #' Default event loop of the R session.
 #'
