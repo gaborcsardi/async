@@ -4,23 +4,17 @@
 \alias{http_get}
 \title{Asynchronous HTTP GET request}
 \usage{
-http_get(url, callback = NULL)
+http_get(url)
 }
 \arguments{
 \item{url}{URL to connect to.}
-
-\item{callback}{Callback function that will be called once the request
-is done, or an error happens. It will be called with two arguments.
-The first argument is not \code{NULL} on error and it contains an error
-object, or an error message from \code{curl}. The second argument contains
-the response from \code{curl}.}
 }
 \value{
 Task id that can be waited on with \code{\link[=wait_for]{wait_for()}}.
 }
 \description{
 Start an HTTP GET request in the background, and report its completion
-by calling a callback function.
+via a deferred.
 }
 \examples{
 TODO

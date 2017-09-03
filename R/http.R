@@ -7,14 +7,9 @@
 #' Asynchronous HTTP GET request
 #'
 #' Start an HTTP GET request in the background, and report its completion
-#' by calling a callback function.
+#' via a deferred.
 #'
 #' @param url URL to connect to.
-#' @param callback Callback function that will be called once the request
-#'   is done, or an error happens. It will be called with two arguments.
-#'   The first argument is not `NULL` on error and it contains an error
-#'   object, or an error message from `curl`. The second argument contains
-#'   the response from `curl`.
 #' @return Task id that can be waited on with [wait_for()].
 #'
 #' @family asyncronous HTTP calls
@@ -23,8 +18,8 @@
 #' @examples
 #' TODO
 
-http_get <- function(url, callback = NULL) {
-  assert_that(is_string(url), is_callback_or_null(callback))
+http_get <- function(url) {
+  assert_that(is_string(url))
   handle <- new_handle(url = url)
   make_deferred_http(handle)
 }
@@ -40,8 +35,8 @@ http_get <- function(url, callback = NULL) {
 #' @examples
 #' TODO
 
-http_head <- function(url, callback = NULL) {
-  assert_that(is_string(url), is_callback_or_null(callback))
+http_head <- function(url) {
+  assert_that(is_string(url))
   handle <- new_handle(url = url)
   handle_setopt(handle, customrequest = "HEAD", nobody = TRUE)
   make_deferred_http(handle)

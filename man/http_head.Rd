@@ -4,16 +4,10 @@
 \alias{http_head}
 \title{Asynchronous HTTP HEAD request}
 \usage{
-http_head(url, callback = NULL)
+http_head(url)
 }
 \arguments{
 \item{url}{URL to connect to.}
-
-\item{callback}{Callback function that will be called once the request
-is done, or an error happens. It will be called with two arguments.
-The first argument is not \code{NULL} on error and it contains an error
-object, or an error message from \code{curl}. The second argument contains
-the response from \code{curl}.}
 }
 \value{
 Task id that can be waited on with \code{\link[=wait_for]{wait_for()}}.
