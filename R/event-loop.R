@@ -203,6 +203,7 @@ el__get_poll_timeout <- function(self, private) {
 
 el__run_timers <- function(self, private) {
   expired <- names(private$timers)[private$timers <= private$time]
+  expired <- expired[order(private$timers[expired])]
   for (id in expired) {
     task <- private$tasks[[id]]
     private$tasks[[id]] <- NULL
