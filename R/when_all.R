@@ -11,7 +11,7 @@
 #' @return A deferred value, that is conditioned on all deferred values
 #'   in `...` and `.list`.
 #'
-#' @seealso [when_any()]
+#' @seealso [when_any()], [when_some()]
 #' @export
 #' @examples
 #' ## Check that the contents of two URLs are the same
