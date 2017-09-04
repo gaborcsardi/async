@@ -60,3 +60,20 @@ test_that("finally", {
   expect_equal(await(dx), "this one")
   expect_true(called)
 })
+
+test_that("errors from other resolutions are not reported", {
+
+  dx1 <- delay(1/10000)$then(~ stop("wrong"))
+  dx2 <- delay(1/10)$then(~ "OK")
+
+  expect_equal(await(dx2), "OK")
+  expect_equal(dx1$get_state(), "rejected")
+  expect_error(await(dx1), "wrong")
+
+  dx1 <- delay(1/10000)$then(~ stop("wrong"))
+  dx2 <- delay(1/10)$then(~ stop("oops"))
+
+  expect_error(await(dx2), "oops")
+  expect_equal(dx1$get_state(), "rejected")
+  expect_error(await(dx1), "wrong")
+})
