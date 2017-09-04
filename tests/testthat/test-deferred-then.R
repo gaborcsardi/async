@@ -82,3 +82,10 @@ test_that("compact function notation", {
   expect_equal(dx$get_value(), 200)
   expect_equal(await(dx), 200)
 })
+
+test_that("embedded then", {
+  add1 <- function(n) { n ; delay(10/1000)$then(function(value) n + 1) }
+  mul3 <- function(n) { n ; delay(10/1000)$then(function(value) n * 3) }
+  result <- await(add1(4)$then(mul3))
+  expect_equal(result, 15)
+})
