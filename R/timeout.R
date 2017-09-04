@@ -13,7 +13,7 @@ timeout <- function(task, timeout, ...) {
     )
     delay(timeout)$then(
       function(value) {
-        if (!done) reject(simpleError("Timed out"))
+        if (!done) reject(make_error("Timed out", "async_timeout"))
         done <<- TRUE
       }
     )

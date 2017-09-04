@@ -14,3 +14,11 @@ get_state_x <- function(x) {
 get_value_x <- function(x) {
   if (is_deferred(x)) x$get_value() else x
 }
+
+make_error <- function(message, class = "simpleError", call = NULL) {
+  class <- c(class, "error", "condition")
+  structure(
+    list(message = as.character(message), call = call),
+    class = class
+  )
+}
