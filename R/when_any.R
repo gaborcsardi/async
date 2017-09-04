@@ -20,22 +20,25 @@
 
 when_any <- function(..., .list = list()) {
   defs <- c(list(...), .list)
-  if (length(defs) == 0) stop("Empty list in `when_any` is not allowed")
+  num_defs <- length(defs)
+  if (num_defs == 0) stop("Empty list in `when_any` is not allowed")
 
   deferred$new(function(resolve, reject) {
-    num_done <- 0
+    force(resolve)
+    force(reject)
+    num_failed <- 0
+    reported <- FALSE
 
     is_defs <- vlapply(defs, is_deferred)
     if (!all(is_defs)) return(resolve(defs[!is_defs][[1]]))
 
     handle_fulfill <- function(value) {
-      num_done <<- num_done + 1
-      if (num_done == 1) resolve(value)
+      if (!reported) { reported <<- TRUE; resolve(value) }
     }
 
     handle_reject <- function(reason) {
-      num_done <<- num_done + 1
-      if (num_done == 1) reject(reason)
+      num_failed <<- num_failed + 1
+      if (num_failed == num_defs) reject(reason)
     }
 
     for (i in seq_along(defs)) {
