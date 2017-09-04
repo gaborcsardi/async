@@ -8,9 +8,9 @@ vcapply <- function(X, FUN, ..., FUN.VALUE = character(1)) {
 }
 
 get_state_x <- function(x) {
-  if (is.deferred(x)) x$get_state() else "not-deferred"
+  if (is_deferred(x)) x$get_state() else "not-deferred"
 }
 
 get_value_x <- function(x) {
-  if (is.deferred(x)) x$get_value() else x
+  if (is_deferred(x)) x$get_value() else x
 }

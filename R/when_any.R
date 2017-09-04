@@ -8,7 +8,7 @@ when_any <- function(..., .list = list()) {
   deferred$new(function(resolve, reject) {
     num_done <- 0
 
-    is_defs <- vlapply(defs, is.deferred)
+    is_defs <- vlapply(defs, is_deferred)
     if (!all(is_defs)) return(resolve(defs[!is_defs][[1]]))
 
     handle_fulfill <- function(value) {

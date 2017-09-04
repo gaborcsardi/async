@@ -11,7 +11,7 @@ await_list <- function(..., .list = list()) {
   defs <- c(list(...), .list)
   num_todo <- length(defs)
   for (d in defs) {
-    if (!is.deferred(d)) {
+    if (!is_deferred(d)) {
       num_todo <- num_todo - 1
     } else {
       d$then(
@@ -32,7 +32,7 @@ await_any <- function(..., .list = list()) {
   defs <- c(list(...), .list)
   num_done <- 0
   for (d in defs) {
-    if (!is.deferred(d)) {
+    if (!is_deferred(d)) {
       num_done <- num_done + 1
       break;
     } else {

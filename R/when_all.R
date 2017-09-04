@@ -17,7 +17,7 @@ when_all <- function(..., .list = list()) {
     }
 
     for (i in seq_along(defs)) {
-      if (!is.deferred(defs[[i]])) {
+      if (!is_deferred(defs[[i]])) {
         num_todo <- num_todo - 1
       } else {
         defs[[i]]$then(handle_fulfill, handle_reject)

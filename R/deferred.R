@@ -98,7 +98,7 @@ def_get_value <- function(self, private) {
 
 def__resolve <- function(self, private, value) {
   if (private$state != "pending") stop("Deferred value already resolved")
-  if (is.deferred(value)) {
+  if (is_deferred(value)) {
     value$then(private$resolve, private$reject)
   } else {
     private$state <- "fulfilled"
@@ -112,7 +112,7 @@ def__resolve <- function(self, private, value) {
 
 def__reject <- function(self, private, reason) {
   if (private$state != "pending") stop("Deferred value already resolved")
-  if (is.deferred(reason)) {
+  if (is_deferred(reason)) {
     reason$then(private$resolve, private$reject)
   } else {
     private$state <- "rejected"
@@ -126,6 +126,6 @@ def__reject <- function(self, private, reason) {
 
 #' @export
 
-is.deferred <- function(x) {
+is_deferred <- function(x) {
   inherits(x, "deferred")
 }

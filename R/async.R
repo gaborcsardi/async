@@ -25,7 +25,7 @@ async <- function(fun) {
     tryCatch(
       {
         r <- evalq({ !!! body(fun) })
-        if (is.deferred(r)) r else make_resolved_deferred(r)
+        if (is_deferred(r)) r else make_resolved_deferred(r)
       },
       error = function(e) make_rejected_deferred(e)
     )
