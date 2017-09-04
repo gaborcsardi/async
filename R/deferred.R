@@ -8,6 +8,8 @@
 #' dx$get_state()
 #' dx$get_value()
 #' dx$then(on_fulfilled = NULL, on_rejected = NULL)
+#' dx$catch(on_rejected)
+#' dx$finally(on_finally)
 #' ```
 #'
 #' @section Arguments:
@@ -18,6 +20,8 @@
 #'     success fully resolved.}
 #'   \item{on_rejected}{Function to call when the deferrred value was
 #'     rejected because of an error.}
+#'   \item{on_finally}{Function to call after the promise was resolved or
+#'     rejected.}
 #' }
 #'
 #' @section Details:
@@ -49,6 +53,13 @@
 #' `on_rejected`. Whether `dx` was rejected or not, does not matter in this
 #' case. This allows using `on_rejected` as an error handler.
 #'
+#' `dx$catch()` is a shortcut to provide an error handler, it is equivalent
+#' to `dx$thin()` with `on_fulfilled` set to `NULL`.
+#'
+#' `dx$finally()` makes sure that `on_finally` runs once `dx` is resolved
+#' or rejected. It is ideal to specifying cleanup functions, e.g. closing
+#' a database.
+#'
 #' @name deferred
 NULL
 
@@ -62,10 +73,14 @@ deferred <- R6Class(
       def_init(self, private, action),
     get_state = function()
       private$state,
+    get_value = function()
+      def_get_value(self, private),
     then = function(on_fulfilled = NULL, on_rejected = NULL)
       def_then(self, private, on_fulfilled, on_rejected),
-    get_value = function()
-      def_get_value(self, private)
+    catch = function(on_rejected)
+      def_catch(self, private, on_rejected),
+    finally = function(on_finally)
+      def_finally(self, private, on_finally)
   ),
 
   private = list(
@@ -91,6 +106,16 @@ def_init <- function(self, private, action) {
   assert_that(is_action_function(action))
   action(private$resolve, private$reject)
   invisible(self)
+}
+
+def_get_value <- function(self, private) {
+  if (private$state == "pending") {
+    stop("Deferred value not resolved yet")
+  } else if (private$state == "rejected") {
+    stop(private$value)
+  } else {
+    private$value
+  }
 }
 
 def_then <- function(self, private, on_fulfilled, on_rejected) {
@@ -143,14 +168,23 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
   def
 }
 
-def_get_value <- function(self, private) {
-  if (private$state == "pending") {
-    stop("Deferred value not resolved yet")
-  } else if (private$state == "rejected") {
-    stop(private$value)
-  } else {
-    private$value
-  }
+def_catch <- function(self, private, on_rejected) {
+  force(on_rejected)
+  self$then(on_rejected = on_rejected)
+}
+
+def_finally <- function(self, private, on_finally) {
+  force(on_finally)
+  self$then(
+    on_fulfilled = function(value) {
+      on_finally()
+      value
+    },
+    on_rejected = function(reason) {
+      on_finally()
+      stop(reason)
+    }
+  )
 }
 
 def__resolve <- function(self, private, value) {

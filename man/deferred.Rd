@@ -12,6 +12,8 @@ Deferred value
 dx$get_state()
 dx$get_value()
 dx$then(on_fulfilled = NULL, on_rejected = NULL)
+dx$catch(on_rejected)
+dx$finally(on_finally)
 }
 }
 
@@ -24,6 +26,8 @@ See more below.}
 success fully resolved.}
 \item{on_rejected}{Function to call when the deferrred value was
 rejected because of an error.}
+\item{on_finally}{Function to call after the promise was resolved or
+rejected.}
 }
 }
 
@@ -56,5 +60,12 @@ Note that the deferred value created by \code{dx$then()} will resolve
 successfully, unless an error is throws from within \code{on_fulfilled} or
 \code{on_rejected}. Whether \code{dx} was rejected or not, does not matter in this
 case. This allows using \code{on_rejected} as an error handler.
+
+\code{dx$catch()} is a shortcut to provide an error handler, it is equivalent
+to \code{dx$thin()} with \code{on_fulfilled} set to \code{NULL}.
+
+\code{dx$finally()} makes sure that \code{on_finally} runs once \code{dx} is resolved
+or rejected. It is ideal to specifying cleanup functions, e.g. closing
+a database.
 }
 
