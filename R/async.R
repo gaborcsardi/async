@@ -1,18 +1,4 @@
 
-make_resolved_deferred <- function(x) {
-  force(x)
-  deferred$new(function(resolve, reject) {
-    resolve(x)
-  })
-}
-
-make_rejected_deferred <- function(x) {
-  force(x)
-  deferred$new(function(resolve, reject) {
-    reject(x)
-  })
-}
-
 #' Create an async function
 #'
 #' Create an async function, that returns a deferred value, from a
@@ -45,9 +31,13 @@ async <- function(fun) {
     tryCatch(
       {
         r <- evalq({ !!! body(fun) })
-        if (is_deferred(r)) r else make_resolved_deferred(r)
+        if (is_deferred(r)) {
+          r
+        } else {
+          deferred$new(function(resolve, reject) resolve(r))
+        }
       },
-      error = function(e) make_rejected_deferred(e)
+      error = function(e) deferred$new(function(resolve, reject) reject(e))
     )
   })
 
