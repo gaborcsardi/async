@@ -13,7 +13,7 @@
 #' @export
 #' @examples
 #' ## Try a download at most 5 times
-#' dx <- retry(
+#' dx <- async_retry(
 #'   function() http_get("https://httpbin.org"),
 #'   times = 5
 #' )$then(~ .$status_code)
