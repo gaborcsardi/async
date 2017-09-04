@@ -1,7 +1,20 @@
 
+#' Keep element using an asyncronous predicate function
+#'
+#' @param .x A list or atomic vector.
+#' @param .p An asynchronous predicate function.
+#' @param ... Additional arguments to the predicate function.
+#' @return A deferred value for the result.
+#'
+#' @family async iterators
 #' @export
+#' @examples
+#' ## Filter out non-working URLs
+#' urls <- c("https://httpbin.org/get", "https://httpbin.org/status/404")
+#' test_url <- async_sequence(http_head, ~ identical(.$status_code, 200L))
+#' await(async_filter(urls, test_url))
 
-filter <- function(.x, .p, ...) {
+async_filter <- function(.x, .p, ...) {
   defs <- lapply(.x, async(.p), ...)
   num_todo <- length(defs)
   keep <- logical(num_todo)

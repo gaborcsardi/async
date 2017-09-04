@@ -1,4 +1,57 @@
 
+#' Deferred value
+#'
+#' @section Usage:
+#' ```
+#' dx <- deferred$new(action)
+#'
+#' dx$get_state()
+#' dx$get_value()
+#' dx$then(on_fulfilled = NULL, on_rejected = NULL)
+#' ```
+#'
+#' @section Arguments:
+#' \describe{
+#'   \item{action}{Function to kick off asynchronous I/O or computation.
+#'     See more below.}
+#'   \item{on_fulfilled}{Function to call when the deferred value was
+#'     success fully resolved.}
+#'   \item{on_rejected}{Function to call when the deferrred value was
+#'     rejected because of an error.}
+#' }
+#'
+#' @section Details:
+#'
+#' `deferred$new` creates a new deferred value. It argument is an `action`
+#' function, which must have two arguments: `resolve` and `reject`.
+#' The `action` function should be a piece of code that returns quickly, but
+#' initiates a potentially long-running, asynchronous task. If/when the task
+#' successfully completes, call `resolve(value)` where `value` is the
+#' result of the I/O or computation (like the return value). If the task
+#' fails, call `reject(reason)`, where `reason` is either an error object,
+#' or a character string.
+#'
+#' `dx$get_state()` returns the state of the deferred value. A deferred
+#' value can be in three states: `"pending"`, `"resolved"` or `"rejected"`.
+#'
+#' `dx$get_value()` returns the resolved value, or the error message or
+#' object of a deferred value. It is an error to call this method on a
+#' deferred value that is pending.
+#'
+#' `dx$then()` creates a deferred value whose resolution (and rejection)
+#' depends on the `dx` deferred value. When `dx` is successfully
+#' resolved, the `on_fulfilled` function is called, with the resolved
+#' value as an argument. If `dx` is rejected, then `on_rejected` is called,
+#' with the error object or message as the argument.
+#'
+#' Note that the deferred value created by `dx$then()` will resolve
+#' successfully, unless an error is throws from within `on_fulfilled` or
+#' `on_rejected`. Whether `dx` was rejected or not, does not matter in this
+#' case. This allows using `on_rejected` as an error handler.
+#'
+#' @name deferred
+NULL
+
 #' @importFrom R6 R6Class
 #' @export
 
@@ -124,7 +177,16 @@ def__reject <- function(self, private, reason) {
   }
 }
 
+#' Is object a deferred value?
+#'
+#' @param x object
+#' @return Whether it is a deferred value.
+#'
 #' @export
+#' @examples
+#' is_deferred(1:10)
+#' is_deferred(dx <- delay(1/100))
+#' is_deferred(await(dx))
 
 is_deferred <- function(x) {
   inherits(x, "deferred")

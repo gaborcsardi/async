@@ -1,11 +1,11 @@
 
-context("until")
+context("async_until")
 
-test_that("until", {
+test_that("async_until", {
 
   count <- 1
 
-  result <- await(until(
+  result <- await(async_until(
     function() count == 5,
     function() {
       delay(1/1000)$then(function(value) count <<- count + 1)
@@ -16,11 +16,11 @@ test_that("until", {
   expect_equal(result, 5)
 })
 
-test_that("until is always called once", {
+test_that("async_until is always called once", {
 
   called <- FALSE
 
-  result <- await(until(
+  result <- await(async_until(
     function() TRUE,
     function() {
       delay(1/1000)$then(function(value) called <<- TRUE)
@@ -34,7 +34,7 @@ test_that("until is always called once", {
 test_that("test function throws", {
 
   expect_error(
-    await(until(
+    await(async_until(
       function() stop("doh"),
       function() {
         delay(1/1000)$then(function(value) called <<- TRUE)

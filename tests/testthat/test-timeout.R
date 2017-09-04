@@ -1,22 +1,22 @@
 
-context("timeout")
+context("async_timeout")
 
 test_that("timed out", {
   f <- function() delay(1/10)$then(function(value) "OK")
-  expect_error(await(timeout(f, 1/1000)), "Timed out")
+  expect_error(await(async_timeout(f, 1/1000)), "Timed out")
 })
 
 test_that("did not time out", {
   f <- function() delay(1/1000)$then(function(value) "OK")
-  expect_equal(await(timeout(f, 1/100)), "OK")
+  expect_equal(await(async_timeout(f, 1/100)), "OK")
 })
 
-test_that("error before timeout", {
+test_that("error before async_timeout", {
   f <- function() delay(1/1000)$then(function(value) stop("oops"))
-  expect_error(await(timeout(f, 1/10)), "oops")
+  expect_error(await(async_timeout(f, 1/10)), "oops")
 })
 
-test_that("error after timeout", {
+test_that("error after async_timeout", {
   f <- function() delay(1/10)$then(function(value) stop("oops"))
-  expect_error(await(timeout(f, 1/1000)), "Timed out")
+  expect_error(await(async_timeout(f, 1/1000)), "Timed out")
 })

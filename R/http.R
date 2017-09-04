@@ -10,13 +10,15 @@
 #' via a deferred.
 #'
 #' @param url URL to connect to.
-#' @return Task id that can be waited on with [wait_for()].
+#' @return Deferred object.
 #'
 #' @family asyncronous HTTP calls
 #' @export
 #' @importFrom curl new_handle
 #' @examples
-#' TODO
+#' dx <- http_get("https://httpbin.org/status/200")$
+#'   then(~ .$status_code)
+#' await(dx)
 
 http_get <- function(url) {
   assert_that(is_string(url))
@@ -27,13 +29,21 @@ http_get <- function(url) {
 #' Asynchronous HTTP HEAD request
 #'
 #' @inheritParams http_get
-#' @return Task id that can be waited on with [wait_for()].
+#' @return Deferred object.
 #'
 #' @family asyncronous HTTP calls
 #' @export
 #' @importFrom curl handle_setopt
 #' @examples
-#' TODO
+#' dx <- http_head("https://httpbin.org/status/200")$
+#'   then(~ .$status_code)
+#' await(dx)
+#'
+#' # Check a list of URLs in parallel
+#' urls <- c("https://r-project.org", "https://httpbin.org")
+#' dx <- when_all(.list = lapply(urls, http_head))$
+#'   then(~ lapply(., "[[", "status_code"))
+#' await(dx)
 
 http_head <- function(url) {
   assert_that(is_string(url))

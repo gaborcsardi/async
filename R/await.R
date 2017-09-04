@@ -1,11 +1,43 @@
 
+#' Wait for the resolution of deferred a value
+#'
+#' Either until it is successfully resolved, or it is rejected.
+#' While waiting for the deferred value to resolve, the async event loop
+#' is running, so other async operations do *not* stop.
+#'
+#' If the deferred value resolves to another deferred value, then
+#' it wait on that as well, and so forth.
+#'
+#' @param def The deferred value to wait on. If not a deferred value,
+#'   then it is resolved immediately, to itself.
+#' @return The value of the deferred.
+#'
+#' @family await functions
 #' @export
+#' @examples
+#' dx <- delay(1/10)$then(~ 42)
+#' dx
+#' await(dx)
+#' await("foobar")
 
 await <- function(def) {
   await_list(def)[[1]]
 }
 
+#' Wait for a list of deferred values
+#'
+#' Similar to [await()], but waits for a list of deferred values.
+#'
+#' @param ... Deferred values to wait on.
+#' @param .list More deferred values to wait on.
+#'
+#' @family await functions
 #' @export
+#' @examples
+#' urls <- c("https://httpbin.org?q=1", "https://httpbin.org?q=2")
+#' dx <- lapply(urls, http_head)
+#' resp <- await_list(.list = dx)
+#' lapply(resp, "[[", "status_code")
 
 await_list <- function(..., .list = list()) {
   defs <- c(list(...), .list)
@@ -26,7 +58,22 @@ await_list <- function(..., .list = list()) {
   lapply(defs, get_value_x)
 }
 
+#' Wait for any of the deferred values to resolve
+#'
+#' Returns as soon as any of the specified deferred values is resolved or
+#' rejected. If multiple deferred values resolved, then an arbitrary one
+#' is returned.
+#'
+#' @param ... Deferred values.
+#' @param .list List of deferred values.
+#'
+#' @family await functions
 #' @export
+#' @examples
+#' # Returns as soon as one timer expires
+#' t1 <- delay(1)$then(~ 1)
+#' t2 <- delay(1/1000)$then(~ 2)
+#' await_any(t1, t2)
 
 await_any <- function(..., .list = list()) {
   defs <- c(list(...), .list)

@@ -7,11 +7,19 @@
 #' @param delay Time interval in seconds, the amount of time to delay
 #'   to delay the execution of the callback. It can be a fraction of a
 #'   second.
-#' @return Task id, it can be waited on with [wait_for()].
+#' @return A deferred object.
 #'
 #' @export
 #' @examples
-#' TODO
+#' ## Two HEAD requests with 1/2 sec delay between them
+#' resp <- list()
+#' dx <- http_head("https://httpbin.org?q=2")$
+#'   then(function(value) resp[[1]] <<- value$status_code)$
+#'   then(function(...) delay(1/2))$
+#'   then(function(...) http_head("https://httpbin.org?q=2"))$
+#'   then(function(value) resp[[2]] <<- value$status_code)
+#' await(dx)
+#' resp
 
 delay <- function(delay) {
   force(delay)

@@ -1,12 +1,12 @@
 
-context("reflect")
+context("async_reflect")
 
-test_that("reflect", {
+test_that("async_reflect", {
 
   badfun <- async(function() stop("oh no!"))
-  safefun <- reflect(badfun)
+  safefun <- async_reflect(badfun)
 
-  result <- await(when_all(safefun, safefun, safefun))
+  result <- await(when_all(safefun(), safefun(), safefun()))
 
   for (i in 1:3) {
     expect_s3_class(result[[i]]$error, "error")

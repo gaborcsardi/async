@@ -12,12 +12,20 @@ to delay the execution of the callback. It can be a fraction of a
 second.}
 }
 \value{
-Task id, it can be waited on with \code{\link[=wait_for]{wait_for()}}.
+A deferred object.
 }
 \description{
 Since R is single-threaded, the callback might be executed (much) later
 than the specified time period.
 }
 \examples{
-TODO
+## Two HEAD requests with 1/2 sec delay between them
+resp <- list()
+dx <- http_head("https://httpbin.org?q=2")$
+  then(function(value) resp[[1]] <<- value$status_code)$
+  then(function(...) delay(1/2))$
+  then(function(...) http_head("https://httpbin.org?q=2"))$
+  then(function(value) resp[[2]] <<- value$status_code)
+await(dx)
+resp
 }

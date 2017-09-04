@@ -13,7 +13,28 @@ make_rejected_deferred <- function(x) {
   })
 }
 
+#' Create an async function
+#'
+#' Create an async function, that returns a deferred value, from a
+#' regular function. If `fun` is already an async function, then it does
+#' nothing, just returns it.
+#'
+#' The result function will have the same arguments, with the same default
+#' values, and the same environment as the original input function.
+#'
+#' @param fun Original function.
+#' @return Async version of the original function.
+#'
 #' @export
+#' @examples
+#' f <- function(x) 42
+#' af <- async(f)
+#' is_async(f)
+#' is_async(af)
+#' f()
+#' dx <- af()
+#' dx
+#' await(dx)
 
 async <- function(fun) {
   fun <- as_function(fun)
@@ -35,7 +56,26 @@ async <- function(fun) {
   async_fun
 }
 
+#' Checks if a function is async
+#'
+#' If `fun` is not a function, an error is thrown.
+#'
+#' Currently, it checks for the `async` attribute, which is set by
+#' [async()].
+#'
+#' @param fun Function.
+#' @return Logical scalar, whether `fun` is async.
+#'
 #' @export
+#' @examples
+#' f <- function(x) 42
+#' af <- async(f)
+#' is_async(f)
+#' is_async(af)
+#' f()
+#' dx <- af()
+#' dx
+#' await(dx)
 
 is_async <- function(fun) {
   assert_that(is.function(fun))

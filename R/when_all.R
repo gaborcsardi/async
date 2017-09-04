@@ -1,5 +1,25 @@
 
+#' Deferred value for a set of deferred values
+#'
+#' Create a deferred value that is resolved when all listed deferred values
+#' are resolved. Note that the rejection of an input deferred value
+#' triggers the rejection of the deferred value returned by `when_all` as
+#' well.
+#'
+#' @param ... Deferred values.
+#' @param .list More deferred values.
+#' @return A deferred value, that is conditioned on all deferred values
+#'   in `...` and `.list`.
+#'
+#' @seealso [when_any()]
 #' @export
+#' @examples
+#' ## Check that the contents of two URLs are the same
+#' u1 <- http_get("https://httpbin.org/get")
+#' u2 <- http_get("https://eu.httpbin.org/get")
+#' dx <- when_all(u1, u2)$
+#'   then(~ identical(.[[1]]$content, .[[2]]$content))
+#' await(dx)
 
 when_all <- function(..., .list = list()) {
   defs <- c(list(...), .list)

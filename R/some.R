@@ -1,7 +1,8 @@
 
 #' @export
+#' @rdname async_every
 
-some <- function(.x, .p, ...) {
+async_some <- function(.x, .p, ...) {
   defs <- lapply(.x, async(.p), ...)
   num_todo <- length(defs)
   done <- FALSE

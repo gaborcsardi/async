@@ -10,13 +10,21 @@ http_head(url)
 \item{url}{URL to connect to.}
 }
 \value{
-Task id that can be waited on with \code{\link[=wait_for]{wait_for()}}.
+Deferred object.
 }
 \description{
 Asynchronous HTTP HEAD request
 }
 \examples{
-TODO
+dx <- http_head("https://httpbin.org/status/200")$
+  then(~ .$status_code)
+await(dx)
+
+# Check a list of URLs in parallel
+urls <- c("https://r-project.org", "https://httpbin.org")
+dx <- when_all(.list = lapply(urls, http_head))$
+  then(~ lapply(., "[[", "status_code"))
+await(dx)
 }
 \seealso{
 Other asyncronous HTTP calls: \code{\link{http_get}}

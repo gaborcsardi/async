@@ -10,14 +10,16 @@ http_get(url)
 \item{url}{URL to connect to.}
 }
 \value{
-Task id that can be waited on with \code{\link[=wait_for]{wait_for()}}.
+Deferred object.
 }
 \description{
 Start an HTTP GET request in the background, and report its completion
 via a deferred.
 }
 \examples{
-TODO
+dx <- http_get("https://httpbin.org/status/200")$
+  then(~ .$status_code)
+await(dx)
 }
 \seealso{
 Other asyncronous HTTP calls: \code{\link{http_head}}
