@@ -16,8 +16,7 @@ make_rejected_deferred <- function(x) {
 #' @export
 
 async <- function(fun) {
-  assert_that(is.function(fun))
-
+  fun <- as_function(fun)
   if (is_async(fun)) return(fun)
 
   async_fun <- fun
