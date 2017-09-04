@@ -1,7 +1,7 @@
 
 context("await")
 
-test_that("creates a promise as needed", {
+test_that("creates a deferred as needed", {
   expect_equal(await("foo"), "foo")
 })
 

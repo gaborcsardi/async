@@ -23,7 +23,7 @@ test_that("it returns a function with the same arity", {
   }
 })
 
-test_that("when called it returns a promise", {
+test_that("when called it returns a deferred", {
   fun <- async(function() "foo")
   dx <- fun()
   expect_true(is_deferred(dx))

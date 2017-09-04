@@ -20,7 +20,7 @@
 #'     success fully resolved.}
 #'   \item{on_rejected}{Function to call when the deferrred value was
 #'     rejected because of an error.}
-#'   \item{on_finally}{Function to call after the promise was resolved or
+#'   \item{on_finally}{Function to call after the deferred was resolved or
 #'     rejected.}
 #' }
 #'
