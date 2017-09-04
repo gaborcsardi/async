@@ -1,0 +1,13 @@
+
+context("sequence")
+
+test_that("sequence", {
+
+  add1 <- function(n) { n ; delay(10/1000)$then(function(value) n + 1) }
+  mul3 <- function(n) { n ; delay(10/1000)$then(function(value) n * 3) }
+
+  add1mul3 <- sequence(add1, mul3)
+  result <- await(add1mul3(4))
+
+  expect_equal(result, 15)
+})
