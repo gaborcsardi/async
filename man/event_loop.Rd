@@ -17,13 +17,10 @@ el$run_delay(delay, callback)
 \section{Arguments}{
 
 \describe{
-\item{ids}{The task ids to wait for.}
 \item{handle}{A \code{curl} handle to use for the \code{HTTP} operation.}
 \item{callback}{Callback function to call when the asynchronous
 operation is done. See details below.}
 \item{delay}{Number of seconds to delay the execution of the callback.}
-\item{...}{Additional arguments to store in the task. These are
-currently not used for anything.}
 }
 }
 

@@ -4,7 +4,7 @@
 \alias{async_map}
 \title{Apply an asynchronous function to each element of a vector}
 \usage{
-async_map(.x, .f, ...)
+async_map(.x, .f, ..., .args = list(), .limit = Inf)
 }
 \arguments{
 \item{.f}{Asynchronous function to apply.}
