@@ -84,6 +84,10 @@ deferred <- R6Class(
 )
 
 def_init <- function(self, private, action) {
+  if (!is.function(action)) {
+    action <- as_function(action)
+    formals(action) <- alist(resolve = NULL, reject = NULL)
+  }
   assert_that(is_action_function(action))
   action(private$resolve, private$reject)
   invisible(self)
