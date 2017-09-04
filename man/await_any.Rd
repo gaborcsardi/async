@@ -23,6 +23,6 @@ t2 <- delay(1/1000)$then(~ 2)
 await_any(t1, t2)
 }
 \seealso{
-Other await functions: \code{\link{await_list}},
+Other await functions: \code{\link{await_all}},
   \code{\link{await}}
 }

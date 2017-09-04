@@ -21,7 +21,7 @@
 #' await("foobar")
 
 await <- function(def) {
-  await_list(def)[[1]]
+  await_all(def)[[1]]
 }
 
 #' Wait for a list of deferred values
@@ -36,10 +36,10 @@ await <- function(def) {
 #' @examples
 #' urls <- c("https://httpbin.org?q=1", "https://httpbin.org?q=2")
 #' dx <- lapply(urls, http_head)
-#' resp <- await_list(.list = dx)
+#' resp <- await_all(.list = dx)
 #' lapply(resp, "[[", "status_code")
 
-await_list <- function(..., .list = list()) {
+await_all <- function(..., .list = list()) {
   defs <- c(list(...), .list)
   num_todo <- length(defs)
   for (d in defs) {

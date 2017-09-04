@@ -58,7 +58,7 @@ test_that("multiple then clauses", {
   dx3 <- dx$then(function(value) value$status_code)
   dx4 <- dx$then(function(value) http_head(value$url))
 
-  result <- await_list(dx2, dx3, dx4)
+  result <- await_all(dx2, dx3, dx4)
 
   expect_equal(result[[1]]$status_code, 404)
   expect_equal(result[[2]], 404)

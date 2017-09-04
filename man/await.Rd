@@ -29,6 +29,6 @@ await(dx)
 await("foobar")
 }
 \seealso{
-Other await functions: \code{\link{await_any}},
-  \code{\link{await_list}}
+Other await functions: \code{\link{await_all}},
+  \code{\link{await_any}}
 }

@@ -26,7 +26,7 @@ test_that("multiple async functions run in parallel", {
     then(function(value) expect_equal(x, 9))
   dx <- foo()
 
-  await_list(dx, dy)
+  await_all(dx, dy)
 })
 
 test_that("resumes with the value of the awaited expression", {
@@ -58,7 +58,7 @@ test_that("resumes with all values of the awaited expressions", {
   bar <- async(function() {
     await(delay(2/1000)$then(function(value) "bar"))
   })
-  all <- async(function() await_list(foo(), bar()))
+  all <- async(function() await_all(foo(), bar()))
 
   dx <- all()$
     then(function(result) expect_equal(result, list("foo", "bar")))
@@ -76,7 +76,7 @@ test_that("throws into the suspendable function the first error", {
   bar <- async(function() {
     delay(1/100)$then(function(value) stop("bar"))
   })
-  all <- async(function() await_list(foo(), bar()))
+  all <- async(function() await_all(foo(), bar()))
 
   dx <- all()$
     then(NULL, function(reason) expect_equal(reason$message, "bar"))
@@ -91,7 +91,7 @@ test_that("await with multiple tasks", {
   dx1 <- http_get("https://eu.httpbin.org/get")$then(~ .$status_code)
   dx2 <- http_get("https://eu.httpbin.org/get?q=42")$then(~ .$status_code)
 
-  await_list(dx1, dx2)
+  await_all(dx1, dx2)
   expect_equal(await(dx1), 200)
   expect_equal(await(dx2), 200)
 })
