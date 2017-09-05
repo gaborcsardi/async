@@ -30,5 +30,5 @@ dx <- when_all(u1, u2)$
 await(dx)
 }
 \seealso{
-\code{\link[=when_any]{when_any()}}
+\code{\link[=when_any]{when_any()}}, \code{\link[=when_some]{when_some()}}
 }
