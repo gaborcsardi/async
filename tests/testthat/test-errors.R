@@ -6,7 +6,7 @@ test_that("rejection", {
   dx <- delay(1/10000)$
     then(function(value) stop("ohno!"))
 
-  expect_error(await(dx, "ohno!"))
+  expect_error(await(dx), "ohno!")
 })
 
 test_that("error propagates", {
