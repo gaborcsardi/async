@@ -6,7 +6,7 @@ test_that("HTTP HEAD & synchronous then", {
 
   result <- await(
     dx <- http_head("https://eu.httpbin.org")$
-    then(function(value) value$status_code)
+      then(function(value) value$status_code)
   )
 
   expect_equal(result, 200)
