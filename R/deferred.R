@@ -130,7 +130,13 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
     handle_fulfill <- function(value) {
       tryCatch(
         {
-          if (is.function(on_fulfilled)) value <- on_fulfilled(value)
+          if (is.function(on_fulfilled)) {
+            if (num_args(on_fulfilled) >= 1) {
+              value <- on_fulfilled(value)
+            } else {
+              value <- on_fulfilled()
+            }
+          }
           resolve(value)
         },
         error = function(e) reject(e)
@@ -141,7 +147,11 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
       tryCatch(
         {
           if (is.function(on_rejected)) {
-            reason <- on_rejected(reason)
+            if (num_args(on_rejected) >= 1) {
+              reason <- on_rejected(reason)
+            } else {
+              reason <- on_rejected()
+            }
             resolve(reason)
           } else {
             reject(reason)

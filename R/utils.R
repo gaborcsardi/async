@@ -22,3 +22,7 @@ make_error <- function(message, class = "simpleError", call = NULL) {
     class = class
   )
 }
+
+num_args <- function(fun) {
+  length(formals(fun))
+}

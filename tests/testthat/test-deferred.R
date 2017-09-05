@@ -27,3 +27,16 @@ test_that("action in formula notation", {
   dx <- deferred$new(~ if (FALSE) resolve(TRUE) else reject("oops"))
   expect_error(await(dx), "oops")
 })
+
+test_that("on_fulfilled / on_rejected without arguments", {
+  dx <- deferred$new(~resolve(TRUE))$then(function() "OK")
+  expect_equal(await(dx), "OK")
+
+  dx <- deferred$new(~resolve(TRUE))$then(function() stop("oops"))
+  expect_error(await(dx), "oops")
+
+  dx <- deferred$new(~resolve(TRUE))$
+    then(function() stop("ooops"))$
+    catch(function() "aaah")
+  expect_equal(await(dx), "aaah")
+})
