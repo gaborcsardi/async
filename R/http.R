@@ -61,3 +61,11 @@ make_deferred_http <- function(handle) {
     })
   })
 }
+
+#' @export
+
+http_stop_for_status <- function(resp) {
+  if (!is.integer(resp$status_code)) stop("Not an HTTP response")
+  if (resp$status_code < 300) return(invisible(resp))
+  stop("HTTP error")
+}

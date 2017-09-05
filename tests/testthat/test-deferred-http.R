@@ -21,3 +21,10 @@ test_that("HEAD", {
 
   expect_equal(dx$get_value()$status_code, 200)
 })
+
+test_that("http_stop_for_status", {
+  dx <- http_get("https://httpbin.org/status/404")$
+    then(http_stop_for_status)
+
+  expect_error(await(dx), "HTTP error")
+})
