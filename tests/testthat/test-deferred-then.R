@@ -89,3 +89,23 @@ test_that("embedded then", {
   result <- await(add1(4)$then(mul3))
   expect_equal(result, 15)
 })
+
+test_that("more embedded thens", {
+
+  steps <- numeric()
+  dx <- async(function() steps <<- c(steps, 1))()$
+    then(function() {
+      async_constant()$
+        then(function() steps <<- c(steps, 2))$
+        then(function() steps <<- c(steps, 3))
+    })$
+    then(function() {
+      async_constant()$
+        then(function() steps <<- c(steps, 4))$
+        then(function() steps <<- c(steps, 5))
+    })$
+    then(function() steps <<- c(steps, 6))
+
+  await(dx)
+  expect_equal(steps, 1:6)
+})
