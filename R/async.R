@@ -31,13 +31,13 @@ async <- function(fun) {
     tryCatch(
       {
         r <- evalq({ !!! body(fun) })
-        if (is_deferred(r)) {
+        if (async::is_deferred(r)) {
           r
         } else {
-          deferred$new(function(resolve, reject) resolve(r))
+          async::deferred$new(function(resolve, reject) resolve(r))
         }
       },
-      error = function(e) deferred$new(function(resolve, reject) reject(e))
+      error = function(e) async::deferred$new(function(resolve, reject) reject(e))
     )
   })
 
