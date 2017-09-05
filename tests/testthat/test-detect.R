@@ -4,6 +4,7 @@ context("async_detect")
 test_that("async_detect", {
 
   is_odd <- async(function(x) {
+    force(x)
     delay(1/1000)$
       then(function(value) as.logical(x %% 2))
   })
