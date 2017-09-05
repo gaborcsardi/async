@@ -21,3 +21,15 @@ test_that("HEAD", {
 
   await(dx)
 })
+
+test_that("headers", {
+
+  skip_if_offline()
+
+  headers = c("X-Header-Test" = "foobar", "X-Another" = "boooyakasha")
+  dx <- http_get("https://eu.httpbin.org/headers", headers = headers)$
+    then(~ jsonlite::fromJSON(rawToChar(.$content), simplifyVector = FALSE))
+
+  expect_equal(await(dx)$headers$`X-Header-Test`, "foobar")
+  expect_equal(await(dx)$headers$`X-Another`, "boooyakasha")
+})

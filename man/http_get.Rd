@@ -4,10 +4,12 @@
 \alias{http_get}
 \title{Asynchronous HTTP GET request}
 \usage{
-http_get(url)
+http_get(url, headers = character())
 }
 \arguments{
 \item{url}{URL to connect to.}
+
+\item{headers}{HTTP headers to send.}
 }
 \value{
 Deferred object.

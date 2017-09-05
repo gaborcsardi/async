@@ -10,19 +10,21 @@
 #' via a deferred.
 #'
 #' @param url URL to connect to.
+#' @param headers HTTP headers to send.
 #' @return Deferred object.
 #'
 #' @family asyncronous HTTP calls
 #' @export
-#' @importFrom curl new_handle
+#' @importFrom curl new_handle handle_setheaders
 #' @examples
 #' dx <- http_get("https://httpbin.org/status/200")$
 #'   then(~ .$status_code)
 #' await(dx)
 
-http_get <- function(url) {
+http_get <- function(url, headers = character()) {
   assert_that(is_string(url))
   handle <- new_handle(url = url)
+  handle_setheaders(handle, .list = headers)
   make_deferred_http(handle)
 }
 
@@ -45,9 +47,10 @@ http_get <- function(url) {
 #'   then(~ lapply(., "[[", "status_code"))
 #' await(dx)
 
-http_head <- function(url) {
+http_head <- function(url, headers = character()) {
   assert_that(is_string(url))
   handle <- new_handle(url = url)
+  handle_setheaders(handle, .list = headers)
   handle_setopt(handle, customrequest = "HEAD", nobody = TRUE)
   make_deferred_http(handle)
 }

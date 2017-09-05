@@ -4,10 +4,12 @@
 \alias{http_head}
 \title{Asynchronous HTTP HEAD request}
 \usage{
-http_head(url)
+http_head(url, headers = character())
 }
 \arguments{
 \item{url}{URL to connect to.}
+
+\item{headers}{HTTP headers to send.}
 }
 \value{
 Deferred object.
