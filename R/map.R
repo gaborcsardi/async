@@ -1,9 +1,11 @@
 
 #' Apply an asynchronous function to each element of a vector
 #'
-#' @param A list or atomic vector.
+#' @param .x A list or atomic vector.
 #' @param .f Asynchronous function to apply.
 #' @param ... Additional arguments to `.f`.
+#' @param .args More additional arguments to `.f`.
+#' @param .limit Number of elements to process simulateneously.
 #' @return Deferred value that is resolved after all deferred values
 #'   from the application of `.f` are resolved.
 #'

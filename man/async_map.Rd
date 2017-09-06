@@ -7,11 +7,15 @@
 async_map(.x, .f, ..., .args = list(), .limit = Inf)
 }
 \arguments{
+\item{.x}{A list or atomic vector.}
+
 \item{.f}{Asynchronous function to apply.}
 
 \item{...}{Additional arguments to \code{.f}.}
 
-\item{A}{list or atomic vector.}
+\item{.args}{More additional arguments to \code{.f}.}
+
+\item{.limit}{Number of elements to process simulateneously.}
 }
 \value{
 Deferred value that is resolved after all deferred values
