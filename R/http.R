@@ -67,7 +67,7 @@ make_deferred_http <- function(handle) {
 
 #' Throw R errors for HTTP errors
 #'
-#' Status codes below 300 are considered successful, other will trigger
+#' Status codes below 300 are considered successful, others will trigger
 #' errors.
 #'
 #' @param resp HTTP response from [http_get()], [http_head()], etc.

@@ -14,7 +14,7 @@ The HTTP response, invisibly, if it is considered successful.
 Otherwise an error is thrown.
 }
 \description{
-Status codes below 300 are considered successful, other will trigger
+Status codes below 300 are considered successful, others will trigger
 errors.
 }
 \examples{
