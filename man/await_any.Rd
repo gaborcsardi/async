@@ -24,5 +24,5 @@ await_any(t1, t2)
 }
 \seealso{
 Other await functions: \code{\link{await_all}},
-  \code{\link{await}}
+  \code{\link{await_env}}, \code{\link{await}}
 }

@@ -26,3 +26,7 @@ make_error <- function(message, class = "simpleError", call = NULL) {
 num_args <- function(fun) {
   length(formals(fun))
 }
+
+sort_by_name <- function(x) {
+  x[order(names(x))]
+}

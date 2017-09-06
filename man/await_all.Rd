@@ -22,5 +22,5 @@ lapply(resp, "[[", "status_code")
 }
 \seealso{
 Other await functions: \code{\link{await_any}},
-  \code{\link{await}}
+  \code{\link{await_env}}, \code{\link{await}}
 }
