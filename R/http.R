@@ -65,7 +65,21 @@ make_deferred_http <- function(handle) {
   })
 }
 
+#' Throw R errors for HTTP errors
+#'
+#' Status codes below 300 are considered successful, other will trigger
+#' errors.
+#'
+#' @param resp HTTP response from [http_get()], [http_head()], etc.
+#' @return The HTTP response, invisibly, if it is considered successful.
+#'   Otherwise an error is thrown.
+#'
 #' @export
+#' @examples
+#' dx <- http_get("https://httpbin.org/status/404")$
+#'   then(http_stop_for_status)
+#'
+#' tryCatch(await(dx), error = function(e) e)
 
 http_stop_for_status <- function(resp) {
   if (!is.integer(resp$status_code)) stop("Not an HTTP response")
