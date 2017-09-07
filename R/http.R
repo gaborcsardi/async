@@ -67,11 +67,12 @@ make_deferred_http <- function(handle) {
 
 #' Throw R errors for HTTP errors
 #'
-#' Status codes below 300 are considered successful, others will trigger
-#' errors.
+#' Status codes below 400 are considered successful, others will trigger
+#' errors. Note that this is different from the `httr` package, which
+#' considers the 3xx status code errors as well.
 #'
 #' @param resp HTTP response from [http_get()], [http_head()], etc.
-#' @return The HTTP response, invisibly, if it is considered successful.
+#' @return The HTTP response invisibly, if it is considered successful.
 #'   Otherwise an error is thrown.
 #'
 #' @export
@@ -83,6 +84,6 @@ make_deferred_http <- function(handle) {
 
 http_stop_for_status <- function(resp) {
   if (!is.integer(resp$status_code)) stop("Not an HTTP response")
-  if (resp$status_code < 300) return(invisible(resp))
+  if (resp$status_code < 400) return(invisible(resp))
   stop("HTTP error")
 }

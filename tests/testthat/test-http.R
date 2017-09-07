@@ -33,3 +33,12 @@ test_that("headers", {
   expect_equal(await(dx)$headers$`X-Header-Test`, "foobar")
   expect_equal(await(dx)$headers$`X-Another`, "boooyakasha")
 })
+
+test_that("304 is not an error", {
+
+  skip_if_offline()
+
+  dx <- http_get("https://httpbin.org/status/304")$
+    then(http_stop_for_status)
+  expect_silent(await(dx))
+})

@@ -10,12 +10,13 @@ http_stop_for_status(resp)
 \item{resp}{HTTP response from \code{\link[=http_get]{http_get()}}, \code{\link[=http_head]{http_head()}}, etc.}
 }
 \value{
-The HTTP response, invisibly, if it is considered successful.
+The HTTP response invisibly, if it is considered successful.
 Otherwise an error is thrown.
 }
 \description{
-Status codes below 300 are considered successful, others will trigger
-errors.
+Status codes below 400 are considered successful, others will trigger
+errors. Note that this is different from the \code{httr} package, which
+considers the 3xx status code errors as well.
 }
 \examples{
 dx <- http_get("https://httpbin.org/status/404")$
