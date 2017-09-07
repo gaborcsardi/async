@@ -20,7 +20,7 @@
 #' await(dx)
 
 async_map <- function(.x, .f, ..., .args = list(), .limit = Inf) {
-  if (.limit != Inf)  {
+  if (.limit < length(.x))  {
     async_map_limit(.x, .f, ..., .args = .args, .limit = .limit)
   } else {
     defs <- do.call(lapply, c(list(.x, async(.f), ...), .args))
@@ -60,7 +60,7 @@ async_map_limit <- function(.x, .f, ..., .args = list(), .limit = Inf) {
     }
     xreject <- function(reason) reject(reason)
 
-    for (ii in seq_len(min(len, .limit))) {
+    for (ii in seq_len(.limit)) {
       local({
         i <- ii
         do.call(.f, c(list(.x[[i]]), args))$then(
