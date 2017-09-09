@@ -3,9 +3,9 @@ Title: Asynchronous HTTP
 Version: 0.0.0.9000
 Author: Gábor Csárdi
 Maintainer: Gábor Csárdi <csardi.gabor@gmail.com>
-Description: Define tasks, that can stop on an HTTP request, and then
-    continue later, once the HTTP response is in. An event loop keeps the
-    tasks running.
+Description: The `async` package brings asychronous I/O and
+    computation to R. As a first step it implements asynchronous
+    HTTP requests.
 License: MIT + file LICENSE
 LazyData: true
 URL: https://github.com/r-lib/async#readme
