@@ -11,7 +11,8 @@ LazyData: true
 URL: https://github.com/r-lib/async#readme
 BugReports: https://github.com/r-lib/async/issues
 RoxygenNote: 6.0.1
-Suggests: 
+Suggests:
+    covr,
     jsonlite,
     testthat
 Encoding: UTF-8

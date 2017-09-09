@@ -9,6 +9,7 @@
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/github/r-lib/async?svg=true)](https://ci.appveyor.com/project/gaborcsardi/async)
 [![](http://www.r-pkg.org/badges/version/async)](http://www.r-pkg.org/pkg/async)
 [![CRAN RStudio mirror downloads](http://cranlogs.r-pkg.org/badges/async)](http://www.r-pkg.org/pkg/async)
+[![Coverage Status](https://img.shields.io/codecov/c/github/r-lib/async/master.svg)](https://codecov.io/github/r-lib/async?branch=master)
 
 The `async` package brings asynchronous (async) computation and I/O to R.
 It uses an event loop to schedule asynchronous functions that
