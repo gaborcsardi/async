@@ -8,8 +8,8 @@ Description: Define tasks, that can stop on an HTTP request, and then
     tasks running.
 License: MIT + file LICENSE
 LazyData: true
-URL: https://github.com/rstudio/async#readme
-BugReports: https://github.com/rstudio/async/issues
+URL: https://github.com/r-lib/async#readme
+BugReports: https://github.com/r-lib/async/issues
 RoxygenNote: 6.0.1
 Suggests: 
     jsonlite,

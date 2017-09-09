@@ -5,8 +5,8 @@
 
 > Asynchronous HTTP
 
-[![Linux Build Status](https://travis-ci.org/rstudio/async.svg?branch=master)](https://travis-ci.org/rstudio/async)
-[![Windows Build status](https://ci.appveyor.com/api/projects/status/github/rstudio/async?svg=true)](https://ci.appveyor.com/project/gaborcsardi/async)
+[![Linux Build Status](https://travis-ci.org/r-lib/async.svg?branch=master)](https://travis-ci.org/r-lib/async)
+[![Windows Build status](https://ci.appveyor.com/api/projects/status/github/r-lib/async?svg=true)](https://ci.appveyor.com/project/gaborcsardi/async)
 [![](http://www.r-pkg.org/badges/version/async)](http://www.r-pkg.org/pkg/async)
 [![CRAN RStudio mirror downloads](http://cranlogs.r-pkg.org/badges/async)](http://www.r-pkg.org/pkg/async)
 
@@ -18,7 +18,7 @@ report their results via deferred values.
 
 
 ```r
-devtools::install_github("rstudio/async")
+devtools::install_github("r-lib/async")
 ```
 
 ## Introduction
