@@ -28,17 +28,18 @@ async <- function(fun) {
 
   async_fun <- fun
   body(async_fun) <- expr({
-    tryCatch(
-      {
-        r <- evalq({ !!! body(fun) })
-        if (async::is_deferred(r)) {
-          r
-        } else {
-          async::deferred$new(function(resolve, reject) resolve(r))
-        }
-      },
-      error = function(e) async::deferred$new(function(resolve, reject) reject(e))
-    )
+    async::deferred$new(function(resolve, reject) {
+      force(resolve) ; force(reject)
+      async:::get_default_event_loop()$defer_next_tick(function() {
+        tryCatch(
+          resolve(evalq(
+            { !!! body(fun) },
+            envir = parent.env(parent.env(environment()))
+          )),
+          error = function(e) reject(e)
+        )
+      })
+    })
   })
 
   attr(async_fun, "async") <- list(TRUE)

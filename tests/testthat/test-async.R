@@ -30,15 +30,15 @@ test_that("when called it returns a deferred", {
   await(dx)
 })
 
-test_that("begins sync and continues async", {
+test_that("begins asynchronously", {
   x <- 5
   foo <- async(function() x <<- 7)
   dx <- foo()$
-    then(function(value) expect_equal(x, 9))$
-    then(function(value) {})
-  expect_equal(x, 7)
+    then(function() expect_equal(x, 7))
+  expect_equal(x, 5)
   x <- 9
   await(dx)
+  expect_equal(x, 7)
 })
 
 test_that("preserves closure", {
