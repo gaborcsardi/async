@@ -17,3 +17,12 @@ is_action_function <- function(x) {
 on_failure(is_action_function) <- function(call, env) {
   paste0(deparse(call$x), " is not a function with two arguments")
 }
+
+is_time_interval <- function(x) {
+  inherits(x, "difftime") ||
+    (is.numeric(x) && length(x) == 1 && !is.na(x) && x >= 0)
+}
+
+on_failure(is_time_interval) <- function(call, env) {
+  paste0(deparse(call$x), " is not a valid time interval")
+}

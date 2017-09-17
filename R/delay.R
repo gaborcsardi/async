@@ -22,7 +22,7 @@
 #' resp
 
 delay <- function(delay) {
-  force(delay)
+  assert_that(is_time_interval(delay))
   deferred$new(function(resolve, reject) {
     force(resolve)
     force(reject)
