@@ -69,11 +69,9 @@ make_deferred_http <- function(handle, file, on_progress) {
     function(resolve, reject, progress) {
       force(resolve)
       force(reject)
-      get_default_event_loop()$run_http(
+      get_default_event_loop()$add_http(
         handle,
-        function(err, res) {
-          if (is.null(err)) resolve(res) else reject(err)
-        },
+        function(err, res) if (is.null(err)) resolve(res) else reject(err),
         progress,
         file
       )

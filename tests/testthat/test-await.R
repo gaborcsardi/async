@@ -46,7 +46,7 @@ test_that("throws into the suspendable function", {
   })
 
   dx <- foo()$
-    then(NULL, function(reason) expect_equal(reason$message, "blah"))
+    then(NULL, function(reason) expect_match(reason$message, "blah"))
 
   await(dx)
 })

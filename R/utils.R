@@ -30,3 +30,7 @@ num_args <- function(fun) {
 sort_by_name <- function(x) {
   x[order(names(x))]
 }
+
+get_cond_message <- function(x) {
+  if (is.character(x)) paste(x, collapse = "\n") else conditionMessage(x)
+}

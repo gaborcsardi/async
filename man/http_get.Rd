@@ -32,3 +32,4 @@ await(dx)
 \seealso{
 Other asyncronous HTTP calls: \code{\link{http_head}}
 }
+\concept{asyncronous HTTP calls}

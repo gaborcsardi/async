@@ -7,8 +7,8 @@
 #' ```
 #' el <- event_loop$new()
 #'
-#' el$run_http(handle, callback)
-#' el$run_delay(delay, callback)
+#' el$add_http(handle, callback)
+#' el$add_delayed(delay, func, callback)
 #' ```
 #'
 #' @section Arguments:
@@ -17,15 +17,16 @@
 #'   \item{callback}{Callback function to call when the asynchronous
 #'      operation is done. See details below.}
 #'   \item{delay}{Number of seconds to delay the execution of the callback.}
+#'   \item{func}{TODO}
 #' }
 #'
 #' @section Details:
-#' `$run_http()` starts an asynchronous HTTP request, with the specified
+#' `$add_http()` starts an asynchronous HTTP request, with the specified
 #' `curl` handle. Once the request is done, and the response is available
 #' (or an error happens), the callback is called with two arguments, the
 #' error object or message (if any) and the `curl` response object.
 #'
-#' `$run_delay()` starts a task with the specified delay.
+#' `$add_delayed()` starts a task with the specified delay.
 #'
 #' @section The default event loop:
 #'
@@ -44,6 +45,7 @@ event_loop <- R6Class(
     initialize = function()
       el_init(self, private),
 
+<<<<<<< HEAD
     run_http = function(handle, callback, file = NULL, progress = NULL)
       el_run_http(self, private, handle, callback, file, progress),
     run_delay = function(delay, callback)
@@ -51,6 +53,14 @@ event_loop <- R6Class(
 
     defer_next_tick = function(callback, args = list())
       el_defer_next_tick(self, private, callback, args),
+=======
+    add_http = function(handle, callback)
+      el_add_http(self, private, handle, callback),
+    add_delayed = function(delay, func, callback)
+      el_add_delayed(self, private, delay, func, callback),
+    add_next_tick = function(func, callback)
+      el_add_next_tick(self, private, func, callback),
+>>>>>>> Event loop now handles errors and stacks
 
     run = function(mode = c("default", "nowait", "once"))
       el_run(self, private, mode = match.arg(mode))
@@ -78,7 +88,7 @@ event_loop <- R6Class(
     tasks = list(),
     timers = Sys.time()[numeric()],
     pool = NULL,
-    next_ticks = list()
+    next_ticks = character()
   )
 )
 
@@ -148,18 +158,30 @@ el_run_http <- function(self, private, handle, callback, progress, file) {
   id
 }
 
-el_run_delay <- function(self, private, delay, callback) {
-  force(self) ; force(private) ; force(delay) ; force(callback)
-  id <- private$create_task(callback, data = list(delay = delay))
+el_add_delayed <- function(self, private, delay, func, callback) {
+  force(self); force(private); force(delay); force(func); force(callback)
+  id <- private$create_task(
+    callback,
+    data = list(
+      delay = delay,
+      func = func,
+      stack = sys.calls()
+    )
+  )
   private$timers[id] <- Sys.time() + as.difftime(delay, units = "secs")
   id
 }
 
-el_defer_next_tick <- function(self, private, callback, args) {
-  private$next_ticks <- append(
-    private$next_ticks,
-    list(list(callback, args))
+el_add_next_tick <- function(self, private, func, callback) {
+  force(self) ; force(private) ; force(callback)
+  id <- private$create_task(
+    callback,
+    data = list(
+      func = func,
+      stack = sys.calls()
+    )
   )
+  private$next_ticks <- c(private$next_ticks, id)
 }
 
 #' @importFrom curl multi_run
@@ -203,9 +225,11 @@ el_run <- function(self, private, mode) {
 
 el__run_pending <- function(self, private) {
   next_ticks <- private$next_ticks
-  private$next_ticks <- list()
-  for (nt in next_ticks) {
-    do.call(nt[[1]], nt[[2]])
+  private$next_ticks <- character()
+  for (id in next_ticks) {
+    task <- private$tasks[[id]]
+    private$tasks[[id]] <- NULL
+    error_callback(task$data$func, task$callback, task$data$stack)
   }
 
   length(next_ticks) > 0
@@ -242,7 +266,7 @@ el__run_timers <- function(self, private) {
     task <- private$tasks[[id]]
     private$tasks[[id]] <- NULL
     private$timers <- private$timers[setdiff(names(private$timers), id)]
-    task$callback()
+    error_callback(task$data$func(), task$callback, task$data$stack)
   }
 }
 
@@ -254,4 +278,73 @@ el__is_alive <- function(self, private) {
 
 el__update_time <- function(self, private) {
   private$time <- Sys.time()
+}
+
+#' Call `func` and then call `callback` with the result
+#'
+#' `callback` will be called with two arguments, the first one will the
+#' error object if `func()` threw an error, or `NULL` otherwise. The second
+#' argument is `NULL` on error, and the result of `func()` otherwise.
+#'
+#' The main purpose of this function is to capture the call stack on error.
+#' The captured call stack is relative to the event loop.
+#'
+#' @param func Function to call.
+#' @param callback Callback to call with the result of `func()`,
+#'   or the error thrown.
+#'
+#' @keywords internal
+
+
+error_callback <- function(func, callback, prev_stack = list()) {
+  error <- NULL
+  tryCatch(
+    withCallingHandlers(
+      result <- func(),
+      error = function(e) { e$stack <- sys.calls(); error <<- e; }
+    ),
+    error = identity
+  )
+  if (is.null(error)) {
+    callback(NULL, result)
+  } else {
+    drop <- error_callback_drop_num()
+    stack1 <- sys.calls()
+    error$stack <- c(
+      prev_stack,
+      head(tail(error$stack, - length(stack1) - drop[1] - 1), - drop[2])
+    )
+    class(error) <- unique(c("async_error", class(error)))
+    callback(error, NULL)
+  }
+}
+
+error_callback_drop_num <- (function() {
+  drop_num <- NULL
+  function() {
+    if (!is.null(drop_num)) return(drop_num)
+    stack1 <- sys.calls()
+    stack2 <- NULL
+    tryCatch(
+      withCallingHandlers(
+        stop("6b965374-2051-4efc-baf6-2564d771c7db"),
+        error = function(e) stack2 <<- sys.calls()
+      ),
+      error = identity
+    )
+    stop_frame <- find_in_stack(
+      stack2, quote(stop("6b965374-2051-4efc-baf6-2564d771c7db")))
+    drop_num <<- c(
+      stop_frame - length(stack1) - 1,
+      length(stack2) - stop_frame
+    )
+    drop_num
+  }
+})()
+
+find_in_stack <- function(stack, elem) {
+  for (i in rev(seq_along(stack))) {
+    if (identical(stack[[i]], elem)) return(i)
+  }
+  NULL
 }

@@ -94,6 +94,7 @@ deferred <- R6Class(
     progress_callback = NULL,
     cancel_callback = NULL,
     cancelled = FALSE,
+    stack = NULL,
 
     resolve = function(value)
       def__resolve(self, private, value),
@@ -102,6 +103,9 @@ deferred <- R6Class(
     progress = function(..., tick = NULL, total = NULL, ratio = NULL,
                         amount = NULL)
       def__progress(self, private, tick, total, ratio, amount, ...)
+
+    make_error_object = function()
+      def__make_error_object(self, private)
   )
 )
 
@@ -130,7 +134,7 @@ def_get_value <- function(self, private) {
   if (private$state == "pending") {
     stop("Deferred value not resolved yet")
   } else if (private$state == "rejected") {
-    stop(private$value)
+    stop(private$make_error_object())
   } else {
     private$value
   }
@@ -146,36 +150,38 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
     force(reject)
 
     handle_fulfill <- function(value) {
-      tryCatch(
-        {
+      force(value)
+      get_default_event_loop()$add_next_tick(
+        function() {
           if (is.function(on_fulfilled)) {
             if (num_args(on_fulfilled) >= 1) {
-              value <- on_fulfilled(value)
+              on_fulfilled(value)
             } else {
-              value <- on_fulfilled()
+              on_fulfilled()
             }
+          } else {
+            value
           }
-          resolve(value)
         },
-        error = function(e) reject(e)
+        function(err, res) if (is.null(err)) resolve(res) else reject(err)
       )
     }
 
     handle_reject <- function(reason) {
-      tryCatch(
-        {
+      force(reason)
+      get_default_event_loop()$add_next_tick(
+        function() {
           if (is.function(on_rejected)) {
             if (num_args(on_rejected) >= 1) {
-              reason <- on_rejected(reason)
+              on_rejected(reason)
             } else {
-              reason <- on_rejected()
+              on_rejected()
             }
-            resolve(reason)
           } else {
-            reject(reason)
+            stop(reason)
           }
         },
-        error = function(e) reject(e)
+        function(err, res) if (is.null(err)) resolve(res) else reject(err)
       )
     }
 
@@ -184,12 +190,10 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
       private$on_rejected <- c(private$on_rejected, list(handle_reject))
 
     } else if (private$state == "fulfilled") {
-      get_default_event_loop()$defer_next_tick(
-        handle_fulfill, list(private$value))
+      handle_fulfill(private$value)
 
     } else if (private$state == "rejected") {
-      get_default_event_loop()$defer_next_tick(
-        handle_reject, list(private$value))
+      handle_reject(private$value)
     }
   })
 
@@ -232,26 +236,27 @@ def__resolve <- function(self, private, value) {
     private$state <- "fulfilled"
     private$value <- value
     loop <- get_default_event_loop()
-    for (f in private$on_fulfilled) loop$defer_next_tick(f, list(value))
+    for (f in private$on_fulfilled) f(value)
     private$on_fulfilled <- list()
   }
 }
 
 def__reject <- function(self, private, reason) {
   if (private$cancelled) return()
-  if (private$state != "pending") stop("Deferred value already resolved")
+  if (private$state != "pending") stop("Deferred value already rejected")
   if (is_deferred(reason)) {
     reason$then(private$resolve, private$reject)
   } else {
     private$state <- "rejected"
-    private$value <- reason
+    private$value <-
+      if (is.character(reason)) simpleError(reason) else reason
     loop <- get_default_event_loop()
     if (inherits(reason, "async_cancelled") &&
         !is.null(private$cancel_callback)) {
       private$cancelled <- TRUE
       private$cancel_callback(conditionMessage(reason))
     }
-    for (f in private$on_rejected) loop$defer_next_tick(f, list(reason))
+    for (f in private$on_rejected) f(reason)
     private$on_rejected <- list()
   }
 }
@@ -262,6 +267,16 @@ def__progress <- function(self, private, tick, total, ratio, amount, ...) {
   args <- list(tick = tick, total = total, ratio = ratio, amount = amount)
   has <- intersect(names(args), names(formals(private$progress_callback)))
   do.call(private$progress_callback, c(list(...), args[has]))
+}
+
+def__make_error_object <- function(self, private) {
+  structure(
+    list(
+      message = private$value$message,
+      call = private$value$stack
+    ),
+    class = c("async_deferred_rejected", "error", "condition")
+  )
 }
 
 #' Is object a deferred value?

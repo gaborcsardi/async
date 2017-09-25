@@ -26,9 +26,10 @@ delay <- function(delay) {
   deferred$new(function(resolve, reject) {
     force(resolve)
     force(reject)
-    get_default_event_loop()$run_delay(
+    get_default_event_loop()$add_delayed(
       delay,
-      function() resolve(TRUE)
+      function() TRUE,
+      function(err, res) resolve(res)
     )
   })
 }

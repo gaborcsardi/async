@@ -35,3 +35,4 @@ Other async control flow: \code{\link{async_reflect}},
   \code{\link{async_sequence}}, \code{\link{async_until}},
   \code{\link{async_whilst}}
 }
+\concept{async control flow}

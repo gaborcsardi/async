@@ -30,15 +30,17 @@ async <- function(fun) {
   body(async_fun) <- expr({
     async::deferred$new(function(resolve, reject) {
       force(resolve) ; force(reject)
-      async:::get_default_event_loop()$defer_next_tick(function() {
-        tryCatch(
-          resolve(evalq(
+      async:::get_default_event_loop()$add_next_tick(
+        function() {
+          evalq(
             { !!! body(fun) },
             envir = parent.env(parent.env(environment()))
-          )),
-          error = function(e) reject(e)
-        )
-      })
+          )
+        },
+        function(err, res) {
+          if (is.null(err)) resolve(res) else reject(err)
+        }
+      )
     })
   })
 
