@@ -69,8 +69,8 @@ NULL
 deferred <- R6Class(
   "deferred",
   public = list(
-    initialize = function(action)
-      def_init(self, private, action),
+    initialize = function(action, on_progress = NULL)
+      def_init(self, private, action, on_progress),
     get_state = function()
       private$state,
     get_value = function()
@@ -90,21 +90,32 @@ deferred <- R6Class(
     value = NULL,
     on_fulfilled = list(),
     on_rejected = list(),
+    progress_callback = NULL,
 
     resolve = function(value)
       def__resolve(self, private, value),
     reject = function(reason)
-      def__reject(self, private, reason)
+      def__reject(self, private, reason),
+    progress = function(tick = NULL, total = NULL, ratio = NULL,
+                        amount = NULL)
+      def__progress(self, private, tick, total, ratio, amount)
   )
 )
 
-def_init <- function(self, private, action) {
+def_init <- function(self, private, action, on_progress) {
   if (!is.function(action)) {
     action <- as_function(action)
-    formals(action) <- alist(resolve = NULL, reject = NULL)
+    formals(action) <- alist(resolve = NULL, reject = NULL,
+                             progress = NULL)
   }
   assert_that(is_action_function(action))
-  action(private$resolve, private$reject)
+  assert_that(is.null(on_progress) || is.function(on_progress))
+  private$progress_callback <- on_progress
+  if (length(formals(action)) == 2) {
+    action(private$resolve, private$reject)
+  } else {
+    action(private$resolve, private$reject, private$progress)
+  }
   invisible(self)
 }
 
@@ -223,6 +234,14 @@ def__reject <- function(self, private, reason) {
     private$on_rejected <- list()
     if (!is.null(private$task)) private$task$callback()
   }
+}
+
+def__progress <- function(self, private, tick, total, ratio, amount) {
+  if (private$state != "pending") stop("Deferred value already resolved")
+  if (is.null(private$progress_callback)) return()
+  args <- list(tick = tick, total = total, ratio = ratio, amount = amount)
+  has <- intersect(names(args), names(formals(private$progress_callback)))
+  do.call(private$progress_callback, args[has])
 }
 
 #' Is object a deferred value?
