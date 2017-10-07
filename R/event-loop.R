@@ -95,6 +95,7 @@ el_run_http <- function(self, private, handle, callback, progress, file) {
   num_bytes <- 0; total <- NULL
   id <- private$create_task(callback, data = list(handle = handle))
   private$ensure_pool()
+  if (!is.null(file) && file.exists(file)) unlink(file)
   multi_add(
     handle = handle,
     pool = private$pool,
