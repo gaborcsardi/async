@@ -88,7 +88,7 @@ el_init <- function(self, private) {
   invisible(self)
 }
 
-#' @importFrom curl multi_add
+#' @importFrom curl multi_add parse_headers_list handle_data
 
 el_run_http <- function(self, private, handle, callback, progress, file) {
   self; private; handle; callback; progress; file
