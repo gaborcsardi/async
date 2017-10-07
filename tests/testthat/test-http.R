@@ -42,3 +42,28 @@ test_that("304 is not an error", {
     then(http_stop_for_status)
   expect_silent(await(dx))
 })
+
+test_that("http progress bars", {
+
+  skip_if_offline()
+
+  totalx <- NULL
+  amountx <- integer()
+  tmp <- tempfile()
+  on.exit(unlink(tmp, recursive = TRUE), add = TRUE)
+  dx <- http_get(
+    "https://httpbin.org/image/jpeg",
+    file = tmp <- tempfile(),
+    on_progress = function(total, amount) {
+      if (!is.null(total)) totalx <<- total
+      amountx <<- c(amountx, amount)
+    }
+  )
+
+  await(dx)
+
+  expect_equal(await(dx)$status_code, 200)
+  expect_true(file.exists(tmp))
+  expect_equal(file.size(tmp), utils::tail(amountx, 1))
+  expect_equal(totalx, utils::tail(amountx, 1))
+})

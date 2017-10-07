@@ -44,8 +44,8 @@ event_loop <- R6Class(
     initialize = function()
       el_init(self, private),
 
-    run_http = function(handle, callback)
-      el_run_http(self, private, handle, callback),
+    run_http = function(handle, callback, file = NULL, progress = NULL)
+      el_run_http(self, private, handle, callback, file, progress),
     run_delay = function(delay, callback)
       el_run_delay(self, private, delay, callback),
 
@@ -90,8 +90,9 @@ el_init <- function(self, private) {
 
 #' @importFrom curl multi_add
 
-el_run_http <- function(self, private, handle, callback) {
-  force(self) ; force(private) ; force(handle) ; force(callback)
+el_run_http <- function(self, private, handle, callback, progress, file) {
+  self; private; handle; callback; progress; file
+  num_bytes <- 0; total <- NULL
   id <- private$create_task(callback, data = list(handle = handle))
   private$ensure_pool()
   multi_add(
@@ -101,6 +102,26 @@ el_run_http <- function(self, private, handle, callback) {
       task <- private$tasks[[id]]
       private$tasks[[id]] <- NULL
       task$callback(NULL, response)
+    },
+    data = if (!is.null(file)) {
+      function(bytes) {
+        con <- file(file, open = "ab")
+        writeBin(bytes, con)
+        close(con)
+        if (is.null(total)) {
+          headers <- parse_headers_list(handle_data(handle)$headers)
+          tot <- as.numeric(headers$`content-length`)
+          if (!is.null(tot) && length(tot) >= 1 && !is.na(tot[[1]])) {
+            total <<- tot
+          }
+        }
+        num_bytes <<- num_bytes + length(bytes)
+        progress(
+          total = total,
+          amount = num_bytes,
+          ratio = if (is.null(total)) NULL else num_bytes / total
+        )
+      }
     },
     fail = function(error) {
       task <- private$tasks[[id]]

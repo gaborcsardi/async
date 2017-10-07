@@ -11,6 +11,10 @@
 #'
 #' @param url URL to connect to.
 #' @param headers HTTP headers to send.
+#' @param file If not `NULL`, it must be a string, specifying a file.
+#'   The body of the response is written to this file.
+#' @param on_progress Progress handler function. It is only used if the
+#'   response body is written to a file.
 #' @return Deferred object.
 #'
 #' @family asyncronous HTTP calls
@@ -21,11 +25,12 @@
 #'   then(~ .$status_code)
 #' await(dx)
 
-http_get <- function(url, headers = character()) {
+http_get <- function(url, headers = character(), file = NULL,
+                     on_progress = NULL) {
   assert_that(is_string(url))
   handle <- new_handle(url = url)
   handle_setheaders(handle, .list = headers)
-  make_deferred_http(handle)
+  make_deferred_http(handle, file, on_progress)
 }
 
 #' Asynchronous HTTP HEAD request
@@ -47,22 +52,31 @@ http_get <- function(url, headers = character()) {
 #'   then(~ lapply(., "[[", "status_code"))
 #' await(dx)
 
-http_head <- function(url, headers = character()) {
+http_head <- function(url, headers = character(), file = NULL,
+                      on_progress = NULL) {
   assert_that(is_string(url))
   handle <- new_handle(url = url)
   handle_setheaders(handle, .list = headers)
   handle_setopt(handle, customrequest = "HEAD", nobody = TRUE)
-  make_deferred_http(handle)
+  make_deferred_http(handle, file, on_progress)
 }
 
-make_deferred_http <- function(handle) {
-  deferred$new(function(resolve, reject) {
-    force(resolve)
-    force(reject)
-    get_default_event_loop()$run_http(handle, function(err, res) {
-      if (is.null(err)) resolve(res) else reject(err)
-    })
-  })
+make_deferred_http <- function(handle, file, on_progress) {
+  deferred$new(
+    function(resolve, reject, progress) {
+      force(resolve)
+      force(reject)
+      get_default_event_loop()$run_http(
+        handle,
+        function(err, res) {
+          if (is.null(err)) resolve(res) else reject(err)
+        },
+        progress,
+        file
+      )
+    },
+    on_progress = on_progress
+  )
 }
 
 #' Throw R errors for HTTP errors
