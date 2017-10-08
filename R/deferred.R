@@ -99,9 +99,9 @@ deferred <- R6Class(
       def__resolve(self, private, value),
     reject = function(reason)
       def__reject(self, private, reason),
-    progress = function(tick = NULL, total = NULL, ratio = NULL,
+    progress = function(..., tick = NULL, total = NULL, ratio = NULL,
                         amount = NULL)
-      def__progress(self, private, tick, total, ratio, amount)
+      def__progress(self, private, tick, total, ratio, amount, ...)
   )
 )
 
@@ -256,12 +256,12 @@ def__reject <- function(self, private, reason) {
   }
 }
 
-def__progress <- function(self, private, tick, total, ratio, amount) {
+def__progress <- function(self, private, tick, total, ratio, amount, ...) {
   if (private$state != "pending") stop("Deferred value already resolved")
   if (is.null(private$progress_callback)) return()
   args <- list(tick = tick, total = total, ratio = ratio, amount = amount)
   has <- intersect(names(args), names(formals(private$progress_callback)))
-  do.call(private$progress_callback, args[has])
+  do.call(private$progress_callback, c(list(...), args[has]))
 }
 
 #' Is object a deferred value?

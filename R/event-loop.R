@@ -100,6 +100,21 @@ el_run_http <- function(self, private, handle, callback, progress, file) {
     handle = handle,
     pool = private$pool,
     done = function(response) {
+      if (!is.null(file)) {
+        if (is.null(total)) {
+          headers <- parse_headers_list(response$headers)
+          tot <- as.numeric(headers$`content-length`)
+          if (!is.null(tot) && length(tot) >= 1 && !is.na(tot[[1]])) {
+            total <<- tot
+          }
+        }
+        progress(
+          status_code = response$status_code,
+          total = total,
+          amount = total,
+          ratio = 1.0
+        )
+      }
       task <- private$tasks[[id]]
       private$tasks[[id]] <- NULL
       task$callback(NULL, response)
