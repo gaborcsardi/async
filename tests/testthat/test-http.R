@@ -67,3 +67,29 @@ test_that("http progress bars", {
   expect_equal(file.size(tmp), utils::tail(amountx, 1))
   expect_equal(totalx, utils::tail(amountx, 1))
 })
+
+test_that("http progress bars & etags", {
+
+  skip_if_offline()
+
+  totalx <- NULL
+  amountx <- NULL
+  tmp <- tempfile()
+  on.exit(unlink(tmp, recursive = TRUE), add = TRUE)
+  dx <- http_get(
+    "https://httpbin.org/etag/etag",
+    file = tmp <- tempfile(),
+    headers = c("If-None-Match" = "etag"),
+    on_progress = function(total, amount) {
+      if (!is.null(total)) totalx <<- total
+      amountx <<- c(amountx, amount)
+    }
+  )
+
+  expect_equal(await(dx)$status_code, 304)
+  expect_equal(length(await(dx)$content), 0)
+
+  expect_null(totalx)
+  expect_null(amountx)
+  expect_false(file.exists(tmp))
+})
