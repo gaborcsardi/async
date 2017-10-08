@@ -94,6 +94,7 @@ deferred <- R6Class(
     on_rejected = list(),
     progress_callback = NULL,
     cancel_callback = NULL,
+    cancelled = FALSE,
 
     resolve = function(value)
       def__resolve(self, private, value),
@@ -216,12 +217,19 @@ def_finally <- function(self, private, on_finally) {
 }
 
 def_cancel <- function(self, private, reason) {
+  if (private$state != "pending") return()
+  private$cancelled <- TRUE
   if (!is.null(private$cancel_callback)) private$cancel_callback(reason)
+
+  private$state <- "rejected"
   cancel_cond <- structure(
     list(message = reason %||% "Promise cancelled", call = NULL),
     class = c("async_cancelled", "error", "condition")
   )
-  private$reject(cancel_cond)
+  private$value <- cancel_cond
+  loop <- get_default_event_loop()
+  for (f in private$on_rejected) loop$defer_next_tick(f, list(cancel_cond))
+  private$on_rejected <- list()
 }
 
 def__resolve <- function(self, private, value) {
@@ -239,6 +247,7 @@ def__resolve <- function(self, private, value) {
 }
 
 def__reject <- function(self, private, reason) {
+  if (private$cancelled) return()
   if (private$state != "pending") stop("Deferred value already resolved")
   if (is_deferred(reason)) {
     reason$then(private$resolve, private$reject)
