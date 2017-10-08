@@ -88,7 +88,6 @@ deferred <- R6Class(
   private = list(
     state = c("pending", "fulfilled", "rejected")[1],
     id = NULL,
-    task = NULL,
     value = NULL,
     on_fulfilled = list(),
     on_rejected = list(),
@@ -242,7 +241,6 @@ def__resolve <- function(self, private, value) {
     loop <- get_default_event_loop()
     for (f in private$on_fulfilled) loop$defer_next_tick(f, list(value))
     private$on_fulfilled <- list()
-    if (!is.null(private$task)) private$task$callback()
   }
 }
 
@@ -257,7 +255,6 @@ def__reject <- function(self, private, reason) {
     loop <- get_default_event_loop()
     for (f in private$on_rejected) loop$defer_next_tick(f, list(reason))
     private$on_rejected <- list()
-    if (!is.null(private$task)) private$task$callback()
   }
 }
 
