@@ -217,18 +217,11 @@ def_finally <- function(self, private, on_finally) {
 
 def_cancel <- function(self, private, reason) {
   if (private$state != "pending") return()
-  private$cancelled <- TRUE
-  if (!is.null(private$cancel_callback)) private$cancel_callback(reason)
-
-  private$state <- "rejected"
   cancel_cond <- structure(
     list(message = reason %||% "Promise cancelled", call = NULL),
     class = c("async_cancelled", "error", "condition")
   )
-  private$value <- cancel_cond
-  loop <- get_default_event_loop()
-  for (f in private$on_rejected) loop$defer_next_tick(f, list(cancel_cond))
-  private$on_rejected <- list()
+  private$reject(cancel_cond)
 }
 
 def__resolve <- function(self, private, value) {
@@ -253,6 +246,11 @@ def__reject <- function(self, private, reason) {
     private$state <- "rejected"
     private$value <- reason
     loop <- get_default_event_loop()
+    if (inherits(reason, "async_cancelled") &&
+        !is.null(private$cancel_callback)) {
+      private$cancelled <- TRUE
+      private$cancel_callback(conditionMessage(reason))
+    }
     for (f in private$on_rejected) loop$defer_next_tick(f, list(reason))
     private$on_rejected <- list()
   }
