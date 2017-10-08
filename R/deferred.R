@@ -69,8 +69,8 @@ NULL
 deferred <- R6Class(
   "deferred",
   public = list(
-    initialize = function(action, on_progress = NULL)
-      def_init(self, private, action, on_progress),
+    initialize = function(action, on_progress = NULL, on_cancel = NULL)
+      def_init(self, private, action, on_progress, on_cancel),
     get_state = function()
       private$state,
     get_value = function()
@@ -80,7 +80,9 @@ deferred <- R6Class(
     catch = function(on_rejected)
       def_catch(self, private, on_rejected),
     finally = function(on_finally)
-      def_finally(self, private, on_finally)
+      def_finally(self, private, on_finally),
+    cancel = function(reason = NULL)
+      def_cancel(self, private, reason)
   ),
 
   private = list(
@@ -91,6 +93,7 @@ deferred <- R6Class(
     on_fulfilled = list(),
     on_rejected = list(),
     progress_callback = NULL,
+    cancel_callback = NULL,
 
     resolve = function(value)
       def__resolve(self, private, value),
@@ -102,7 +105,7 @@ deferred <- R6Class(
   )
 )
 
-def_init <- function(self, private, action, on_progress) {
+def_init <- function(self, private, action, on_progress, on_cancel) {
   if (!is.function(action)) {
     action <- as_function(action)
     formals(action) <- alist(resolve = NULL, reject = NULL,
@@ -111,11 +114,15 @@ def_init <- function(self, private, action, on_progress) {
   assert_that(is_action_function(action))
   assert_that(is.null(on_progress) || is.function(on_progress))
   private$progress_callback <- on_progress
-  if (length(formals(action)) == 2) {
-    action(private$resolve, private$reject)
-  } else {
-    action(private$resolve, private$reject, private$progress)
+  assert_that(is.null(on_cancel) || is.function(on_cancel))
+  private$cancel_callback <- on_cancel
+
+  action_args <- names(formals(action))
+  args <- list(private$resolve, private$reject)
+  if (!is.na(pr_arg <- match("progress", action_args))) {
+    args$progress <- private$progress
   }
+  do.call(action, args)
   invisible(self)
 }
 
@@ -206,6 +213,15 @@ def_finally <- function(self, private, on_finally) {
       stop(reason)
     }
   )
+}
+
+def_cancel <- function(self, private, reason) {
+  if (!is.null(private$cancel_callback)) private$cancel_callback(reason)
+  cancel_cond <- structure(
+    list(message = reason %||% "Promise cancelled", call = NULL),
+    class = c("async_cancelled", "error", "condition")
+  )
+  private$reject(cancel_cond)
 }
 
 def__resolve <- function(self, private, value) {
