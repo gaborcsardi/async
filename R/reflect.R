@@ -16,7 +16,7 @@
 #' @examples
 #'  badfun <- async(function() stop("oh no!"))
 #'  safefun <- async_reflect(badfun)
-#'  await(when_all(safefun(), "good", safefun(), safefun()))
+#'  wait_for(when_all(safefun(), "good", safefun(), safefun()))
 
 async_reflect <- function(task) {
   task <- async(task)

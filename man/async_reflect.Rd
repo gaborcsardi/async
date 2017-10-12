@@ -23,7 +23,7 @@ a vector or list.
 \examples{
  badfun <- async(function() stop("oh no!"))
  safefun <- async_reflect(badfun)
- await(when_all(safefun(), "good", safefun(), safefun()))
+ wait_for(when_all(safefun(), "good", safefun(), safefun()))
 }
 \seealso{
 Other async control flow: \code{\link{async_retryable}},

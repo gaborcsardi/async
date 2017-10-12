@@ -22,7 +22,7 @@ Make an asynchronous funcion retryable
 http_get_5 <- async_retryable(http_get, times = 5)
 dx <- http_get("https://httpbin.org/get?q=1")$
   then(~ rawToChar(.$content))
-cat(await(dx))
+cat(wait_for(dx))
 }
 \seealso{
 Other async control flow: \code{\link{async_reflect}},

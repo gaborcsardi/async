@@ -26,13 +26,13 @@ Asynchronous HTTP HEAD request
 \examples{
 dx <- http_head("https://httpbin.org/status/200")$
   then(~ .$status_code)
-await(dx)
+wait_for(dx)
 
 # Check a list of URLs in parallel
 urls <- c("https://r-project.org", "https://httpbin.org")
 dx <- when_all(.list = lapply(urls, http_head))$
   then(~ lapply(., "[[", "status_code"))
-await(dx)
+wait_for(dx)
 }
 \seealso{
 Other asyncronous HTTP calls: \code{\link{http_get}}

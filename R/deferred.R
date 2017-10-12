@@ -273,7 +273,7 @@ def__progress <- function(self, private, tick, total, ratio, amount, ...) {
 #' @examples
 #' is_deferred(1:10)
 #' is_deferred(dx <- delay(1/100))
-#' is_deferred(await(dx))
+#' is_deferred(wait_for(dx))
 
 is_deferred <- function(x) {
   inherits(x, "deferred")

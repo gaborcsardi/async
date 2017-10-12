@@ -18,5 +18,5 @@ Is object a deferred value?
 \examples{
 is_deferred(1:10)
 is_deferred(dx <- delay(1/100))
-is_deferred(await(dx))
+is_deferred(wait_for(dx))
 }

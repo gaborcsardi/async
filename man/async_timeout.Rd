@@ -30,12 +30,12 @@ later.
 ## You can catch the error, asynchronously
 dx <- async_timeout(function() delay(1/10)$then(~ "OK"), 1/1000)$
   then(NULL, ~ "Timed out")
-await(dx)
+wait_for(dx)
 
 ## Or synchronously
 dx <- async_timeout(function() delay(1/10)$then(~ "OK"), 1/1000)
 tryCatch(
-  await(dx),
+  wait_for(dx),
   async_timeout = function(e) "Timed out. :(",
   error = function(e) paste("Other error:", e$message)
 )

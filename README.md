@@ -96,16 +96,16 @@ operations on the resolved value.
 
 ## Synchronization
 
-The `await()` function allows mixing synchronous and asynchronous code.
+The `wait_for()` function allows mixing synchronous and asynchronous code.
 It can be called on a deferred value, and it stops the synchronous
 computation until the deferred value is resolved (i.e. fulfilled or
-rejected). Importantly, `await()` runs an event loop that is working
-towards he resolution of all deferred values. `await()` calls don't lead
+rejected). Importantly, `wait_for()` runs an event loop that is working
+towards he resolution of all deferred values. `wait_for()` calls don't lead
 deadlocks.
 
 In a typical application, a function is implemented asynchronously, and
 then used synchronously by the interactive user, or another piece of
-synchronous code, via `await()` calls. The following example makes three
+synchronous code, via `wait_for()` calls. The following example makes three
 HTTP requests in parallel:
 
 
@@ -116,7 +116,7 @@ http_status <- function(url) {
 r1 <- http_status("https://httpbin.org/status/403")
 r2 <- http_status("https://httpbin.org/status/404")
 r3 <- http_status("https://httpbin.org/status/200")
-await_all(r1, r2, r3)
+wait_for_all(r1, r2, r3)
 ```
 
 ```
@@ -130,20 +130,20 @@ await_all(r1, r2, r3)
 #> [1] 200
 ```
 
-`await_all()` waits until all supplied deferred values are resolved.
+`wait_for_all()` waits until all supplied deferred values are resolved.
 Note that
 ```
-await_all(r1, r2, r3)
+wait_for_all(r1, r2, r3)
 ```
 is completely equivalent to
 ```
-await(r1)
-await(r2)
-await(r3)
+wait_for(r1)
+wait_for(r2)
+wait_for(r3)
 ```
-since `await()` works towards the resolution of all deferreds, not just
-the specified ones. `await_all()` is easier to use programmatically if you
-have a list of deferred values. `await_any()` waits until at least one
+since `wait_for()` works towards the resolution of all deferreds, not just
+the specified ones. `wait_for_all()` is easier to use programmatically if you
+have a list of deferred values. `wait_for_any()` waits until at least one
 deferred value is resolved.
 
 ## Error handling
@@ -160,7 +160,7 @@ u1 <- http_get("https://httpbin.org")$
   then(function() "web server is up", function() "web server is down")
 u2 <- http_get("non-existing-url.for-sure")$
   then(function() "web server is up", function() "web server is down")
-await(u1)
+wait_for(u1)
 ```
 
 ```
@@ -168,7 +168,7 @@ await(u1)
 ```
 
 ```r
-await(u2)
+wait_for(u2)
 ```
 
 ```
@@ -180,7 +180,7 @@ equivalent to `then()` with its first argument set to `NULL`.
 
 Errors can also be handled synchronously. If an error is not handled
 asynchronously in a `then()` or `catch()` method, then the deferred value
-will throw an error when it is `await()`-ed. This can be caught via
+will throw an error when it is `wait_for()`-ed. This can be caught via
 `tryCatch()`.
 
 ## Async Iterators
@@ -247,7 +247,7 @@ gx <- http_get("https://crandb.r-pkg.org/-/topdeps/devel")$
   then(~ names(unlist(.)))$
   then(~ async_map(., get_author))
 
-await(gx)[1:3]
+wait_for(gx)[1:3]
 ```
 
 ```
@@ -272,7 +272,7 @@ urls <- c("https://cran.rstudio.com", "https://cran.r-project.org",
 qs <- lapply(urls, http_head)
 t2 <- when_some(2, .list = qs)$
   then(function(top2) vapply(top2, "[[", character(1), "url"))
-await(t2)
+wait_for(t2)
 ```
 
 ```

@@ -6,7 +6,7 @@ test_that("rejection", {
   dx <- delay(1/10000)$
     then(function(value) stop("ohno!"))
 
-  expect_error(await(dx), "ohno!")
+  expect_error(wait_for(dx), "ohno!")
 })
 
 test_that("error propagates", {
@@ -16,7 +16,7 @@ test_that("error propagates", {
     then(function(x) stop("ohno!"))$
     then(function(x) called <<- TRUE)
 
-  expect_error(await(dx, "ohno!"))
+  expect_error(wait_for(dx, "ohno!"))
   expect_false(called)
 })
 
@@ -26,8 +26,8 @@ test_that("handled error is not an error any more", {
     then(function(x) stop("ohno!"))$
     then(NULL, function(x) "OK")
 
-  expect_silent(await(dx))
-  expect_equal(await(dx), "OK")
+  expect_silent(wait_for(dx))
+  expect_equal(wait_for(dx), "OK")
 })
 
 test_that("catch", {
@@ -37,7 +37,7 @@ test_that("catch", {
     then(~ "not this one")$
     catch(~ "nothing to see here")
 
-  expect_equal(await(dx), "nothing to see here")
+  expect_equal(wait_for(dx), "nothing to see here")
 })
 
 test_that("finally", {
@@ -48,7 +48,7 @@ test_that("finally", {
     then(~ "not this one")$
     finally(function() called <<- TRUE)
 
-  expect_error(await(dx), "oops")
+  expect_error(wait_for(dx), "oops")
   expect_true(called)
 
   called <- FALSE
@@ -57,7 +57,7 @@ test_that("finally", {
     then(~ "this one")$
     finally(function() called <<- TRUE)
 
-  expect_equal(await(dx), "this one")
+  expect_equal(wait_for(dx), "this one")
   expect_true(called)
 })
 
@@ -66,14 +66,14 @@ test_that("errors from other resolutions are not reported", {
   dx1 <- delay(1/10000)$then(~ stop("wrong"))
   dx2 <- delay(1/10)$then(~ "OK")
 
-  expect_equal(await(dx2), "OK")
+  expect_equal(wait_for(dx2), "OK")
   expect_equal(dx1$get_state(), "rejected")
-  expect_error(await(dx1), "wrong")
+  expect_error(wait_for(dx1), "wrong")
 
   dx1 <- delay(1/10000)$then(~ stop("wrong"))
   dx2 <- delay(1/10)$then(~ stop("oops"))
 
-  expect_error(await(dx2), "oops")
+  expect_error(wait_for(dx2), "oops")
   expect_equal(dx1$get_state(), "rejected")
-  expect_error(await(dx1), "wrong")
+  expect_error(wait_for(dx1), "wrong")
 })

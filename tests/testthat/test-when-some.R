@@ -8,7 +8,7 @@ test_that("when_some", {
   dx <- when_some(2, d1, d2)$
     then(function(value) expect_equal(value, list("bar", "foo")))
 
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("when_some, few errors", {
@@ -19,7 +19,7 @@ test_that("when_some, few errors", {
   dx <- when_some(2, d1, d2, d3)$
     then(function(value) expect_equal(value, list("bar", "foo")))
 
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("too many errors", {
@@ -28,5 +28,5 @@ test_that("too many errors", {
   d3 <- delay(1/10000)$then(function(value) "bar")
 
   dx <- when_some(2, d1, d2, d3)
-  expect_error(await(dx), "ooops again")
+  expect_error(wait_for(dx), "ooops again")
 })

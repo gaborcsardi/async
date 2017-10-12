@@ -12,7 +12,7 @@
 #' ## Keep calling while result is bigger than 0.1
 #' calls <- 0
 #' number <- Inf
-#' await(async_whilst(
+#' wait_for(async_whilst(
 #'   function() number >= 0.1,
 #'   function() {
 #'     calls <<- calls + 1
@@ -33,7 +33,7 @@ async_whilst <- function(test, task, ...) {
 
     xresolve <- function(value) {
       tryCatch(
-        if (!await(test())) {
+        if (!wait_for(test())) {
           resolve(value)
         } else {
           task(...)$then(xresolve, xreject)
@@ -43,6 +43,6 @@ async_whilst <- function(test, task, ...) {
     }
     xreject <- function(reason) reject(reason)
 
-    if (await(test())) task(...)$then(xresolve, xreject) else resolve(NULL)
+    if (wait_for(test())) task(...)$then(xresolve, xreject) else resolve(NULL)
   })
 }

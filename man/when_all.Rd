@@ -27,7 +27,7 @@ u1 <- http_get("https://httpbin.org/get")
 u2 <- http_get("https://eu.httpbin.org/get")
 dx <- when_all(u1, u2)$
   then(~ identical(.[[1]]$content, .[[2]]$content))
-await(dx)
+wait_for(dx)
 }
 \seealso{
 \code{\link[=when_any]{when_any()}}, \code{\link[=when_some]{when_some()}}

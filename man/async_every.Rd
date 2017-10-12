@@ -30,8 +30,8 @@ is_odd <- function(x) {
   force(x)
   delay(1/1000)$then(~ as.logical(x \%\% 2))
 }
-await(async_every(c(1,3,5,7,10,11), is_odd))
-await(async_every(c(1,3,5,7,11), is_odd))
+wait_for(async_every(c(1,3,5,7,10,11), is_odd))
+wait_for(async_every(c(1,3,5,7,11), is_odd))
 }
 \seealso{
 Other async iterators: \code{\link{async_detect}},

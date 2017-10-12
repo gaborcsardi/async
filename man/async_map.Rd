@@ -30,7 +30,7 @@ dx <- async_map(
   function(wait) delay(wait)$then(~ "OK")
 )
 dx
-await(dx)
+wait_for(dx)
 }
 \seealso{
 Other async iterators: \code{\link{async_detect}},

@@ -27,5 +27,5 @@ is_async(af)
 f()
 dx <- af()
 dx
-await(dx)
+wait_for(dx)
 }

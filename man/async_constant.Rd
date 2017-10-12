@@ -19,5 +19,5 @@ This is sometimes useful to start a deferred chain.
 dx <- async_constant(1/100)$
   then(~ delay(.))$
   then(~ print(.))
-await(dx)
+wait_for(dx)
 }

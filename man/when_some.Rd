@@ -35,7 +35,7 @@ the returned deferred value is rejected.
 u1 <- http_get("https://httpbin.org/get")
 u2 <- http_get("https://eu.httpbin.org/get")
 dx <- when_any(u1, u2)$then(~ .$url)
-await(dx)
+wait_for(dx)
 }
 \seealso{
 \code{\link[=when_all]{when_all()}}

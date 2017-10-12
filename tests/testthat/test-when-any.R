@@ -8,7 +8,7 @@ test_that("when_any", {
   dx <- when_any(d1, d2)$
     then(function(value) expect_equal(value, "bar"))
 
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("when_any, non-deferred", {
@@ -18,7 +18,7 @@ test_that("when_any, non-deferred", {
   dx <- when_any(d1, d2)$
     then(function(value) expect_equal(value, "bar"))
 
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("when_any, non-deferred only", {
@@ -28,7 +28,7 @@ test_that("when_any, non-deferred only", {
   dx <- when_any(d1, d2)$
     then(function(value) expect_true(value %in% c("foo", "bar")))
 
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("when_any, error first, success then", {
@@ -38,7 +38,7 @@ test_that("when_any, error first, success then", {
   dx <- when_any(d1, d2)$
     then(function(value) expect_equal(value, "bar"))
 
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("when_any, late error is ignored", {
@@ -48,7 +48,7 @@ test_that("when_any, late error is ignored", {
   dx <- when_any(d1, d2)$
     then(NULL, function(value) expect_equal(value, "bar"))
 
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("when_any, multiple errors", {
@@ -58,5 +58,5 @@ test_that("when_any, multiple errors", {
   dx <- when_any(d1, d2)$
     then(NULL, function(reason) expect_equal(reason$message, "foo"))
 
-  await(dx)
+  wait_for(dx)
 })

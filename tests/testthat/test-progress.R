@@ -10,8 +10,8 @@ test_that("tick", {
     }
   )
 
-  expect_silent(await(dx))
-  expect_equal(await(dx), "done")
+  expect_silent(wait_for(dx))
+  expect_equal(wait_for(dx), "done")
 
   ticked <- 0
   dx <- deferred$new(
@@ -21,7 +21,7 @@ test_that("tick", {
     },
     function(tick) ticked <<- ticked + tick
   )
-  expect_equal(await(dx), "done")
+  expect_equal(wait_for(dx), "done")
   expect_equal(ticked, 10)
 })
 
@@ -39,7 +39,7 @@ test_that("total", {
       if (!is.null(tick)) ticked <<- ticked + tick
     }
   )
-  expect_equal(await(dx), "done")
+  expect_equal(wait_for(dx), "done")
   expect_equal(ticked, 10)
 })
 
@@ -52,7 +52,7 @@ test_that("ratio", {
     },
     function(ratio) ratiox <<- c(ratiox, ratio)
   )
-  expect_equal(await(dx), "done")
+  expect_equal(wait_for(dx), "done")
   expect_equal(ratiox, (0:10) / 10)
 })
 
@@ -70,7 +70,7 @@ test_that("amount", {
       if (!is.null(amount)) amountx <<- amountx + amount
     }
   )
-  expect_equal(await(dx), "done")
+  expect_equal(wait_for(dx), "done")
   expect_equal(totalx, 100)
   expect_equal(amountx, 100)
 })

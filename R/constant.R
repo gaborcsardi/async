@@ -11,7 +11,7 @@
 #' dx <- async_constant(1/100)$
 #'   then(~ delay(.))$
 #'   then(~ print(.))
-#' await(dx)
+#' wait_for(dx)
 
 async_constant <- function(value = NULL) {
   force(value)

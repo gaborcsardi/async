@@ -11,5 +11,5 @@ test_that("each", {
   )$
   then(function(value) expect_identical(sort(done), sort(letters[1:10])))
 
-  await(dx)
+  wait_for(dx)
 })

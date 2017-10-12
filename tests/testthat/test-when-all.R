@@ -8,7 +8,7 @@ test_that("when_all", {
   dx <- when_all(d1, d2)$
     then(function(value) expect_equal(value, list("foo", "bar")))
 
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("when_all, non-deferred", {
@@ -18,7 +18,7 @@ test_that("when_all, non-deferred", {
   dx <- when_all(d1, d2)$
     then(function(value) expect_equal(value, list("foo", "bar")))
 
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("when_all, non-deferred only", {
@@ -28,14 +28,14 @@ test_that("when_all, non-deferred only", {
   dx <- when_all(d1, d2)$
     then(function(value) expect_equal(value, list("foo", "bar")))
 
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("when_all, empty list", {
   dx <- when_all()$
     then(function(value) expect_equal(value, list()))
 
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("when_all, error", {
@@ -45,7 +45,7 @@ test_that("when_all, error", {
   dx <- when_all(d1, d2)$
     then(NULL, function(reason) expect_equal(reason$message, "foo"))
 
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("when_all, multiple errors", {
@@ -55,5 +55,5 @@ test_that("when_all, multiple errors", {
   dx <- when_all(d1, d2)$
     then(NULL, function(reason) expect_equal(reason$message, "bar"))
 
-  await(dx)
+  wait_for(dx)
 })

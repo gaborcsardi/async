@@ -27,7 +27,7 @@ via a deferred.
 \examples{
 dx <- http_get("https://httpbin.org/status/200")$
   then(~ .$status_code)
-await(dx)
+wait_for(dx)
 }
 \seealso{
 Other asyncronous HTTP calls: \code{\link{http_head}}

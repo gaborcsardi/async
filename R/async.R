@@ -20,7 +20,7 @@
 #' f()
 #' dx <- af()
 #' dx
-#' await(dx)
+#' wait_for(dx)
 
 async <- function(fun) {
   fun <- as_function(fun)
@@ -66,7 +66,7 @@ async <- function(fun) {
 #' f()
 #' dx <- af()
 #' dx
-#' await(dx)
+#' wait_for(dx)
 
 is_async <- function(fun) {
   assert_that(is.function(fun))

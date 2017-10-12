@@ -23,7 +23,7 @@
 #' @examples
 #' dx <- http_get("https://httpbin.org/status/200")$
 #'   then(~ .$status_code)
-#' await(dx)
+#' wait_for(dx)
 
 http_get <- function(url, headers = character(), file = NULL,
                      on_progress = NULL) {
@@ -44,13 +44,13 @@ http_get <- function(url, headers = character(), file = NULL,
 #' @examples
 #' dx <- http_head("https://httpbin.org/status/200")$
 #'   then(~ .$status_code)
-#' await(dx)
+#' wait_for(dx)
 #'
 #' # Check a list of URLs in parallel
 #' urls <- c("https://r-project.org", "https://httpbin.org")
 #' dx <- when_all(.list = lapply(urls, http_head))$
 #'   then(~ lapply(., "[[", "status_code"))
-#' await(dx)
+#' wait_for(dx)
 
 http_head <- function(url, headers = character(), file = NULL,
                       on_progress = NULL) {
@@ -98,7 +98,7 @@ make_deferred_http <- function(handle, file, on_progress) {
 #' dx <- http_get("https://httpbin.org/status/404")$
 #'   then(http_stop_for_status)
 #'
-#' tryCatch(await(dx), error = function(e) e)
+#' tryCatch(wait_for(dx), error = function(e) e)
 
 http_stop_for_status <- function(resp) {
   if (!is.integer(resp$status_code)) stop("Not an HTTP response")

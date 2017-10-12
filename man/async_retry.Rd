@@ -27,7 +27,7 @@ dx <- async_retry(
   times = 5
 )$then(~ .$status_code)
 
-await(dx)
+wait_for(dx)
 }
 \seealso{
 Other async control flow: \code{\link{async_reflect}},

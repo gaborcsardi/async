@@ -12,10 +12,10 @@
 #' @param env Environment to wait on. An error is thrown if not an
 #'   environment.
 #' @return A named list of resolved values. An unhandled rejection make
-#'   `await_env` throw an error. Note that since the environment is a hash,
+#'   `wait_for_env` throw an error. Note that since the environment is a hash,
 #'   the order of the values is arbitrary.
 #' 
-#' @family await functions
+#' @family wait_for functions
 #' @export
 #' @examples
 #' ## dynamically change the async operations we are waiting on
@@ -25,9 +25,9 @@
 #'     env$foo2 <- async_constant("OK2")
 #'     "OK"
 #'   })
-#' await_env(env)
+#' wait_for_env(env)
 
-await_env <- function(env) {
+wait_for_env <- function(env) {
   assert_that(is.environment(env))
 
   num_pending <- function(env) {

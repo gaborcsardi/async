@@ -5,7 +5,7 @@ test_that("unsuccessful async_retry", {
 
   x <- 5
   expect_error(
-    await(async_retry(
+    wait_for(async_retry(
       function() {
         x <<- x - 1
         if (x) stop("error") else "OK"
@@ -19,7 +19,7 @@ test_that("unsuccessful async_retry", {
 test_that("successful async_retry", {
 
   x <- 5
-  result <- await(async_retry(
+  result <- wait_for(async_retry(
     function() {
       x <<- x - 1
       if (x) stop("error") else "OK"

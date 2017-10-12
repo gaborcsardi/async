@@ -22,5 +22,5 @@ considers the 3xx status code errors as well.
 dx <- http_get("https://httpbin.org/status/404")$
   then(http_stop_for_status)
 
-tryCatch(await(dx), error = function(e) e)
+tryCatch(wait_for(dx), error = function(e) e)
 }

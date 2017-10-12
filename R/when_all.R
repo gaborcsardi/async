@@ -19,7 +19,7 @@
 #' u2 <- http_get("https://eu.httpbin.org/get")
 #' dx <- when_all(u1, u2)$
 #'   then(~ identical(.[[1]]$content, .[[2]]$content))
-#' await(dx)
+#' wait_for(dx)
 
 when_all <- function(..., .list = list()) {
   defs <- c(list(...), .list)

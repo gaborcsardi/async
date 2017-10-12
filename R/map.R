@@ -17,7 +17,7 @@
 #'   function(wait) delay(wait)$then(~ "OK")
 #' )
 #' dx
-#' await(dx)
+#' wait_for(dx)
 
 async_map <- function(.x, .f, ..., .args = list(), .limit = Inf) {
   if (.limit < length(.x))  {

@@ -26,6 +26,6 @@ dx <- http_head("https://httpbin.org?q=2")$
   then(function(...) delay(1/2))$
   then(function(...) http_head("https://httpbin.org?q=2"))$
   then(function(value) resp[[2]] <<- value$status_code)
-await(dx)
+wait_for(dx)
 resp
 }

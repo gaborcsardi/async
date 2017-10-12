@@ -27,7 +27,7 @@ test_that("when called it returns a deferred", {
   fun <- async(function() "foo")
   dx <- fun()
   expect_true(is_deferred(dx))
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("begins asynchronously", {
@@ -37,7 +37,7 @@ test_that("begins asynchronously", {
     then(function() expect_equal(x, 7))
   expect_equal(x, 5)
   x <- 9
-  await(dx)
+  wait_for(dx)
   expect_equal(x, 7)
 })
 
@@ -51,7 +51,7 @@ test_that("preserves closure", {
   dx <- foo()$
     then(function(result) expect_identical(result, env))
 
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("resolves to the definition", {
@@ -59,7 +59,7 @@ test_that("resolves to the definition", {
   dx <- foo()$
     then(function(result) expect_equal(result, "blah"))
 
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("rejects with the thrown error", {
@@ -76,19 +76,19 @@ test_that("rejects with the thrown error", {
       }
     })
 
-  await(dx)
+  wait_for(dx)
 })
 
-test_that("works with await", {
+test_that("works with wait_for", {
 
   foo <- async(function() {
-    await(delay(20/1000)$then(function(value) "blah"))
+    wait_for(delay(20/1000)$then(function(value) "blah"))
   })
 
   dx <- foo()$
     then(function(result) expect_equal(result, "blah"))
 
-  await(dx)
+  wait_for(dx)
 })
 
 test_that("triggers error on unhandled rejection", {
@@ -97,7 +97,7 @@ test_that("triggers error on unhandled rejection", {
   did_trigger <- FALSE
 
   tryCatch(
-    await(foo()),
+    wait_for(foo()),
     error = function(e) did_trigger <<- TRUE
   )
 

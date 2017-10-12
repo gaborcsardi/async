@@ -18,7 +18,7 @@
 #'   times = 5
 #' )$then(~ .$status_code)
 #'
-#' await(dx)
+#' wait_for(dx)
 
 async_retry <- function(task, times, ...) {
   task <- async(task)
@@ -53,7 +53,7 @@ async_retry <- function(task, times, ...) {
 #' http_get_5 <- async_retryable(http_get, times = 5)
 #' dx <- http_get("https://httpbin.org/get?q=1")$
 #'   then(~ rawToChar(.$content))
-#' cat(await(dx))
+#' cat(wait_for(dx))
 
 async_retryable <- function(task, times) {
   task <- async(task)

@@ -12,34 +12,34 @@
 #'   then it is resolved immediately, to itself.
 #' @return The value of the deferred.
 #'
-#' @family await functions
+#' @family wait_for functions
 #' @export
 #' @examples
 #' dx <- delay(1/10)$then(~ 42)
 #' dx
-#' await(dx)
-#' await("foobar")
+#' wait_for(dx)
+#' wait_for("foobar")
 
-await <- function(def) {
-  await_all(def)[[1]]
+wait_for <- function(def) {
+  wait_for_all(def)[[1]]
 }
 
 #' Wait for a list of deferred values
 #'
-#' Similar to [await()], but waits for a list of deferred values.
+#' Similar to [wait_for()], but waits for a list of deferred values.
 #'
 #' @param ... Deferred values to wait on.
 #' @param .list More deferred values to wait on.
 #'
-#' @family await functions
+#' @family wait_for functions
 #' @export
 #' @examples
 #' urls <- c("https://httpbin.org?q=1", "https://httpbin.org?q=2")
 #' dx <- lapply(urls, http_head)
-#' resp <- await_all(.list = dx)
+#' resp <- wait_for_all(.list = dx)
 #' lapply(resp, "[[", "status_code")
 
-await_all <- function(..., .list = list()) {
+wait_for_all <- function(..., .list = list()) {
   defs <- c(list(...), .list)
   num_todo <- length(defs)
   for (d in defs) {
@@ -67,15 +67,15 @@ await_all <- function(..., .list = list()) {
 #' @param ... Deferred values.
 #' @param .list List of deferred values.
 #'
-#' @family await functions
+#' @family wait_for functions
 #' @export
 #' @examples
 #' # Returns as soon as one timer expires
 #' t1 <- delay(1)$then(~ 1)
 #' t2 <- delay(1/1000)$then(~ 2)
-#' await_any(t1, t2)
+#' wait_for_any(t1, t2)
 
-await_any <- function(..., .list = list()) {
+wait_for_any <- function(..., .list = list()) {
   defs <- c(list(...), .list)
   num_done <- 0
   for (d in defs) {

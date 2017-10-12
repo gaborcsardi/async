@@ -12,7 +12,7 @@
 #' ## Keep calling until it "returns" a number less than < 0.1
 #' calls <- 0
 #' number <- Inf
-#' await(async_until(
+#' wait_for(async_until(
 #'   function() number < 0.1,
 #'   function() {
 #'     calls <<- calls + 1
@@ -32,7 +32,7 @@ async_until <- function(test, task, ...) {
 
     xresolve <- function(value) {
       tryCatch(
-        if (await(test())) {
+        if (wait_for(test())) {
           resolve(value)
         } else {
           task(...)$then(xresolve, xreject)

@@ -29,7 +29,7 @@ dx <- async_detect(
     "https://httpbin.org"),
   async_sequence(http_head, function(x) x$status_code == 200)
 )
-await(dx)
+wait_for(dx)
 }
 \seealso{
 Other async iterators: \code{\link{async_every}},
