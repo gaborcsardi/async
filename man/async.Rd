@@ -4,7 +4,7 @@
 \alias{async}
 \title{Create an async function}
 \usage{
-async(fun)
+async(fn)
 }
 \arguments{
 \item{fun}{Original function.}
