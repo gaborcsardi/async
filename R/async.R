@@ -31,6 +31,7 @@ async <- function(fn) {
   })
   formals(factory) <- fn_fmls(fn)
 
+  attr(factory, "async") <- list(TRUE)
   factory
 }
 
