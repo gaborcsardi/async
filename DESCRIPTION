@@ -19,7 +19,10 @@ Encoding: UTF-8
 Imports:
     assertthat,
     curl (>= 3.0),
+    flowery,
     R6,
     rlang,
     uuid
+Remotes:
+    gaborcsardi/flowery@pause
 Roxygen: list(markdown = TRUE)

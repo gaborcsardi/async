@@ -22,29 +22,59 @@
 #' dx
 #' wait_for(dx)
 
-async <- function(fun) {
-  fun <- as_function(fun)
-  if (is_async(fun)) return(fun)
+async <- function(fn) {
 
-  async_fun <- fun
-  body(async_fun) <- expr({
-    async::deferred$new(function(resolve, reject) {
-      force(resolve) ; force(reject)
-      async:::get_default_event_loop()$defer_next_tick(function() {
-        tryCatch(
-          resolve(evalq(
-            { !!! body(fun) },
-            envir = parent.env(parent.env(environment()))
-          )),
-          error = function(e) reject(e)
-        )
+  force(fn)
+  factory <- expr_interp(function() {
+    args <- list(!!!fn_fmls_syms(fn))
+    new_async_generator(body(fn), environment(fn), args)
+  })
+  formals(factory) <- fn_fmls(fn)
+
+  factory
+}
+
+new_async_generator <- function(body, env, args = list()) {
+  parts <- flowery:::machine_parts(body, pause_sym = quote(await))
+  if (is_null(parts)) {
+    stop("Functions without `await` are not supported yet")
+  }
+  env <- flowery:::gen_env(env, args)
+
+  deferred$new(function(resolve, reject) {
+    resolve; reject
+
+    gen <- expr_interp(function(`_result` = NULL) {
+      nm <- gen_arg_name(env_get(env, "_pause_sym"))
+      if (!is.null(nm)) env_set(env, nm, `_result`, create = TRUE)
+
+      evalq(env, expr = {
+        while (TRUE) {
+          !!flowery:::machine_switch(parts)
+        }
       })
     })
+
+    continue <- function(value) {
+      ret <- gen(value)
+      if (is_deferred(ret)) {
+        ret$then(continue)
+
+      } else {
+        resolve(ret)
+      }
+    }
+
+    continue()
   })
+}
 
-  attr(async_fun, "async") <- list(TRUE)
-
-  async_fun
+gen_arg_name <- function(expr) {
+  if (!length(expr) || expr[[1]] != quote(`<-`)) return(NULL)
+  if (! is.symbol(expr[[2]])) {
+    stop("await assignment must be have a symbol on the left hand side")
+  }
+  as.character(expr[[2]])
 }
 
 #' Checks if a function is async
