@@ -162,11 +162,7 @@ el_add_delayed <- function(self, private, delay, func, callback) {
   force(self); force(private); force(delay); force(func); force(callback)
   id <- private$create_task(
     callback,
-    data = list(
-      delay = delay,
-      func = func,
-      stack = sys.calls()
-    )
+    data = list(delay = delay, func = func)
   )
   private$timers[id] <- Sys.time() + as.difftime(delay, units = "secs")
   id
@@ -174,13 +170,7 @@ el_add_delayed <- function(self, private, delay, func, callback) {
 
 el_add_next_tick <- function(self, private, func, callback) {
   force(self) ; force(private) ; force(callback)
-  id <- private$create_task(
-    callback,
-    data = list(
-      func = func,
-      stack = sys.calls()
-    )
-  )
+  id <- private$create_task(callback, data = list(func = func))
   private$next_ticks <- c(private$next_ticks, id)
 }
 
@@ -239,6 +229,7 @@ el__run_pending <- function(self, private) {
 
 el__create_task <- function(self, private, callback, data, ...) {
   id <- UUIDgenerate()
+  data$stack <- list(sys.calls())
   private$tasks[[id]] <- list(
     id = id,
     callback = callback,
@@ -310,10 +301,9 @@ error_callback <- function(func, callback, prev_stack = list()) {
   } else {
     drop <- error_callback_drop_num()
     stack1 <- sys.calls()
-    error$stack <- c(
-      prev_stack,
-      head(tail(error$stack, - length(stack1) - drop[1] - 1), - drop[2])
-    )
+    rel_stack <- head(tail(error$stack, - length(stack1) - drop[1] - 1),
+                      - drop[2])
+    error$stack <- c(prev_stack, list(rel_stack))
     class(error) <- unique(c("async_error", class(error)))
     callback(error, NULL)
   }

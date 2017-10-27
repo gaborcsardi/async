@@ -38,6 +38,6 @@ test_that("next tick, simple error", {
   expect_true(ticked)
   expect_null(result)
   expect_s3_class(error, "async_error")
-  expect_equal(tail(error$stack, 1), list(quote(stop("ohno"))))
-  expect_equal(tail(error$stack, 2)[[1]][[1]], quote(el_add_next_tick))
+  expect_equal(error$stack[[2]][[1]], quote(stop("ohno")))
+  expect_equal(tail(error$stack[[1]], 3)[[1]][[1]], quote(el_add_next_tick))
 })
