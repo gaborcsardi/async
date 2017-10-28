@@ -34,3 +34,12 @@ sort_by_name <- function(x) {
 get_cond_message <- function(x) {
   if (is.character(x)) paste(x, collapse = "\n") else conditionMessage(x)
 }
+
+find_in_stack <- function(stack, elem) {
+  for (i in rev(seq_along(stack))) {
+    stacki <- stack[[i]]
+    attributes(stacki) <- NULL
+    if (identical(stacki, elem)) return(i)
+  }
+  NULL
+}

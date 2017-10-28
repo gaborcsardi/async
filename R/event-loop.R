@@ -328,10 +328,3 @@ error_callback_drop_num <- (function() {
     drop_num
   }
 })()
-
-find_in_stack <- function(stack, elem) {
-  for (i in rev(seq_along(stack))) {
-    if (identical(stack[[i]], elem)) return(i)
-  }
-  NULL
-}
