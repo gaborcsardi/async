@@ -266,7 +266,7 @@ def__make_error_object <- function(self, private) {
       message = private$value$message,
       call = private$value$stack
     ),
-    class = unique(c("async_deferred_rejected", class(private$value),
+    class = unique(c(class(private$value), "async_deferred_rejected",
       "error", "condition"))
   )
 }
