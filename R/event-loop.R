@@ -276,7 +276,6 @@ el__update_time <- function(self, private) {
 #'
 #' @keywords internal
 
-
 error_callback <- function(func, callback, prev_stack = list()) {
   error <- NULL
   tryCatch(
@@ -289,14 +288,19 @@ error_callback <- function(func, callback, prev_stack = list()) {
   if (is.null(error)) {
     callback(NULL, result)
   } else {
-    drop <- error_callback_drop_num()
-    stack1 <- sys.calls()
-    rel_stack <- head(tail(error$stack, - length(stack1) - drop[1] - 1),
-                      - drop[2])
-    error$stack <- c(prev_stack, list(rel_stack))
-    class(error) <- unique(c("async_error", class(error)))
+    error <- make_error_stack(error, prev_stack)
     callback(error, NULL)
   }
+}
+
+make_error_stack <- function(error, prev_stack, dropx = 0) {
+  drop <- error_callback_drop_num()
+  stack1 <- sys.calls()
+  rel_stack <- head(tail(error$stack, - length(stack1) - drop[1] - dropx),
+                    - drop[2])
+  error$stack <- c(prev_stack, list(rel_stack))
+  class(error) <- unique(c("async_error", class(error)))
+  error
 }
 
 error_callback_drop_num <- (function() {
