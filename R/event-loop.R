@@ -284,7 +284,7 @@ error_callback <- function(func, callback, prev_stack = list()) {
   tryCatch(
     withCallingHandlers(
       result <- func(),
-      error = function(e) { e$stack <- sys.calls(); error <<- e; }
+      error = function(e) { e$call <- sys.calls(); error <<- e; }
     ),
     error = identity
   )
@@ -299,9 +299,9 @@ error_callback <- function(func, callback, prev_stack = list()) {
 make_error_stack <- function(error, prev_stack, dropx = 0) {
   drop <- error_callback_drop_num()
   stack1 <- sys.calls()
-  rel_stack <- head(tail(error$stack, - length(stack1) - drop[1] - dropx),
+  rel_stack <- head(tail(error$call, - length(stack1) - drop[1] - dropx),
                     - drop[2])
-  error$stack <- c(prev_stack, list(rel_stack))
+  error$call <- c(prev_stack, list(rel_stack))
   class(error) <- unique(c("async_error", class(error)))
   error
 }

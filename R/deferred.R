@@ -264,7 +264,7 @@ def__make_error_object <- function(self, private) {
   structure(
     list(
       message = private$value$message,
-      call = private$value$stack
+      call = private$value$call
     ),
     class = unique(c(
       setdiff(class(private$value), c("simpleError", "error", "condition")),
