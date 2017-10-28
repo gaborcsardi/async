@@ -121,7 +121,7 @@ def_init <- function(self, private, action, on_progress, on_cancel) {
   assert_that(is.null(on_cancel) || is.function(on_cancel))
   private$cancel_callback <- on_cancel
 
-  private$stack$mystart <- list(sys.calls())
+  private$stack$mystart <- sys.calls()
 
   action_args <- names(formals(action))
   args <- list(private$resolve, private$reject)
@@ -237,14 +237,6 @@ def__resolve <- function(self, private, value) {
   }
 }
 
-stitch_longstack <- function(self, private, reason) {
-  if (is.character(reason)) {
-    simpleError(reason)
-  } else {
-    reason
-  }
-}
-
 def__reject <- function(self, private, reason) {
   if (private$cancelled) return()
   if (private$state != "pending") stop("Deferred value already rejected")
@@ -252,7 +244,8 @@ def__reject <- function(self, private, reason) {
     reason$then(private$resolve, private$reject)
   } else {
     private$state <- "rejected"
-    private$value <- stitch_longstack(self, private, reason)
+    private$value <-
+      if (is.character(reason)) simpleError(reason) else reason
     private$stack$myeval <- conditionCall(private$value)
     loop <- get_default_event_loop()
     if (inherits(reason, "async_cancelled") &&
