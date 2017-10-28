@@ -142,6 +142,9 @@ el_add_http <- function(self, private, handle, callback, progress, file) {
     fail = function(error) {
       task <- private$tasks[[id]]
       private$tasks[[id]] <- NULL
+      error <- make_error(message = error)
+      error <- make_error_stack(error, task$data$stack)
+      class(error) <- unique(c("async_http_error", class(error)))
       task$callback(error, NULL)
     }
   )

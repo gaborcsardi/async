@@ -41,3 +41,26 @@ test_that("next tick, simple error", {
   expect_equal(error$stack[[2]][[1]], quote(stop("ohno")))
   expect_equal(tail(error$stack[[1]], 3)[[1]][[1]], quote(el_add_next_tick))
 })
+
+test_that("error stack on HTTP errors", {
+  el <- event_loop$new()
+
+  error <- "foo"
+  result <- "bar"
+
+  f <- function() g()
+  g <- function() {
+    handle <- new_handle(url = "http://0.42.42.42", timeout = 1)
+    el$add_http(
+      handle,
+      function(err, res) { error <<- err; result <<- res }
+    )
+  }
+  f()
+  el$run()
+
+  expect_null(result)
+  expect_s3_class(error, c("async_http_error", "async_error"))
+  expect_equal(tail(error$stack[[1]], 6)[[1]][[1]], quote(f))
+  expect_equal(tail(error$stack[[1]], 6)[[2]][[1]], quote(g))
+})
