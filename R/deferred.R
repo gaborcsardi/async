@@ -102,7 +102,7 @@ deferred <- R6Class(
       def__reject(self, private, reason),
     progress = function(..., tick = NULL, total = NULL, ratio = NULL,
                         amount = NULL)
-      def__progress(self, private, tick, total, ratio, amount, ...)
+      def__progress(self, private, tick, total, ratio, amount, ...),
 
     make_error_object = function()
       def__make_error_object(self, private)
@@ -266,7 +266,8 @@ def__make_error_object <- function(self, private) {
       message = private$value$message,
       call = private$value$stack
     ),
-    class = c("async_deferred_rejected", "error", "condition")
+    class = unique(c("async_deferred_rejected", class(private$value),
+      "error", "condition"))
   )
 }
 
