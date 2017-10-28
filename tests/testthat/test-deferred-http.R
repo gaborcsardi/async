@@ -23,6 +23,9 @@ test_that("HEAD", {
 })
 
 test_that("http_stop_for_status", {
+
+  skip_if_offline()
+
   dx <- http_get("https://httpbin.org/status/404")$
     then(http_stop_for_status)
 
