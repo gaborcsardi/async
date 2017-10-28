@@ -94,7 +94,7 @@ deferred <- R6Class(
     progress_callback = NULL,
     cancel_callback = NULL,
     cancelled = FALSE,
-    stack = list(mystart = NULL, myeval = NULL, parentstart = NULL),
+    stack = list(start = NULL, eval = NULL, parent = NULL),
 
     resolve = function(value)
       def__resolve(self, private, value),
@@ -121,7 +121,7 @@ def_init <- function(self, private, action, on_progress, on_cancel) {
   assert_that(is.null(on_cancel) || is.function(on_cancel))
   private$cancel_callback <- on_cancel
 
-  private$stack$mystart <- sys.calls()
+  private$stack$start <- sys.calls()
 
   action_args <- names(formals(action))
   args <- list(private$resolve, private$reject)
@@ -190,8 +190,7 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
     }
   })
 
-  def$.__enclos_env__$private$stack$parent_start <-
-    private$stack$mystart
+  def$.__enclos_env__$private$stack$parent <- private$stack
 
   def
 }
@@ -262,7 +261,7 @@ def__make_error_object <- function(self, private, err) {
     cl <- class(err)
   }
 
-  private$stack$myeval <- call
+  private$stack["eval"] <- list(call)
 
   ccl <- setdiff(cl, c("async_error", "simpleError", "error", "condition"))
 

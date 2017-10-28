@@ -12,9 +12,9 @@ test_that("single deferred value (http)", {
   expect_s3_class(err, c("async_http_error", "async_deferred_rejected"))
   call <- conditionCall(err)
   expect_false(is.null(
-    find_call_in_stack(call$mystart, quote(http_get))
+    find_call_in_stack(call$start, quote(http_get))
   ))
-  expect_null(find_in_stack(call$mystart, quote(cmon_not_this())))
+  expect_null(find_in_stack(call$start, quote(cmon_not_this())))
 
   but_yes_this <- function() http_get("http://0.42.42.42", timeout = 1)
   dx <- but_yes_this()
@@ -22,7 +22,7 @@ test_that("single deferred value (http)", {
   expect_s3_class(err, c("async_http_error", "async_deferred_rejected"))
   call <- conditionCall(err)
   expect_false(is.null(
-    find_in_stack(call$mystart, quote(but_yes_this()))
+    find_in_stack(call$start, quote(but_yes_this()))
   ))
 })
 
@@ -39,9 +39,9 @@ test_that("single async function", {
   expect_s3_class(err, c("async_error", "async_deferred_rejected"))
   call <- conditionCall(err)
   expect_false(is.null(
-    find_call_in_stack(call$mystart, quote(afun))
+    find_call_in_stack(call$start, quote(afun))
   ))
-  expect_null(find_in_stack(call$mystart, quote(cmon_not_this())))
+  expect_null(find_in_stack(call$start, quote(cmon_not_this())))
 
   but_yes_this <- function() afun()
   dx <- but_yes_this()
@@ -50,10 +50,10 @@ test_that("single async function", {
   expect_s3_class(err, c("async_error", "async_deferred_rejected"))
   call <- conditionCall(err)
   expect_false(is.null(
-    find_in_stack(call$mystart, quote(but_yes_this()))
+    find_in_stack(call$start, quote(but_yes_this()))
   ))
   expect_false(is.null(
-    find_in_stack(call$myeval, quote(stop("boo")))
+    find_in_stack(call$eval, quote(stop("boo")))
   ))
 })
 
