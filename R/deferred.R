@@ -94,7 +94,7 @@ deferred <- R6Class(
     progress_callback = NULL,
     cancel_callback = NULL,
     cancelled = FALSE,
-    stack = NULL,
+    stack = list(mystart = NULL, myeval = NULL, parentstart = NULL),
 
     resolve = function(value)
       def__resolve(self, private, value),
@@ -120,6 +120,8 @@ def_init <- function(self, private, action, on_progress, on_cancel) {
   private$progress_callback <- on_progress
   assert_that(is.null(on_cancel) || is.function(on_cancel))
   private$cancel_callback <- on_cancel
+
+  private$stack$mystart <- list(sys.calls())
 
   action_args <- names(formals(action))
   args <- list(private$resolve, private$reject)
@@ -188,6 +190,9 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
     }
   })
 
+  def$.__enclos_env__$private$stack$parent_start <-
+    private$stack$mystart
+
   def
 }
 
@@ -232,6 +237,14 @@ def__resolve <- function(self, private, value) {
   }
 }
 
+stitch_longstack <- function(self, private, reason) {
+  if (is.character(reason)) {
+    simpleError(reason)
+  } else {
+    reason
+  }
+}
+
 def__reject <- function(self, private, reason) {
   if (private$cancelled) return()
   if (private$state != "pending") stop("Deferred value already rejected")
@@ -239,8 +252,8 @@ def__reject <- function(self, private, reason) {
     reason$then(private$resolve, private$reject)
   } else {
     private$state <- "rejected"
-    private$value <-
-      if (is.character(reason)) simpleError(reason) else reason
+    private$value <- stitch_longstack(self, private, reason)
+    private$stack$myeval <- conditionCall(private$value)
     loop <- get_default_event_loop()
     if (inherits(reason, "async_cancelled") &&
         !is.null(private$cancel_callback)) {
@@ -264,7 +277,7 @@ def__make_error_object <- function(self, private) {
   structure(
     list(
       message = private$value$message,
-      call = private$value$call
+      call = private$stack
     ),
     class = unique(c(
       setdiff(class(private$value), c("simpleError", "error", "condition")),

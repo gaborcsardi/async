@@ -1,4 +1,5 @@
 
+
 ## TODO: think about error handling
 
 #' Event loop

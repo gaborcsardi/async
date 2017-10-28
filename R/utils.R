@@ -43,3 +43,11 @@ find_in_stack <- function(stack, elem) {
   }
   NULL
 }
+
+find_call_in_stack <- function(stack, elem) {
+  for (i in rev(seq_along(stack))) {
+    stacki_call <- stack[[i]][[1]]
+    if (identical(stacki_call, elem)) return(i)
+  }
+  NULL
+}
