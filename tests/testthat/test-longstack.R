@@ -55,7 +55,7 @@ test_that("single async function", {
     find_in_stack(call$mystart, quote(but_yes_this()))
   ))
   expect_false(is.null(
-    find_in_stack(call$myeval[[2]], quote(stop("boo")))
+    find_in_stack(call$myeval, quote(stop("boo")))
   ))
 })
 

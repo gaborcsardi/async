@@ -237,6 +237,12 @@ def__resolve <- function(self, private, value) {
   }
 }
 
+get_eval_stack <- function(err) {
+  call <- conditionCall(err)
+  if (inherits(err, "async_error")) call <- call[[2]]
+  call
+}
+
 def__reject <- function(self, private, reason) {
   if (private$cancelled) return()
   if (private$state != "pending") stop("Deferred value already rejected")
@@ -246,7 +252,7 @@ def__reject <- function(self, private, reason) {
     private$state <- "rejected"
     private$value <-
       if (is.character(reason)) simpleError(reason) else reason
-    private$stack$myeval <- conditionCall(private$value)
+    private$stack$myeval <- get_eval_stack(private$value)
     loop <- get_default_event_loop()
     if (inherits(reason, "async_cancelled") &&
         !is.null(private$cancel_callback)) {
