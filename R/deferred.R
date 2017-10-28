@@ -104,8 +104,8 @@ deferred <- R6Class(
                         amount = NULL)
       def__progress(self, private, tick, total, ratio, amount, ...),
 
-    make_error_object = function()
-      def__make_error_object(self, private)
+    make_error_object = function(err)
+      def__make_error_object(self, private, err)
   )
 )
 
@@ -136,7 +136,7 @@ def_get_value <- function(self, private) {
   if (private$state == "pending") {
     stop("Deferred value not resolved yet")
   } else if (private$state == "rejected") {
-    stop(private$make_error_object())
+    stop(private$value)
   } else {
     private$value
   }
@@ -218,7 +218,7 @@ def_finally <- function(self, private, on_finally) {
 def_cancel <- function(self, private, reason) {
   if (private$state != "pending") return()
   cancel_cond <- structure(
-    list(message = reason %||% "Promise cancelled", call = NULL),
+    list(message = reason %||% "Deferred computation cancelled", call = NULL),
     class = c("async_cancelled", "error", "condition")
   )
   private$reject(cancel_cond)
@@ -237,10 +237,39 @@ def__resolve <- function(self, private, value) {
   }
 }
 
-get_eval_stack <- function(err) {
-  call <- conditionCall(err)
-  if (inherits(err, "async_error")) call <- call[[2]]
-  call
+#' Create an error object for a rejected deferred computation
+#'
+#' * Make sure that the error is an error object.
+#' * Make sure that the error stack is in the correct format.
+#' * Make sure that the error has the correct classes.
+#'
+#' @param self self
+#' @param private private self
+#' @return error object
+#'
+#' @keywords internal
+
+def__make_error_object <- function(self, private, err) {
+
+  if (is.character(err)) {
+    call <- NULL
+    msg <- err
+    cl <- character()
+  } else {
+    call <- conditionCall(err)
+    if (inherits(err, "async_error")) call <- call[[2]]
+    msg <- conditionMessage(err)
+    cl <- class(err)
+  }
+
+  private$stack$myeval <- call
+
+  ccl <- setdiff(cl, c("async_error", "simpleError", "error", "condition"))
+
+  private$value <- structure(
+    list(message = msg, call = private$stack),
+    class = c(ccl, "async_deferred_rejected", "error", "condition")
+  )
 }
 
 def__reject <- function(self, private, reason) {
@@ -250,16 +279,14 @@ def__reject <- function(self, private, reason) {
     reason$then(private$resolve, private$reject)
   } else {
     private$state <- "rejected"
-    private$value <-
-      if (is.character(reason)) simpleError(reason) else reason
-    private$stack$myeval <- get_eval_stack(private$value)
-    loop <- get_default_event_loop()
-    if (inherits(reason, "async_cancelled") &&
-        !is.null(private$cancel_callback)) {
+    private$make_error_object(reason)
+    if (inherits(private$value, "async_cancelled")) {
       private$cancelled <- TRUE
-      private$cancel_callback(conditionMessage(reason))
+      if (!is.null(private$cancel_callback)) {
+        private$cancel_callback(conditionMessage(private$value))
+      }
     }
-    for (f in private$on_rejected) f(reason)
+    for (f in private$on_rejected) f(private$value)
     private$on_rejected <- list()
   }
 }
@@ -270,20 +297,6 @@ def__progress <- function(self, private, tick, total, ratio, amount, ...) {
   args <- list(tick = tick, total = total, ratio = ratio, amount = amount)
   has <- intersect(names(args), names(formals(private$progress_callback)))
   do.call(private$progress_callback, c(list(...), args[has]))
-}
-
-def__make_error_object <- function(self, private) {
-  structure(
-    list(
-      message = private$value$message,
-      call = private$stack
-    ),
-    class = unique(c(
-      setdiff(class(private$value), c("simpleError", "error", "condition")),
-      "async_deferred_rejected",
-      "simpleError", "error", "condition"
-    ))
-  )
 }
 
 #' Is object a deferred value?
