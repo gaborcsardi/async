@@ -164,31 +164,27 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
     force(resolve)
     force(reject)
 
-    handle_fulfill <- function(value) {
-      force(value)
-      get_default_event_loop()$add_next_tick(
-        make_then_function(on_fulfilled, value),
-        function(err, res) if (is.null(err)) resolve(res) else reject(err)
-      )
-    }
-
-    handle_reject <- function(reason) {
-      force(reason)
-      get_default_event_loop()$add_next_tick(
-        make_then_function(on_rejected %||% stop, reason),
-        function(err, res) if (is.null(err)) resolve(res) else reject(err)
-      )
+    handle <- function(func) {
+      force(func)
+      function(value) {
+        get_default_event_loop()$add_next_tick(
+          make_then_function(func, value),
+          function(err, res) if (is.null(err)) resolve(res) else reject(err)
+        )
+      }
     }
 
     if (private$state == "pending") {
-      private$on_fulfilled <- c(private$on_fulfilled, list(handle_fulfill))
-      private$on_rejected <- c(private$on_rejected, list(handle_reject))
+      private$on_fulfilled <- c(private$on_fulfilled,
+                                list(handle(on_fulfilled)))
+      private$on_rejected <- c(private$on_rejected,
+                               list(handle(on_rejected %||% stop)))
 
     } else if (private$state == "fulfilled") {
-      handle_fulfill(private$value)
+      handle(on_fulfilled)(private$value)
 
     } else if (private$state == "rejected") {
-      handle_reject(private$value)
+      handle(on_rejected %||% stop)(private$value)
     }
   })
 
