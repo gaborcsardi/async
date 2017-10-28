@@ -4,7 +4,8 @@
 \alias{http_get}
 \title{Asynchronous HTTP GET request}
 \usage{
-http_get(url, headers = character(), file = NULL, on_progress = NULL)
+http_get(url, headers = character(), file = NULL, timeout = 10,
+  on_progress = NULL)
 }
 \arguments{
 \item{url}{URL to connect to.}
@@ -13,6 +14,8 @@ http_get(url, headers = character(), file = NULL, on_progress = NULL)
 
 \item{file}{If not \code{NULL}, it must be a string, specifying a file.
 The body of the response is written to this file.}
+
+\item{timeout}{Timeout for the request, in seconds.}
 
 \item{on_progress}{Progress handler function. It is only used if the
 response body is written to a file.}
