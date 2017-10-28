@@ -140,6 +140,21 @@ def_get_value <- function(self, private) {
   }
 }
 
+make_then_function <- function(func, value) {
+  func; value
+  function() {
+    if (is.function(func)) {
+      if (num_args(func) >= 1) {
+        func(value)
+      } else {
+        func()
+      }
+    } else {
+      value
+    }
+  }
+}
+
 def_then <- function(self, private, on_fulfilled, on_rejected) {
   force(self)
   force(private)
@@ -152,17 +167,7 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
     handle_fulfill <- function(value) {
       force(value)
       get_default_event_loop()$add_next_tick(
-        function() {
-          if (is.function(on_fulfilled)) {
-            if (num_args(on_fulfilled) >= 1) {
-              on_fulfilled(value)
-            } else {
-              on_fulfilled()
-            }
-          } else {
-            value
-          }
-        },
+        make_then_function(on_fulfilled, value),
         function(err, res) if (is.null(err)) resolve(res) else reject(err)
       )
     }
@@ -170,17 +175,7 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
     handle_reject <- function(reason) {
       force(reason)
       get_default_event_loop()$add_next_tick(
-        function() {
-          if (is.function(on_rejected)) {
-            if (num_args(on_rejected) >= 1) {
-              on_rejected(reason)
-            } else {
-              on_rejected()
-            }
-          } else {
-            stop(reason)
-          }
-        },
+        make_then_function(on_rejected %||% stop, reason),
         function(err, res) if (is.null(err)) resolve(res) else reject(err)
       )
     }
