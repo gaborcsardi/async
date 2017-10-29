@@ -191,7 +191,7 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
     } else if (private$state == "rejected") {
       handle(on_rejected %||% stop)(private$value)
     }
-  })
+  }, longstack = cbind(c(0,0,0,0), c(4,0,0,0)))
 
   def$.__enclos_env__$private$stack$parent <- private$stack
 
@@ -269,7 +269,7 @@ def__make_error_object <- function(self, private, err) {
   ccl <- setdiff(cl, c("async_error", "simpleError", "error", "condition"))
 
   private$value <- structure(
-    list(message = msg, call = private$stack, hide = private$stack$hide),
+    list(message = msg, call = private$stack),
     class = c(ccl, "async_deferred_rejected", "error", "condition")
   )
 }

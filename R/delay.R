@@ -23,13 +23,16 @@
 
 delay <- function(delay) {
   assert_that(is_time_interval(delay))
-  deferred$new(function(resolve, reject) {
-    force(resolve)
-    force(reject)
-    get_default_event_loop()$add_delayed(
-      delay,
-      function() TRUE,
-      function(err, res) resolve(res)
-    )
-  })
+  deferred$new(
+    function(resolve, reject) {
+      force(resolve)
+      force(reject)
+      get_default_event_loop()$add_delayed(
+        delay,
+        function() TRUE,
+        function(err, res) resolve(res)
+      )
+    },
+    longstack = cbind(c(0,0,0,0), c(3,0,0,0))
+  )
 }

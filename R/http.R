@@ -78,7 +78,8 @@ make_deferred_http <- function(handle, file, on_progress) {
       )
     },
     on_progress = on_progress,
-    on_cancel = function(reason) multi_cancel(handle)
+    on_cancel = function(reason) multi_cancel(handle),
+    longstack = cbind(c(0,0,0,0), c(3,0,0,0))
   )
 }
 

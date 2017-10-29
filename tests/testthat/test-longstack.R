@@ -74,4 +74,20 @@ test_that("async function with a stack", {
   expect_false(is.null(stop_no))
   expect_true(f_no == g_no - 1)
   expect_true(g_no == stop_no - 1)
+
+  call2 <- trim_long_stack(call)
+  expect_equal(tail(call2$start, 1)[[1]], quote(afun()))
+})
+
+test_that("then, parent stack", {
+  g <- function() stop("ohno")
+  f <- function() g()
+
+  dx1 <- delay(1/1000)
+  dx2 <- dx1$then(f)
+  err <- tryCatch(await(dx2), error = identity)
+  call <- conditionCall(err)
+  expect_false(is.null(
+    find_in_stack(call$parent$start, quote(delay(1/1000)))
+  ))
 })
