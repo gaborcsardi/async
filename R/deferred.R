@@ -69,8 +69,9 @@ NULL
 deferred <- R6Class(
   "deferred",
   public = list(
-    initialize = function(action, on_progress = NULL, on_cancel = NULL)
-      def_init(self, private, action, on_progress, on_cancel),
+    initialize = function(action, on_progress = NULL, on_cancel = NULL,
+                          longstack = NULL)
+      def_init(self, private, action, on_progress, on_cancel, longstack),
     get_state = function()
       private$state,
     get_value = function()
@@ -109,7 +110,8 @@ deferred <- R6Class(
   )
 )
 
-def_init <- function(self, private, action, on_progress, on_cancel) {
+def_init <- function(self, private, action, on_progress, on_cancel,
+                     longstack) {
   if (!is.function(action)) {
     action <- as_function(action)
     formals(action) <- alist(resolve = NULL, reject = NULL,
@@ -122,6 +124,7 @@ def_init <- function(self, private, action, on_progress, on_cancel) {
   private$cancel_callback <- on_cancel
 
   private$stack$start <- sys.calls()
+  private$stack$hide <- longstack
 
   action_args <- names(formals(action))
   args <- list(private$resolve, private$reject)
@@ -266,7 +269,7 @@ def__make_error_object <- function(self, private, err) {
   ccl <- setdiff(cl, c("async_error", "simpleError", "error", "condition"))
 
   private$value <- structure(
-    list(message = msg, call = private$stack),
+    list(message = msg, call = private$stack, hide = private$stack$hide),
     class = c(ccl, "async_deferred_rejected", "error", "condition")
   )
 }

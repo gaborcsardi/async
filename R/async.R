@@ -28,20 +28,23 @@ async <- function(fun) {
 
   async_fun <- fun
   body(async_fun) <- expr({
-    async::deferred$new(function(resolve, reject) {
-      force(resolve) ; force(reject)
-      async:::get_default_event_loop()$add_next_tick(
-        function() {
-          evalq(
-            { !!! body(fun) },
-            envir = parent.env(parent.env(environment()))
-          )
-        },
-        function(err, res) {
-          if (is.null(err)) resolve(res) else reject(err)
-        }
-      )
-    })
+    async::deferred$new(
+      function(resolve, reject) {
+        force(resolve) ; force(reject)
+        async:::get_default_event_loop()$add_next_tick(
+          function() {
+            evalq(
+              { !!! body(fun) },
+              envir = parent.env(parent.env(environment()))
+            )
+          },
+          function(err, res) {
+            if (is.null(err)) resolve(res) else reject(err)
+          }
+        )
+      },
+      longstack = cbind(c(0, 2, 0, 0), c(3, 0, 0, 0))
+    )
   })
 
   attr(async_fun, "async") <- list(TRUE)

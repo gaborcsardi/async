@@ -64,7 +64,14 @@ test_that("async function with a stack", {
   afun <- async(function() f())
 
   err <- tryCatch(await(afun()), error = identity)
+  call <- conditionCall(err)
   expect_equal(conditionMessage(err), "ohno")
-
-
+  f_no <- find_in_stack(call$eval, quote(f()))
+  g_no <- find_in_stack(call$eval, quote(g()))
+  stop_no <- find_in_stack(call$eval, quote(stop("ohno")))
+  expect_false(is.null(f_no))
+  expect_false(is.null(g_no))
+  expect_false(is.null(stop_no))
+  expect_true(f_no == g_no - 1)
+  expect_true(g_no == stop_no - 1)
 })

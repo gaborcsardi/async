@@ -5,6 +5,9 @@ async_env <- new.env(parent = emptyenv())
 
 .onLoad <- function(libname, pkgname) {
   async_env$default_loop <- event_loop$new()
+
+  ## How many frames to drop from event loop call stacks?
+  error_callback_drop_num()
 }
 
 .onUnload <- function(libpath) {
