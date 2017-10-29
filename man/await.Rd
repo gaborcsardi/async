@@ -32,3 +32,4 @@ await("foobar")
 Other await functions: \code{\link{await_all}},
   \code{\link{await_any}}, \code{\link{await_env}}
 }
+\concept{await functions}

@@ -69,8 +69,9 @@ NULL
 deferred <- R6Class(
   "deferred",
   public = list(
-    initialize = function(action, on_progress = NULL, on_cancel = NULL)
-      def_init(self, private, action, on_progress, on_cancel),
+    initialize = function(action, on_progress = NULL, on_cancel = NULL,
+                          longstack = NULL)
+      def_init(self, private, action, on_progress, on_cancel, longstack),
     get_state = function()
       private$state,
     get_value = function()
@@ -94,6 +95,7 @@ deferred <- R6Class(
     progress_callback = NULL,
     cancel_callback = NULL,
     cancelled = FALSE,
+    stack = list(start = NULL, eval = NULL, parent = NULL),
 
     resolve = function(value)
       def__resolve(self, private, value),
@@ -101,11 +103,15 @@ deferred <- R6Class(
       def__reject(self, private, reason),
     progress = function(..., tick = NULL, total = NULL, ratio = NULL,
                         amount = NULL)
-      def__progress(self, private, tick, total, ratio, amount, ...)
+      def__progress(self, private, tick, total, ratio, amount, ...),
+
+    make_error_object = function(err)
+      def__make_error_object(self, private, err)
   )
 )
 
-def_init <- function(self, private, action, on_progress, on_cancel) {
+def_init <- function(self, private, action, on_progress, on_cancel,
+                     longstack) {
   if (!is.function(action)) {
     action <- as_function(action)
     formals(action) <- alist(resolve = NULL, reject = NULL,
@@ -116,6 +122,9 @@ def_init <- function(self, private, action, on_progress, on_cancel) {
   private$progress_callback <- on_progress
   assert_that(is.null(on_cancel) || is.function(on_cancel))
   private$cancel_callback <- on_cancel
+
+  private$stack$start <- sys.calls()
+  private$stack$hide <- longstack
 
   action_args <- names(formals(action))
   args <- list(private$resolve, private$reject)
@@ -136,6 +145,21 @@ def_get_value <- function(self, private) {
   }
 }
 
+make_then_function <- function(func, value) {
+  func; value
+  function() {
+    if (is.function(func)) {
+      if (num_args(func) >= 1) {
+        func(value)
+      } else {
+        func()
+      }
+    } else {
+      value
+    }
+  }
+}
+
 def_then <- function(self, private, on_fulfilled, on_rejected) {
   force(self)
   force(private)
@@ -145,53 +169,31 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
     force(resolve)
     force(reject)
 
-    handle_fulfill <- function(value) {
-      tryCatch(
-        {
-          if (is.function(on_fulfilled)) {
-            if (num_args(on_fulfilled) >= 1) {
-              value <- on_fulfilled(value)
-            } else {
-              value <- on_fulfilled()
-            }
-          }
-          resolve(value)
-        },
-        error = function(e) reject(e)
-      )
-    }
-
-    handle_reject <- function(reason) {
-      tryCatch(
-        {
-          if (is.function(on_rejected)) {
-            if (num_args(on_rejected) >= 1) {
-              reason <- on_rejected(reason)
-            } else {
-              reason <- on_rejected()
-            }
-            resolve(reason)
-          } else {
-            reject(reason)
-          }
-        },
-        error = function(e) reject(e)
-      )
+    handle <- function(func) {
+      force(func)
+      function(value) {
+        get_default_event_loop()$add_next_tick(
+          make_then_function(func, value),
+          function(err, res) if (is.null(err)) resolve(res) else reject(err)
+        )
+      }
     }
 
     if (private$state == "pending") {
-      private$on_fulfilled <- c(private$on_fulfilled, list(handle_fulfill))
-      private$on_rejected <- c(private$on_rejected, list(handle_reject))
+      private$on_fulfilled <- c(private$on_fulfilled,
+                                list(handle(on_fulfilled)))
+      private$on_rejected <- c(private$on_rejected,
+                               list(handle(on_rejected %||% stop)))
 
     } else if (private$state == "fulfilled") {
-      get_default_event_loop()$defer_next_tick(
-        handle_fulfill, list(private$value))
+      handle(on_fulfilled)(private$value)
 
     } else if (private$state == "rejected") {
-      get_default_event_loop()$defer_next_tick(
-        handle_reject, list(private$value))
+      handle(on_rejected %||% stop)(private$value)
     }
-  })
+  }, longstack = cbind(c(0,0,0,0), c(4,0,0,0)))
+
+  def$.__enclos_env__$private$stack$parent <- private$stack
 
   def
 }
@@ -218,7 +220,7 @@ def_finally <- function(self, private, on_finally) {
 def_cancel <- function(self, private, reason) {
   if (private$state != "pending") return()
   cancel_cond <- structure(
-    list(message = reason %||% "Promise cancelled", call = NULL),
+    list(message = reason %||% "Deferred computation cancelled", call = NULL),
     class = c("async_cancelled", "error", "condition")
   )
   private$reject(cancel_cond)
@@ -232,26 +234,61 @@ def__resolve <- function(self, private, value) {
     private$state <- "fulfilled"
     private$value <- value
     loop <- get_default_event_loop()
-    for (f in private$on_fulfilled) loop$defer_next_tick(f, list(value))
+    for (f in private$on_fulfilled) f(value)
     private$on_fulfilled <- list()
   }
 }
 
+#' Create an error object for a rejected deferred computation
+#'
+#' * Make sure that the error is an error object.
+#' * Make sure that the error stack is in the correct format.
+#' * Make sure that the error has the correct classes.
+#'
+#' @param self self
+#' @param private private self
+#' @return error object
+#'
+#' @keywords internal
+
+def__make_error_object <- function(self, private, err) {
+
+  if (is.character(err)) {
+    call <- NULL
+    msg <- err
+    cl <- character()
+  } else {
+    call <- conditionCall(err)
+    if (inherits(err, "async_error")) call <- call[[2]]
+    msg <- conditionMessage(err)
+    cl <- class(err)
+  }
+
+  private$stack["eval"] <- list(call)
+
+  ccl <- setdiff(cl, c("async_error", "simpleError", "error", "condition"))
+
+  private$value <- structure(
+    list(message = msg, call = private$stack),
+    class = c(ccl, "async_deferred_rejected", "error", "condition")
+  )
+}
+
 def__reject <- function(self, private, reason) {
   if (private$cancelled) return()
-  if (private$state != "pending") stop("Deferred value already resolved")
+  if (private$state != "pending") stop("Deferred value already rejected")
   if (is_deferred(reason)) {
     reason$then(private$resolve, private$reject)
   } else {
     private$state <- "rejected"
-    private$value <- reason
-    loop <- get_default_event_loop()
-    if (inherits(reason, "async_cancelled") &&
-        !is.null(private$cancel_callback)) {
+    private$make_error_object(reason)
+    if (inherits(private$value, "async_cancelled")) {
       private$cancelled <- TRUE
-      private$cancel_callback(conditionMessage(reason))
+      if (!is.null(private$cancel_callback)) {
+        private$cancel_callback(conditionMessage(private$value))
+      }
     }
-    for (f in private$on_rejected) loop$defer_next_tick(f, list(reason))
+    for (f in private$on_rejected) f(private$value)
     private$on_rejected <- list()
   }
 }

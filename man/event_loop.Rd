@@ -9,8 +9,8 @@ Event loop
 \section{Usage}{
 \preformatted{el <- event_loop$new()
 
-el$run_http(handle, callback)
-el$run_delay(delay, callback)
+el$add_http(handle, callback)
+el$add_delayed(delay, func, callback)
 }
 }
 
@@ -21,17 +21,18 @@ el$run_delay(delay, callback)
 \item{callback}{Callback function to call when the asynchronous
 operation is done. See details below.}
 \item{delay}{Number of seconds to delay the execution of the callback.}
+\item{func}{TODO}
 }
 }
 
 \section{Details}{
 
-\code{$run_http()} starts an asynchronous HTTP request, with the specified
+\code{$add_http()} starts an asynchronous HTTP request, with the specified
 \code{curl} handle. Once the request is done, and the response is available
 (or an error happens), the callback is called with two arguments, the
 error object or message (if any) and the \code{curl} response object.
 
-\code{$run_delay()} starts a task with the specified delay.
+\code{$add_delayed()} starts a task with the specified delay.
 }
 
 \section{The default event loop}{

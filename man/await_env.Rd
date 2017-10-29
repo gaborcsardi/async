@@ -39,3 +39,4 @@ await_env(env)
 Other await functions: \code{\link{await_all}},
   \code{\link{await_any}}, \code{\link{await}}
 }
+\concept{await functions}

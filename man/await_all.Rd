@@ -24,3 +24,4 @@ lapply(resp, "[[", "status_code")
 Other await functions: \code{\link{await_any}},
   \code{\link{await_env}}, \code{\link{await}}
 }
+\concept{await functions}
