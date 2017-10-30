@@ -18,7 +18,7 @@ test_that("on_cancel callback is called", {
 
   expect_equal(dx$get_state(), "rejected")
   expect_true(cancelled)
-  expect_equal(cancel_msg, "changed my mind")
+  expect_match(cancel_msg, "changed my mind")
 })
 
 test_that("then() is also rejected on cancel", {

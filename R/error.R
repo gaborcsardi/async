@@ -2,32 +2,41 @@
 #' @export
 
 print.async_deferred_rejected <- function(x, ...) {
-
-  cat("Error:", x$message, "\n\n")
-  print_long_stack(x$call)
+  cat(format(x, ...), sep = "\n")
   invisible(x)
 }
 
-print_long_stack <- function(call) {
+#' @export
 
-  separator <- function() cat("  --------\n")
+format.async_deferred_rejected <- function(x, ...) {
+  c(paste0("Async error: ", x$message), "", format_long_stack(x$call))
+}
+
+format_long_stack <- function(call) {
+
+  separator <- function() "  --------\n"
+  result <- character()
 
   if (!is.null(call$parent)) {
-    print_long_stack(call$parent)
-    separator()
+    result <- c(result, format_long_stack(call$parent), separator())
   }
 
   call <- trim_long_stack(call)
 
-  cat(paste(" ", seq_along(call$start), as.character(call$start)),
-      sep = "\n")
+  result <- c(
+    result,
+    paste(" ", seq_along(call$start), as.character(call$start))
+  )
   if (length(call$eval)) {
-    separator()
-    cat(paste(" ", seq_along(call$eval), as.character(call$eval)),
-        sep = "\n")
+    result <- c(
+      result,
+      separator(),
+      paste(" ", seq_along(call$eval), as.character(call$eval))
+    )
   }
-}
 
+  result
+}
 
 trim_long_stack <- function(call) {
   if (h <- call$hide[1,1] %||% 0) call$start <- tail(call$start, -h)
@@ -37,4 +46,18 @@ trim_long_stack <- function(call) {
 
   call$hide[] <- 0
   call
+}
+
+#' @export
+
+conditionCall.async_deferred_rejected <- function(c) {
+  call <- trim_long_stack(c$call)
+  st <- if (length(call$eval)) call$eval else call$start
+  tail(st, 1)[[1]]
+}
+
+#' @export
+
+conditionMessage.async_deferred_rejected <- function(c) {
+  paste(c("", format(c)), collapse = "\n")
 }

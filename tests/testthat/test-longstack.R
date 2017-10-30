@@ -10,7 +10,7 @@ test_that("single deferred value (http)", {
   }
   cmon_not_this()
   expect_s3_class(err, c("async_http_error", "async_deferred_rejected"))
-  call <- conditionCall(err)
+  call <- err$call
   expect_false(is.null(
     find_call_in_stack(call$start, quote(http_get))
   ))
@@ -20,7 +20,7 @@ test_that("single deferred value (http)", {
   dx <- but_yes_this()
   err <- tryCatch(await(dx), error = identity)
   expect_s3_class(err, c("async_http_error", "async_deferred_rejected"))
-  call <- conditionCall(err)
+  call <- err$call
   expect_false(is.null(
     find_in_stack(call$start, quote(but_yes_this()))
   ))
@@ -35,9 +35,9 @@ test_that("single async function", {
     err <<- tryCatch(await(dx), error = identity)
   }
   cmon_not_this()
-  expect_equal(conditionMessage(err), "boo")
+  expect_equal(err$message, "boo")
   expect_s3_class(err, c("async_error", "async_deferred_rejected"))
-  call <- conditionCall(err)
+  call <- err$call
   expect_false(is.null(
     find_call_in_stack(call$start, quote(afun))
   ))
@@ -46,9 +46,9 @@ test_that("single async function", {
   but_yes_this <- function() afun()
   dx <- but_yes_this()
   err <- tryCatch(await(dx), error = identity)
-  expect_equal(conditionMessage(err), "boo")
+  expect_equal(err$message, "boo")
   expect_s3_class(err, c("async_error", "async_deferred_rejected"))
-  call <- conditionCall(err)
+  call <- err$call
   expect_false(is.null(
     find_in_stack(call$start, quote(but_yes_this()))
   ))
@@ -64,8 +64,8 @@ test_that("async function with a stack", {
   afun <- async(function() f())
 
   err <- tryCatch(await(afun()), error = identity)
-  call <- conditionCall(err)
-  expect_equal(conditionMessage(err), "ohno")
+  call <- err$call
+  expect_equal(err$message, "ohno")
   f_no <- find_in_stack(call$eval, quote(f()))
   g_no <- find_in_stack(call$eval, quote(g()))
   stop_no <- find_in_stack(call$eval, quote(stop("ohno")))
@@ -86,7 +86,7 @@ test_that("then, parent stack", {
   dx1 <- delay(1/1000)
   dx2 <- dx1$then(f)
   err <- tryCatch(await(dx2), error = identity)
-  call <- conditionCall(err)
+  call <- err$call
   expect_false(is.null(
     find_in_stack(call$parent$start, quote(delay(1/1000)))
   ))

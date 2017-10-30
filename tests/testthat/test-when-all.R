@@ -43,7 +43,7 @@ test_that("when_all, error", {
   d2 <- delay(1/1000)$then(function(value) "bar")
 
   dx <- when_all(d1, d2)$
-    then(NULL, function(reason) expect_equal(reason$message, "foo"))
+    then(NULL, function(reason) expect_match(reason$message, "foo"))
 
   await(dx)
 })
@@ -53,7 +53,7 @@ test_that("when_all, multiple errors", {
   d2 <- delay(1/10000)$then(function(value) stop("bar"))
 
   dx <- when_all(d1, d2)$
-    then(NULL, function(reason) expect_equal(reason$message, "bar"))
+    then(NULL, function(reason) expect_match(reason$message, "bar"))
 
   await(dx)
 })

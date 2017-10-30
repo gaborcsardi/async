@@ -56,7 +56,7 @@ test_that("when_any, multiple errors", {
   d2 <- delay(1/10000)$then(function(value) stop("bar"))
 
   dx <- when_any(d1, d2)$
-    then(NULL, function(reason) expect_equal(reason$message, "foo"))
+    then(NULL, function(reason) expect_match(reason$message, "foo"))
 
   await(dx)
 })
