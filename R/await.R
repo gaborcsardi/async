@@ -40,7 +40,17 @@ await <- function(def) {
 #' lapply(resp, "[[", "status_code")
 
 await_all <- function(..., .list = list()) {
+  el <- get_default_event_loop()
+  el_id <- el$get_id()
+
   defs <- c(list(...), .list)
+
+  for (d in defs) {
+    if (!is_deferred(d)) next
+    id <- d$.__enclos_env__$private$event_loop$get_id()
+    if (id != el_id) stop("Cannot await across event loops")
+  }
+
   num_todo <- length(defs)
   for (d in defs) {
     if (!is_deferred(d)) {
@@ -53,7 +63,7 @@ await_all <- function(..., .list = list()) {
     }
   }
 
-  while (num_todo > 0) get_default_event_loop()$run("once")
+  while (num_todo > 0) el$run("once")
 
   lapply(defs, get_value_x)
 }
@@ -76,7 +86,17 @@ await_all <- function(..., .list = list()) {
 #' await_any(t1, t2)
 
 await_any <- function(..., .list = list()) {
+  el <- get_default_event_loop()
+  el_id <- el$get_id()
+
   defs <- c(list(...), .list)
+
+  for (d in defs) {
+    if (!is_deferred(d)) next
+    id <- d$.__enclos_env__$private$event_loop$get_id()
+    if (id != el_id) stop("Cannot await across event loops")
+  }
+
   num_done <- 0
   for (d in defs) {
     if (!is_deferred(d)) {
@@ -90,7 +110,7 @@ await_any <- function(..., .list = list()) {
     }
   }
 
-  while (num_done == 0) get_default_event_loop()$run("once")
+  while (num_done == 0) el$run("once")
 
   states <- vcapply(defs, get_state_x)
   get_value_x(defs[states != "pending"][[1]])

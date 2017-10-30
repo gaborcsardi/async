@@ -4,7 +4,7 @@ async_env <- new.env(parent = emptyenv())
 ## nocov start
 
 .onLoad <- function(libname, pkgname) {
-  async_env$default_loop <- event_loop$new()
+  async_env$loops <- list(event_loop$new())
 
   ## How many frames to drop from event loop call stacks?
   error_callback_drop_num()
@@ -29,5 +29,6 @@ async_env <- new.env(parent = emptyenv())
 #' @keywords internal
 
 get_default_event_loop <- function() {
-  async_env$default_loop
+  num_loops <- length(async_env$loops)
+  async_env$loops[[num_loops]]
 }
