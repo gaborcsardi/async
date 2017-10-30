@@ -38,6 +38,8 @@ format_long_stack <- function(call) {
   result
 }
 
+#' @importFrom utils head tail
+
 trim_long_stack <- function(call) {
   if (h <- call$hide[1,1] %||% 0) call$start <- tail(call$start, -h)
   if (h <- call$hide[1,2] %||% 0) call$start <- head(call$start, -h)
