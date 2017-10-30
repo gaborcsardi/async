@@ -25,20 +25,22 @@ test_that("it returns a function with the same arity", {
 
 test_that("when called it returns a deferred", {
   fun <- async(function() "foo")
-  dx <- fun()
+  sync_wrap(dx <- fun())
   expect_true(is_deferred(dx))
-  await(dx)
 })
 
 test_that("begins asynchronously", {
-  x <- 5
-  foo <- async(function() x <<- 7)
-  dx <- foo()$
-    then(function() expect_equal(x, 7))
-  expect_equal(x, 5)
-  x <- 9
-  await(dx)
-  expect_equal(x, 7)
+  do <- async(function() {
+    x <- 5
+    foo <- async(function() x <<- 7)
+    dx <- foo()$
+      then(function() expect_equal(x, 7))
+    expect_equal(x, 5)
+    x <- 9
+    await(dx)
+    expect_equal(x, 7)
+  })
+  sync_wrap(do())
 })
 
 test_that("preserves closure", {
@@ -48,58 +50,69 @@ test_that("preserves closure", {
     async(function() parent.env(environment()))
   })
 
-  dx <- foo()$
-    then(function(result) expect_identical(result, env))
+  do <- async(function() {
+    dx <- foo()$
+      then(function(result) expect_identical(result, env))
+  })
 
-  await(dx)
+  sync_wrap(do())
 })
 
 test_that("resolves to the definition", {
-  foo <- async(function () "blah")
-  dx <- foo()$
-    then(function(result) expect_equal(result, "blah"))
-
-  await(dx)
+  do <- async(function() {
+    foo <- async(function () "blah")
+    dx <- foo()$
+      then(function(result) expect_equal(result, "blah"))
+  })
+  sync_wrap(do())
 })
 
 test_that("rejects with the thrown error", {
-  act <- NULL
-  exp <- simpleError("Expected thrown value to match rejection value")
-  foo <- async(function() { stop(exp); "blah" })
-  dx <- foo()$
-    then(NULL, function(err) { act <<- exp; exp })$
-    then(function(value) {
-      if (is.null(act)) {
-        stop("Extected function to throw")
-      } else if (!identical(act, exp)) {
-        stop(exp)
-      }
-    })
+  do <- async(function() {
+    act <- NULL
+    exp <- simpleError("Expected thrown value to match rejection value")
+    foo <- async(function() { stop(exp); "blah" })
+    dx <- foo()$
+      then(NULL, function(err) { act <<- exp; exp })$
+      then(function(value) {
+        if (is.null(act)) {
+          stop("Extected function to throw")
+        } else if (!identical(act, exp)) {
+          stop(exp)
+        }
+      })
+  })
 
-  await(dx)
+  expect_silent(sync_wrap(do()))
 })
 
 test_that("works with await", {
 
-  foo <- async(function() {
-    await(delay(20/1000)$then(function(value) "blah"))
+  do <- async(function() {
+    foo <- async(function() {
+      await(delay(20/1000)$then(function(value) "blah"))
+    })
+
+    dx <- foo()$
+      then(function(result) expect_equal(result, "blah"))
   })
 
-  dx <- foo()$
-    then(function(result) expect_equal(result, "blah"))
-
-  await(dx)
+  sync_wrap(do())
 })
 
 test_that("triggers error on unhandled rejection", {
 
-  foo <- async(function() stop("Nobody handled me"))
-  did_trigger <- FALSE
+  do <- async(function() {
+    foo <- async(function() stop("Nobody handled me"))
+    did_trigger <- FALSE
 
-  tryCatch(
-    await(foo()),
-    error = function(e) did_trigger <<- TRUE
-  )
+    tryCatch(
+      await(foo()),
+      error = function(e) did_trigger <<- TRUE
+    )
 
-  expect_true(did_trigger)
+    expect_true(did_trigger)
+  })
+
+  sync_wrap(do())
 })
