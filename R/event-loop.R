@@ -256,7 +256,7 @@ el__run_timers <- function(self, private) {
     task <- private$tasks[[id]]
     private$tasks[[id]] <- NULL
     private$timers <- private$timers[setdiff(names(private$timers), id)]
-    error_callback(task$data$func(), task$callback, task$data$stack)
+    error_callback(task$data$func, task$callback, task$data$stack)
   }
 }
 

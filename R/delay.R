@@ -30,7 +30,7 @@ delay <- function(delay) {
       get_default_event_loop()$add_delayed(
         delay,
         function() TRUE,
-        function(err, res) resolve(res)
+        function(err, res) if (is.null(err)) resolve(res) else reject(err)
       )
     },
     longstack = cbind(c(0,0,0,0), c(3,0,0,0))
