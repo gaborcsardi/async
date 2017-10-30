@@ -27,13 +27,16 @@ dynamic set of async operations.
 }
 \examples{
 ## dynamically change the async operations we are waiting on
-env <- new.env()
-env$foo <- delay(1/10000)$
-  then(function() {
-    env$foo2 <- async_constant("OK2")
-    "OK"
-  })
-await_env(env)
+afun <- async(function() {
+  env <- new.env()
+  env$foo <- delay(1/10000)$
+    then(function() {
+      env$foo2 <- async_constant("OK2")
+      "OK"
+    })
+  await_env(env)
+})
+sync_wrap(afun())
 }
 \seealso{
 Other await functions: \code{\link{await_all}},

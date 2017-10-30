@@ -17,6 +17,9 @@ Is object a deferred value?
 }
 \examples{
 is_deferred(1:10)
-is_deferred(dx <- delay(1/100))
-is_deferred(await(dx))
+afun <- async(function() {
+  print(is_deferred(dx <- delay(1/100)))
+  print(is_deferred(await(dx)))
+})
+sync_wrap(afun())
 }

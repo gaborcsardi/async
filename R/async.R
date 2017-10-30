@@ -18,9 +18,8 @@
 #' is_async(f)
 #' is_async(af)
 #' f()
-#' dx <- af()
+#' sync_wrap(dx <- af())
 #' dx
-#' await(dx)
 
 async <- function(fun) {
   fun <- as_function(fun)
@@ -69,9 +68,8 @@ async <- function(fun) {
 #' is_async(f)
 #' is_async(af)
 #' f()
-#' dx <- af()
+#' sync_wrap(dx <- af())
 #' dx
-#' await(dx)
 
 is_async <- function(fun) {
   assert_that(is.function(fun))

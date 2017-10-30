@@ -12,7 +12,7 @@
 #' ## Keep calling until it "returns" a number less than < 0.1
 #' calls <- 0
 #' number <- Inf
-#' await(async_until(
+#' sync_wrap(async_until(
 #'   function() number < 0.1,
 #'   function() {
 #'     calls <<- calls + 1

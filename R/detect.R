@@ -14,12 +14,11 @@
 #' @family async iterators
 #' @export
 #' @examples
-#' dx <- async_detect(
+#' sync_wrap(async_detect(
 #'   c("https://httpbin.org/status/404", "https://eu.httpbin.org",
 #'     "https://httpbin.org"),
 #'   async_sequence(http_head, function(x) x$status_code == 200)
-#' )
-#' await(dx)
+#' ))
 
 async_detect <- function(.x, .p, ..., .limit = Inf) {
   if (.limit < length(.x)) {

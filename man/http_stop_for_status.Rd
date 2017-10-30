@@ -19,8 +19,10 @@ errors. Note that this is different from the \code{httr} package, which
 considers the 3xx status code errors as well.
 }
 \examples{
-dx <- http_get("https://httpbin.org/status/404")$
-  then(http_stop_for_status)
+afun <- async(function() {
+  http_get("https://httpbin.org/status/404")$
+    then(http_stop_for_status)
+})
 
-tryCatch(await(dx), error = function(e) e)
+tryCatch(sync_wrap(afun()), error = function(e) e)
 }

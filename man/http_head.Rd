@@ -27,15 +27,19 @@ Deferred object.
 Asynchronous HTTP HEAD request
 }
 \examples{
-dx <- http_head("https://httpbin.org/status/200")$
-  then(~ .$status_code)
-await(dx)
+afun <- async(function() {
+  dx <- http_head("https://httpbin.org/status/200")$
+    then(~ .$status_code)
+})
+sync_wrap(afun())
 
 # Check a list of URLs in parallel
+afun <- async(function(urls) {
+  when_all(.list = lapply(urls, http_head))$
+    then(~ lapply(., "[[", "status_code"))
+})
 urls <- c("https://r-project.org", "https://httpbin.org")
-dx <- when_all(.list = lapply(urls, http_head))$
-  then(~ lapply(., "[[", "status_code"))
-await(dx)
+sync_wrap(afun(urls))
 }
 \seealso{
 Other asyncronous HTTP calls: \code{\link{http_get}}

@@ -1,4 +1,10 @@
 
+#' Synchronously wrap on asynchronous code
+#'
+#' TODO
+#'
+#' @param expr Async function call expression.
+#'
 #' @export
 
 sync_wrap <- function(expr) {

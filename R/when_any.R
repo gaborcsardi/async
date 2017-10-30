@@ -19,10 +19,12 @@
 #' @export
 #' @examples
 #' ## Use the URL that returns first
-#' u1 <- http_get("https://httpbin.org/get")
-#' u2 <- http_get("https://eu.httpbin.org/get")
-#' dx <- when_any(u1, u2)$then(~ .$url)
-#' await(dx)
+#' afun <- async(function() {
+#'   u1 <- http_get("https://httpbin.org/get")
+#'   u2 <- http_get("https://eu.httpbin.org/get")
+#'   when_any(u1, u2)$then(~ .$url)
+#' })
+#' sync_wrap(afun())
 
 when_some <- function(count, ..., .list = list()) {
   force(count)

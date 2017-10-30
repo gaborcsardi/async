@@ -22,12 +22,14 @@ error, or \code{times} tries have been performed.
 }
 \examples{
 ## Try a download at most 5 times
-dx <- async_retry(
-  function() http_get("https://httpbin.org"),
-  times = 5
-)$then(~ .$status_code)
+afun <- async(function() {
+  async_retry(
+    function() http_get("https://httpbin.org"),
+    times = 5
+  )$then(~ .$status_code)
+})
 
-await(dx)
+sync_wrap(afun())
 }
 \seealso{
 Other async control flow: \code{\link{async_reflect}},

@@ -311,8 +311,11 @@ def__progress <- function(self, private, tick, total, ratio, amount, ...) {
 #' @export
 #' @examples
 #' is_deferred(1:10)
-#' is_deferred(dx <- delay(1/100))
-#' is_deferred(await(dx))
+#' afun <- async(function() {
+#'   print(is_deferred(dx <- delay(1/100)))
+#'   print(is_deferred(await(dx)))
+#' })
+#' sync_wrap(afun())
 
 is_deferred <- function(x) {
   inherits(x, "deferred")

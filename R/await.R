@@ -15,10 +15,13 @@
 #' @family await functions
 #' @export
 #' @examples
-#' dx <- delay(1/10)$then(~ 42)
-#' dx
-#' await(dx)
-#' await("foobar")
+#' afun <- async(function() {
+#'   dx <- delay(1/10)$then(~ 42)
+#'   print(dx)
+#'   print(await(dx))
+#'   print(await("foobar"))
+#' })
+#' sync_wrap(afun())
 
 await <- function(def) {
   await_all(def)[[1]]
@@ -34,10 +37,13 @@ await <- function(def) {
 #' @family await functions
 #' @export
 #' @examples
-#' urls <- c("https://httpbin.org?q=1", "https://httpbin.org?q=2")
-#' dx <- lapply(urls, http_head)
-#' resp <- await_all(.list = dx)
-#' lapply(resp, "[[", "status_code")
+#' afun <- async(function() {
+#'   urls <- c("https://httpbin.org?q=1", "https://httpbin.org?q=2")
+#'   dx <- lapply(urls, http_head)
+#'   resp <- await_all(.list = dx)
+#'   lapply(resp, "[[", "status_code")
+#' })
+#' sync_wrap(afun())
 
 await_all <- function(..., .list = list()) {
   el <- get_default_event_loop()
@@ -81,9 +87,12 @@ await_all <- function(..., .list = list()) {
 #' @export
 #' @examples
 #' # Returns as soon as one timer expires
-#' t1 <- delay(1)$then(~ 1)
-#' t2 <- delay(1/1000)$then(~ 2)
-#' await_any(t1, t2)
+#' afun <- async(function() {
+#'   t1 <- delay(1)$then(~ 1)
+#'   t2 <- delay(1/1000)$then(~ 2)
+#'   await_any(t1, t2)
+#' })
+#' sync_wrap(afun())
 
 await_any <- function(..., .list = list()) {
   el <- get_default_event_loop()

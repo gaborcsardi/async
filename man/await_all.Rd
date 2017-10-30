@@ -15,10 +15,13 @@ await_all(..., .list = list())
 Similar to \code{\link[=await]{await()}}, but waits for a list of deferred values.
 }
 \examples{
-urls <- c("https://httpbin.org?q=1", "https://httpbin.org?q=2")
-dx <- lapply(urls, http_head)
-resp <- await_all(.list = dx)
-lapply(resp, "[[", "status_code")
+afun <- async(function() {
+  urls <- c("https://httpbin.org?q=1", "https://httpbin.org?q=2")
+  dx <- lapply(urls, http_head)
+  resp <- await_all(.list = dx)
+  lapply(resp, "[[", "status_code")
+})
+sync_wrap(afun())
 }
 \seealso{
 Other await functions: \code{\link{await_any}},

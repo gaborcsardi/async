@@ -16,8 +16,10 @@ A deferred value.
 This is sometimes useful to start a deferred chain.
 }
 \examples{
-dx <- async_constant(1/100)$
-  then(~ delay(.))$
-  then(~ print(.))
-await(dx)
+afun <- async(function() {
+  async_constant(1/100)$
+    then(function(x) delay(x))$
+    then(function(x) print(x))
+})
+sync_wrap(afun())
 }

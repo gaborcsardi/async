@@ -23,7 +23,7 @@ Repeatedly call task, while test returns true
 ## Keep calling while result is bigger than 0.1
 calls <- 0
 number <- Inf
-await(async_whilst(
+sync_wrap(async_whilst(
   function() number >= 0.1,
   function() {
     calls <<- calls + 1
@@ -31,7 +31,6 @@ await(async_whilst(
   }
 ))
 calls
-
 }
 \seealso{
 Other async control flow: \code{\link{async_reflect}},

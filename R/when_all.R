@@ -15,11 +15,13 @@
 #' @export
 #' @examples
 #' ## Check that the contents of two URLs are the same
-#' u1 <- http_get("https://httpbin.org/get")
-#' u2 <- http_get("https://eu.httpbin.org/get")
-#' dx <- when_all(u1, u2)$
-#'   then(~ identical(.[[1]]$content, .[[2]]$content))
-#' await(dx)
+#' afun <- async(function() {
+#'   u1 <- http_get("https://httpbin.org/get")
+#'   u2 <- http_get("https://eu.httpbin.org/get")
+#'   when_all(u1, u2)$
+#'     then(~ identical(.[[1]]$content, .[[2]]$content))
+#' })
+#' sync_wrap(afun())
 
 when_all <- function(..., .list = list()) {
   defs <- c(list(...), .list)

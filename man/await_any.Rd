@@ -18,9 +18,12 @@ is returned.
 }
 \examples{
 # Returns as soon as one timer expires
-t1 <- delay(1)$then(~ 1)
-t2 <- delay(1/1000)$then(~ 2)
-await_any(t1, t2)
+afun <- async(function() {
+  t1 <- delay(1)$then(~ 1)
+  t2 <- delay(1/1000)$then(~ 2)
+  await_any(t1, t2)
+})
+sync_wrap(afun())
 }
 \seealso{
 Other await functions: \code{\link{await_all}},
