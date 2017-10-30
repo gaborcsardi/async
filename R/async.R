@@ -27,10 +27,10 @@ async <- function(fun) {
 
   async_fun <- fun
   body(async_fun) <- expr({
-    async::deferred$new(
+    (!! deferred)$new(
       function(resolve, reject) {
         force(resolve) ; force(reject)
-        async:::get_default_event_loop()$add_next_tick(
+        (!! get_default_event_loop)()$add_next_tick(
           function() {
             evalq(
               { !!! body(fun) },
