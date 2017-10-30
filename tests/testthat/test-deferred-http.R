@@ -30,7 +30,6 @@ test_that("HEAD", {
 
 test_that("http_stop_for_status", {
 
-  skip("fails")
   skip_if_offline()
 
   do <- async(function() {
