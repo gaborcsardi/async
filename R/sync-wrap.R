@@ -8,9 +8,8 @@
 #' @export
 
 sync_wrap <- function(expr) {
-  new_el <- event_loop$new()
-  async_env$loops <- c(async_env$loops, list(new_el))
-  on.exit(async_env$loops[[length(async_env$loops)]] <- NULL)
-  get_default_event_loop()$run()
+  new_el <- push_event_loop()
+  on.exit(pop_event_loop())
+  new_el$run()
   await(expr)
 }
