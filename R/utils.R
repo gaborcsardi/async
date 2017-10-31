@@ -13,8 +13,7 @@ get_state_x <- function(x) {
 
 get_state_check_x <- function(x, event_loop) {
   if (is_deferred(x)) {
-    id <- x$.__enclos_env__$private$event_loop$get_id()
-    if (id != event_loop) {
+    if (!identical(x$get_event_loop(), event_loop)) {
       stop("Cannot await_env() across synchronization barrier")
     }
     x$get_state()

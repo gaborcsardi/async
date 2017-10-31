@@ -54,9 +54,7 @@ event_loop <- R6Class(
       el_add_next_tick(self, private, func, callback),
 
     run = function(mode = c("default", "nowait", "once"))
-      el_run(self, private, mode = match.arg(mode)),
-
-    get_id = function() private$id
+      el_run(self, private, mode = match.arg(mode))
   ),
 
   private = list(
@@ -75,7 +73,6 @@ event_loop <- R6Class(
     update_time = function()
       el__update_time(self, private),
 
-    id = NULL,
     time = Sys.time(),
     stop_flag = FALSE,
     tasks = list(),
@@ -85,12 +82,9 @@ event_loop <- R6Class(
   )
 )
 
-#' @importFrom uuid UUIDgenerate
-
 el_init <- function(self, private) {
   ## TODO
   ## reg.finalizer(self, function(me) me$run("default"), onexit = TRUE)
-  private$id <- UUIDgenerate()
   invisible(self)
 }
 

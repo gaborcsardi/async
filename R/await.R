@@ -47,14 +47,12 @@ await <- function(def) {
 
 await_all <- function(..., .list = list()) {
   el <- get_default_event_loop()
-  el_id <- el$get_id()
 
   defs <- c(list(...), .list)
 
   for (d in defs) {
     if (!is_deferred(d)) next
-    id <- d$.__enclos_env__$private$event_loop$get_id()
-    if (id != el_id) {
+    if (!identical(d$get_event_loop(), el)) {
       stop("Cannot await_all() across synchronization barrier")
     }
   }
@@ -98,14 +96,12 @@ await_all <- function(..., .list = list()) {
 
 await_any <- function(..., .list = list()) {
   el <- get_default_event_loop()
-  el_id <- el$get_id()
 
   defs <- c(list(...), .list)
 
   for (d in defs) {
     if (!is_deferred(d)) next
-    id <- d$.__enclos_env__$private$event_loop$get_id()
-    if (id != el_id) {
+    if (!identical(d$get_event_loop(), el)) {
       stop("Cannot await_any() across synchronization barrier")
     }
   }

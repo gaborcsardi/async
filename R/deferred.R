@@ -83,7 +83,9 @@ deferred <- R6Class(
     finally = function(on_finally)
       def_finally(self, private, on_finally),
     cancel = function(reason = NULL)
-      def_cancel(self, private, reason)
+      def_cancel(self, private, reason),
+
+    get_event_loop = function() private$event_loop
   ),
 
   private = list(

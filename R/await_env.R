@@ -34,10 +34,9 @@ await_env <- function(env) {
   assert_that(is.environment(env))
 
   el <- get_default_event_loop()
-  el_id <- el$get_id()
 
   num_pending <- function(env) {
-    sum(eapply(env, get_state_check_x, event_loop = el_id,
+    sum(eapply(env, get_state_check_x, event_loop = el,
                all.names = TRUE) == "pending")
   }
   
