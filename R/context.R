@@ -41,8 +41,11 @@ start_dev_async_context <- function() {
 
 stop_dev_async_context <- function() {
   num_loops <- length(async_env$loops)
-  if (num_loops != 1) {
+  if (num_loops == 0) {
+    warning("Dev async context not running")
+  } else if (num_loops > 1) {
     stop("Multiple async contexts, cannot remove dev context")
+  } else {
+    pop_event_loop()
   }
-  pop_event_loop()
 }
