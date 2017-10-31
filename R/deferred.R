@@ -83,11 +83,14 @@ deferred <- R6Class(
     finally = function(on_finally)
       def_finally(self, private, on_finally),
     cancel = function(reason = NULL)
-      def_cancel(self, private, reason)
+      def_cancel(self, private, reason),
+
+    get_event_loop = function() private$event_loop
   ),
 
   private = list(
     state = c("pending", "fulfilled", "rejected")[1],
+    event_loop = NULL,
     id = NULL,
     value = NULL,
     on_fulfilled = list(),
@@ -112,6 +115,8 @@ deferred <- R6Class(
 
 def_init <- function(self, private, action, on_progress, on_cancel,
                      longstack) {
+  private$event_loop <- get_default_event_loop()
+
   if (!is.function(action)) {
     action <- as_function(action)
     formals(action) <- alist(resolve = NULL, reject = NULL,
@@ -163,6 +168,14 @@ make_then_function <- function(func, value) {
 def_then <- function(self, private, on_fulfilled, on_rejected) {
   force(self)
   force(private)
+
+  if (! identical(private$event_loop, get_default_event_loop())) {
+    err <- make_error(
+      "Cannot create deferred chain across synchronization barrier",
+      class = "async_synchronization_barrier_error")
+    stop(err)
+  }
+
   on_fulfilled <- if (!is.null(on_fulfilled)) as_function(on_fulfilled)
   on_rejected  <- if (!is.null(on_rejected))  as_function(on_rejected)
   def <- deferred$new(function(resolve, reject) {
@@ -172,7 +185,7 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
     handle <- function(func) {
       force(func)
       function(value) {
-        get_default_event_loop()$add_next_tick(
+        private$event_loop$add_next_tick(
           make_then_function(func, value),
           function(err, res) if (is.null(err)) resolve(res) else reject(err)
         )
@@ -233,7 +246,6 @@ def__resolve <- function(self, private, value) {
   } else {
     private$state <- "fulfilled"
     private$value <- value
-    loop <- get_default_event_loop()
     for (f in private$on_fulfilled) f(value)
     private$on_fulfilled <- list()
   }
@@ -309,8 +321,11 @@ def__progress <- function(self, private, tick, total, ratio, amount, ...) {
 #' @export
 #' @examples
 #' is_deferred(1:10)
-#' is_deferred(dx <- delay(1/100))
-#' is_deferred(await(dx))
+#' afun <- async(function() {
+#'   print(is_deferred(dx <- delay(1/100)))
+#'   print(is_deferred(await(dx)))
+#' })
+#' synchronise(afun())
 
 is_deferred <- function(x) {
   inherits(x, "deferred")

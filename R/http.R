@@ -22,9 +22,11 @@
 #' @export
 #' @importFrom curl new_handle handle_setheaders
 #' @examples
-#' dx <- http_get("https://httpbin.org/status/200")$
-#'   then(~ .$status_code)
-#' await(dx)
+#' afun <- async(function() {
+#'   http_get("https://eu.httpbin.org/status/200")$
+#'     then(~ .$status_code)
+#' })
+#' synchronise(afun())
 
 http_get <- function(url, headers = character(), file = NULL,
                      timeout = 10, on_progress = NULL) {
@@ -43,15 +45,19 @@ http_get <- function(url, headers = character(), file = NULL,
 #' @export
 #' @importFrom curl handle_setopt
 #' @examples
-#' dx <- http_head("https://httpbin.org/status/200")$
-#'   then(~ .$status_code)
-#' await(dx)
+#' afun <- async(function() {
+#'   dx <- http_head("https://eu.httpbin.org/status/200")$
+#'     then(~ .$status_code)
+#' })
+#' synchronise(afun())
 #'
 #' # Check a list of URLs in parallel
-#' urls <- c("https://r-project.org", "https://httpbin.org")
-#' dx <- when_all(.list = lapply(urls, http_head))$
-#'   then(~ lapply(., "[[", "status_code"))
-#' await(dx)
+#' afun <- async(function(urls) {
+#'   when_all(.list = lapply(urls, http_head))$
+#'     then(~ lapply(., "[[", "status_code"))
+#' })
+#' urls <- c("https://r-project.org", "https://eu.httpbin.org")
+#' synchronise(afun(urls))
 
 http_head <- function(url, headers = character(), file = NULL,
                       timeout = 10, on_progress = NULL) {
@@ -95,10 +101,12 @@ make_deferred_http <- function(handle, file, on_progress) {
 #'
 #' @export
 #' @examples
-#' dx <- http_get("https://httpbin.org/status/404")$
-#'   then(http_stop_for_status)
+#' afun <- async(function() {
+#'   http_get("https://eu.httpbin.org/status/404")$
+#'     then(http_stop_for_status)
+#' })
 #'
-#' tryCatch(await(dx), error = function(e) e)
+#' tryCatch(synchronise(afun()), error = function(e) e)
 
 http_stop_for_status <- function(resp) {
   if (!is.integer(resp$status_code)) stop("Not an HTTP response")

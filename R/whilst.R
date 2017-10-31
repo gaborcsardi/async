@@ -12,7 +12,7 @@
 #' ## Keep calling while result is bigger than 0.1
 #' calls <- 0
 #' number <- Inf
-#' await(async_whilst(
+#' synchronise(async_whilst(
 #'   function() number >= 0.1,
 #'   function() {
 #'     calls <<- calls + 1
@@ -20,7 +20,6 @@
 #'   }
 #' ))
 #' calls
-#'
 
 async_whilst <- function(test, task, ...) {
   force(test)

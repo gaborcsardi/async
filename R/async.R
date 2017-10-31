@@ -18,9 +18,8 @@
 #' is_async(f)
 #' is_async(af)
 #' f()
-#' dx <- af()
+#' synchronise(dx <- af())
 #' dx
-#' await(dx)
 
 async <- function(fun) {
   fun <- as_function(fun)
@@ -28,10 +27,10 @@ async <- function(fun) {
 
   async_fun <- fun
   body(async_fun) <- expr({
-    async::deferred$new(
+    (!! deferred)$new(
       function(resolve, reject) {
         force(resolve) ; force(reject)
-        async:::get_default_event_loop()$add_next_tick(
+        (!! get_default_event_loop)()$add_next_tick(
           function() {
             evalq(
               { !!! body(fun) },
@@ -69,9 +68,8 @@ async <- function(fun) {
 #' is_async(f)
 #' is_async(af)
 #' f()
-#' dx <- af()
+#' synchronise(dx <- af())
 #' dx
-#' await(dx)
 
 is_async <- function(fun) {
   assert_that(is.function(fun))

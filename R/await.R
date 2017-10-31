@@ -15,10 +15,13 @@
 #' @family await functions
 #' @export
 #' @examples
-#' dx <- delay(1/10)$then(~ 42)
-#' dx
-#' await(dx)
-#' await("foobar")
+#' afun <- async(function() {
+#'   dx <- delay(1/10)$then(~ 42)
+#'   print(dx)
+#'   print(await(dx))
+#'   print(await("foobar"))
+#' })
+#' synchronise(afun())
 
 await <- function(def) {
   await_all(def)[[1]]
@@ -34,13 +37,29 @@ await <- function(def) {
 #' @family await functions
 #' @export
 #' @examples
-#' urls <- c("https://httpbin.org?q=1", "https://httpbin.org?q=2")
-#' dx <- lapply(urls, http_head)
-#' resp <- await_all(.list = dx)
-#' lapply(resp, "[[", "status_code")
+#' afun <- async(function() {
+#'   urls <- c("https://eu.httpbin.org?q=1", "https://eu.httpbin.org?q=2")
+#'   dx <- lapply(urls, http_head)
+#'   resp <- await_all(.list = dx)
+#'   lapply(resp, "[[", "status_code")
+#' })
+#' synchronise(afun())
 
 await_all <- function(..., .list = list()) {
+  el <- get_default_event_loop()
+
   defs <- c(list(...), .list)
+
+  for (d in defs) {
+    if (!is_deferred(d)) next
+    if (!identical(d$get_event_loop(), el)) {
+      err <- make_error(
+        "Cannot await() across synchronization barrier",
+        class = "async_synchronization_barrier_error")
+      stop(err)
+    }
+  }
+
   num_todo <- length(defs)
   for (d in defs) {
     if (!is_deferred(d)) {
@@ -53,7 +72,7 @@ await_all <- function(..., .list = list()) {
     }
   }
 
-  while (num_todo > 0) get_default_event_loop()$run("once")
+  while (num_todo > 0) el$run("once")
 
   lapply(defs, get_value_x)
 }
@@ -71,12 +90,28 @@ await_all <- function(..., .list = list()) {
 #' @export
 #' @examples
 #' # Returns as soon as one timer expires
-#' t1 <- delay(1)$then(~ 1)
-#' t2 <- delay(1/1000)$then(~ 2)
-#' await_any(t1, t2)
+#' afun <- async(function() {
+#'   t1 <- delay(1)$then(~ 1)
+#'   t2 <- delay(1/1000)$then(~ 2)
+#'   await_any(t1, t2)
+#' })
+#' synchronise(afun())
 
 await_any <- function(..., .list = list()) {
+  el <- get_default_event_loop()
+
   defs <- c(list(...), .list)
+
+  for (d in defs) {
+    if (!is_deferred(d)) next
+    if (!identical(d$get_event_loop(), el)) {
+      err <- make_error(
+        "Cannot await() across synchronization barrier",
+        class = "async_synchronization_barrier_error")
+      stop(err)
+    }
+  }
+
   num_done <- 0
   for (d in defs) {
     if (!is_deferred(d)) {
@@ -90,7 +125,7 @@ await_any <- function(..., .list = list()) {
     }
   }
 
-  while (num_done == 0) get_default_event_loop()$run("once")
+  while (num_done == 0) el$run("once")
 
   states <- vcapply(defs, get_state_x)
   get_value_x(defs[states != "pending"][[1]])

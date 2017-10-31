@@ -24,12 +24,11 @@ All predicates are running in parallel, and the returned match
 is not guaranteed to be the first one.
 }
 \examples{
-dx <- async_detect(
-  c("https://httpbin.org/status/404", "https://eu.httpbin.org",
-    "https://httpbin.org"),
+synchronise(async_detect(
+  c("https://eu.httpbin.org/status/404", "https://eu.httpbin.org",
+    "https://eu.httpbin.org/status/403"),
   async_sequence(http_head, function(x) x$status_code == 200)
-)
-await(dx)
+))
 }
 \seealso{
 Other async iterators: \code{\link{async_every}},

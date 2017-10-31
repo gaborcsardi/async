@@ -55,7 +55,6 @@ event_loop <- R6Class(
 
     run = function(mode = c("default", "nowait", "once"))
       el_run(self, private, mode = match.arg(mode))
-
   ),
 
   private = list(
@@ -251,7 +250,7 @@ el__run_timers <- function(self, private) {
     task <- private$tasks[[id]]
     private$tasks[[id]] <- NULL
     private$timers <- private$timers[setdiff(names(private$timers), id)]
-    error_callback(task$data$func(), task$callback, task$data$stack)
+    error_callback(task$data$func, task$callback, task$data$stack)
   }
 }
 

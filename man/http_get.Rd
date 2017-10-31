@@ -28,9 +28,11 @@ Start an HTTP GET request in the background, and report its completion
 via a deferred.
 }
 \examples{
-dx <- http_get("https://httpbin.org/status/200")$
-  then(~ .$status_code)
-await(dx)
+afun <- async(function() {
+  http_get("https://eu.httpbin.org/status/200")$
+    then(~ .$status_code)
+})
+synchronise(afun())
 }
 \seealso{
 Other asyncronous HTTP calls: \code{\link{http_head}}

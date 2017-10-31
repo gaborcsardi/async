@@ -21,9 +21,13 @@ Keep element using an asyncronous predicate function
 }
 \examples{
 ## Filter out non-working URLs
-urls <- c("https://httpbin.org/get", "https://httpbin.org/status/404")
-test_url <- async_sequence(http_head, ~ identical(.$status_code, 200L))
-await(async_filter(urls, test_url))
+afun <- async(function(urls) {
+  test_url <- async_sequence(http_head, ~ identical(.$status_code, 200L))
+  async_filter(urls, test_url)
+})
+urls <- c("https://eu.httpbin.org/get",
+          "https://eu.httpbin.org/status/404")
+synchronise(afun(urls))
 }
 \seealso{
 Other async iterators: \code{\link{async_detect}},

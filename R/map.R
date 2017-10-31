@@ -12,12 +12,10 @@
 #' @family async iterators
 #' @export
 #' @examples
-#' dx <- async_map(
+#' synchronise(async_map(
 #'   seq(10, 100, by = 10) / 100,
 #'   function(wait) delay(wait)$then(~ "OK")
-#' )
-#' dx
-#' await(dx)
+#' ))
 
 async_map <- function(.x, .f, ..., .args = list(), .limit = Inf) {
   if (.limit < length(.x))  {

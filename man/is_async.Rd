@@ -25,7 +25,6 @@ af <- async(f)
 is_async(f)
 is_async(af)
 f()
-dx <- af()
+synchronise(dx <- af())
 dx
-await(dx)
 }

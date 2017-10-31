@@ -32,10 +32,12 @@ the returned deferred value is rejected.
 }
 \examples{
 ## Use the URL that returns first
-u1 <- http_get("https://httpbin.org/get")
-u2 <- http_get("https://eu.httpbin.org/get")
-dx <- when_any(u1, u2)$then(~ .$url)
-await(dx)
+afun <- async(function() {
+  u1 <- http_get("https://eu.httpbin.org")
+  u2 <- http_get("https://eu.httpbin.org/get")
+  when_any(u1, u2)$then(~ .$url)
+})
+synchronise(afun())
 }
 \seealso{
 \code{\link[=when_all]{when_all()}}

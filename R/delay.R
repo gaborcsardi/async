@@ -12,14 +12,17 @@
 #' @export
 #' @examples
 #' ## Two HEAD requests with 1/2 sec delay between them
-#' resp <- list()
-#' dx <- http_head("https://httpbin.org?q=2")$
-#'   then(function(value) resp[[1]] <<- value$status_code)$
-#'   then(function(...) delay(1/2))$
-#'   then(function(...) http_head("https://httpbin.org?q=2"))$
-#'   then(function(value) resp[[2]] <<- value$status_code)
-#' await(dx)
-#' resp
+#' afun <- async(function() {
+#'   resp <- list()
+#'   dx <- http_head("https://eu.httpbin.org?q=2")$
+#'     then(function(value) resp[[1]] <<- value$status_code)$
+#'     then(function(...) delay(1/2))$
+#'     then(function(...) http_head("https://eu.httpbin.org?q=2"))$
+#'     then(function(value) resp[[2]] <<- value$status_code)
+#'   await(dx)
+#'   resp
+#' })
+#' synchronise(afun())
 
 delay <- function(delay) {
   assert_that(is_time_interval(delay))
@@ -30,7 +33,7 @@ delay <- function(delay) {
       get_default_event_loop()$add_delayed(
         delay,
         function() TRUE,
-        function(err, res) resolve(res)
+        function(err, res) if (is.null(err)) resolve(res) else reject(err)
       )
     },
     longstack = cbind(c(0,0,0,0), c(3,0,0,0))

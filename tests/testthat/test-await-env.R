@@ -2,62 +2,78 @@
 context("await_env")
 
 test_that("empty env", {
-  expect_equal(
+  synchronise(expect_equal(
     await_env(new.env()),
     structure(list(), names = character())
-  )
+  ))
 })
 
 test_that("only regular objects", {
-  env <- new.env()
-  env$foo <- "foo"
-  env$bar <- 1:10
-  expect_equal(
-    await_env(env),
-    as.list(env)
-  )
+  do <- async(function() {
+    env <- new.env()
+    env$foo <- "foo"
+    env$bar <- 1:10
+    expect_equal(
+      await_env(env),
+      as.list(env)
+    )
+  })
+  synchronise(do())
 })
 
 test_that("deferred value in env", {
-  env <- new.env()
-  env$foo <- async_constant()
-  env$bar <- delay(1/10000)
-  l <- as.list(env)
-  expect_equal(
-    await_env(env),
-    await_all(.list = l)
-  )
+  do <- async(function() {
+    env <- new.env()
+    env$foo <- async_constant()
+    env$bar <- delay(1/10000)
+    l <- as.list(env)
+    expect_equal(
+      await_env(env),
+      await_all(.list = l)
+    )
+  })
+  synchronise(do())
 })
 
 test_that("dynamically change the number of deferred values", {
-  env <- new.env()
-  env$foo <- delay(1/10000)$
-    then(function() {
-      env$foo2 <- async_constant("OK2")
-      "OK"
-    })
+  do <- async(function() {
+    env <- new.env()
+    env$foo <- delay(1/10000)$
+      then(function() {
+        env$foo2 <- async_constant("OK2")
+        "OK"
+      })
 
-  expect_equal(
-    sort_by_name(await_env(env)),
-    list(foo = "OK", foo2 = "OK2")
-  )
+    expect_equal(
+      sort_by_name(await_env(env)),
+      list(foo = "OK", foo2 = "OK2")
+    )
+  })
+  synchronise(do())
 })
 
 test_that("remove a deferred value", {
-  env <- new.env()
-  env$foo <- delay(1)
-  env$bar <- delay(1/10000)$
-    then(function() {
-      rm("foo", envir = env)
-      "OK"
-    })
+  do <- async(function() {
+    env <- new.env()
+    env$foo <- delay(1)
+    env$bar <- delay(1/10000)$
+      then(function() {
+        rm("foo", envir = env)
+        "OK"
+      })
 
-  expect_equal(await_env(env), list(bar = "OK"))
+    expect_equal(await_env(env), list(bar = "OK"))
+  })
+  synchronise(do())
 })
 
-test_that("error", {
-  env <- new.env()
-  env$foo <- delay(1/1000)$then(~ stop("ooops"))
 
-  expect_error(await_env(env), "ooops")
+test_that("error", {
+  do <- async(function() {
+    env <- new.env()
+    env$foo <- delay(1/1000)$then(~ stop("ooops"))
+
+    expect_error(await_env(env), "ooops")
+  })
+  synchronise(do())
 })

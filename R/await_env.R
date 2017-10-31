@@ -19,19 +19,25 @@
 #' @export
 #' @examples
 #' ## dynamically change the async operations we are waiting on
-#' env <- new.env()
-#' env$foo <- delay(1/10000)$
-#'   then(function() {
-#'     env$foo2 <- async_constant("OK2")
-#'     "OK"
-#'   })
-#' await_env(env)
+#' afun <- async(function() {
+#'   env <- new.env()
+#'   env$foo <- delay(1/10000)$
+#'     then(function() {
+#'       env$foo2 <- async_constant("OK2")
+#'       "OK"
+#'     })
+#'   await_env(env)
+#' })
+#' synchronise(afun())
 
 await_env <- function(env) {
   assert_that(is.environment(env))
 
+  el <- get_default_event_loop()
+
   num_pending <- function(env) {
-    sum(eapply(env, get_state_x, all.names = TRUE) == "pending")
+    sum(eapply(env, get_state_check_x, event_loop = el,
+               all.names = TRUE) == "pending")
   }
   
   while (num_pending(env) > 0) get_default_event_loop()$run("once")

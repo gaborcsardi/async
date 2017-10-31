@@ -27,6 +27,35 @@ devtools::install_github("r-lib/async")
 The `async` package brings asychronous I/O and computation to R. As a first
 step it implements asynchronous HTTP requests.
 
+## Async functions
+
+Asynchronous computation is carried out in asynchronous (async) functions.
+An async function is special:
+- it can stop its execution to wait for results from other async
+  functions.
+- it can create deferred values, that represent asynchronous computation.
+- it can wait on deferred values, using the `await()` functions.
+- it returns a deferred value.
+- it can call other asynchronous functions.
+
+The `async` package contains some async functions:
+- `delay()` invokes computation that is carried out after a timer expires.
+- `http_get()` and `http_head()` perform HTTP requests, asynchronously.
+- `async_constant()` is an async function that represents a value.
+
+More async functions can be created using `async()`.
+
+## Synchronization barriers
+
+Asynchronous computation is carried out in async functions, and async
+functions can call other async functions. Usually synchronous functions
+cannot call asynchronous functions, except for a special function:
+`synchronise()`. `synchronise()` creates a synchronization barrier. It
+can call an async function, and it waits until the async function is run
+to completion. `synchronise()` is a tool that allows embedding
+asynchronous code into synchronous code. All examples in this intro are
+embedded into a `synchronise()` call.
+
 ## Deferred Values
 
 Asynchronous computation is represented by deferred values. In `async`
@@ -50,39 +79,47 @@ an HTTP GET request with the `http_get()` function.
 
 While the eventual value of a pending deferred is not known, we can still
 operate on it, by declaring code that is to be executed, once the value
-will be known:
+will be known.
 
 
 ```r
 library(async)
-def <- http_get("https://httpbin.org")
-status <- def$then(function(response) response$status_code)
-status
+afun <- async(function() {
+  def <- http_get("https://httpbin.org")
+  status <- def$then(function(response) response$status_code)
+  print(status)
+  status$get_state()
+})
+synchronise(afun())
 ```
 
 ```
 #> <deferred>
 #>   Public:
+#>     cancel: function (reason = NULL) 
 #>     catch: function (on_rejected) 
 #>     clone: function (deep = FALSE) 
 #>     finally: function (on_finally) 
+#>     get_event_loop: function () 
 #>     get_state: function () 
 #>     get_value: function () 
-#>     initialize: function (action) 
+#>     initialize: function (action, on_progress = NULL, on_cancel = NULL, longstack = NULL) 
 #>     then: function (on_fulfilled = NULL, on_rejected = NULL) 
 #>   Private:
+#>     cancel_callback: NULL
+#>     cancelled: FALSE
+#>     event_loop: event_loop, R6
 #>     id: NULL
+#>     make_error_object: function (err) 
 #>     on_fulfilled: list
 #>     on_rejected: list
+#>     progress: function (..., tick = NULL, total = NULL, ratio = NULL, amount = NULL) 
+#>     progress_callback: NULL
 #>     reject: function (reason) 
 #>     resolve: function (value) 
+#>     stack: list
 #>     state: pending
-#>     task: NULL
 #>     value: NULL
-```
-
-```r
-status$get_state()
 ```
 
 ```
@@ -110,13 +147,16 @@ HTTP requests in parallel:
 
 
 ```r
-http_status <- function(url) {
-  http_get(url)$then(function(response) response$status_code)
-}
-r1 <- http_status("https://httpbin.org/status/403")
-r2 <- http_status("https://httpbin.org/status/404")
-r3 <- http_status("https://httpbin.org/status/200")
-await_all(r1, r2, r3)
+afun <- async(function() {
+  http_status <- function(url) {
+    http_get(url)$then(function(response) response$status_code)
+  }
+  r1 <- http_status("https://httpbin.org/status/403")
+  r2 <- http_status("https://httpbin.org/status/404")
+  r3 <- http_status("https://httpbin.org/status/200")
+  await_all(r1, r2, r3)
+})
+synchronise(afun())
 ```
 
 ```
@@ -156,22 +196,21 @@ also re-throw the error by calling `stop()`.
 
 
 ```r
-u1 <- http_get("https://httpbin.org")$
-  then(function() "web server is up", function() "web server is down")
-u2 <- http_get("non-existing-url.for-sure")$
-  then(function() "web server is up", function() "web server is down")
-await(u1)
+afun <- async(function() {
+  u1 <- http_get("https://httpbin.org")$
+    then(function() "web server is up", function() "web server is down")
+  u2 <- http_get("non-existing-url.for-sure")$
+    then(function() "web server is up", function() "web server is down")
+  await_all(u1, u2)
+})
+synchronise(afun())
 ```
 
 ```
+#> [[1]]
 #> [1] "web server is up"
-```
-
-```r
-await(u2)
-```
-
-```
+#> 
+#> [[2]]
 #> [1] "web server is down"
 ```
 
@@ -235,19 +274,22 @@ reverse dependencies.
 
 ```r
 fromJSON <- function(x) jsonlite::fromJSON(x, simplifyVector = FALSE)
-get_author <- function(package) {
-  url <- paste0("https://crandb.r-pkg.org/", package)
-  http_get(url)$
+revdep_authors <- async(function() {
+  get_author <- function(package) {
+    url <- paste0("https://crandb.r-pkg.org/", package)
+    http_get(url)$
+      then(~ fromJSON(rawToChar(.$content)))$
+      then(~ .$Author)
+  }
+
+  gx <- http_get("https://crandb.r-pkg.org/-/topdeps/devel")$
     then(~ fromJSON(rawToChar(.$content)))$
-    then(~ .$Author)
-}
+    then(~ names(unlist(.)))$
+    then(~ async_map(., get_author))
 
-gx <- http_get("https://crandb.r-pkg.org/-/topdeps/devel")$
-  then(~ fromJSON(rawToChar(.$content)))$
-  then(~ names(unlist(.)))$
-  then(~ async_map(., get_author))
-
-await(gx)[1:3]
+  await(gx)
+})
+synchronise(revdep_authors())[1:3]
 ```
 
 ```
@@ -267,12 +309,16 @@ The following code returns the 2 URLs that respond first.
 
 
 ```r
+fastest_two <- async(function(urls) {
+  qs <- lapply(urls, http_head)
+  t2 <- when_some(2, .list = qs)$
+  then(function(top2) vapply(top2, "[[", character(1), "url"))
+})
 urls <- c("https://cran.rstudio.com", "https://cran.r-project.org",
           "https://www.stats.bris.ac.uk/R/", "https://cran.uib.no/")
-qs <- lapply(urls, http_head)
-t2 <- when_some(2, .list = qs)$
-  then(function(top2) vapply(top2, "[[", character(1), "url"))
-await(t2)
+synchronise(
+  fastest_two(urls)
+)
 ```
 
 ```

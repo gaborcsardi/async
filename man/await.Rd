@@ -23,10 +23,13 @@ If the deferred value resolves to another deferred value, then
 it wait on that as well, and so forth.
 }
 \examples{
-dx <- delay(1/10)$then(~ 42)
-dx
-await(dx)
-await("foobar")
+afun <- async(function() {
+  dx <- delay(1/10)$then(~ 42)
+  print(dx)
+  print(await(dx))
+  print(await("foobar"))
+})
+synchronise(afun())
 }
 \seealso{
 Other await functions: \code{\link{await_all}},

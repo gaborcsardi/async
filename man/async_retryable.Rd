@@ -20,9 +20,11 @@ Make an asynchronous funcion retryable
 \examples{
 ## Create a downloader that retries five times
 http_get_5 <- async_retryable(http_get, times = 5)
-dx <- http_get("https://httpbin.org/get?q=1")$
-  then(~ rawToChar(.$content))
-cat(await(dx))
+ret <- synchronise(
+  http_get("https://eu.httpbin.org/get?q=1")$
+    then(~ rawToChar(.$content))
+)
+cat(ret)
 }
 \seealso{
 Other async control flow: \code{\link{async_reflect}},

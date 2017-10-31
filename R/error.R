@@ -43,8 +43,12 @@ format_long_stack <- function(call) {
 trim_long_stack <- function(call) {
   if (h <- call$hide[1,1] %||% 0) call$start <- tail(call$start, -h)
   if (h <- call$hide[1,2] %||% 0) call$start <- head(call$start, -h)
-  if (h <- call$hide[2,1] %||% 0) call$eval <- tail(call$eval, -h)
-  if (h <- call$hide[2,2] %||% 0) call$eval <- head(call$eval, -h)
+  if (h <- call$hide[2,1] %||% 0 && is.list(call$eval)) {
+    call$eval <- tail(call$eval, -h)
+  }
+  if (h <- call$hide[2,2] %||% 0 && is.list(call$eval)) {
+    call$eval <- head(call$eval, -h)
+  }
 
   call$hide[] <- 0
   call
@@ -55,7 +59,7 @@ trim_long_stack <- function(call) {
 conditionCall.async_deferred_rejected <- function(c) {
   call <- trim_long_stack(c$call)
   st <- if (length(call$eval)) call$eval else call$start
-  tail(st, 1)[[1]]
+  if (is.list(st)) tail(st, 1)[[1]] else st
 }
 
 #' @export
