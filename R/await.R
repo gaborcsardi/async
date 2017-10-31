@@ -53,7 +53,10 @@ await_all <- function(..., .list = list()) {
   for (d in defs) {
     if (!is_deferred(d)) next
     if (!identical(d$get_event_loop(), el)) {
-      stop("Cannot await_all() across synchronization barrier")
+      err <- make_error(
+        "Cannot await() across synchronization barrier",
+        class = "async_synchronization_barrier_error")
+      stop(err)
     }
   }
 
@@ -102,7 +105,10 @@ await_any <- function(..., .list = list()) {
   for (d in defs) {
     if (!is_deferred(d)) next
     if (!identical(d$get_event_loop(), el)) {
-      stop("Cannot await_any() across synchronization barrier")
+      err <- make_error(
+        "Cannot await() across synchronization barrier",
+        class = "async_synchronization_barrier_error")
+      stop(err)
     }
   }
 

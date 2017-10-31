@@ -15,7 +15,11 @@ async_env$loops <- list()
 get_default_event_loop <- function() {
   num_loops <- length(async_env$loops)
   if (num_loops == 0) {
-    stop("You can only call async functions from an async context")
+    err <- make_error(
+      "You can only call async functions from an async context",
+      class = "async_synchronization_barrier_error"
+    )
+    stop(err)
   }
 
   async_env$loops[[num_loops]]
