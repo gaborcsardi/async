@@ -11,6 +11,18 @@ get_state_x <- function(x) {
   if (is_deferred(x)) x$get_state() else "not-deferred"
 }
 
+get_state_check_x <- function(x, event_loop) {
+  if (is_deferred(x)) {
+    id <- x$.__enclos_env__$private$event_loop$get_id()
+    if (id != event_loop) {
+      stop("Cannot await_env() across synchronization barrier")
+    }
+    x$get_state()
+  } else {
+    "not-deferred"
+  }
+}
+
 get_value_x <- function(x) {
   if (is_deferred(x)) x$get_value() else x
 }

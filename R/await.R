@@ -54,7 +54,9 @@ await_all <- function(..., .list = list()) {
   for (d in defs) {
     if (!is_deferred(d)) next
     id <- d$.__enclos_env__$private$event_loop$get_id()
-    if (id != el_id) stop("Cannot await across event loops")
+    if (id != el_id) {
+      stop("Cannot await_all() across synchronization barrier")
+    }
   }
 
   num_todo <- length(defs)
@@ -103,7 +105,9 @@ await_any <- function(..., .list = list()) {
   for (d in defs) {
     if (!is_deferred(d)) next
     id <- d$.__enclos_env__$private$event_loop$get_id()
-    if (id != el_id) stop("Cannot await across event loops")
+    if (id != el_id) {
+      stop("Cannot await_any() across synchronization barrier")
+    }
   }
 
   num_done <- 0

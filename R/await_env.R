@@ -33,9 +33,12 @@
 await_env <- function(env) {
   assert_that(is.environment(env))
 
-  ## TODO: check event loop of deferred values in the environment?
+  el <- get_default_event_loop()
+  el_id <- el$get_id()
+
   num_pending <- function(env) {
-    sum(eapply(env, get_state_x, all.names = TRUE) == "pending")
+    sum(eapply(env, get_state_check_x, event_loop = el_id,
+               all.names = TRUE) == "pending")
   }
   
   while (num_pending(env) > 0) get_default_event_loop()$run("once")
