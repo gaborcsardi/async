@@ -46,7 +46,7 @@ test_that("304 is not an error", {
   skip_if_offline()
 
   do <- async(function() {
-    dx <- http_get("https://httpbin.org/status/304")$
+    dx <- http_get("https://eu.httpbin.org/status/304")$
       then(http_stop_for_status)
     expect_silent(await(dx))
   })
@@ -63,7 +63,7 @@ test_that("http progress bars", {
     tmp <- tempfile()
     on.exit(unlink(tmp, recursive = TRUE), add = TRUE)
     dx <- http_get(
-      "https://httpbin.org/image/jpeg",
+      "https://eu.httpbin.org/image/jpeg",
       file = tmp <- tempfile(),
       on_progress = function(total, amount, status_code) {
         if (!is.null(total)) totalx <<- total
@@ -92,7 +92,7 @@ test_that("http progress bars & etags", {
     tmp <- tempfile()
     on.exit(unlink(tmp, recursive = TRUE), add = TRUE)
     dx <- http_get(
-      "https://httpbin.org/etag/etag",
+      "https://eu.httpbin.org/etag/etag",
       file = tmp <- tempfile(),
       headers = c("If-None-Match" = "etag"),
       on_progress = function(total, amount, status_code) {

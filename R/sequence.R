@@ -11,8 +11,8 @@
 #' @export
 #' @examples
 #' check_url <- async_sequence(http_head, ~ identical(.$status_code, 200L))
-#' sync_wrap(check_url("https://httpbin.org/status/404"))
-#' sync_wrap(check_url("https://httpbin.org/status/200"))
+#' sync_wrap(check_url("https://eu.httpbin.org/status/404"))
+#' sync_wrap(check_url("https://eu.httpbin.org/status/200"))
 
 async_sequence <- function(..., .list = NULL) {
   funcs <- c(list(...), .list)

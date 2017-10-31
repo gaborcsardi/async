@@ -15,7 +15,7 @@
 #' ## Try a download at most 5 times
 #' afun <- async(function() {
 #'   async_retry(
-#'     function() http_get("https://httpbin.org"),
+#'     function() http_get("https://eu.httpbin.org"),
 #'     times = 5
 #'   )$then(~ .$status_code)
 #' })
@@ -54,7 +54,7 @@ async_retry <- function(task, times, ...) {
 #' ## Create a downloader that retries five times
 #' http_get_5 <- async_retryable(http_get, times = 5)
 #' ret <- sync_wrap(
-#'   http_get("https://httpbin.org/get?q=1")$
+#'   http_get("https://eu.httpbin.org/get?q=1")$
 #'     then(~ rawToChar(.$content))
 #' )
 #' cat(ret)

@@ -29,7 +29,7 @@ via a deferred.
 }
 \examples{
 afun <- async(function() {
-  http_get("https://httpbin.org/status/200")$
+  http_get("https://eu.httpbin.org/status/200")$
     then(~ .$status_code)
 })
 sync_wrap(afun())

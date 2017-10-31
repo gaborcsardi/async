@@ -28,7 +28,7 @@ Asynchronous HTTP HEAD request
 }
 \examples{
 afun <- async(function() {
-  dx <- http_head("https://httpbin.org/status/200")$
+  dx <- http_head("https://eu.httpbin.org/status/200")$
     then(~ .$status_code)
 })
 sync_wrap(afun())
@@ -38,7 +38,7 @@ afun <- async(function(urls) {
   when_all(.list = lapply(urls, http_head))$
     then(~ lapply(., "[[", "status_code"))
 })
-urls <- c("https://r-project.org", "https://httpbin.org")
+urls <- c("https://r-project.org", "https://eu.httpbin.org")
 sync_wrap(afun(urls))
 }
 \seealso{

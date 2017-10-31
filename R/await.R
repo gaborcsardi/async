@@ -38,7 +38,7 @@ await <- function(def) {
 #' @export
 #' @examples
 #' afun <- async(function() {
-#'   urls <- c("https://httpbin.org?q=1", "https://httpbin.org?q=2")
+#'   urls <- c("https://eu.httpbin.org?q=1", "https://eu.httpbin.org?q=2")
 #'   dx <- lapply(urls, http_head)
 #'   resp <- await_all(.list = dx)
 #'   lapply(resp, "[[", "status_code")

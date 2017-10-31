@@ -23,7 +23,7 @@
 #' @importFrom curl new_handle handle_setheaders
 #' @examples
 #' afun <- async(function() {
-#'   http_get("https://httpbin.org/status/200")$
+#'   http_get("https://eu.httpbin.org/status/200")$
 #'     then(~ .$status_code)
 #' })
 #' sync_wrap(afun())
@@ -46,7 +46,7 @@ http_get <- function(url, headers = character(), file = NULL,
 #' @importFrom curl handle_setopt
 #' @examples
 #' afun <- async(function() {
-#'   dx <- http_head("https://httpbin.org/status/200")$
+#'   dx <- http_head("https://eu.httpbin.org/status/200")$
 #'     then(~ .$status_code)
 #' })
 #' sync_wrap(afun())
@@ -56,7 +56,7 @@ http_get <- function(url, headers = character(), file = NULL,
 #'   when_all(.list = lapply(urls, http_head))$
 #'     then(~ lapply(., "[[", "status_code"))
 #' })
-#' urls <- c("https://r-project.org", "https://httpbin.org")
+#' urls <- c("https://r-project.org", "https://eu.httpbin.org")
 #' sync_wrap(afun(urls))
 
 http_head <- function(url, headers = character(), file = NULL,
@@ -102,7 +102,7 @@ make_deferred_http <- function(handle, file, on_progress) {
 #' @export
 #' @examples
 #' afun <- async(function() {
-#'   http_get("https://httpbin.org/status/404")$
+#'   http_get("https://eu.httpbin.org/status/404")$
 #'     then(http_stop_for_status)
 #' })
 #'

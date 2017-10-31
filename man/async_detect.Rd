@@ -25,8 +25,8 @@ is not guaranteed to be the first one.
 }
 \examples{
 sync_wrap(async_detect(
-  c("https://httpbin.org/status/404", "https://eu.httpbin.org",
-    "https://httpbin.org"),
+  c("https://eu.httpbin.org/status/404", "https://eu.httpbin.org",
+    "https://eu.httpbin.org/status/403"),
   async_sequence(http_head, function(x) x$status_code == 200)
 ))
 }

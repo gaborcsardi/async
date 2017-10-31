@@ -24,7 +24,7 @@ error, or \code{times} tries have been performed.
 ## Try a download at most 5 times
 afun <- async(function() {
   async_retry(
-    function() http_get("https://httpbin.org"),
+    function() http_get("https://eu.httpbin.org"),
     times = 5
   )$then(~ .$status_code)
 })

@@ -21,7 +21,7 @@ Make an asynchronous funcion retryable
 ## Create a downloader that retries five times
 http_get_5 <- async_retryable(http_get, times = 5)
 ret <- sync_wrap(
-  http_get("https://httpbin.org/get?q=1")$
+  http_get("https://eu.httpbin.org/get?q=1")$
     then(~ rawToChar(.$content))
 )
 cat(ret)

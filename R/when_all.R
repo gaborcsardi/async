@@ -16,7 +16,7 @@
 #' @examples
 #' ## Check that the contents of two URLs are the same
 #' afun <- async(function() {
-#'   u1 <- http_get("https://httpbin.org/get")
+#'   u1 <- http_get("https://eu.httpbin.org")
 #'   u2 <- http_get("https://eu.httpbin.org/get")
 #'   when_all(u1, u2)$
 #'     then(~ identical(.[[1]]$content, .[[2]]$content))

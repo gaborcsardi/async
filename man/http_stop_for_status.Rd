@@ -20,7 +20,7 @@ considers the 3xx status code errors as well.
 }
 \examples{
 afun <- async(function() {
-  http_get("https://httpbin.org/status/404")$
+  http_get("https://eu.httpbin.org/status/404")$
     then(http_stop_for_status)
 })
 
