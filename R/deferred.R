@@ -168,6 +168,14 @@ make_then_function <- function(func, value) {
 def_then <- function(self, private, on_fulfilled, on_rejected) {
   force(self)
   force(private)
+
+  if (! identical(private$event_loop, get_default_event_loop())) {
+    err <- make_error(
+      "Cannot create deferred chain across synchronization barrier",
+      class = "async_synchronization_barrier_error")
+    stop(err)
+  }
+
   on_fulfilled <- if (!is.null(on_fulfilled)) as_function(on_fulfilled)
   on_rejected  <- if (!is.null(on_rejected))  as_function(on_rejected)
   def <- deferred$new(function(resolve, reject) {
