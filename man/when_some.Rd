@@ -37,7 +37,7 @@ afun <- async(function() {
   u2 <- http_get("https://eu.httpbin.org/get")
   when_any(u1, u2)$then(~ .$url)
 })
-sync_wrap(afun())
+synchronise(afun())
 }
 \seealso{
 \code{\link[=when_all]{when_all()}}

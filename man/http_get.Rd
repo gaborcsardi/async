@@ -32,7 +32,7 @@ afun <- async(function() {
   http_get("https://eu.httpbin.org/status/200")$
     then(~ .$status_code)
 })
-sync_wrap(afun())
+synchronise(afun())
 }
 \seealso{
 Other asyncronous HTTP calls: \code{\link{http_head}}

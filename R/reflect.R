@@ -16,7 +16,7 @@
 #' @examples
 #'  badfun <- async(function() stop("oh no!"))
 #'  safefun <- async_reflect(badfun)
-#'  sync_wrap(when_all(safefun(), "good"))
+#'  synchronise(when_all(safefun(), "good"))
 
 async_reflect <- function(task) {
   task <- async(task)

@@ -12,7 +12,7 @@ test_that("GET", {
     result <- rawToChar(dx$get_value()$content)
     expect_match(result, "\"q\": \"42\"", fixed = TRUE)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("HEAD", {
@@ -25,7 +25,7 @@ test_that("HEAD", {
 
     expect_equal(dx$get_value()$status_code, 200)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("http_stop_for_status", {
@@ -38,5 +38,5 @@ test_that("http_stop_for_status", {
 
     expect_error(await(dx), "HTTP error")
   })
-  sync_wrap(do())
+  synchronise(do())
 })

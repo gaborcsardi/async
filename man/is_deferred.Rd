@@ -21,5 +21,5 @@ afun <- async(function() {
   print(is_deferred(dx <- delay(1/100)))
   print(is_deferred(await(dx)))
 })
-sync_wrap(afun())
+synchronise(afun())
 }

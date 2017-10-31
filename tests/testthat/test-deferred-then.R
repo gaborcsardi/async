@@ -14,7 +14,7 @@ test_that("HTTP HEAD & synchronous then", {
     expect_equal(dx$get_value(), 200)
     expect_equal(await(dx), 200)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("HTTP HEAD & async then", {
@@ -30,7 +30,7 @@ test_that("HTTP HEAD & async then", {
     expect_equal(dx$get_value()$status_code, 200)
     expect_equal(await(dx)$status_code, 200)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("HTTP HEAD & async then & sync then", {
@@ -47,7 +47,7 @@ test_that("HTTP HEAD & async then & sync then", {
     expect_equal(dx$get_value(), 200)
     expect_equal(await(dx), 200)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("then for fulfilled", {
@@ -59,7 +59,7 @@ test_that("then for fulfilled", {
 
     expect_equal(result, 404)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("multiple then clauses", {
@@ -81,7 +81,7 @@ test_that("multiple then clauses", {
     expect_equal(dx3$get_value(), 404)
     expect_equal(dx4$get_value()$url, dx$get_value()$url)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("compact function notation", {
@@ -98,7 +98,7 @@ test_that("compact function notation", {
     expect_equal(dx$get_value(), 200)
     expect_equal(await(dx), 200)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("embedded then", {
@@ -109,7 +109,7 @@ test_that("embedded then", {
     result <- await(add1(4)$then(mul3))
     expect_equal(result, 15)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("more embedded thens", {
@@ -132,5 +132,5 @@ test_that("more embedded thens", {
     await(dx)
     expect_equal(steps, 1:6)
   })
-  sync_wrap(do())
+  synchronise(do())
 })

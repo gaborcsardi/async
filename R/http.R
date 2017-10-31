@@ -26,7 +26,7 @@
 #'   http_get("https://eu.httpbin.org/status/200")$
 #'     then(~ .$status_code)
 #' })
-#' sync_wrap(afun())
+#' synchronise(afun())
 
 http_get <- function(url, headers = character(), file = NULL,
                      timeout = 10, on_progress = NULL) {
@@ -49,7 +49,7 @@ http_get <- function(url, headers = character(), file = NULL,
 #'   dx <- http_head("https://eu.httpbin.org/status/200")$
 #'     then(~ .$status_code)
 #' })
-#' sync_wrap(afun())
+#' synchronise(afun())
 #'
 #' # Check a list of URLs in parallel
 #' afun <- async(function(urls) {
@@ -57,7 +57,7 @@ http_get <- function(url, headers = character(), file = NULL,
 #'     then(~ lapply(., "[[", "status_code"))
 #' })
 #' urls <- c("https://r-project.org", "https://eu.httpbin.org")
-#' sync_wrap(afun(urls))
+#' synchronise(afun(urls))
 
 http_head <- function(url, headers = character(), file = NULL,
                       timeout = 10, on_progress = NULL) {
@@ -106,7 +106,7 @@ make_deferred_http <- function(handle, file, on_progress) {
 #'     then(http_stop_for_status)
 #' })
 #'
-#' tryCatch(sync_wrap(afun()), error = function(e) e)
+#' tryCatch(synchronise(afun()), error = function(e) e)
 
 http_stop_for_status <- function(resp) {
   if (!is.integer(resp$status_code)) stop("Not an HTTP response")

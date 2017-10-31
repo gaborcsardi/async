@@ -20,7 +20,7 @@
 #'   )$then(~ .$status_code)
 #' })
 #'
-#' sync_wrap(afun())
+#' synchronise(afun())
 
 async_retry <- function(task, times, ...) {
   task <- async(task)
@@ -53,7 +53,7 @@ async_retry <- function(task, times, ...) {
 #' @examples
 #' ## Create a downloader that retries five times
 #' http_get_5 <- async_retryable(http_get, times = 5)
-#' ret <- sync_wrap(
+#' ret <- synchronise(
 #'   http_get("https://eu.httpbin.org/get?q=1")$
 #'     then(~ rawToChar(.$content))
 #' )

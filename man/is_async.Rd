@@ -25,6 +25,6 @@ af <- async(f)
 is_async(f)
 is_async(af)
 f()
-sync_wrap(dx <- af())
+synchronise(dx <- af())
 dx
 }

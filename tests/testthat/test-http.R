@@ -10,7 +10,7 @@ test_that("GET", {
                     then(~ rawToChar(.$content)))
     expect_match(result, "\"q\": \"42\"", fixed = TRUE)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("HEAD", {
@@ -23,7 +23,7 @@ test_that("HEAD", {
     })
     await(dx)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("headers", {
@@ -38,7 +38,7 @@ test_that("headers", {
     expect_equal(await(dx)$headers$`X-Header-Test`, "foobar")
     expect_equal(await(dx)$headers$`X-Another`, "boooyakasha")
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("304 is not an error", {
@@ -50,7 +50,7 @@ test_that("304 is not an error", {
       then(http_stop_for_status)
     expect_silent(await(dx))
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("http progress bars", {
@@ -78,7 +78,7 @@ test_that("http progress bars", {
     expect_equal(file.size(tmp), utils::tail(amountx, 1))
     expect_equal(totalx, utils::tail(amountx, 1))
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("http progress bars & etags", {
@@ -107,5 +107,5 @@ test_that("http progress bars & etags", {
     expect_equal(length(await(dx)$content), 0)
     expect_false(file.exists(tmp))
   })
-  sync_wrap(do())
+  synchronise(do())
 })

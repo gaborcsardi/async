@@ -9,7 +9,7 @@ test_that("async_map", {
     delay(1/100)$then(function(value) x * 2)
   })
 
-  result <- sync_wrap(async_map(list, fun))
+  result <- synchronise(async_map(list, fun))
   expect_identical(result, as.list(unlist(list) * 2))
 })
 
@@ -22,7 +22,7 @@ test_that("async_map with limit", {
   })
 
   for (l in 1:10) {
-    result <- sync_wrap(async_map(list, fun, .limit = l))
+    result <- synchronise(async_map(list, fun, .limit = l))
     expect_identical(result, as.list(unlist(list) * 2))
   }
 })
@@ -36,6 +36,6 @@ test_that("async_map with limit, error", {
   })
 
   for (l in 1:10) {
-    expect_error(sync_wrap(async_map(list, fun, .limit = l)), "oops")
+    expect_error(synchronise(async_map(list, fun, .limit = l)), "oops")
   }
 })

@@ -7,7 +7,7 @@ test_that("async_sequence", {
   mul3 <- function(n) { n ; delay(10/1000)$then(function(value) n * 3) }
 
   add1mul3 <- async_sequence(add1, mul3)
-  result <- sync_wrap(add1mul3(4))
+  result <- synchronise(add1mul3(4))
 
   expect_equal(result, 15)
 })

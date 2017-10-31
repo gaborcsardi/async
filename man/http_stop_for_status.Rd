@@ -24,5 +24,5 @@ afun <- async(function() {
     then(http_stop_for_status)
 })
 
-tryCatch(sync_wrap(afun()), error = function(e) e)
+tryCatch(synchronise(afun()), error = function(e) e)
 }

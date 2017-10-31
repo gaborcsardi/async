@@ -28,7 +28,7 @@
 #'     })
 #'   await_env(env)
 #' })
-#' sync_wrap(afun())
+#' synchronise(afun())
 
 await_env <- function(env) {
   assert_that(is.environment(env))

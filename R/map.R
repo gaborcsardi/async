@@ -12,7 +12,7 @@
 #' @family async iterators
 #' @export
 #' @examples
-#' sync_wrap(async_map(
+#' synchronise(async_map(
 #'   seq(10, 100, by = 10) / 100,
 #'   function(wait) delay(wait)$then(~ "OK")
 #' ))

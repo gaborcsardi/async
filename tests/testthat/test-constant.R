@@ -11,7 +11,7 @@ test_that("creates a deferred value", {
     expect_true(is_deferred(dx))
     await(dx)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("resolves to the specified value", {
@@ -22,5 +22,5 @@ test_that("resolves to the specified value", {
     dx <- async_constant("foobar")
     expect_equal(await(dx), "foobar")
   })
-  sync_wrap(do())
+  synchronise(do())
 })

@@ -10,7 +10,7 @@ test_that("when_all", {
       then(function(value) expect_equal(value, list("foo", "bar")))
     await(dx)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("when_all, non-deferred", {
@@ -22,7 +22,7 @@ test_that("when_all, non-deferred", {
       then(function(value) expect_equal(value, list("foo", "bar")))
     await(dx)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("when_all, non-deferred only", {
@@ -34,7 +34,7 @@ test_that("when_all, non-deferred only", {
       then(function(value) expect_equal(value, list("foo", "bar")))
     await(dx)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("when_all, empty list", {
@@ -43,7 +43,7 @@ test_that("when_all, empty list", {
       then(function(value) expect_equal(value, list()))
     await(dx)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("when_all, error", {
@@ -55,7 +55,7 @@ test_that("when_all, error", {
       then(NULL, function(reason) expect_match(reason$message, "foo"))
     await(dx)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("when_all, multiple errors", {
@@ -67,5 +67,5 @@ test_that("when_all, multiple errors", {
       then(NULL, function(reason) expect_match(reason$message, "bar"))
     await(dx)
   })
-  sync_wrap(do())
+  synchronise(do())
 })

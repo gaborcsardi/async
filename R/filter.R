@@ -16,7 +16,7 @@
 #' })
 #' urls <- c("https://eu.httpbin.org/get",
 #'           "https://eu.httpbin.org/status/404")
-#' sync_wrap(afun(urls))
+#' synchronise(afun(urls))
 
 async_filter <- function(.x, .p, ...) {
   defs <- lapply(.x, async(.p), ...)

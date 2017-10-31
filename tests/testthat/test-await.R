@@ -2,7 +2,7 @@
 context("await")
 
 test_that("creates a deferred as needed", {
-  sync_wrap(expect_equal(await("foo"), "foo"))
+  synchronise(expect_equal(await("foo"), "foo"))
 })
 
 test_that("multiple async functions run in parallel", {
@@ -29,7 +29,7 @@ test_that("multiple async functions run in parallel", {
 
     await_all(dx, dy)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("resumes with the value of the awaited expression", {
@@ -43,7 +43,7 @@ test_that("resumes with the value of the awaited expression", {
 
     await(dx)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("throws into the suspendable function", {
@@ -57,7 +57,7 @@ test_that("throws into the suspendable function", {
 
     await(dx)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("resumes with all values of the awaited expressions", {
@@ -75,7 +75,7 @@ test_that("resumes with all values of the awaited expressions", {
 
     await(dx)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("throws into the suspendable function the first error", {
@@ -96,7 +96,7 @@ test_that("throws into the suspendable function the first error", {
 
     await(dx)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("await with multiple tasks", {
@@ -113,5 +113,5 @@ test_that("await with multiple tasks", {
     expect_equal(await(dx1), 200)
     expect_equal(await(dx2), 200)
   })
-  sync_wrap(do())
+  synchronise(do())
 })

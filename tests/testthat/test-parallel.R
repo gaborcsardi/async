@@ -17,5 +17,5 @@ test_that("parallel", {
     expect_match(dx1$get_value(), "\"q\": \"foo\"", fixed = TRUE)
     expect_match(dx2$get_value(), "\"q\": \"bar\"", fixed = TRUE)
   })
-  sync_wrap(do())
+  synchronise(do())
 })

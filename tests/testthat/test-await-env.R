@@ -2,7 +2,7 @@
 context("await_env")
 
 test_that("empty env", {
-  sync_wrap(expect_equal(
+  synchronise(expect_equal(
     await_env(new.env()),
     structure(list(), names = character())
   ))
@@ -18,7 +18,7 @@ test_that("only regular objects", {
       as.list(env)
     )
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("deferred value in env", {
@@ -32,7 +32,7 @@ test_that("deferred value in env", {
       await_all(.list = l)
     )
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("dynamically change the number of deferred values", {
@@ -49,7 +49,7 @@ test_that("dynamically change the number of deferred values", {
       list(foo = "OK", foo2 = "OK2")
     )
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("remove a deferred value", {
@@ -64,7 +64,7 @@ test_that("remove a deferred value", {
 
     expect_equal(await_env(env), list(bar = "OK"))
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 
@@ -75,5 +75,5 @@ test_that("error", {
 
     expect_error(await_env(env), "ooops")
   })
-  sync_wrap(do())
+  synchronise(do())
 })

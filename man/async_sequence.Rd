@@ -21,8 +21,8 @@ Compose asynchronous functions
 }
 \examples{
 check_url <- async_sequence(http_head, ~ identical(.$status_code, 200L))
-sync_wrap(check_url("https://eu.httpbin.org/status/404"))
-sync_wrap(check_url("https://eu.httpbin.org/status/200"))
+synchronise(check_url("https://eu.httpbin.org/status/404"))
+synchronise(check_url("https://eu.httpbin.org/status/200"))
 }
 \seealso{
 Other async control flow: \code{\link{async_reflect}},

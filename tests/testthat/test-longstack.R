@@ -17,7 +17,7 @@ test_that("single deferred value (http)", {
     ))
     expect_null(find_in_stack(call$start, quote(cmon_not_this())))
   })
-  sync_wrap(do())
+  synchronise(do())
 
   do <- async(function() {
     but_yes_this <- function() http_get("http://0.42.42.42", timeout = 1)
@@ -29,7 +29,7 @@ test_that("single deferred value (http)", {
       find_in_stack(call$start, quote(but_yes_this()))
     ))
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("single async function", {
@@ -51,7 +51,7 @@ test_that("single async function", {
     ))
     expect_null(find_in_stack(call$start, quote(cmon_not_this())))
   })
-  sync_wrap(do())
+  synchronise(do())
 
   do <- async(function() {
     but_yes_this <- function() afun()
@@ -67,7 +67,7 @@ test_that("single async function", {
       find_in_stack(call$eval, quote(stop("boo")))
     ))
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("async function with a stack", {
@@ -92,7 +92,7 @@ test_that("async function with a stack", {
     call2 <- trim_long_stack(call)
     expect_equal(tail(call2$start, 1)[[1]], quote(afun()))
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("then, parent stack", {
@@ -108,5 +108,5 @@ test_that("then, parent stack", {
       find_in_stack(call$parent$start, quote(delay(1/1000)))
     ))
   })
-  sync_wrap(do())
+  synchronise(do())
 })

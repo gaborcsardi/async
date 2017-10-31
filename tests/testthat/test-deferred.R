@@ -6,7 +6,7 @@ test_that("error if not done yet", {
     dx <- delay(1/1000)
     expect_error(dx$get_value())
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("rejecting with a deferred", {
@@ -17,7 +17,7 @@ test_that("rejecting with a deferred", {
 
     expect_equal(await(x), "OK")
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("action in formula notation", {
@@ -34,7 +34,7 @@ test_that("action in formula notation", {
     dx <- deferred$new(~ if (FALSE) resolve(TRUE) else reject("oops"))
     expect_error(await(dx), "oops")
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("on_fulfilled / on_rejected without arguments", {
@@ -50,5 +50,5 @@ test_that("on_fulfilled / on_rejected without arguments", {
       catch(function() "aaah")
     expect_equal(await(dx), "aaah")
   })
-  sync_wrap(do())
+  synchronise(do())
 })

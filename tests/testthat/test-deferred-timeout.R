@@ -11,5 +11,5 @@ test_that("deferred timeout", {
     expect_true(Sys.time() - tic >= as.difftime(1/4, unit = "secs"))
     expect_true(good)
   })
-  sync_wrap(do())
+  synchronise(do())
 })

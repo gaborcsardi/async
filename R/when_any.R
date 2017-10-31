@@ -24,7 +24,7 @@
 #'   u2 <- http_get("https://eu.httpbin.org/get")
 #'   when_any(u1, u2)$then(~ .$url)
 #' })
-#' sync_wrap(afun())
+#' synchronise(afun())
 
 when_some <- function(count, ..., .list = list()) {
   force(count)

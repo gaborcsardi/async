@@ -14,5 +14,5 @@ test_that("async_reflect", {
       expect_null(result[[i]]$value)
     }
   })
-  sync_wrap(do())
+  synchronise(do())
 })

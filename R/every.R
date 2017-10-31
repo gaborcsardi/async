@@ -16,8 +16,8 @@
 #'   force(x)
 #'   delay(1/1000)$then(~ as.logical(x %% 2))
 #' })
-#' sync_wrap(async_every(c(1,3,5,7,10,11), is_odd))
-#' sync_wrap(async_every(c(1,3,5,7,11), is_odd))
+#' synchronise(async_every(c(1,3,5,7,10,11), is_odd))
+#' synchronise(async_every(c(1,3,5,7,11), is_odd))
 
 async_every <- function(.x, .p, ...) {
   defs <- lapply(.x, async(.p), ...)

@@ -22,7 +22,7 @@
 #'   await(dx)
 #'   resp
 #' })
-#' sync_wrap(afun())
+#' synchronise(afun())
 
 delay <- function(delay) {
   assert_that(is_time_interval(delay))

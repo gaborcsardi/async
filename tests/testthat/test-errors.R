@@ -9,7 +9,7 @@ test_that("rejection", {
 
     expect_error(await(dx), "ohno!")
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("error propagates", {
@@ -24,7 +24,7 @@ test_that("error propagates", {
     expect_error(await(dx, "ohno!"))
     expect_false(called)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("handled error is not an error any more", {
@@ -37,7 +37,7 @@ test_that("handled error is not an error any more", {
     expect_silent(await(dx))
     expect_equal(await(dx), "OK")
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("catch", {
@@ -50,7 +50,7 @@ test_that("catch", {
 
     expect_equal(await(dx), "nothing to see here")
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("finally", {
@@ -74,7 +74,7 @@ test_that("finally", {
     expect_equal(await(dx), "this one")
     expect_true(called)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("errors from other resolutions are not reported", {
@@ -94,5 +94,5 @@ test_that("errors from other resolutions are not reported", {
     expect_equal(dx1$get_state(), "rejected")
     expect_error(await(dx1), "wrong")
   })
-  sync_wrap(do())
+  synchronise(do())
 })

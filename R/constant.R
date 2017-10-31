@@ -13,7 +13,7 @@
 #'     then(function(x) delay(x))$
 #'     then(function(x) print(x))
 #' })
-#' sync_wrap(afun())
+#' synchronise(afun())
 
 async_constant <- function(value = NULL) {
   force(value)

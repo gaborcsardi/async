@@ -14,7 +14,7 @@
 #' @family async iterators
 #' @export
 #' @examples
-#' sync_wrap(async_detect(
+#' synchronise(async_detect(
 #'   c("https://eu.httpbin.org/status/404", "https://eu.httpbin.org",
 #'     "https://eu.httpbin.org/status/403"),
 #'   async_sequence(http_head, function(x) x$status_code == 200)

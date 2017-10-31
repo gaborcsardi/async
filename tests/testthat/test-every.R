@@ -17,5 +17,5 @@ test_that("async_every", {
     result <- await(async_every(1:10 * 2 + 1, is_odd))
     expect_identical(result, TRUE)
   })
-  sync_wrap(do())
+  synchronise(do())
 })

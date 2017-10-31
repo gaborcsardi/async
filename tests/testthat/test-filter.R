@@ -17,5 +17,5 @@ test_that("async_filter", {
     result <- await(async_filter(1:10 * 2, is_odd))
     expect_identical(result, numeric())
   })
-  sync_wrap(do())
+  synchronise(do())
 })

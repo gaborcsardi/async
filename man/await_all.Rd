@@ -21,7 +21,7 @@ afun <- async(function() {
   resp <- await_all(.list = dx)
   lapply(resp, "[[", "status_code")
 })
-sync_wrap(afun())
+synchronise(afun())
 }
 \seealso{
 Other await functions: \code{\link{await_any}},

@@ -29,7 +29,7 @@ afun <- async(function() {
   when_all(u1, u2)$
     then(~ identical(.[[1]]$content, .[[2]]$content))
 })
-sync_wrap(afun())
+synchronise(afun())
 }
 \seealso{
 \code{\link[=when_any]{when_any()}}, \code{\link[=when_some]{when_some()}}

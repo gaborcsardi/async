@@ -29,5 +29,5 @@ test_that("async_detect", {
     expect_null(result)
   })
 
-  lapply(c(Inf, 1, 2, 3, 5, 10, 20), function(x) sync_wrap(test(x)))
+  lapply(c(Inf, 1, 2, 3, 5, 10, 20), function(x) synchronise(test(x)))
 })

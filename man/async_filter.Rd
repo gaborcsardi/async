@@ -27,7 +27,7 @@ afun <- async(function(urls) {
 })
 urls <- c("https://eu.httpbin.org/get",
           "https://eu.httpbin.org/status/404")
-sync_wrap(afun(urls))
+synchronise(afun(urls))
 }
 \seealso{
 Other async iterators: \code{\link{async_detect}},

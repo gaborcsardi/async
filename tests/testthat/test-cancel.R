@@ -22,7 +22,7 @@ test_that("on_cancel callback is called", {
     expect_match(cancel_msg, "changed my mind")
   })
 
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("then() is also rejected on cancel", {
@@ -38,7 +38,7 @@ test_that("then() is also rejected on cancel", {
     expect_equal(dx2$get_state(), "rejected")
     expect_equal(dx$get_state(), "rejected")
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("can catch and handle cancellation", {
@@ -49,5 +49,5 @@ test_that("can catch and handle cancellation", {
     expect_error(await(dx), "changed my mind")
     expect_error(await(dx), class = "async_cancelled")
   })
-  sync_wrap(do())
+  synchronise(do())
 })

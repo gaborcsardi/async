@@ -21,7 +21,7 @@
 #'   when_all(u1, u2)$
 #'     then(~ identical(.[[1]]$content, .[[2]]$content))
 #' })
-#' sync_wrap(afun())
+#' synchronise(afun())
 
 when_all <- function(..., .list = list()) {
   defs <- c(list(...), .list)

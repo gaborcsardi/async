@@ -15,7 +15,7 @@ test_that("tick", {
     expect_silent(await(dx))
     expect_equal(await(dx), "done")
   })
-  sync_wrap(do())
+  synchronise(do())
 
   do <- async(function() {
     ticked <- 0
@@ -29,7 +29,7 @@ test_that("tick", {
     expect_equal(await(dx), "done")
     expect_equal(ticked, 10)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("total", {
@@ -50,7 +50,7 @@ test_that("total", {
     expect_equal(await(dx), "done")
     expect_equal(ticked, 10)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("ratio", {
@@ -66,7 +66,7 @@ test_that("ratio", {
     expect_equal(await(dx), "done")
     expect_equal(ratiox, (0:10) / 10)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("amount", {
@@ -88,5 +88,5 @@ test_that("amount", {
     expect_equal(totalx, 100)
     expect_equal(amountx, 100)
   })
-  sync_wrap(do())
+  synchronise(do())
 })

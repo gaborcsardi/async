@@ -29,7 +29,7 @@ afun <- async(function() {
   )$then(~ .$status_code)
 })
 
-sync_wrap(afun())
+synchronise(afun())
 }
 \seealso{
 Other async control flow: \code{\link{async_reflect}},

@@ -23,7 +23,7 @@ afun <- async(function() {
   t2 <- delay(1/1000)$then(~ 2)
   await_any(t1, t2)
 })
-sync_wrap(afun())
+synchronise(afun())
 }
 \seealso{
 Other await functions: \code{\link{await_all}},

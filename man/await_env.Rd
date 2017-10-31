@@ -36,7 +36,7 @@ afun <- async(function() {
     })
   await_env(env)
 })
-sync_wrap(afun())
+synchronise(afun())
 }
 \seealso{
 Other await functions: \code{\link{await_all}},

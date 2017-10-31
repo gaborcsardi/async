@@ -9,7 +9,7 @@ test_that("when_some", {
     dx <- when_some(2, d1, d2)$
       then(function(value) expect_equal(value, list("bar", "foo")))
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("when_some, few errors", {
@@ -21,7 +21,7 @@ test_that("when_some, few errors", {
     dx <- when_some(2, d1, d2, d3)$
       then(function(value) expect_equal(value, list("bar", "foo")))
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("too many errors", {
@@ -33,5 +33,5 @@ test_that("too many errors", {
     dx <- when_some(2, d1, d2, d3)
     expect_error(await(dx), "ooops again")
   })
-  sync_wrap(do())
+  synchronise(do())
 })

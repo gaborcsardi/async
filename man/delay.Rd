@@ -30,5 +30,5 @@ afun <- async(function() {
   await(dx)
   resp
 })
-sync_wrap(afun())
+synchronise(afun())
 }

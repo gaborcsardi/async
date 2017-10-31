@@ -5,7 +5,7 @@ test_that("async_until", {
 
   count <- 1
 
-  result <- sync_wrap(async_until(
+  result <- synchronise(async_until(
     function() count == 5,
     function() {
       delay(1/1000)$then(function(value) count <<- count + 1)
@@ -20,7 +20,7 @@ test_that("async_until is always called once", {
 
   called <- FALSE
 
-  result <- sync_wrap(async_until(
+  result <- synchronise(async_until(
     function() TRUE,
     function() {
       delay(1/1000)$then(function(value) called <<- TRUE)
@@ -34,7 +34,7 @@ test_that("async_until is always called once", {
 test_that("test function throws", {
 
   expect_error(
-    sync_wrap(async_until(
+    synchronise(async_until(
       function() stop("doh"),
       function() {
         delay(1/1000)$then(function(value) called <<- TRUE)

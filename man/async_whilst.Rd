@@ -23,7 +23,7 @@ Repeatedly call task, while test returns true
 ## Keep calling while result is bigger than 0.1
 calls <- 0
 number <- Inf
-sync_wrap(async_whilst(
+synchronise(async_whilst(
   function() number >= 0.1,
   function() {
     calls <<- calls + 1

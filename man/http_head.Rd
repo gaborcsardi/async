@@ -31,7 +31,7 @@ afun <- async(function() {
   dx <- http_head("https://eu.httpbin.org/status/200")$
     then(~ .$status_code)
 })
-sync_wrap(afun())
+synchronise(afun())
 
 # Check a list of URLs in parallel
 afun <- async(function(urls) {
@@ -39,7 +39,7 @@ afun <- async(function(urls) {
     then(~ lapply(., "[[", "status_code"))
 })
 urls <- c("https://r-project.org", "https://eu.httpbin.org")
-sync_wrap(afun(urls))
+synchronise(afun(urls))
 }
 \seealso{
 Other asyncronous HTTP calls: \code{\link{http_get}}

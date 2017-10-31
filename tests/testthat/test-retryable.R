@@ -14,5 +14,5 @@ test_that("async_retryable", {
     result <- await(rf())
     expect_identical(result, "OK")
   })
-  sync_wrap(do())
+  synchronise(do())
 })

@@ -14,5 +14,5 @@ test_that("each", {
 
     await(dx)
   })
-  sync_wrap(do())
+  synchronise(do())
 })

@@ -25,7 +25,7 @@ from the application of \code{.f} are resolved.
 Apply an asynchronous function to each element of a vector
 }
 \examples{
-sync_wrap(async_map(
+synchronise(async_map(
   seq(10, 100, by = 10) / 100,
   function(wait) delay(wait)$then(~ "OK")
 ))

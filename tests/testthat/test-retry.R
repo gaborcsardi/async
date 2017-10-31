@@ -16,7 +16,7 @@ test_that("unsuccessful async_retry", {
       "error"
     )
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("successful async_retry", {
@@ -33,5 +33,5 @@ test_that("successful async_retry", {
 
     expect_equal(result, "OK")
   })
-  sync_wrap(do())
+  synchronise(do())
 })

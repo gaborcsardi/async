@@ -28,14 +28,14 @@ later.
 }
 \examples{
 ## You can catch the error, asynchronously
-sync_wrap(
+synchronise(
   async_timeout(function() delay(1/10)$then(~ "OK"), 1/1000)$
     then(NULL, ~ "Timed out")
 )
 
 ## Or synchronously
 tryCatch(
-  sync_wrap(
+  synchronise(
     async_timeout(function() delay(1/10)$then(~ "OK"), 1/1000)
   ),
   async_timeout = function(e) "Timed out. :(",

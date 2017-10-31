@@ -25,7 +25,7 @@ test_that("it returns a function with the same arity", {
 
 test_that("when called it returns a deferred", {
   fun <- async(function() "foo")
-  sync_wrap(dx <- fun())
+  synchronise(dx <- fun())
   expect_true(is_deferred(dx))
 })
 
@@ -40,7 +40,7 @@ test_that("begins asynchronously", {
     await(dx)
     expect_equal(x, 7)
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("preserves closure", {
@@ -55,7 +55,7 @@ test_that("preserves closure", {
       then(function(result) expect_identical(result, env))
   })
 
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("resolves to the definition", {
@@ -64,7 +64,7 @@ test_that("resolves to the definition", {
     dx <- foo()$
       then(function(result) expect_equal(result, "blah"))
   })
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("rejects with the thrown error", {
@@ -83,7 +83,7 @@ test_that("rejects with the thrown error", {
       })
   })
 
-  expect_silent(sync_wrap(do()))
+  expect_silent(synchronise(do()))
 })
 
 test_that("works with await", {
@@ -97,7 +97,7 @@ test_that("works with await", {
       then(function(result) expect_equal(result, "blah"))
   })
 
-  sync_wrap(do())
+  synchronise(do())
 })
 
 test_that("triggers error on unhandled rejection", {
@@ -114,5 +114,5 @@ test_that("triggers error on unhandled rejection", {
     expect_true(did_trigger)
   })
 
-  sync_wrap(do())
+  synchronise(do())
 })

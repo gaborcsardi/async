@@ -29,7 +29,7 @@ afun <- async(function() {
   print(await(dx))
   print(await("foobar"))
 })
-sync_wrap(afun())
+synchronise(afun())
 }
 \seealso{
 Other await functions: \code{\link{await_all}},

@@ -18,7 +18,7 @@
 #' is_async(f)
 #' is_async(af)
 #' f()
-#' sync_wrap(dx <- af())
+#' synchronise(dx <- af())
 #' dx
 
 async <- function(fun) {
@@ -68,7 +68,7 @@ async <- function(fun) {
 #' is_async(f)
 #' is_async(af)
 #' f()
-#' sync_wrap(dx <- af())
+#' synchronise(dx <- af())
 #' dx
 
 is_async <- function(fun) {

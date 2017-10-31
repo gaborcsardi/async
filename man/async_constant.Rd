@@ -21,5 +21,5 @@ afun <- async(function() {
     then(function(x) delay(x))$
     then(function(x) print(x))
 })
-sync_wrap(afun())
+synchronise(afun())
 }

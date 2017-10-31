@@ -21,7 +21,7 @@
 #'   print(await(dx))
 #'   print(await("foobar"))
 #' })
-#' sync_wrap(afun())
+#' synchronise(afun())
 
 await <- function(def) {
   await_all(def)[[1]]
@@ -43,7 +43,7 @@ await <- function(def) {
 #'   resp <- await_all(.list = dx)
 #'   lapply(resp, "[[", "status_code")
 #' })
-#' sync_wrap(afun())
+#' synchronise(afun())
 
 await_all <- function(..., .list = list()) {
   el <- get_default_event_loop()
@@ -92,7 +92,7 @@ await_all <- function(..., .list = list()) {
 #'   t2 <- delay(1/1000)$then(~ 2)
 #'   await_any(t1, t2)
 #' })
-#' sync_wrap(afun())
+#' synchronise(afun())
 
 await_any <- function(..., .list = list()) {
   el <- get_default_event_loop()

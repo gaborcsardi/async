@@ -21,5 +21,5 @@ test_that("each_of", {
       expect_identical(sort(done), sort(coll))
     })
   })
-  sync_wrap(do())
+  synchronise(do())
 })
