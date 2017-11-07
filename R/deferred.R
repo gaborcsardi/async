@@ -281,7 +281,7 @@ def__make_error_object <- function(self, private, err) {
   ccl <- setdiff(cl, c("async_error", "simpleError", "error", "condition"))
 
   private$value <- structure(
-    list(message = msg, call = private$stack),
+    list(message = msg, call = private$stack, error = err),
     class = c(ccl, "async_deferred_rejected", "error", "condition")
   )
 }
