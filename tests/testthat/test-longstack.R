@@ -5,7 +5,7 @@ test_that("single deferred value (http)", {
 
   do <- async(function() {
     err <- NULL
-    dx <- http_get("http://0.42.42.42", timeout = 1)
+    dx <- http_get("http://0.42.42.42", options = list(timeout = 1))
     cmon_not_this <- function() {
       err <<- tryCatch(await(dx), error = identity)
     }
@@ -20,7 +20,9 @@ test_that("single deferred value (http)", {
   synchronise(do())
 
   do <- async(function() {
-    but_yes_this <- function() http_get("http://0.42.42.42", timeout = 1)
+    but_yes_this <- function() {
+      http_get("http://0.42.42.42", options = list(timeout = 1))
+    }
     dx <- but_yes_this()
     err <- tryCatch(await(dx), error = identity)
     expect_s3_class(err, c("async_http_error", "async_deferred_rejected"))

@@ -13,7 +13,8 @@
 #' @param headers HTTP headers to send.
 #' @param file If not `NULL`, it must be a string, specifying a file.
 #'   The body of the response is written to this file.
-#' @param timeout Timeout for the request, in seconds.
+#' @param options Options to set on the handle. Passed to
+#'   [curl::handle_setopt()].
 #' @param on_progress Progress handler function. It is only used if the
 #'   response body is written to a file.
 #' @return Deferred object.
@@ -29,10 +30,11 @@
 #' synchronise(afun())
 
 http_get <- function(url, headers = character(), file = NULL,
-                     timeout = 10, on_progress = NULL) {
+                     options = list(timeout = 600), on_progress = NULL) {
   assert_that(is_string(url))
-  handle <- new_handle(url = url, timeout = timeout)
+  handle <- new_handle(url = url)
   handle_setheaders(handle, .list = headers)
+  handle_setopt(handle, .list = options)
   make_deferred_http(handle, file, on_progress)
 }
 
@@ -60,11 +62,12 @@ http_get <- function(url, headers = character(), file = NULL,
 #' synchronise(afun(urls))
 
 http_head <- function(url, headers = character(), file = NULL,
-                      timeout = 10, on_progress = NULL) {
+                      options = list(timeout = 600), on_progress = NULL) {
   assert_that(is_string(url))
-  handle <- new_handle(url = url, timeout = timeout)
+  handle <- new_handle(url = url)
   handle_setheaders(handle, .list = headers)
-  handle_setopt(handle, customrequest = "HEAD", nobody = TRUE)
+  handle_setopt(handle, customrequest = "HEAD", nobody = TRUE,
+                .list = options)
   make_deferred_http(handle, file, on_progress)
 }
 
