@@ -91,6 +91,10 @@ make_deferred_http <- function(handle, file, on_progress) {
   )
 }
 
+#' @include longstack.R
+
+make_deferred_http <- async_longstack_barrier(make_deferred_http)
+
 #' Throw R errors for HTTP errors
 #'
 #' Status codes below 400 are considered successful, others will trigger
