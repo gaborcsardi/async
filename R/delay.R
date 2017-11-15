@@ -35,7 +35,6 @@ delay <- function(delay) {
         function() TRUE,
         function(err, res) if (is.null(err)) resolve(res) else reject(err)
       )
-    },
-    longstack = cbind(c(0,0,0,0), c(3,0,0,0))
+    }
   )
 }

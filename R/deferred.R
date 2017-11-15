@@ -69,9 +69,8 @@ NULL
 deferred <- R6Class(
   "deferred",
   public = list(
-    initialize = function(action, on_progress = NULL, on_cancel = NULL,
-                          longstack = NULL)
-      def_init(self, private, action, on_progress, on_cancel, longstack),
+    initialize = function(action, on_progress = NULL, on_cancel = NULL)
+      def_init(self, private, action, on_progress, on_cancel),
     get_state = function()
       private$state,
     get_value = function()
@@ -98,7 +97,6 @@ deferred <- R6Class(
     progress_callback = NULL,
     cancel_callback = NULL,
     cancelled = FALSE,
-    stack = list(start = NULL, eval = NULL, parent = NULL),
 
     resolve = function(value)
       def__resolve(self, private, value),
@@ -113,8 +111,7 @@ deferred <- R6Class(
   )
 )
 
-def_init <- function(self, private, action, on_progress, on_cancel,
-                     longstack) {
+def_init <- function(self, private, action, on_progress, on_cancel) {
   private$event_loop <- get_default_event_loop()
 
   if (!is.function(action)) {
@@ -127,9 +124,6 @@ def_init <- function(self, private, action, on_progress, on_cancel,
   private$progress_callback <- on_progress
   assert_that(is.null(on_cancel) || is.function(on_cancel))
   private$cancel_callback <- on_cancel
-
-  private$stack$start <- sys.calls()
-  private$stack$hide <- longstack
 
   action_args <- names(formals(action))
   args <- list(private$resolve, private$reject)
@@ -178,7 +172,8 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
 
   on_fulfilled <- if (!is.null(on_fulfilled)) as_function(on_fulfilled)
   on_rejected  <- if (!is.null(on_rejected))  as_function(on_rejected)
-  def <- deferred$new(function(resolve, reject) {
+
+  deferred$new(function(resolve, reject) {
     force(resolve)
     force(reject)
 
@@ -204,11 +199,7 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
     } else if (private$state == "rejected") {
       handle(on_rejected %||% stop)(private$value)
     }
-  }, longstack = cbind(c(0,0,0,0), c(4,0,0,0)))
-
-  def$.__enclos_env__$private$stack$parent <- private$stack
-
-  def
+  })
 }
 
 def_catch <- function(self, private, on_rejected) {
@@ -254,7 +245,6 @@ def__resolve <- function(self, private, value) {
 #' Create an error object for a rejected deferred computation
 #'
 #' * Make sure that the error is an error object.
-#' * Make sure that the error stack is in the correct format.
 #' * Make sure that the error has the correct classes.
 #'
 #' @param self self
@@ -276,12 +266,10 @@ def__make_error_object <- function(self, private, err) {
     cl <- class(err)
   }
 
-  private$stack["eval"] <- list(call)
-
   ccl <- setdiff(cl, c("async_error", "simpleError", "error", "condition"))
 
   private$value <- structure(
-    list(message = msg, call = private$stack, error = err),
+    list(message = msg, error = err),
     class = c(ccl, "async_deferred_rejected", "error", "condition")
   )
 }
