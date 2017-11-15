@@ -302,7 +302,7 @@ make_error_stack <- function(error, prev_stack, dropx = 0) {
   rel_stack <- head(tail(error$call, - length(stack1) - drop[1] - dropx),
                     - drop[2])
   error$call <- c(prev_stack, list(rel_stack))
-  class(error) <- unique(c("async_error", class(error)))
+  class(error) <- unique(c("async_event_loop_error", class(error)))
   error
 }
 

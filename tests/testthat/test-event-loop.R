@@ -37,7 +37,7 @@ test_that("next tick, simple error", {
 
   expect_true(ticked)
   expect_null(result)
-  expect_s3_class(error, "async_error")
+  expect_s3_class(error, "async_event_loop_error")
   call <- conditionCall(error)
   expect_equal(call[[2]][[1]], quote(stop("ohno")))
   expect_equal(tail(call[[1]], 3)[[1]][[1]], quote(el_add_next_tick))
@@ -61,7 +61,7 @@ test_that("error stack on HTTP errors", {
   el$run()
 
   expect_null(result)
-  expect_s3_class(error, c("async_http_error", "async_error"))
+  expect_s3_class(error, c("async_http_error", "async_event_loop_error"))
   call <- conditionCall(error)
   expect_equal(tail(call[[1]], 6)[[1]][[1]], quote(f))
   expect_equal(tail(call[[1]], 6)[[2]][[1]], quote(g))
