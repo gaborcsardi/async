@@ -10,7 +10,7 @@ test_that("single deferred value (http)", {
       err <<- tryCatch(await(dx), error = identity)
     }
     cmon_not_this()
-    expect_s3_class(err, c("async_http_error", "async_deferred_rejected"))
+    expect_s3_class(err, c("async_http_error", "async_rejected"))
     call <- err$call
     expect_false(is.null(
       find_call_in_stack(call$start, quote(http_get))
@@ -25,7 +25,7 @@ test_that("single deferred value (http)", {
     }
     dx <- but_yes_this()
     err <- tryCatch(await(dx), error = identity)
-    expect_s3_class(err, c("async_http_error", "async_deferred_rejected"))
+    expect_s3_class(err, c("async_http_error", "async_rejected"))
     call <- err$call
     expect_false(is.null(
       find_in_stack(call$start, quote(but_yes_this()))
@@ -46,7 +46,7 @@ test_that("single async function", {
     }
     cmon_not_this()
     expect_equal(err$message, "boo")
-    expect_s3_class(err, c("async_event_loop_error", "async_deferred_rejected"))
+    expect_s3_class(err, c("async_event_loop_error", "async_rejected"))
     call <- err$call
     expect_false(is.null(
       find_call_in_stack(call$start, quote(afun))
@@ -60,7 +60,7 @@ test_that("single async function", {
     dx <- but_yes_this()
     err <- tryCatch(await(dx), error = identity)
     expect_equal(err$message, "boo")
-    expect_s3_class(err, c("async_event_loop_error", "async_deferred_rejected"))
+    expect_s3_class(err, c("async_event_loop_error", "async_rejected"))
     call <- err$call
     expect_false(is.null(
       find_in_stack(call$start, quote(but_yes_this()))

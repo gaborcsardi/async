@@ -267,7 +267,7 @@ def__make_error_object <- function(self, private, err) {
 
   private$value <- structure(
     list(message = msg, error = err),
-    class = unique(c("async_deferred_rejected", "error", "condition", cl))
+    class = unique(c("async_rejected", "error", "condition", cl))
   )
 }
 
