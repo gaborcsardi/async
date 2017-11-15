@@ -66,3 +66,54 @@ test_that("error stack on HTTP errors", {
   expect_equal(tail(call[[1]], 6)[[1]][[1]], quote(f))
   expect_equal(tail(call[[1]], 6)[[2]][[1]], quote(g))
 })
+
+test_that("errors in embedded event loops", {
+  ticked <- ticked2 <- ticked3 <- FALSE
+  error  <- error2  <- error3  <- "foo"
+  result <- result2 <- result3 <- "bar"
+
+  f3 <- function() g3()
+  g3 <- function() {
+    el <- event_loop$new()
+    el$add_next_tick(
+      function() { ticked <<- TRUE; stop("ohno") },
+      function(err, res) {
+        error <<- err
+        result <<- res
+        if (!is.null(err)) stop(err)
+      }
+    )
+    el$run()
+  }
+
+  f2 <- function() g2()
+  g2 <- function() {
+    el <- event_loop$new()
+    el$add_next_tick(
+      function() { ticked2 <<- TRUE; f3() },
+      function(err, res) {
+        error2 <<- err
+        result2 <<- res
+        if (!is.null(err)) stop(err)
+      }
+    )
+    el$run()
+  }
+
+  mel <- event_loop$new()
+  mel$add_next_tick(
+    function() { ticked3 <<- TRUE; f2() },
+    function(err, res) { error3 <<- err; result3 <<- res }
+  )
+  mel$run()
+
+  expect_true(ticked)
+  expect_true(ticked2)
+  expect_true(ticked3)
+  expect_s3_class(error, "async_event_loop_error")
+  expect_s3_class(error2, "async_event_loop_error")
+  expect_s3_class(error3, "async_event_loop_error")
+  expect_null(result)
+  expect_null(result2)
+  expect_null(result3)
+})
