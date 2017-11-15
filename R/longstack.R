@@ -15,7 +15,7 @@ print.async_rejected <- function(x, ...) {
 
 format.async_rejected <- function(x, ...) {
   ## TODO
-  x
+  format.default(x)
 }
 
 #' @export
