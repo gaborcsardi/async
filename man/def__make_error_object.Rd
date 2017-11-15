@@ -17,7 +17,6 @@ error object
 \description{
 \itemize{
 \item Make sure that the error is an error object.
-\item Make sure that the error stack is in the correct format.
 \item Make sure that the error has the correct classes.
 }
 }

@@ -2,8 +2,7 @@
 ## nocov start
 
 .onLoad <- function(libname, pkgname) {
-  ## How many frames to drop from event loop call stacks?
-  error_callback_drop_num()
+  ## Nothing to do for now
 }
 
 .onUnload <- function(libpath) {

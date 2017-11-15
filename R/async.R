@@ -41,8 +41,7 @@ async <- function(fun) {
             if (is.null(err)) resolve(res) else reject(err)
           }
         )
-      },
-      longstack = cbind(c(0, 2, 0, 0), c(3, 0, 0, 0))
+      }
     )
   })
 
