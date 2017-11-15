@@ -261,16 +261,13 @@ def__make_error_object <- function(self, private, err) {
     cl <- character()
   } else {
     call <- conditionCall(err)
-    if (inherits(err, "async_error")) call <- call[[2]]
     msg <- conditionMessage(err)
     cl <- class(err)
   }
 
-  ccl <- setdiff(cl, c("async_error", "simpleError", "error", "condition"))
-
   private$value <- structure(
     list(message = msg, error = err),
-    class = c(ccl, "async_deferred_rejected", "error", "condition")
+    class = unique(c("async_deferred_rejected", "error", "condition", cl))
   )
 }
 
