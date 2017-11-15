@@ -212,7 +212,7 @@ el__run_pending <- function(self, private) {
   for (id in next_ticks) {
     task <- private$tasks[[id]]
     private$tasks[[id]] <- NULL
-    error_callback(task$data$func, task$callback, task$data$stack)
+    call_with_callback(task$data$func, task$callback, task$data$stack)
   }
 
   length(next_ticks) > 0
@@ -250,7 +250,7 @@ el__run_timers <- function(self, private) {
     task <- private$tasks[[id]]
     private$tasks[[id]] <- NULL
     private$timers <- private$timers[setdiff(names(private$timers), id)]
-    error_callback(task$data$func, task$callback, task$data$stack)
+    call_with_callback(task$data$func, task$callback, task$data$stack)
   }
 }
 
@@ -279,7 +279,7 @@ el__update_time <- function(self, private) {
 #'
 #' @keywords internal
 
-error_callback <- function(func, callback, prev_stack = list()) {
+call_with_callback <- function(func, callback, prev_stack = list()) {
   error <- NULL
   tryCatch(
     withCallingHandlers(
@@ -297,7 +297,7 @@ error_callback <- function(func, callback, prev_stack = list()) {
 }
 
 make_error_stack <- function(error, prev_stack, dropx = 0) {
-  drop <- error_callback_drop_num()
+  drop <- call_with_callback_drop_num()
   stack1 <- sys.calls()
   rel_stack <- head(tail(error$call, - length(stack1) - drop[1] - dropx),
                     - drop[2])
@@ -306,7 +306,7 @@ make_error_stack <- function(error, prev_stack, dropx = 0) {
   error
 }
 
-error_callback_drop_num <- (function() {
+call_with_callback_drop_num <- (function() {
   drop_num <- NULL
   function() {
     if (!is.null(drop_num)) return(drop_num)
