@@ -33,7 +33,8 @@ delay <- function(delay) {
       get_default_event_loop()$add_delayed(
         delay,
         function() TRUE,
-        function(err, res) if (is.null(err)) resolve(res) else reject(err)
+        function(err, res) if (is.null(err)) resolve(res) else reject(err),
+        deferred = environment(resolve)$self
       )
     }
   )

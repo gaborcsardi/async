@@ -90,13 +90,14 @@ deferred <- R6Class(
   private = list(
     state = c("pending", "fulfilled", "rejected")[1],
     event_loop = NULL,
-    id = NULL,
+    task_id = NULL,
     value = NULL,
     on_fulfilled = list(),
     on_rejected = list(),
     progress_callback = NULL,
     cancel_callback = NULL,
     cancelled = FALSE,
+    start_stack = NULL,
 
     resolve = function(value)
       def__resolve(self, private, value),
@@ -130,7 +131,10 @@ def_init <- function(self, private, action, on_progress, on_cancel) {
   if (!is.na(pr_arg <- match("progress", action_args))) {
     args$progress <- private$progress
   }
-  do.call(action, args)
+
+  private$start_stack <- record_stack()
+  private$task_id <- async_start_task(self, do.call(action, args))
+
   invisible(self)
 }
 
@@ -182,7 +186,8 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
       function(value) {
         private$event_loop$add_next_tick(
           make_then_function(func, value),
-          function(err, res) if (is.null(err)) resolve(res) else reject(err)
+          function(err, res) if (is.null(err)) resolve(res) else reject(err),
+          deferred = environment(resolve)$self
         )
       }
     }

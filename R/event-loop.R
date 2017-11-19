@@ -46,20 +46,21 @@ event_loop <- R6Class(
     initialize = function()
       el_init(self, private),
 
-    add_http = function(handle, callback, file = NULL, progress = NULL)
-      el_add_http(self, private, handle, callback, file, progress),
-    add_delayed = function(delay, func, callback)
-      el_add_delayed(self, private, delay, func, callback),
-    add_next_tick = function(func, callback)
-      el_add_next_tick(self, private, func, callback),
+    add_http = function(handle, callback, file = NULL, progress = NULL,
+                        deferred)
+      el_add_http(self, private, handle, callback, file, progress, deferred),
+    add_delayed = function(delay, func, callback, deferred)
+      el_add_delayed(self, private, delay, func, callback, deferred),
+    add_next_tick = function(func, callback, deferred)
+      el_add_next_tick(self, private, func, callback, deferred),
 
     run = function(mode = c("default", "nowait", "once"))
       el_run(self, private, mode = match.arg(mode))
   ),
 
   private = list(
-    create_task = function(callback, ...)
-      el__create_task(self, private, callback, ...),
+    create_task = function(callback, deferred, ...)
+      el__create_task(self, private, callback, deferred, ...),
     ensure_pool = function(...)
       el__ensure_pool(self, private, ...),
     get_poll_timeout = function()
@@ -90,10 +91,12 @@ el_init <- function(self, private) {
 
 #' @importFrom curl multi_add parse_headers_list handle_data
 
-el_add_http <- function(self, private, handle, callback, progress, file) {
+el_add_http <- function(self, private, handle, callback, progress, file,
+                        deferred) {
   self; private; handle; callback; progress; file
   num_bytes <- 0; total <- NULL
-  id <- private$create_task(callback, data = list(handle = handle))
+  id <- private$create_task(callback, data = list(handle = handle),
+                            deferred = deferred)
   private$ensure_pool()
   if (!is.null(file) && file.exists(file)) unlink(file)
   multi_add(
@@ -143,7 +146,6 @@ el_add_http <- function(self, private, handle, callback, progress, file) {
       task <- private$tasks[[id]]
       private$tasks[[id]] <- NULL
       error <- make_error(message = error)
-      error <- make_error_stack(error, task$data$stack)
       class(error) <- unique(c("async_http_error", class(error)))
       task$callback(error, NULL)
     }
@@ -151,19 +153,21 @@ el_add_http <- function(self, private, handle, callback, progress, file) {
   id
 }
 
-el_add_delayed <- function(self, private, delay, func, callback) {
+el_add_delayed <- function(self, private, delay, func, callback, deferred) {
   force(self); force(private); force(delay); force(func); force(callback)
   id <- private$create_task(
     callback,
-    data = list(delay = delay, func = func)
+    data = list(delay = delay, func = func),
+    deferred = deferred
   )
   private$timers[id] <- Sys.time() + as.difftime(delay, units = "secs")
   id
 }
 
-el_add_next_tick <- function(self, private, func, callback) {
+el_add_next_tick <- function(self, private, func, callback, deferred) {
   force(self) ; force(private) ; force(callback)
-  id <- private$create_task(callback, data = list(func = func))
+  id <- private$create_task(callback, data = list(func = func),
+                            deferred = deferred)
   private$next_ticks <- c(private$next_ticks, id)
 }
 
@@ -212,7 +216,7 @@ el__run_pending <- function(self, private) {
   for (id in next_ticks) {
     task <- private$tasks[[id]]
     private$tasks[[id]] <- NULL
-    call_with_callback(task$data$func, task$callback, task$data$stack)
+    call_with_callback(task$data$func, task$callback, task$deferred)
   }
 
   length(next_ticks) > 0
@@ -220,12 +224,12 @@ el__run_pending <- function(self, private) {
 
 #' @importFrom uuid UUIDgenerate
 
-el__create_task <- function(self, private, callback, data, ...) {
+el__create_task <- function(self, private, callback, data, deferred, ...) {
   id <- UUIDgenerate()
-  data$stack <- list(sys.calls())
   private$tasks[[id]] <- list(
     id = id,
     callback = callback,
+    deferred = deferred,
     data = data,
     error = NULL,
     result = NULL
@@ -250,7 +254,7 @@ el__run_timers <- function(self, private) {
     task <- private$tasks[[id]]
     private$tasks[[id]] <- NULL
     private$timers <- private$timers[setdiff(names(private$timers), id)]
-    call_with_callback(task$data$func, task$callback, task$data$stack)
+    call_with_callback(task$data$func, task$callback, task$deferred)
   }
 }
 
@@ -270,61 +274,28 @@ el__update_time <- function(self, private) {
 #' error object if `func()` threw an error, or `NULL` otherwise. The second
 #' argument is `NULL` on error, and the result of `func()` otherwise.
 #'
-#' The main purpose of this function is to capture the call stack on error.
-#' The captured call stack is relative to the event loop.
-#'
 #' @param func Function to call.
 #' @param callback Callback to call with the result of `func()`,
 #'   or the error thrown.
 #'
 #' @keywords internal
 
-call_with_callback <- function(func, callback, prev_stack = list()) {
+call_with_callback <- function(func, callback, deferred) {
   error <- NULL
   tryCatch(
     withCallingHandlers(
-      result <- func(),
-      error = function(e) { e$call <- sys.calls(); error <<- e; }
+      result <- async_start_task(deferred, func()),
+      error = function(e) { e$call <- record_stack(); error <<- e; }
     ),
     error = identity
   )
   if (is.null(error)) {
     callback(NULL, result)
   } else {
-    error <- make_error_stack(error, prev_stack)
     callback(error, NULL)
   }
 }
 
-make_error_stack <- function(error, prev_stack, dropx = 0) {
-  drop <- call_with_callback_drop_num()
-  stack1 <- sys.calls()
-  rel_stack <- head(tail(error$call, - length(stack1) - drop[1] - dropx),
-                    - drop[2])
-  error$call <- c(prev_stack, list(rel_stack))
-  class(error) <- unique(c("async_event_loop_error", class(error)))
-  error
-}
+async_start_task <- function(deferred, expr) { deferred; expr }
 
-call_with_callback_drop_num <- (function() {
-  drop_num <- NULL
-  function() {
-    if (!is.null(drop_num)) return(drop_num)
-    stack1 <- sys.calls()
-    stack2 <- NULL
-    tryCatch(
-      withCallingHandlers(
-        stop("6b965374-2051-4efc-baf6-2564d771c7db"),
-        error = function(e) stack2 <<- sys.calls()
-      ),
-      error = identity
-    )
-    stop_frame <- find_in_stack(
-      stack2, quote(stop("6b965374-2051-4efc-baf6-2564d771c7db")))
-    drop_num <<- c(
-      stop_frame - length(stack1) - 1,
-      length(stack2) - stop_frame
-    )
-    drop_num
-  }
-})()
+async_init_task <- function(deferred, expr) { deferred; expr }

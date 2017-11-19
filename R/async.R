@@ -39,7 +39,8 @@ async <- function(fun) {
           },
           function(err, res) {
             if (is.null(err)) resolve(res) else reject(err)
-          }
+          },
+          deferred = environment(resolve)$self
         )
       }
     )
