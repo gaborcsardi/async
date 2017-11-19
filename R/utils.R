@@ -65,3 +65,12 @@ find_call_in_stack <- function(stack, elem) {
   }
   NULL
 }
+
+find_calls_in_stack <- function(stack, elem) {
+  vlapply(stack, function(x) identical(x[[1]], elem))
+}
+
+null_rownames <- function(x) {
+  rownames(x) <- NULL
+  x
+}

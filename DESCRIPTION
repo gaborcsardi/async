@@ -38,7 +38,6 @@ Collate:
     'event-loop.R'
     'every.R'
     'filter.R'
-    'longstack.R'
     'http.R'
     'map.R'
     'onload.R'
@@ -54,3 +53,4 @@ Collate:
     'when_all.R'
     'when_any.R'
     'whilst.R'
+    'widestack.R'

@@ -4,7 +4,7 @@
 \alias{call_with_callback}
 \title{Call \code{func} and then call \code{callback} with the result}
 \usage{
-call_with_callback(func, callback, prev_stack = list())
+call_with_callback(func, callback, user_data)
 }
 \arguments{
 \item{func}{Function to call.}
@@ -16,9 +16,5 @@ or the error thrown.}
 \code{callback} will be called with two arguments, the first one will the
 error object if \code{func()} threw an error, or \code{NULL} otherwise. The second
 argument is \code{NULL} on error, and the result of \code{func()} otherwise.
-}
-\details{
-The main purpose of this function is to capture the call stack on error.
-The captured call stack is relative to the event loop.
 }
 \keyword{internal}

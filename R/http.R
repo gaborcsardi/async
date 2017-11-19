@@ -83,17 +83,14 @@ make_deferred_http <- function(handle, file, on_progress) {
         handle,
         function(err, res) if (is.null(err)) resolve(res) else reject(err),
         progress,
-        file
+        file,
+        deferred = environment(resolve)$self
       )
     },
     on_progress = on_progress,
     on_cancel = function(reason) multi_cancel(handle)
   )
 }
-
-#' @include longstack.R
-
-make_deferred_http <- async_longstack_barrier(make_deferred_http)
 
 #' Throw R errors for HTTP errors
 #'

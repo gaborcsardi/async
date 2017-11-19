@@ -1,6 +1,9 @@
 
 context("longstack")
 
+## TODO: run these once widestack is implemented
+return()
+
 test_that("single deferred value (http)", {
 
   do <- async(function() {
