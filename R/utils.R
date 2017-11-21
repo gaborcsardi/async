@@ -7,6 +7,10 @@ vcapply <- function(X, FUN, ..., FUN.VALUE = character(1)) {
   vapply(X, FUN, FUN.VALUE = FUN.VALUE, ...)
 }
 
+viapply <- function(X, FUN, ..., FUN.VALUE = integer(1)) {
+  vapply(X, FUN, FUN.VALUE = FUN.VALUE, ...)
+}
+
 get_state_x <- function(x) {
   if (is_deferred(x)) x$get_state() else "not-deferred"
 }

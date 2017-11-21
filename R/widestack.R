@@ -32,6 +32,27 @@ record_this_stack <- function(calls, frames) {
   defs <- lapply(frames[barriers],  get_deferred_from_barrier)
   async_ids <- vcapply(defs, function(x) env_name(x$self))
 
+  ## What to hide? From a hide barrier to the next barrier
+  hide_barriers <- which(find_calls_in_stack(calls, quote(async_hide)))
+  barrier_idx <- which(barriers)
+  next_barriers <- viapply(
+    hide_barriers,
+    function(b) min(barrier_idx[barrier_idx > b] - 1L, length(calls))
+  )
+  to_hide <- logical(length(calls))
+  for (i in seq_along(hide_barriers)) {
+    to_hide[hide_barriers[i]:next_barriers[i]] <- TRUE
+  }
+
+  ## Also hide two calls before async_def_init
+  to_hide[which(init_barriers) - 1] <- TRUE
+  to_hide[which(init_barriers) - 2] <- TRUE
+
+  ## TODO: init calls should denote where they were called from
+  ## TODO: lift init calls up one step to avoid duplication
+  ## TODO: remove extra func() and func(value) calls from callback
+  ## TODO: rewrite async_stack_run() calls to something more descriptive
+
   ## Active async task, if any, either initializing or running
   last_async_frame <- tail(frames[barriers], 1)
   act_task <- if (length(last_async_frame)) last_async_frame[[1]]$deferred
@@ -43,7 +64,8 @@ record_this_stack <- function(calls, frames) {
     stringsAsFactors = FALSE,
     task_id = c("main", async_ids)[cumsum(barriers) + 1],
     call = I(calls),
-    frame_id = frame_ids
+    frame_id = frame_ids,
+    hide = to_hide
   )
 
   ## Wide stacks of the prelude tasks, we need to make them unique. (TODO)
@@ -80,26 +102,29 @@ get_deferred_from_barrier <- function(frame) {
   )
 }
 
-print_wide_stack <- function(stack) {
-  for (i in seq_along(stack)) {
-    stack[[i]]$same <- paste(
-      stack[[i]]$frame_id,
-      vcapply(
-        lapply(stack[[i]]$calls, format.default),
-        paste,
-        collapse = "\n"
-      )
+print_wide_stack <- function(wst) {
+
+  add_hash <- function(x) {
+    x$same <- paste(
+      x$frame_id,
+      vcapply(lapply(x$call, format.default), paste, collapse = "\n")
     )
+    x
   }
+  stack <- lapply(wst$calls, add_hash)
 
   df <- do.call(rbind, stack)
-  df <- df[ !duplicated(df$frame_id), , drop = FALSE]
-  df$out <- vcapply(df$calls, format_call)
-  marks <- lapply(stack, function(s) {
-    ifelse(df$same %in% s$same, "*", " ")
+  df <- df[ !duplicated(df$same), , drop = FALSE]
+
+  df$out <- vcapply(df$call, format_call)
+  marks <- lapply(unique(df$task_id), function(t) {
+    ifelse(df$task_id == t, "*", " ")
   })
   df$mark <- do.call(paste, marks)
-  cat(paste(df$mark, df$out), sep = "\n")
+
+  pdf <- df[! df$hide, ]
+
+  cat(paste(pdf$mark, pdf$out), sep = "\n")
 }
 
 format_call <- function(call) {

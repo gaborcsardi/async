@@ -77,7 +77,7 @@ deferred <- R6Class(
     get_value = function()
       def_get_value(self, private),
     then = function(on_fulfilled = NULL, on_rejected = NULL)
-      def_then(self, private, on_fulfilled, on_rejected),
+      async_hide(def_then(self, private, on_fulfilled, on_rejected)),
     catch = function(on_rejected)
       def_catch(self, private, on_rejected),
     finally = function(on_finally)
