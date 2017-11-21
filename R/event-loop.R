@@ -284,7 +284,7 @@ call_with_callback <- function(func, callback, deferred) {
   error <- NULL
   tryCatch(
     withCallingHandlers(
-      result <- async_start_task(deferred, func()),
+      result <- async_stack_run(deferred, func()),
       error = function(e) { e$call <- record_stack(); error <<- e; }
     ),
     error = identity
@@ -296,6 +296,4 @@ call_with_callback <- function(func, callback, deferred) {
   }
 }
 
-async_start_task <- function(deferred, expr) { deferred; expr }
-
-async_init_task <- function(deferred, expr) { deferred; expr }
+async_stack_run <- function(deferred, expr) { deferred; expr }

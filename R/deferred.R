@@ -69,8 +69,9 @@ NULL
 deferred <- R6Class(
   "deferred",
   public = list(
-    initialize = function(action, on_progress = NULL, on_cancel = NULL)
-      def_init(self, private, action, on_progress, on_cancel),
+    initialize = function(action, on_progress = NULL, on_cancel = NULL,
+                          parent = NULL)
+      async_def_init(self, private, action, on_progress, on_cancel, parent),
     get_state = function()
       private$state,
     get_value = function()
@@ -98,6 +99,7 @@ deferred <- R6Class(
     cancel_callback = NULL,
     cancelled = FALSE,
     start_stack = NULL,
+    parent = NULL,
 
     resolve = function(value)
       def__resolve(self, private, value),
@@ -112,8 +114,12 @@ deferred <- R6Class(
   )
 )
 
-def_init <- function(self, private, action, on_progress, on_cancel) {
+async_def_init <- function(deferred, private, action, on_progress,
+                           on_cancel, parent) {
+
   private$event_loop <- get_default_event_loop()
+  private$parent <- parent
+  private$start_stack <- record_stack()
 
   if (!is.function(action)) {
     action <- as_function(action)
@@ -132,10 +138,9 @@ def_init <- function(self, private, action, on_progress, on_cancel) {
     args$progress <- private$progress
   }
 
-  private$start_stack <- record_stack()
-  private$task_id <- async_start_task(self, do.call(action, args))
+  private$task_id <- async_stack_run(deferred, do.call(action, args))
 
-  invisible(self)
+  invisible(deferred)
 }
 
 def_get_value <- function(self, private) {
@@ -177,9 +182,11 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
   on_fulfilled <- if (!is.null(on_fulfilled)) as_function(on_fulfilled)
   on_rejected  <- if (!is.null(on_rejected))  as_function(on_rejected)
 
-  deferred$new(function(resolve, reject) {
+  deferred$new(parent = self, function(resolve, reject) {
     force(resolve)
     force(reject)
+
+    myself <- environment(resolve)$self
 
     handle <- function(func) {
       force(func)
@@ -187,7 +194,7 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
         private$event_loop$add_next_tick(
           make_then_function(func, value),
           function(err, res) if (is.null(err)) resolve(res) else reject(err),
-          deferred = environment(resolve)$self
+          deferred = myself
         )
       }
     }
