@@ -35,51 +35,42 @@ record_this_stack <- function(calls, frames) {
   ## Active async task, if any, either initializing or running
   last_async_frame <- tail(frames[barriers], 1)
   act_task <- if (length(last_async_frame)) last_async_frame[[1]]$deferred
-  act_parent <- deferred$.__enclos_env__$private$parent
+  act_parent <- act_task$.__enclos_env__$private$parent
   act_id <- if (length(act_task)) env_name(act_task) else "main"
+  act_parent_id <- if (length(act_parent)) env_name(act_parent) else NA_character_
 
-  wst <- data.frame(
+  call_df <- data.frame(
     stringsAsFactors = FALSE,
     task_id = c("main", async_ids)[cumsum(barriers) + 1],
     call = I(calls),
     frame_id = frame_ids
   )
 
-  ## up_stacks <- lapply(defs, function(x) x$private$start_stack)
-  ## parent_stacks <- lapply(
-  ##   defs,
-  ##   function(x) x$private$parent$.__enclos_env__$private$start_stack
-  ## )
+  ## Wide stacks of the prelude tasks, we need to make them unique. (TODO)
+  ## Note that these are the start stacks only. Run stacks of a deferred
+  ## might be included in another deferred's stack.
+  pre <- c(defs, list(list(private = act_parent$.__enclos_env__$private)))
+  pre_stacks <- drop_nulls(lapply(pre, function(x) x$private$start_stack))
 
-  ## stacks <- c(
-  ##   unlist(parent_stacks, recursive = FALSE),
-  ##   unlist(up_stacks, recursive = FALSE),
-  ##   list(current_stack))
-  ## task_names <- vcapply(stacks, function(x) x$task_id[[1]])
-  ## stacks[task_names == "main" | !duplicated(task_names)]
+  ## Merge the prelude to the current wide stack.
+  ## `calls` is a named list of call stack data frames
+  ## `parents` is a character vector
+  extract_calls <- function(x) {
+    unlist(lapply(x, "[[", "calls"), recursive = FALSE)
+  }
 
+  wsts <- list(
+    calls = c(
+      unique_names(extract_calls(pre_stacks)),
+      structure(list(call_df), names = act_id)
+    ),
+    parents = unique_names(c(
+      unlist(lapply(pre_stacks, "[[", "parents")),
+      structure(act_parent_id, names = act_id)
+    ))
+  )
 
-  browser()
-
-  ## current_stack <- data.frame(
-  ##   stringsAsFactors = FALSE,
-  ##   task_id = tail(c("main", async_ids), 1),
-  ##   calls = I(calls),
-  ##   frame_id = frame_ids
-  ## )
-
-  ## up_stacks <- lapply(defs, function(x) x$private$start_stack)
-  ## parent_stacks <- lapply(
-  ##   defs,
-  ##   function(x) x$private$parent$.__enclos_env__$private$start_stack
-  ## )
-
-  ## stacks <- c(
-  ##   unlist(parent_stacks, recursive = FALSE),
-  ##   unlist(up_stacks, recursive = FALSE),
-  ##   list(current_stack))
-  ## task_names <- vcapply(stacks, function(x) x$task_id[[1]])
-  ## stacks[task_names == "main" | !duplicated(task_names)]
+  wsts
 }
 
 get_deferred_from_barrier <- function(frame) {
