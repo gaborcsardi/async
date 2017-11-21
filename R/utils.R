@@ -74,3 +74,11 @@ null_rownames <- function(x) {
   rownames(x) <- NULL
   x
 }
+
+drop_nulls <- function(x) {
+  x[! vlapply(x, is.null)]
+}
+
+unique_names <- function(x) {
+  x[unique(names(x))]
+}
