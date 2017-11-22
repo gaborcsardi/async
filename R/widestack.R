@@ -48,11 +48,6 @@ record_this_stack <- function(calls, frames) {
   to_hide[which(init_barriers) - 1] <- TRUE
   to_hide[which(init_barriers) - 2] <- TRUE
 
-  ## TODO: init calls should denote where they were called from
-  ## TODO: lift init calls up one step to avoid duplication
-  ## TODO: remove extra func() and func(value) calls from callback
-  ## TODO: rewrite async_stack_run() calls to something more descriptive
-
   ## Active async task, if any, either initializing or running
   last_async_frame <- tail(frames[barriers], 1)
   act_task <- if (length(last_async_frame)) last_async_frame[[1]]$deferred
@@ -65,7 +60,9 @@ record_this_stack <- function(calls, frames) {
     task_id = c("main", async_ids)[cumsum(barriers) + 1],
     call = I(calls),
     frame_id = frame_ids,
-    hide = to_hide
+    hide = to_hide,
+    init = init_barriers,
+    callback = run_barriers
   )
 
   ## Wide stacks of the prelude tasks, we need to make them unique. (TODO)
@@ -117,12 +114,49 @@ print_wide_stack <- function(wst) {
   df <- df[ !duplicated(df$same), , drop = FALSE]
 
   df$out <- vcapply(df$call, format_call)
+
+  ## Marks
   marks <- lapply(unique(df$task_id), function(t) {
     ifelse(df$task_id == t, "*", " ")
   })
-  df$mark <- do.call(paste, marks)
+  df$marks <- do.call(
+    mapply,
+    c(list(c), marks, USE.NAMES = FALSE, SIMPLIFY = FALSE)
+  )
 
   pdf <- df[! df$hide, ]
+
+  ## Lift init calls up one step to avoid duplication
+  init_calls <- which(pdf$init) - 1L
+  if (length(init_calls)) {
+    pdf$out[init_calls] <- paste("+", pdf$out[init_calls])
+  }
+
+  compose <- function(x, y) ifelse(x == " " & y == " ", " ", "*")
+
+  pdf$marks[init_calls] <- mapply(
+    compose,
+    pdf$marks[init_calls], pdf$marks[init_calls + 1], SIMPLIFY=FALSE
+  )
+  pdf <- pdf[! pdf$init, ]
+
+  ## rewrite async_stack_run() calls to something more descriptive
+  run_calls <- which(pdf$callback)
+  if (length(run_calls)) {
+    pdf$out[run_calls] <-
+      paste(">", sub("^[+][ ]", "", pdf$out[run_calls - 1L]))
+  }
+
+  ## TODO: remove extra func() and func(value) calls from callback
+
+  add_arrows <- function(x) {
+    w <- regexpr("[*][ ]+[*]", x)
+    regmatches(x, w) <- gsub(" ", "-", regmatches(x, w))
+    x
+  }
+
+  pdf$mark <- vcapply(pdf$marks, paste, collapse = " ")
+  pdf$mark <- add_arrows(pdf$mark)
 
   cat(paste(pdf$mark, pdf$out), sep = "\n")
 }
