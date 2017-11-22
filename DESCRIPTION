@@ -19,7 +19,10 @@ Suggests:
 Encoding: UTF-8
 Imports:
     assertthat,
+    cli,
+    crayon,
     curl (>= 3.0),
+    prettycode,
     R6,
     rlang,
     utils,

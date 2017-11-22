@@ -86,3 +86,8 @@ drop_nulls <- function(x) {
 unique_names <- function(x) {
   x[unique(names(x))]
 }
+
+has_utf8 <- function() {
+  ## TODO: this is a hack, we need to export `has_utf8()` from `cli`
+  cli::get_spinner()$name == "dots"
+}

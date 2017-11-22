@@ -4,7 +4,7 @@
 \alias{call_with_callback}
 \title{Call \code{func} and then call \code{callback} with the result}
 \usage{
-call_with_callback(func, callback, user_data)
+call_with_callback(func, callback, deferred)
 }
 \arguments{
 \item{func}{Function to call.}

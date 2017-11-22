@@ -147,18 +147,40 @@ print_wide_stack <- function(wst) {
       paste(">", sub("^[+][ ]", "", pdf$out[run_calls - 1L]))
   }
 
-  ## TODO: remove extra func() and func(value) calls from callback
-
-  add_arrows <- function(x) {
-    w <- regexpr("[*][ ]+[*]", x)
-    regmatches(x, w) <- gsub(" ", "-", regmatches(x, w))
-    x
-  }
+  pdf <- unicode_wide_stack(pdf)
 
   pdf$mark <- vcapply(pdf$marks, paste, collapse = " ")
   pdf$mark <- add_arrows(pdf$mark)
+  pdf$mark <- add_lines(pdf$mark)
 
+  cat_header(pdf)
   cat(paste(pdf$mark, pdf$out), sep = "\n")
+}
+
+add_arrows <- function(x) {
+  w <- regexpr("(?<=[^ ])[ ]+(?=[^ ])", x, perl = TRUE)
+  m <- regmatches(x, w)
+
+  arrow <- if (has_utf8()) {
+    make_unicode_arrow(nchar(m, type = "bytes"))
+  } else {
+    strrep("-", nchar(m))
+  }
+
+  regmatches(x, w) <- arrow
+  x
+}
+
+add_lines <- function(x) {
+  if (! has_utf8()) return(x)
+  w <- regexpr("[ ]+$", x, perl = TRUE)
+  light_grey <- crayon::make_style("#666666")
+  regmatches(x, w) <- light_grey(strrep("\u2508", nchar(regmatches(x, w))))
+  x
+}
+
+make_unicode_arrow <- function(l) {
+  ifelse(l == 0, "", paste0(strrep("\u2508", l -1), "\u21e2"))
 }
 
 format_call <- function(call) {
@@ -171,10 +193,80 @@ format_call <- function(call) {
   col <- getSrcLocation(call, which = "column")
 
   if (!is.null(line)) {
-    out <- paste0(out, " @ ", file, ":", line, ":", col)
+    loc <- crayon::green(paste0("@ ", file, ":", line, ":", col))
+    out <- paste(out, loc)
   }
 
   out
+}
+
+cat_header <- function(pdf) {
+  num_tasks <- length(pdf$marks[[1]])
+  header <- c(letters, LETTERS)
+  num_tasks <- min(num_tasks, length(header))
+  header <- paste(header[seq_len(num_tasks)], collapse = " ")
+
+  style <- crayon::make_style("darkgrey", bg = TRUE)
+  cat(style(header), "\n")
+}
+
+unicode_wide_stack <- function(pdf) {
+  ## Do we print unicode?
+  if (! has_utf8()) return(pdf)
+
+  ## Color and prettify markers
+  pdf$marks <- get_mark_types(pdf)
+
+  pdf$out <- sub("^[+] ", paste0(cli::symbol$star, " "), pdf$out)
+  pdf$out <- sub("^[>] ", paste0("\u25b6", " "), pdf$out)
+
+  pdf
+}
+
+get_mark_types <- function(pdf) {
+  mx   <- "\u25aa"
+  mx_  <- "\u25aa\u0329"
+  m_x  <- "\u25ab\u030d"
+  m_x_ <- "\u25ab\u0329\u030d"
+
+  num_tasks <- length(pdf$marks[[1]])
+  cols <- get_colors(num_tasks)
+  styles <- lapply(cols, crayon::make_style)
+
+  marks <- pdf$marks
+  types <- marks
+  for (i in seq_along(types)) {
+    row <- marks[[i]]
+    if (length(types) == 1) {
+      types[[i]] <- sub("*", mx, row, fixed = TRUE)
+
+    } else if (i == 1) {
+      types[[i]] <- ifelse(
+        marks[[i]] == " ", " ",
+        ifelse(marks[[i + 1]] == "*", mx_, mx)
+      )
+
+    } else if (i == length(types)) {
+      types[[i]] <- ifelse(
+        marks[[i]] == " ", " ",
+        ifelse(marks[[i - 1]] == "*", m_x, mx))
+
+    } else {
+      types[[i]] <- ifelse(
+        marks[[i]] == " ", " ",
+        ifelse(
+          marks[[i - 1]] == "*",
+          ifelse(marks[[i + 1]] == "*", m_x_, m_x),
+          ifelse(marks[[i + 1]] == "*", mx_, mx)
+        )
+      )
+    }
+    types[[i]] <- vcapply(seq_along(types[[i]]), function(j) {
+      if (types[[i]][j] == " ") " " else styles[[j]](types[[i]][j])
+    })
+  }
+
+  types
 }
 
 #' @export
