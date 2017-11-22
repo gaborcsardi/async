@@ -130,6 +130,11 @@ get_deferred_from_barrier <- function(frame) {
 }
 
 print_wide_stack <- function(wst) {
+  pr <- format_wide_stack(wst)
+  cat(pr, sep = "\n")
+}
+
+format_wide_stack <- function(wst) {
 
   add_hash <- function(x) {
     x$same <- paste(
@@ -183,8 +188,7 @@ print_wide_stack <- function(wst) {
   pdf$mark <- add_arrows(pdf$mark)
   pdf$mark <- add_lines(pdf$mark)
 
-  cat_header(pdf)
-  cat(paste(pdf$mark, pdf$out), sep = "\n")
+  c(make_header(pdf), paste(pdf$mark, pdf$out))
 }
 
 add_arrows <- function(x) {
@@ -243,14 +247,14 @@ format_call <- function(call, fnam, fargs, env) {
   out
 }
 
-cat_header <- function(pdf) {
+make_header <- function(pdf) {
   num_tasks <- length(pdf$marks[[1]])
   header <- c(letters, LETTERS)
   num_tasks <- min(num_tasks, length(header))
   header <- paste(header[seq_len(num_tasks)], collapse = " ")
 
   style <- crayon::make_style("darkgrey", bg = TRUE)
-  cat(style(header), "\n")
+  style(header)
 }
 
 unicode_wide_stack <- function(pdf) {
@@ -315,7 +319,7 @@ get_mark_types <- function(pdf) {
 #' @export
 
 print.async_rejected <- function(x, ...) {
-  cat(format(x, ...), sep = "\n")
+  print_wide_stack(x$error$call)
   invisible(x)
 }
 
