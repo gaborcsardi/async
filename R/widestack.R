@@ -12,12 +12,13 @@ env_name <- function(env) {
 record_stack <- function() {
   calls <- head(sys.calls(), -1)
   frames <- head(sys.frames(), -1)
-  record_this_stack(calls, frames)
+  funcs <- lapply(seq_along(calls), sys.function)
+  record_this_stack(calls, frames, funcs)
 }
 
 #' @importFrom utils tail
 
-record_this_stack <- function(calls, frames) {
+record_this_stack <- function(calls, frames, funcs) {
   frame_ids <- vcapply(frames, env_name)
 
   ## The async tasks currently initializing
@@ -62,7 +63,10 @@ record_this_stack <- function(calls, frames) {
     frame_id = frame_ids,
     hide = to_hide,
     init = init_barriers,
-    callback = run_barriers
+    callback = run_barriers,
+    envs = vcapply(funcs, function(x) environmentName(environment(x))),
+    fnams = vcapply(calls, get_call_name),
+    fargs = vcapply(calls, get_call_args)
   )
 
   ## Wide stacks of the prelude tasks, we need to make them unique. (TODO)
@@ -92,6 +96,32 @@ record_this_stack <- function(calls, frames) {
   wsts
 }
 
+#' @importFrom utils capture.output
+
+get_call_name <- function(call) {
+  if (is.call(call)) {
+    call[-1] <- NULL
+    sub("[(][)]\\s*$", "", paste(capture.output(call), collapse = "\n"))
+  } else {
+    ## This should never happen, but better safe than sorry
+    "<anonymous>"
+  }
+}
+
+get_call_args <- function(call) {
+  ## No arguments
+  if (is.null(call[-1])) return("()")
+
+  ## Otherwise format them
+  call[[1]] <- as.symbol("foobar")
+  str <- format(call)
+  str[1] <- sub("^foobar", "", str[1])
+  if (length(str) > 1) {
+    str[-1] <- sub("^[ ]+", "", str[-1])
+  }
+  paste(str, collapse = "")
+}
+
 get_deferred_from_barrier <- function(frame) {
   list(
     self = frame$deferred,
@@ -113,7 +143,7 @@ print_wide_stack <- function(wst) {
   df <- do.call(rbind, stack)
   df <- df[ !duplicated(df$same), , drop = FALSE]
 
-  df$out <- vcapply(df$call, format_call)
+  df$out <- mapply(format_call, df$call, df$fnams, df$fargs, df$envs)
 
   ## Marks
   marks <- lapply(unique(df$task_id), function(t) {
@@ -183,9 +213,20 @@ make_unicode_arrow <- function(l) {
   ifelse(l == 0, "", paste0(strrep("\u2508", l -1), "\u21e2"))
 }
 
-format_call <- function(call) {
-  out <- format.default(call)
-  if (length(out) > 1) out <- paste0(out[1], "...")
+format_call <- function(call, fnam, fargs, env) {
+
+  light_grey <- crayon::make_style("#666666")
+  fargs <- if (nchar(fargs) > 50) {
+    paste0(substring(fargs, 1, 50), cli::symbol$ellipsis)
+  } else {
+    fargs
+  }
+  fargs <- light_grey(fargs)
+  env <- if (env %in% c("", "R_GlobalEnv")) "" else paste0(env, "::")
+  env <- crayon::cyan(env)
+  fnam <- crayon::yellow(fnam)
+
+  out <- paste0(env, fnam, " ", fargs)
 
   dir <- getSrcDirectory(call)
   file <- getSrcFilename(call)
@@ -193,7 +234,9 @@ format_call <- function(call) {
   col <- getSrcLocation(call, which = "column")
 
   if (!is.null(line)) {
-    loc <- crayon::green(paste0("@ ", file, ":", line, ":", col))
+    loc <- crayon::green(paste0(
+      "@ ", file.path(basename(dir), file), ":", line, ":", col
+    ))
     out <- paste(out, loc)
   }
 
