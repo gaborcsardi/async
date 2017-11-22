@@ -22,7 +22,6 @@ Imports:
     cli,
     crayon,
     curl (>= 3.0),
-    prettycode,
     R6,
     rlang,
     utils,
