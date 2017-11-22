@@ -164,6 +164,16 @@ print_wide_stack <- function(wst) {
 format_call <- function(call) {
   out <- format.default(call)
   if (length(out) > 1) out <- paste0(out[1], "...")
+
+  dir <- getSrcDirectory(call)
+  file <- getSrcFilename(call)
+  line <- getSrcLocation(call)
+  col <- getSrcLocation(call, which = "column")
+
+  if (!is.null(line)) {
+    out <- paste0(out, " @ ", file, ":", line, ":", col)
+  }
+
   out
 }
 
