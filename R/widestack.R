@@ -56,9 +56,7 @@ record_this_stack <- function(calls, frames, funcs) {
     hide = to_hide,
     init = init_barriers,
     callback = run_barriers,
-    envs = vcapply(funcs, function(x) environmentName(environment(x))),
-    fnams = vcapply(calls, get_call_name),
-    fargs = vcapply(calls, get_call_args)
+    envs = vcapply(funcs, function(x) environmentName(environment(x)))
   )
 
   ## Wide stacks of the prelude tasks, we need to make them unique. (TODO)
@@ -139,6 +137,9 @@ format_wide_stack <- function(wst) {
 
   df <- do.call(rbind, stack)
   df <- df[ !duplicated(df$same), , drop = FALSE]
+
+  df$fnams <- vcapply(df$call, get_call_name)
+  df$fargs <- vcapply(df$call, get_call_args)
 
   df$out <- mapply(format_call, df$call, df$fnams, df$fargs, df$envs)
 
