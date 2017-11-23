@@ -326,17 +326,19 @@ format.async_rejected <- function(x, ...) {
 #' @export
 
 conditionCall.async_rejected <- function(c) {
-  ## TODO
   tail(tail(c$call$calls, 1)[[1]]$call, 1)[[1]]
 }
 
 #' @export
 
 conditionMessage.async_rejected <- function(c) {
-  ## TODO
-  crayon::reset(paste0(
-    "\n\n",
-    crayon::bold(crayon::red(cli::symbol$cross, c$message)), "\n",
-    paste(c("", format_wide_stack(c$call)), collapse = "\n")
-  ))
+  if (is.null(c$call)) {
+    NextMethod()
+  } else {
+    crayon::reset(paste0(
+      "\n\n",
+      crayon::bold(crayon::red(cli::symbol$cross, c$message)), "\n",
+      paste(c("", format_wide_stack(c$call)), collapse = "\n")
+    ))
+  }
 }
