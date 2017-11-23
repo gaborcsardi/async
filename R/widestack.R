@@ -312,7 +312,7 @@ get_mark_types <- function(pdf) {
 #' @export
 
 print.async_rejected <- function(x, ...) {
-  print_wide_stack(x$error$call)
+  print_wide_stack(x$call)
   invisible(x)
 }
 
