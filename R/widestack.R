@@ -1,12 +1,4 @@
 
-env_name <- function(env) {
-  if ((n <- environmentName(env)) != "") {
-    n
-  } else {
-    sub(">$", "", sub("^<environment: ", "", format.default(env)))
-  }
-}
-
 #' @importFrom utils head
 
 record_stack <- function() {
@@ -19,7 +11,7 @@ record_stack <- function() {
 #' @importFrom utils tail
 
 record_this_stack <- function(calls, frames, funcs) {
-  frame_ids <- vcapply(frames, env_name)
+  frame_ids <- vcapply(frames, format.default)
 
   ## The async tasks currently initializing
   init_barriers <- find_calls_in_stack(calls, quote(async_def_init))
@@ -31,7 +23,7 @@ record_this_stack <- function(calls, frames, funcs) {
 
   barriers <- init_barriers | run_barriers
   defs <- lapply(frames[barriers],  get_deferred_from_barrier)
-  async_ids <- vcapply(defs, function(x) env_name(x$self))
+  async_ids <- vcapply(defs, function(x) format.default(x$self))
 
   ## What to hide? From a hide barrier to the next barrier
   hide_barriers <- which(find_calls_in_stack(calls, quote(async_hide)))
@@ -53,8 +45,8 @@ record_this_stack <- function(calls, frames, funcs) {
   last_async_frame <- tail(frames[barriers], 1)
   act_task <- if (length(last_async_frame)) last_async_frame[[1]]$deferred
   act_parent <- act_task$.__enclos_env__$private$parent
-  act_id <- if (length(act_task)) env_name(act_task) else "main"
-  act_parent_id <- if (length(act_parent)) env_name(act_parent) else NA_character_
+  act_id <- if (length(act_task)) format.default(act_task) else "main"
+  act_parent_id <- if (length(act_parent)) format.default(act_parent) else NA_character_
 
   call_df <- data.frame(
     stringsAsFactors = FALSE,
