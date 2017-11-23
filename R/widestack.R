@@ -332,12 +332,23 @@ conditionCall.async_rejected <- function(c) {
 #' @export
 
 conditionMessage.async_rejected <- function(c) {
+
+  warn_if_debug_off <- function() {
+    if (!isTRUE(getOption("async.debug"))) {
+      paste0(
+        "\n", "(Async debugging if off, turn it on with `",
+        crayon::bold(crayon::italic("options(async.debug = TRUE)")), "`.)\n"
+      )
+    }
+  }
+
   if (! inherits(c$call, "async_wide_stack")) {
     NextMethod()
   } else {
     crayon::reset(paste0(
       "\n\n",
       crayon::bold(crayon::red(cli::symbol$cross, c$message)), "\n",
+      warn_if_debug_off(),
       paste(c("", format_wide_stack(c$call)), collapse = "\n")
     ))
   }
