@@ -118,7 +118,9 @@ async_def_init <- function(deferred, private, action, on_progress,
 
   private$event_loop <- get_default_event_loop()
   private$parent <- parent
-  private$start_stack <- record_stack()
+  if (isTRUE(getOption("async.debug"))) {
+    private$start_stack <- record_stack()
+  }
 
   if (!is.function(action)) {
     action <- as_function(action)
