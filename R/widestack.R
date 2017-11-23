@@ -48,8 +48,7 @@ record_this_stack <- function(calls, frames, funcs) {
   act_id <- if (length(act_task)) format.default(act_task) else "main"
   act_parent_id <- if (length(act_parent)) format.default(act_parent) else NA_character_
 
-  call_df <- data.frame(
-    stringsAsFactors = FALSE,
+  call_df <- list(
     task_id = c("main", async_ids)[cumsum(barriers) + 1],
     call = I(calls),
     frame_id = frame_ids,
@@ -135,6 +134,7 @@ format_wide_stack <- function(wst) {
   }
   stack <- lapply(wst$calls, add_hash)
 
+  stack <- lapply(stack, as.data.frame, stringsAsFactors = FALSE)
   df <- do.call(rbind, stack)
   df <- df[ !duplicated(df$same), , drop = FALSE]
 
