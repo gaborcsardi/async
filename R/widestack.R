@@ -82,7 +82,7 @@ record_this_stack <- function(calls, frames, funcs) {
     ))
   )
 
-  wsts
+  structure(wsts, class = "async_wide_stack")
 }
 
 #' @importFrom utils capture.output
@@ -332,7 +332,7 @@ conditionCall.async_rejected <- function(c) {
 #' @export
 
 conditionMessage.async_rejected <- function(c) {
-  if (is.null(c$call)) {
+  if (! inherits(c$call, "async_wide_stack")) {
     NextMethod()
   } else {
     crayon::reset(paste0(
