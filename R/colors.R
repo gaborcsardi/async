@@ -1,4 +1,6 @@
 
+#' @importFrom grDevices colors
+
 get_colors <- function(num) {
 
   cols <- c("green", "blue", "magenta", "cyan", "yellow", "red", "silver")

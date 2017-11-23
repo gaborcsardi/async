@@ -210,6 +210,8 @@ make_unicode_arrow <- function(l) {
   ifelse(l == 0, "", paste0(strrep("\u2508", l -1), "\u21e2"))
 }
 
+#' @importFrom utils getSrcDirectory getSrcFilename getSrcLocation
+
 format_call <- function(call, fnam, fargs, env) {
 
   light_grey <- crayon::make_style("#666666")
