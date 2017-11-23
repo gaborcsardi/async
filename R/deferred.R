@@ -91,7 +91,6 @@ deferred <- R6Class(
   private = list(
     state = c("pending", "fulfilled", "rejected")[1],
     event_loop = NULL,
-    task_id = NULL,
     value = NULL,
     on_fulfilled = list(),
     on_rejected = list(),
@@ -138,7 +137,15 @@ async_def_init <- function(deferred, private, action, on_progress,
     args$progress <- private$progress
   }
 
-  private$task_id <- async_stack_run(deferred, do.call(action, args))
+  error <- NULL
+  tryCatch(
+    withCallingHandlers(
+      result <- async_stack_run(deferred, do.call(action, args)),
+      error = function(e) { e$call <- record_stack(); error <- e; }
+    ),
+    error = identity
+  )
+  if (! is.null(error)) private$reject(error)
 
   invisible(deferred)
 }
@@ -266,21 +273,8 @@ def__resolve <- function(self, private, value) {
 #' @keywords internal
 
 def__make_error_object <- function(self, private, err) {
-
-  if (is.character(err)) {
-    call <- NULL
-    msg <- err
-    cl <- character()
-  } else {
-    call <- conditionCall(err)
-    msg <- conditionMessage(err)
-    cl <- class(err)
-  }
-
-  private$value <- structure(
-    list(message = msg, error = err),
-    class = unique(c("async_rejected", cl, "error", "condition"))
-  )
+  class(err) <- unique(c("async_rejected", class(err)))
+  private$value <- err
 }
 
 def__reject <- function(self, private, reason) {

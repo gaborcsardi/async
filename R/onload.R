@@ -2,7 +2,8 @@
 ## nocov start
 
 .onLoad <- function(libname, pkgname) {
-  ## Nothing to do for now
+  ## This is the current max
+  options(warning.length = 8170)
 }
 
 .onUnload <- function(libpath) {
