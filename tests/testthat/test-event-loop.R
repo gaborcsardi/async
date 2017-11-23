@@ -14,7 +14,8 @@ test_that("next tick", {
   result <- "bar"
   el$add_next_tick(
     function() ticked <<- TRUE,
-    function(err, res) { error <<- err; result <<- res }
+    function(err, res) { error <<- err; result <<- res },
+    deferred = NULL
   )
   el$run()
 
