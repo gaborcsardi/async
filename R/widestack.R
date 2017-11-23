@@ -334,12 +334,16 @@ format.async_rejected <- function(x, ...) {
 
 conditionCall.async_rejected <- function(c) {
   ## TODO
-  c$call
+  tail(tail(c$call$calls, 1)[[1]]$call, 1)[[1]]
 }
 
 #' @export
 
 conditionMessage.async_rejected <- function(c) {
   ## TODO
-  c$message
+  crayon::reset(paste0(
+    "\n\n",
+    crayon::bold(crayon::red(cli::symbol$cross, c$message)), "\n",
+    paste(c("", format_wide_stack(c$call)), collapse = "\n")
+  ))
 }
