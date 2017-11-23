@@ -139,15 +139,9 @@ async_def_init <- function(deferred, private, action, on_progress,
     args$progress <- private$progress
   }
 
-  error <- NULL
-  tryCatch(
-    withCallingHandlers(
-      result <- async_stack_run(deferred, do.call(action, args)),
-      error = function(e) { e$call <- record_stack(); error <- e; }
-    ),
-    error = identity
-  )
-  if (! is.null(error)) private$reject(error)
+  ## We do not check for errors here. Instead the error is returned
+  ## synchronously.
+  async_stack_run(deferred, do.call(action, args))
 
   invisible(deferred)
 }
