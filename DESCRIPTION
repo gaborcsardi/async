@@ -32,6 +32,7 @@ Collate:
     'async.R'
     'await.R'
     'await_env.R'
+    'colors.R'
     'constant.R'
     'context.R'
     'deferred.R'
