@@ -124,7 +124,15 @@ el_add_http <- function(self, private, handle, callback, progress, file,
     },
     data = if (!is.null(file)) {
       function(bytes) {
-        con <- file(file, open = "ab")
+        ## R runs out of connections very quickly, especially because they
+        ## are not removed until a gc(). However, calling gc() is
+        ## expensive, so we only do it if we have to. This is a temporary
+        ## solution until we can use our own connections, that are not
+        ## so limited in their numbers.
+        con <- tryCatch(
+          file(file, open = "ab"),
+          error = function(e) { gc(); file(file, open = "ab") }
+        )
         writeBin(bytes, con)
         close(con)
         if (is.null(total)) {
