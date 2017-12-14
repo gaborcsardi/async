@@ -110,11 +110,12 @@ el_add_http <- function(self, private, handle, callback, progress, file,
           if (!is.null(tot) && length(tot) >= 1 && !is.na(tot[[1]])) {
             total <<- tot
           }
+        } else {
+          total <- NULL
         }
         progress(
           status_code = response$status_code,
           total = total,
-          amount = total,
           ratio = 1.0
         )
       }
@@ -141,11 +142,13 @@ el_add_http <- function(self, private, handle, callback, progress, file,
           if (!is.null(tot) && length(tot) >= 1 && !is.na(tot[[1]])) {
             total <<- tot
           }
+        } else {
+          total <- NULL
         }
         num_bytes <<- num_bytes + length(bytes)
         progress(
           total = total,
-          amount = num_bytes,
+          amount = length(bytes),
           ratio = if (is.null(total)) NULL else num_bytes / total
         )
       }

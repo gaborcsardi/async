@@ -59,7 +59,7 @@ test_that("http progress bars", {
 
   do <- async(function() {
     totalx <- NULL
-    amountx <- integer()
+    amountx <- 0
     tmp <- tempfile()
     on.exit(unlink(tmp, recursive = TRUE), add = TRUE)
     dx <- http_get(
@@ -67,7 +67,7 @@ test_that("http progress bars", {
       file = tmp <- tempfile(),
       on_progress = function(total, amount, status_code) {
         if (!is.null(total)) totalx <<- total
-        amountx <<- c(amountx, amount)
+        if (!is.null(amount)) amountx <<- amountx + amount
       }
     )
 
@@ -75,8 +75,8 @@ test_that("http progress bars", {
 
     expect_equal(await(dx)$status_code, 200)
     expect_true(file.exists(tmp))
-    expect_equal(file.size(tmp), utils::tail(amountx, 1))
-    expect_equal(totalx, utils::tail(amountx, 1))
+    expect_equal(file.size(tmp), amountx)
+    expect_equal(totalx, amountx)
   })
   synchronise(do())
 })
