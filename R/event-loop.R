@@ -93,17 +93,17 @@ el_init <- function(self, private) {
 
 el_add_http <- function(self, private, handle, callback, progress, file,
                         deferred) {
-  self; private; handle; callback; progress; file
+  self; private; handle; callback; progress; outfile <- file
   num_bytes <- 0; total <- NULL
   id <- private$create_task(callback, data = list(handle = handle),
                             deferred = deferred)
   private$ensure_pool()
-  if (!is.null(file) && file.exists(file)) unlink(file)
+  if (!is.null(outfile) && file.exists(outfile)) unlink(outfile)
   multi_add(
     handle = handle,
     pool = private$pool,
     done = function(response) {
-      if (!is.null(file)) {
+      if (!is.null(outfile)) {
         if (is.null(total)) {
           headers <- parse_headers_list(response$headers)
           tot <- as.numeric(headers$`content-length`)
@@ -123,7 +123,7 @@ el_add_http <- function(self, private, handle, callback, progress, file,
       private$tasks[[id]] <- NULL
       task$callback(NULL, response)
     },
-    data = if (!is.null(file)) {
+    data = if (!is.null(outfile)) {
       function(bytes) {
         ## R runs out of connections very quickly, especially because they
         ## are not removed until a gc(). However, calling gc() is
@@ -131,8 +131,8 @@ el_add_http <- function(self, private, handle, callback, progress, file,
         ## solution until we can use our own connections, that are not
         ## so limited in their numbers.
         con <- tryCatch(
-          file(file, open = "ab"),
-          error = function(e) { gc(); file(file, open = "ab") }
+          file(outfile, open = "ab"),
+          error = function(e) { gc(); file(outfile, open = "ab") }
         )
         writeBin(bytes, con)
         close(con)
