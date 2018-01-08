@@ -19,6 +19,7 @@ Suggests:
 Encoding: UTF-8
 Imports:
     assertthat,
+    backports,
     cli,
     crayon,
     curl (>= 3.0),

@@ -3,6 +3,7 @@
 
 .onLoad <- function(libname, pkgname) {
   ## This is the current max
+  backports::import(pkgname, "strrep")
   options(warning.length = 8170)
 }
 
