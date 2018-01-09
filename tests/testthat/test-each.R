@@ -7,6 +7,7 @@ test_that("each", {
     done <- character()
     dx <- when_all(
       .list = lapply(letters[1:10], function(x) {
+        force(x)
         delay(1/1000)$then(function(value) done <<- c(done, x))
       })
     )$
