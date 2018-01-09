@@ -27,4 +27,5 @@ Imports:
     rlang,
     utils,
     uuid
+Remotes: gaborcsardi/curl@fix/trimws
 Roxygen: list(markdown = TRUE)
