@@ -75,7 +75,7 @@ test_that("http progress bars", {
 
     expect_equal(await(dx)$status_code, 200)
     expect_true(file.exists(tmp))
-    expect_equal(file.size(tmp), amountx)
+    expect_equal(file.info(tmp)$size, amountx)
     expect_equal(totalx, amountx)
   })
   synchronise(do())
