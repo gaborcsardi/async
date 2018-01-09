@@ -57,7 +57,7 @@ test_that("synchronization barriers, async_detect", {
   })
 
   afun2 <- async(function(x) {
-    async_detect(list(x, 1), function(.x) await(.x) == 1)
+    async_detect(list(x, 2), function(.x) await(.x) == 1)
   })
 
   expect_error(
