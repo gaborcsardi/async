@@ -27,6 +27,7 @@ async <- function(fun) {
 
   async_fun <- fun
   body(async_fun) <- expr({
+    mget(ls(environment(), all.names = TRUE), environment())
     (!! deferred)$new(
       function(resolve, reject) {
         force(resolve) ; force(reject)
