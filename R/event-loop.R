@@ -298,7 +298,11 @@ call_with_callback <- function(func, callback, deferred) {
   tryCatch(
     withCallingHandlers(
       result <- async_stack_run(deferred, func()),
-      error = function(e) { e$call <- record_stack(); error <<- e; }
+      error = function(e) {
+        e$call <- record_stack(); error <<- e;
+        handler <- getOption("async.error")
+        if (is.function(handler)) handler()
+      }
     ),
     error = identity
   )
