@@ -6,8 +6,8 @@ test_that("tick", {
   do <- async(function() {
     dx <- deferred$new(
       function(resolve, reject, progress) {
-        for (i in 1:10) progress(tick = 1)
-        progress(tick = 1)
+        for (i in 1:10) progress(list(tick = 1))
+        progress(list(tick = 1))
         resolve("done")
       }
     )
@@ -21,10 +21,10 @@ test_that("tick", {
     ticked <- 0
     dx <- deferred$new(
       function(resolve, reject, progress) {
-        for (i in 1:10) progress(tick = 1)
+        for (i in 1:10) progress(list(tick = 1))
         resolve("done")
       },
-      function(tick) ticked <<- ticked + tick
+      function(data) ticked <<- ticked + data$tick
     )
     expect_equal(await(dx), "done")
     expect_equal(ticked, 10)
@@ -38,13 +38,13 @@ test_that("total", {
     totalx <- NULL
     dx <- deferred$new(
       function(resolve, reject, progress) {
-        progress(total = 10)
-        for (i in 1:10) progress(tick = 1)
+        progress(list(total = 10))
+        for (i in 1:10) progress(list(tick = 1))
         resolve("done")
       },
-      function(tick, total) {
-        if (!is.null(total)) totalx <<- total
-        if (!is.null(tick)) ticked <<- ticked + tick
+      function(data) {
+        if (!is.null(data$total)) totalx <<- data$total
+        if (!is.null(data$tick)) ticked <<- ticked + data$tick
       }
     )
     expect_equal(await(dx), "done")
@@ -58,10 +58,10 @@ test_that("ratio", {
     ratiox <- 0
     dx <- deferred$new(
       function(resolve, reject, progress) {
-        for (i in 1:10) progress(ratio = i / 10)
+        for (i in 1:10) progress(list(ratio = i / 10))
         resolve("done")
       },
-      function(ratio) ratiox <<- c(ratiox, ratio)
+      function(data) ratiox <<- c(ratiox, data$ratio)
     )
     expect_equal(await(dx), "done")
     expect_equal(ratiox, (0:10) / 10)
@@ -75,13 +75,13 @@ test_that("amount", {
     totalx  <- 0
     dx <- deferred$new(
       function(resolve, reject, progress) {
-        progress(total = 100)
-        for (i in 1:10) progress(amount = 10)
+        progress(list(total = 100))
+        for (i in 1:10) progress(list(amount = 10))
         resolve("done")
       },
-      function(amount, total) {
-        if (!is.null(total)) totalx <<- total
-        if (!is.null(amount)) amountx <<- amountx + amount
+      function(data) {
+        if (!is.null(data$total)) totalx <<- data$total
+        if (!is.null(data$amount)) amountx <<- amountx + data$amount
       }
     )
     expect_equal(await(dx), "done")

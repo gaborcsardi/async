@@ -113,11 +113,11 @@ el_add_http <- function(self, private, handle, callback, progress, file,
         } else {
           total <- NULL
         }
-        progress(
+        progress(list(
           status_code = response$status_code,
           total = total,
           ratio = 1.0
-        )
+        ))
       }
       task <- private$tasks[[id]]
       private$tasks[[id]] <- NULL
@@ -146,11 +146,11 @@ el_add_http <- function(self, private, handle, callback, progress, file,
           total <- NULL
         }
         num_bytes <<- num_bytes + length(bytes)
-        progress(
+        progress(list(
           total = total,
           amount = length(bytes),
           ratio = if (is.null(total)) NULL else num_bytes / total
-        )
+        ))
       }
     },
     fail = function(error) {

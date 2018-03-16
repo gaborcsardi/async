@@ -65,9 +65,9 @@ test_that("http progress bars", {
     dx <- http_get(
       "https://eu.httpbin.org/image/jpeg",
       file = tmp <- tempfile(),
-      on_progress = function(total, amount, status_code) {
-        if (!is.null(total)) totalx <<- total
-        if (!is.null(amount)) amountx <<- amountx + amount
+      on_progress = function(data) {
+        if (!is.null(data$total)) totalx <<- data$total
+        if (!is.null(data$amount)) amountx <<- amountx + data$amount
       }
     )
 
@@ -95,10 +95,10 @@ test_that("http progress bars & etags", {
       "https://eu.httpbin.org/etag/etag",
       file = tmp <- tempfile(),
       headers = c("If-None-Match" = "etag"),
-      on_progress = function(total, amount, status_code) {
-        if (!is.null(total)) totalx <<- total
-        amountx <<- c(amountx, amount)
-        statusx <<- status_code
+      on_progress = function(data) {
+        if (!is.null(data$total)) totalx <<- data$total
+        amountx <<- c(amountx, data$amount)
+        statusx <<- data$status_code
       }
     )
 
