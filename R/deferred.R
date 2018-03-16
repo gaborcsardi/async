@@ -77,7 +77,7 @@ deferred <- R6Class(
     get_value = function()
       def_get_value(self, private),
     then = function(on_fulfilled = NULL, on_rejected = NULL)
-      async_hide(def_then(self, private, on_fulfilled, on_rejected)),
+      def_then(self, private, on_fulfilled, on_rejected),
     catch = function(on_rejected)
       def_catch(self, private, on_rejected),
     finally = function(on_finally)
@@ -117,9 +117,6 @@ async_def_init <- function(deferred, private, action, on_progress,
 
   private$event_loop <- get_default_event_loop()
   private$parent <- parent
-  if (isTRUE(getOption("async.debug"))) {
-    private$start_stack <- record_stack()
-  }
 
   if (!is.function(action)) {
     action <- as_function(action)

@@ -157,7 +157,6 @@ el_add_http <- function(self, private, handle, callback, progress, file,
       task <- private$tasks[[id]]
       private$tasks[[id]] <- NULL
       error <- make_error(message = error)
-      error$call <- record_stack()
       class(error) <- unique(c("async_rejected", "async_http_error",
                                class(error)))
       task$callback(error, NULL)
@@ -294,23 +293,20 @@ el__update_time <- function(self, private) {
 #' @keywords internal
 
 call_with_callback <- function(func, callback, deferred) {
-  error <- NULL
+  recerror <- NULL
+  result <- NULL
   tryCatch(
     withCallingHandlers(
       result <- async_stack_run(deferred, func()),
       error = function(e) {
-        e$call <- record_stack(); error <<- e;
+        recerror <<- e;
         handler <- getOption("async.error")
         if (is.function(handler)) handler()
       }
     ),
     error = identity
   )
-  if (is.null(error)) {
-    callback(NULL, result)
-  } else {
-    callback(error, NULL)
-  }
+  callback(recerror, result)
 }
 
 async_stack_run <- function(deferred, expr) { deferred; expr }

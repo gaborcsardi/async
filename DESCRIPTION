@@ -21,11 +21,9 @@ Imports:
     assertthat,
     backports,
     cli,
-    crayon,
     curl (>= 3.0),
     R6,
     rlang,
-    utils,
     uuid
 Remotes: gaborcsardi/curl@fix/trimws
 Roxygen: list(markdown = TRUE)
