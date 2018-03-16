@@ -94,7 +94,7 @@ el_init <- function(self, private) {
 el_add_http <- function(self, private, handle, callback, progress, file,
                         deferred) {
   self; private; handle; callback; progress; outfile <- file
-  num_bytes <- 0; total <- NULL
+  num_bytes <- 0; total <- NULL; content <- NULL
   id <- private$create_task(callback, data = list(handle = handle),
                             deferred = deferred)
   private$ensure_pool()
@@ -103,28 +103,25 @@ el_add_http <- function(self, private, handle, callback, progress, file,
     handle = handle,
     pool = private$pool,
     done = function(response) {
-      if (!is.null(outfile)) {
-        if (is.null(total)) {
-          headers <- parse_headers_list(response$headers)
-          tot <- as.numeric(headers$`content-length`)
-          if (!is.null(tot) && length(tot) >= 1 && !is.na(tot[[1]])) {
-            total <<- tot
-          }
-        } else {
-          total <- NULL
+      if (is.null(total)) {
+        headers <- parse_headers_list(response$headers)
+        tot <- as.numeric(headers$`content-length`)
+        if (!is.null(tot) && length(tot) >= 1 && !is.na(tot[[1]])) {
+          total <<- tot
         }
-        progress(list(
-          status_code = response$status_code,
-          total = total,
-          ratio = 1.0
-        ))
       }
+      progress(list(
+        status_code = response$status_code,
+        total = total,
+        ratio = 1.0
+      ))
       task <- private$tasks[[id]]
       private$tasks[[id]] <- NULL
+      response$content <- do.call(c, as.list(content))
       task$callback(NULL, response)
     },
-    data = if (!is.null(outfile)) {
-      function(bytes) {
+    data = function(bytes) {
+      if (!is.null(outfile)) {
         ## R runs out of connections very quickly, especially because they
         ## are not removed until a gc(). However, calling gc() is
         ## expensive, so we only do it if we have to. This is a temporary
@@ -136,22 +133,22 @@ el_add_http <- function(self, private, handle, callback, progress, file,
         )
         writeBin(bytes, con)
         close(con)
-        if (is.null(total)) {
-          headers <- parse_headers_list(handle_data(handle)$headers)
-          tot <- as.numeric(headers$`content-length`)
-          if (!is.null(tot) && length(tot) >= 1 && !is.na(tot[[1]])) {
-            total <<- tot
-          }
-        } else {
-          total <- NULL
-        }
-        num_bytes <<- num_bytes + length(bytes)
-        progress(list(
-          total = total,
-          amount = length(bytes),
-          ratio = if (is.null(total)) NULL else num_bytes / total
-        ))
+      } else {
+        content <<- c(content, list(bytes))
       }
+      if (is.null(total)) {
+        headers <- parse_headers_list(handle_data(handle)$headers)
+        tot <- as.numeric(headers$`content-length`)
+        if (!is.null(tot) && length(tot) >= 1 && !is.na(tot[[1]])) {
+          total <<- tot
+        }
+      }
+      num_bytes <<- num_bytes + length(bytes)
+      progress(list(
+        total = total,
+        amount = length(bytes),
+        ratio = if (is.null(total)) NULL else num_bytes / total
+      ))
     },
     fail = function(error) {
       task <- private$tasks[[id]]
