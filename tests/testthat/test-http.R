@@ -109,3 +109,27 @@ test_that("http progress bars & etags", {
   })
   synchronise(do())
 })
+
+test_that("progress bar for in-memory data", {
+
+  skip_if_offline()
+
+  u1 <- "http://httpbin.org/stream-bytes/2048?chunk_size=1024"
+
+  called <- 0L
+  bytes <- 0L
+  do <- async(function() {
+    dx <- http_get(
+      u1, options = list(buffersize = 1100),
+      on_progress = function(data) {
+        called <<- called + 1L
+        if (length(data$amount)) bytes <<- bytes + data$amount
+      }
+    )
+  })
+
+  ret <- synchronise(do())
+  expect_true(called >= 2)
+  expect_equal(bytes, 2048)
+  expect_equal(length(ret$content), 2048)
+})

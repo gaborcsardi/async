@@ -94,7 +94,7 @@ el_init <- function(self, private) {
 el_add_http <- function(self, private, handle, callback, progress, file,
                         deferred) {
   self; private; handle; callback; progress; outfile <- file
-  num_bytes <- 0; total <- NULL; content <- NULL
+  num_bytes <- 0L; total <- NULL; content <- NULL
   id <- private$create_task(callback, data = list(handle = handle),
                             deferred = deferred)
   private$ensure_pool()
@@ -107,10 +107,11 @@ el_add_http <- function(self, private, handle, callback, progress, file,
         headers <- parse_headers_list(response$headers)
         tot <- as.numeric(headers$`content-length`)
         if (!is.null(tot) && length(tot) >= 1 && !is.na(tot[[1]])) {
-          total <<- tot
+          total <<- as.integer(tot)
         }
       }
       progress(list(
+        event = "done",
         status_code = response$status_code,
         total = total,
         ratio = 1.0
@@ -140,11 +141,12 @@ el_add_http <- function(self, private, handle, callback, progress, file,
         headers <- parse_headers_list(handle_data(handle)$headers)
         tot <- as.numeric(headers$`content-length`)
         if (!is.null(tot) && length(tot) >= 1 && !is.na(tot[[1]])) {
-          total <<- tot
+          total <<- as.integer(tot)
         }
       }
       num_bytes <<- num_bytes + length(bytes)
       progress(list(
+        event = "data",
         total = total,
         amount = length(bytes),
         ratio = if (is.null(total)) NULL else num_bytes / total
