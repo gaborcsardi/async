@@ -1,7 +1,7 @@
 
 #' Repeatedly call task until it return `TRUE`
 #'
-#' @param test Synchronous or asynchronous test function.
+#' @param test Synchronous test function.
 #' @param task Asynchronous function to call repeatedly.
 #' @param ... Arguments to pass to `task`.
 #' @return Deferred value, that is resolved when the iteration is done.
@@ -32,7 +32,7 @@ async_until <- function(test, task, ...) {
 
     xresolve <- function(value) {
       tryCatch(
-        if (await(test())) {
+        if (test()) {
           resolve(value)
         } else {
           task(...)$then(xresolve, xreject)

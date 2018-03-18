@@ -41,7 +41,7 @@ test_that("synchronization barriers, async_constant", {
   })
 
   afun2 <- async(function(x) {
-    await(x) + 42
+    x$then(~ . + 42)
   })
 
   expect_error(
@@ -57,7 +57,7 @@ test_that("synchronization barriers, async_detect", {
   })
 
   afun2 <- async(function(x) {
-    async_detect(list(x, 2), function(.x) await(.x) == 1)
+    async_detect(list(x, 2), function(.x) .x$then(~ . == 1))
   })
 
   expect_error(
@@ -73,7 +73,7 @@ test_that("synchronization barriers, async_every", {
   })
 
   afun2 <- async(function(x) {
-    async_every(list(x, 1), function(.x) await(.x) == 1)
+    async_every(list(x, 1), function(.x) .x$then(~ . == 1))
   })
 
   expect_error(
@@ -90,7 +90,7 @@ test_that("synchronization barriers, async_filter", {
   })
 
   afun2 <- async(function(x) {
-    async_filter(list(x, 1), function(.x) await(.x) == 1)
+    async_filter(list(x, 1), function(.x) .x$then(~ . == 1))
   })
 
   expect_error(
@@ -106,7 +106,7 @@ test_that("synchronization barriers, async_map", {
   })
 
   afun2 <- async(function(x) {
-    async_filter(list(x, 1), function(.x) await(.x) + 1)
+    async_filter(list(x, 1), function(.x) .x$then(~ . + 1))
   })
 
   expect_error(

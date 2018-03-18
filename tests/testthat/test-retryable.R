@@ -10,9 +10,7 @@ test_that("async_retryable", {
       if (i < 5) stop("error") else "OK"
     }
 
-    rf <- async_retryable(f, 5)
-    result <- await(rf())
-    expect_identical(result, "OK")
+    async_retryable(f, 5)()
   })
-  synchronise(do())
+  expect_identical(synchronise(do()), "OK")
 })

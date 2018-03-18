@@ -7,12 +7,13 @@ test_that("async_reflect", {
   safefun <- async_reflect(badfun)
 
   do <- async(function() {
-    result <- await(when_all(safefun(), safefun(), safefun()))
-
-    for (i in 1:3) {
-      expect_s3_class(result[[i]]$error, "error")
-      expect_null(result[[i]]$value)
-    }
+    when_all(safefun(), safefun(), safefun())$
+      then(function(result) {
+        for (i in 1:3) {
+          expect_s3_class(result[[i]]$error, "error")
+          expect_null(result[[i]]$value)
+        }
+      })
   })
   synchronise(do())
 })

@@ -5,9 +5,8 @@ test_that("rejection", {
 
   do <- async(function() {
     dx <- delay(1/10000)$
-      then(function(value) stop("ohno!"))
-
-    expect_error(await(dx), "ohno!")
+      then(~ stop("ohno!"))$
+      catch(~ expect_match(.$message, "ohno!"))
   })
   synchronise(do())
 })
@@ -17,12 +16,13 @@ test_that("error propagates", {
   do <- async(function() {
     called <- FALSE
     dx <- delay(1/10000)$
-      then(function(x) x)$
-      then(function(x) stop("ohno!"))$
+      then(~ .)$
+      then(~ stop("ohno!"))$
       then(function(x) called <<- TRUE)
 
-    expect_error(await(dx, "ohno!"))
-    expect_false(called)
+    dx$
+      catch(~ expect_match(.$message, "ohno!"))$
+      then(function(x) expect_false(called))
   })
   synchronise(do())
 })
@@ -30,12 +30,11 @@ test_that("error propagates", {
 test_that("handled error is not an error any more", {
 
   do <- async(function() {
-    dx <- delay(1/10000)$
+    delay(1/10000)$
       then(function(x) stop("ohno!"))$
-      then(NULL, function(x) "OK")
-
-    expect_silent(await(dx))
-    expect_equal(await(dx), "OK")
+      then(NULL, function(x) "OK")$
+      then(~ expect_equal(., "OK"))$
+      catch(~ stop("not called"))
   })
   synchronise(do())
 })
@@ -47,52 +46,32 @@ test_that("catch", {
       then(~ stop("ooops"))$
       then(~ "not this one")$
       catch(~ "nothing to see here")
-
-    expect_equal(await(dx), "nothing to see here")
   })
-  synchronise(do())
+  expect_equal(
+    synchronise(do()),
+    "nothing to see here"
+  )
 })
 
 test_that("finally", {
+  called <- FALSE
   do <- async(function() {
-    called <- FALSE
-    dx <- delay(1/1000)$
+    delay(1/1000)$
       then(~ .)$
       then(~ stop("oops"))$
       then(~ "not this one")$
       finally(function() called <<- TRUE)
+  })
+  expect_error(synchronise(do()), "oops")
+  expect_true(called)
 
-    expect_error(await(dx), "oops")
-    expect_true(called)
-
-    called <- FALSE
-    dx <- delay(1/1000)$
+  called <- FALSE
+  do <- async(function() {
+    delay(1/1000)$
       then(~ .)$
       then(~ "this one")$
       finally(function() called <<- TRUE)
-
-    expect_equal(await(dx), "this one")
-    expect_true(called)
   })
-  synchronise(do())
-})
-
-test_that("errors from other resolutions are not reported", {
-
-  do <- async(function() {
-    dx1 <- delay(1/10000)$then(~ stop("wrong"))
-    dx2 <- delay(1/10)$then(~ "OK")
-
-    expect_equal(await(dx2), "OK")
-    expect_equal(dx1$get_state(), "rejected")
-    expect_error(await(dx1), "wrong")
-
-    dx1 <- delay(1/10000)$then(~ stop("wrong"))
-    dx2 <- delay(1/10)$then(~ stop("oops"))
-
-    expect_error(await(dx2), "oops")
-    expect_equal(dx1$get_state(), "rejected")
-    expect_error(await(dx1), "wrong")
-  })
-  synchronise(do())
+  expect_equal(synchronise(do()), "this one")
+  expect_true(called)
 })

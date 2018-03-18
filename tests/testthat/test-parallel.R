@@ -11,11 +11,8 @@ test_that("parallel", {
     dx2 <- http_get("https://eu.httpbin.org/get?q=bar")$
       then( ~ rawToChar(.$content))
 
-    await(dx1)
-    await(dx2)
-
-    expect_match(dx1$get_value(), "\"q\": \"foo\"", fixed = TRUE)
-    expect_match(dx2$get_value(), "\"q\": \"bar\"", fixed = TRUE)
+    dx1$then(~ expect_match(., "\"q\": \"foo\"", fixed = TRUE))
+    dx2$then(~ expect_match(., "\"q\": \"bar\"", fixed = TRUE))
   })
   synchronise(do())
 })

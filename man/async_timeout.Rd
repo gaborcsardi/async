@@ -42,4 +42,3 @@ tryCatch(
   error = function(e) paste("Other error:", e$message)
 )
 }
-\concept{async utilities}

@@ -20,15 +20,14 @@ than the specified time period.
 }
 \examples{
 ## Two HEAD requests with 1/2 sec delay between them
+resp <- list()
 afun <- async(function() {
-  resp <- list()
-  dx <- http_head("https://eu.httpbin.org?q=2")$
+  http_head("https://eu.httpbin.org?q=2")$
     then(function(value) resp[[1]] <<- value$status_code)$
     then(function(...) delay(1/2))$
     then(function(...) http_head("https://eu.httpbin.org?q=2"))$
     then(function(value) resp[[2]] <<- value$status_code)
-  await(dx)
-  resp
 })
 synchronise(afun())
+resp
 }

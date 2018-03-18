@@ -17,12 +17,6 @@ get_state_x <- function(x) {
 
 get_state_check_x <- function(x, event_loop) {
   if (is_deferred(x)) {
-    if (!identical(x$get_event_loop(), event_loop)) {
-      err <- make_error(
-        "Cannot await() across synchronization barrier",
-        class = "async_synchronization_barrier_error")
-      stop(err)
-    }
     x$get_state()
   } else {
     "not-deferred"

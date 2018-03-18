@@ -8,14 +8,14 @@ test_that("async_every", {
   )
 
   do <- async(function() {
-    result <- await(async_every(1:10, is_odd))
-    expect_identical(result, FALSE)
+    async_every(1:10, is_odd)$
+      then(~ expect_identical(., FALSE))
 
-    result <- await(async_every(numeric(), is_odd))
-    expect_identical(result, TRUE)
+    async_every(numeric(), is_odd)$
+      then(~ expect_identical(., TRUE))
 
-    result <- await(async_every(1:10 * 2 + 1, is_odd))
-    expect_identical(result, TRUE)
+    async_every(1:10 * 2 + 1, is_odd)$
+      then(~ expect_identical(., TRUE))
   })
   synchronise(do())
 })

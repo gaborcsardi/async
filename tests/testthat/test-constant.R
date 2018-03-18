@@ -5,11 +5,8 @@ test_that("creates a deferred value", {
   do <- async(function() {
     dx <- async_constant()
     expect_true(is_deferred(dx))
-    await(dx)
-
     dx <- async_constant("foobar")
     expect_true(is_deferred(dx))
-    await(dx)
   })
   synchronise(do())
 })
@@ -17,10 +14,10 @@ test_that("creates a deferred value", {
 test_that("resolves to the specified value", {
   do <- async(function() {
     dx <- async_constant()
-    expect_null(await(dx))
+    dx$then(function(x) expect_null(x))
 
     dx <- async_constant("foobar")
-    expect_equal(await(dx), "foobar")
+    dx$then(function(x) expect_equal(x, "foobar"))
   })
   synchronise(do())
 })

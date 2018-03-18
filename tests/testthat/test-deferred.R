@@ -11,44 +11,45 @@ test_that("error if not done yet", {
 
 test_that("rejecting with a deferred", {
   do <- async(function() {
-    x <- deferred$new(function(resolve, reject) {
+    deferred$new(function(resolve, reject) {
       reject(delay(1/1000)$then(function(value) "OK"))
     })
-
-    expect_equal(await(x), "OK")
   })
-  synchronise(do())
+  res <- synchronise(do())
+  expect_equal(res, "OK")
 })
 
 test_that("action in formula notation", {
   do <- async(function() {
-    dx <- deferred$new(~ resolve(TRUE))
-    expect_true(await(dx))
+    dx <- deferred$new(~ resolve(TRUE))$
+      then(~ expect_true(.))
 
-    dx <- deferred$new(~ reject("oops"))
-    expect_error(await(dx), "oops")
+    dx <- deferred$new(~ reject("oops"))$
+      then(~ expect_error(., "oops"))
 
-    dx <- deferred$new(~ if (TRUE) resolve(TRUE) else reject("oops"))
-    expect_true(await(dx))
+    dx <- deferred$new(~ if (TRUE) resolve(TRUE) else reject("oops"))$
+      then(~ expect_true(.))
 
-    dx <- deferred$new(~ if (FALSE) resolve(TRUE) else reject("oops"))
-    expect_error(await(dx), "oops")
+    dx <- deferred$new(~ if (FALSE) resolve(TRUE) else reject("oops"))$
+      catch(~ expect_match(., "oops"))
   })
   synchronise(do())
 })
 
 test_that("on_fulfilled / on_rejected without arguments", {
   do <- async(function() {
-    dx <- deferred$new(~resolve(TRUE))$then(function() "OK")
-    expect_equal(await(dx), "OK")
-
-    dx <- deferred$new(~resolve(TRUE))$then(function() stop("oops"))
-    expect_error(await(dx), "oops")
+    dx <- deferred$new(~resolve(TRUE))$
+      then(~ "OK")$
+      then(~ expect_equal(., "OK"))
 
     dx <- deferred$new(~resolve(TRUE))$
-      then(function() stop("ooops"))$
-      catch(function() "aaah")
-    expect_equal(await(dx), "aaah")
+      then(~ stop("oops"))$
+      catch(~ expect_equal(., "oops"))
+
+    dx <- deferred$new(~resolve(TRUE))$
+      then(~ stop("ooops"))$
+      catch(~ "aaah")$
+      then(~ expect_equal(., "aaah"))
   })
   synchronise(do())
 })

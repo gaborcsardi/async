@@ -10,23 +10,23 @@ test_that("async_detect", {
   })
 
   test <- async(function(limit) {
-    result <- await(async_detect(1:10, is_odd, .limit = limit))
-    expect_true(result %in% c(1L, 3L, 5L, 7L, 9L))
+    async_detect(1:10, is_odd, .limit = limit)$
+      then(~ expect_true(. %in% c(1L, 3L, 5L, 7L, 9L)))
 
-    result <- await(async_detect(2:10, is_odd, .limit = limit))
-    expect_true(result %in% c(3L, 5L, 7L, 9L))
+    async_detect(2:10, is_odd, .limit = limit)$
+      then(~ expect_true(. %in% c(3L, 5L, 7L, 9L)))
 
-    result <- await(async_detect(2, is_odd, .limit = limit))
-    expect_null(result)
+    async_detect(2, is_odd, .limit = limit)$
+      then(~ expect_null(.))
 
-    result <- await(async_detect(c(1:10 * 2L, 43L), is_odd, .limit = limit))
-    expect_identical(result, 43L)
+    async_detect(c(1:10 * 2L, 43L), is_odd, .limit = limit)$
+      then(~ expect_identical(., 43L))
 
-    result <- await(async_detect(numeric(), is_odd, .limit = limit))
-    expect_null(result)
+    async_detect(numeric(), is_odd, .limit = limit)$
+      then(~ expect_null(.))
 
-    result <- await(async_detect(1:10 * 2, is_odd, .limit = limit))
-    expect_null(result)
+    async_detect(1:10 * 2, is_odd, .limit = limit)$
+      then(~ expect_null(.))
   })
 
   lapply(c(Inf, 1, 2, 3, 5, 10, 20), function(x) synchronise(test(x)))

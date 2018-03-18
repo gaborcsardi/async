@@ -7,7 +7,7 @@
 async_until(test, task, ...)
 }
 \arguments{
-\item{test}{Synchronous or asynchronous test function.}
+\item{test}{Synchronous test function.}
 
 \item{task}{Asynchronous function to call repeatedly.}
 
@@ -37,4 +37,3 @@ Other async control flow: \code{\link{async_reflect}},
   \code{\link{async_retryable}}, \code{\link{async_retry}},
   \code{\link{async_sequence}}, \code{\link{async_whilst}}
 }
-\concept{async control flow}

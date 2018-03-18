@@ -304,7 +304,6 @@ def__progress <- function(self, private, data) {
 #' is_deferred(1:10)
 #' afun <- async(function() {
 #'   print(is_deferred(dx <- delay(1/100)))
-#'   print(is_deferred(await(dx)))
 #' })
 #' synchronise(afun())
 

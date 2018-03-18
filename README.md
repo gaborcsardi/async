@@ -34,7 +34,6 @@ An async function is special:
 - it can stop its execution to wait for results from other async
   functions.
 - it can create deferred values, that represent asynchronous computation.
-- it can wait on deferred values, using the `await()` functions.
 - it returns a deferred value.
 - it can call other asynchronous functions.
 
@@ -103,21 +102,21 @@ synchronise(afun())
 #>     get_event_loop: function () 
 #>     get_state: function () 
 #>     get_value: function () 
-#>     initialize: function (action, on_progress = NULL, on_cancel = NULL, longstack = NULL) 
+#>     initialize: function (action, on_progress = NULL, on_cancel = NULL, parent = NULL) 
 #>     then: function (on_fulfilled = NULL, on_rejected = NULL) 
 #>   Private:
 #>     cancel_callback: NULL
 #>     cancelled: FALSE
 #>     event_loop: event_loop, R6
-#>     id: NULL
 #>     make_error_object: function (err) 
 #>     on_fulfilled: list
 #>     on_rejected: list
-#>     progress: function (..., tick = NULL, total = NULL, ratio = NULL, amount = NULL) 
+#>     parent: deferred, R6
+#>     progress: function (data) 
 #>     progress_callback: NULL
 #>     reject: function (reason) 
 #>     resolve: function (value) 
-#>     stack: list
+#>     start_stack: NULL
 #>     state: pending
 #>     value: NULL
 ```
@@ -133,17 +132,17 @@ operations on the resolved value.
 
 ## Synchronization
 
-The `await()` function allows mixing synchronous and asynchronous code.
-It can be called on a deferred value, and it stops the synchronous
-computation until the deferred value is resolved (i.e. fulfilled or
-rejected). Importantly, `await()` runs an event loop that is working
-towards he resolution of all deferred values. `await()` calls don't lead
-deadlocks.
+The `synchroniset()` function allows mixing synchronous and asynchronous
+code. It can be called on an expression that creates deferred values,
+and it stops the synchronous until all deferred values are resolved
+(i.e. fulfilled or rejected). Importantly, `synchronise()` creates a new
+event loop and works towards he resolution of all deferred values
+created within this event loop.
 
 In a typical application, a function is implemented asynchronously, and
 then used synchronously by the interactive user, or another piece of
-synchronous code, via `await()` calls. The following example makes three
-HTTP requests in parallel:
+synchronous code, via `synchronise()` calls. The following example makes
+three HTTP requests in parallel:
 
 
 ```r
@@ -154,7 +153,7 @@ afun <- async(function() {
   r1 <- http_status("https://httpbin.org/status/403")
   r2 <- http_status("https://httpbin.org/status/404")
   r3 <- http_status("https://httpbin.org/status/200")
-  await_all(r1, r2, r3)
+  when_all(r1, r2, r3)
 })
 synchronise(afun())
 ```
@@ -169,22 +168,6 @@ synchronise(afun())
 #> [[3]]
 #> [1] 200
 ```
-
-`await_all()` waits until all supplied deferred values are resolved.
-Note that
-```
-await_all(r1, r2, r3)
-```
-is completely equivalent to
-```
-await(r1)
-await(r2)
-await(r3)
-```
-since `await()` works towards the resolution of all deferreds, not just
-the specified ones. `await_all()` is easier to use programmatically if you
-have a list of deferred values. `await_any()` waits until at least one
-deferred value is resolved.
 
 ## Error handling
 
@@ -201,7 +184,7 @@ afun <- async(function() {
     then(function() "web server is up", function() "web server is down")
   u2 <- http_get("non-existing-url.for-sure")$
     then(function() "web server is up", function() "web server is down")
-  await_all(u1, u2)
+  when_all(u1, u2)
 })
 synchronise(afun())
 ```
@@ -219,7 +202,7 @@ equivalent to `then()` with its first argument set to `NULL`.
 
 Errors can also be handled synchronously. If an error is not handled
 asynchronously in a `then()` or `catch()` method, then the deferred value
-will throw an error when it is `await()`-ed. This can be caught via
+will throw an error when it is `synchronise()`-ed. This can be caught via
 `tryCatch()`.
 
 ## Async Iterators
@@ -282,25 +265,23 @@ revdep_authors <- async(function() {
       then(~ .$Author)
   }
 
-  gx <- http_get("https://crandb.r-pkg.org/-/topdeps/devel")$
+  http_get("https://crandb.r-pkg.org/-/topdeps/devel")$
     then(~ fromJSON(rawToChar(.$content)))$
     then(~ names(unlist(.)))$
     then(~ async_map(., get_author))
-
-  await(gx)
 })
 synchronise(revdep_authors())[1:3]
 ```
 
 ```
 #> [[1]]
-#> [1] "Yihui Xie [aut, cre],\nAdam Vogt [ctb],\nAlastair Andrew [ctb],\nAlex Zvoleff [ctb],\nAndre Simon [ctb] (the CSS files under inst/themes/ were derived from\nthe Highlight package http://www.andre-simon.de),\nAron Atkins [ctb],\nAaron Wolen [ctb],\nAshley Manton [ctb],\nBen Baumer [ctb],\nBrian Diggs [ctb],\nCassio Pereira [ctb],\nDavid Robinson [ctb],\nDonald Arseneau [ctb, cph] (the framed package at inst/misc/framed.sty),\nDoug Hemken [ctb],\nDuncan Murdoch [ctb],\nFabian Hirschmann [ctb],\nFitch Simeon [ctb],\nForest Fang [ctb],\nFrank E Harrell Jr [ctb] (the Sweavel package at inst/misc/Sweavel.sty),\nGarrick Aden-Buie [ctb],\nGregoire Detrez [ctb],\nHadley Wickham [ctb],\nHeewon Jeon [ctb],\nHenrik Bengtsson [ctb],\nHiroaki Yutani [ctb],\nIan Lyttle [ctb],\nHodges Daniel [ctb],\nJake Burkhead [ctb],\nJames Manton [ctb],\nJared Lander [ctb],\nJason Punyon [ctb],\nJavier Luraschi [ctb],\nJeff Arnold [ctb],\nJeremy Ashkenas [ctb, cph] (the CSS file at\ninst/misc/docco-classic.css),\nJeremy Stephens [ctb],\nJim Hester [ctb],\nJoe Cheng [ctb],\nJohannes Ranke [ctb],\nJohn Honaker [ctb],\nJohn Muschelli [ctb],\nJonathan Keane [ctb],\nJJ Allaire [ctb],\nJohan Toloe [ctb],\nJoseph Larmarange [ctb],\nJulien Barnier [ctb],\nKaiyin Zhong [ctb],\nKamil Slowikowski [ctb],\nKarl Forner [ctb],\nKevin K. Smith [ctb],\nKirill Mueller [ctb],\nKohske Takahashi [ctb],\nMichael Friendly [ctb],\nMichal Bojanowski [ctb],\nMichel Kuhlmann [ctb],\nNacho Caballero [ctb],\nNick Salkowski [ctb],\nNoam Ross [ctb],\nQiang Li [ctb],\nRamnath Vaidyanathan [ctb],\nRichard Cotton [ctb],\nRobert Krzyzanowski [ctb],\nRomain Francois [ctb],\nScott Kostyshak [ctb],\nSebastian Meyer [ctb],\nSietse Brouwer [ctb],\nSimon de Bernard [ctb],\nSylvain Rousseau [ctb],\nTaiyun Wei [ctb],\nThibaut Assus [ctb],\nThibaut Lamadon [ctb],\nThomas Leeper [ctb],\nTom Torsney-Weir [ctb],\nTrevor Davis [ctb],\nViktoras Veitas [ctb],\nWeicheng Zhu [ctb],\nWush Wu [ctb],\nZachary Foster [ctb]"
+#> [1] "Yihui Xie [aut, cre] (<https://orcid.org/0000-0003-0645-5666>),\nAdam Vogt [ctb],\nAlastair Andrew [ctb],\nAlex Zvoleff [ctb],\nAndre Simon [ctb] (the CSS files under inst/themes/ were derived from\nthe Highlight package http://www.andre-simon.de),\nAron Atkins [ctb],\nAaron Wolen [ctb],\nAshley Manton [ctb],\nBen Baumer [ctb],\nBrian Diggs [ctb],\nCassio Pereira [ctb],\nChristophe Dervieux [ctb],\nDavid Hugh-Jones [ctb],\nDavid Robinson [ctb],\nDonald Arseneau [ctb, cph] (the framed package at inst/misc/framed.sty),\nDoug Hemken [ctb],\nDuncan Murdoch [ctb],\nElio Campitelli [ctb],\nFabian Hirschmann [ctb],\nFitch Simeon [ctb],\nForest Fang [ctb],\nFrank E Harrell Jr [ctb] (the Sweavel package at inst/misc/Sweavel.sty),\nGarrick Aden-Buie [ctb],\nGregoire Detrez [ctb],\nHadley Wickham [ctb],\nHeewon Jeon [ctb],\nHenrik Bengtsson [ctb],\nHiroaki Yutani [ctb],\nIan Lyttle [ctb],\nHodges Daniel [ctb],\nJake Burkhead [ctb],\nJames Manton [ctb],\nJared Lander [ctb],\nJason Punyon [ctb],\nJavier Luraschi [ctb],\nJeff Arnold [ctb],\nJenny Bryan [ctb],\nJeremy Ashkenas [ctb, cph] (the CSS file at\ninst/misc/docco-classic.css),\nJeremy Stephens [ctb],\nJim Hester [ctb],\nJoe Cheng [ctb],\nJohannes Ranke [ctb],\nJohn Honaker [ctb],\nJohn Muschelli [ctb],\nJonathan Keane [ctb],\nJJ Allaire [ctb],\nJohan Toloe [ctb],\nJonathan Sidi [ctb],\nJoseph Larmarange [ctb],\nJulien Barnier [ctb],\nKaiyin Zhong [ctb],\nKamil Slowikowski [ctb],\nKarl Forner [ctb],\nKevin K. Smith [ctb],\nKirill Mueller [ctb],\nKohske Takahashi [ctb],\nMartin Modrák [ctb],\nMichael Chirico [ctb],\nMichael Friendly [ctb],\nMichal Bojanowski [ctb],\nMichel Kuhlmann [ctb],\nNacho Caballero [ctb],\nNick Salkowski [ctb],\nNoam Ross [ctb],\nObada Mahdi [ctb],\nQiang Li [ctb],\nRamnath Vaidyanathan [ctb],\nRichard Cotton [ctb],\nRobert Krzyzanowski [ctb],\nRomain Francois [ctb],\nRuaridh Williamson [ctb],\nScott Kostyshak [ctb],\nSebastian Meyer [ctb],\nSietse Brouwer [ctb],\nSimon de Bernard [ctb],\nSylvain Rousseau [ctb],\nTaiyun Wei [ctb],\nThibaut Assus [ctb],\nThibaut Lamadon [ctb],\nThomas Leeper [ctb],\nTom Torsney-Weir [ctb],\nTrevor Davis [ctb],\nViktoras Veitas [ctb],\nWeicheng Zhu [ctb],\nWush Wu [ctb],\nZachary Foster [ctb]"
 #> 
 #> [[2]]
-#> [1] "Hadley Wickham [aut, cre],\nRStudio [cph]"
+#> [1] "Hadley Wickham [aut, cre],\nRStudio [cph, fnd],\nR Core team [ctb] (Implementation of utils::recover())"
 #> 
 #> [[3]]
-#> [1] "JJ Allaire [aut, cre],\nJoe Cheng [aut],\nYihui Xie [aut],\nJonathan McPherson [aut],\nWinston Chang [aut],\nJeff Allen [aut],\nHadley Wickham [aut],\nAron Atkins [aut],\nRob Hyndman [aut],\nRuben Arslan [aut],\nRStudio, Inc. [cph],\njQuery Foundation [cph] (jQuery library),\njQuery contributors [ctb, cph] (jQuery library; authors listed in\ninst/rmd/h/jquery-AUTHORS.txt),\njQuery UI contributors [ctb, cph] (jQuery UI library; authors listed in\ninst/rmd/h/jqueryui-AUTHORS.txt),\nMark Otto [ctb] (Bootstrap library),\nJacob Thornton [ctb] (Bootstrap library),\nBootstrap contributors [ctb] (Bootstrap library),\nTwitter, Inc [cph] (Bootstrap library),\nAlexander Farkas [ctb, cph] (html5shiv library),\nScott Jehl [ctb, cph] (Respond.js library),\nIvan Sagalaev [ctb, cph] (highlight.js library),\nGreg Franko [ctb, cph] (tocify library),\nEli Grey [ctb, cph] (FileSaver library),\nJohn MacFarlane [ctb, cph] (Pandoc templates),\nGoogle, Inc. [ctb, cph] (ioslides library),\nDave Raggett [ctb] (slidy library),\nW3C [cph] (slidy library),\nDave Gandy [ctb, cph] (Font-Awesome),\nBen Sperry [ctb] (Ionicons),\nDrifty [cph] (Ionicons),\nAidan Lister [ctb, cph] (jQuery StickyTabs)"
+#> [1] "JJ Allaire [aut],\nYihui Xie [aut, cre] (<https://orcid.org/0000-0003-0645-5666>),\nJonathan McPherson [aut],\nJavier Luraschi [aut],\nKevin Ushey [aut],\nAron Atkins [aut],\nHadley Wickham [aut],\nJoe Cheng [aut],\nWinston Chang [aut],\nJeff Allen [ctb],\nRoy Storey [ctb],\nRob Hyndman [ctb],\nRuben Arslan [ctb],\nRStudio, Inc. [cph],\njQuery Foundation [cph] (jQuery library),\njQuery contributors [ctb, cph] (jQuery library; authors listed in\ninst/rmd/h/jquery-AUTHORS.txt),\njQuery UI contributors [ctb, cph] (jQuery UI library; authors listed in\ninst/rmd/h/jqueryui-AUTHORS.txt),\nMark Otto [ctb] (Bootstrap library),\nJacob Thornton [ctb] (Bootstrap library),\nBootstrap contributors [ctb] (Bootstrap library),\nTwitter, Inc [cph] (Bootstrap library),\nAlexander Farkas [ctb, cph] (html5shiv library),\nScott Jehl [ctb, cph] (Respond.js library),\nIvan Sagalaev [ctb, cph] (highlight.js library),\nGreg Franko [ctb, cph] (tocify library),\nJohn MacFarlane [ctb, cph] (Pandoc templates),\nGoogle, Inc. [ctb, cph] (ioslides library),\nDave Raggett [ctb] (slidy library),\nW3C [cph] (slidy library),\nDave Gandy [ctb, cph] (Font-Awesome),\nBen Sperry [ctb] (Ionicons),\nDrifty [cph] (Ionicons),\nAidan Lister [ctb, cph] (jQuery StickyTabs)"
 ```
 
 ### Checking URLs
