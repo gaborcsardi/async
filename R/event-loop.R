@@ -89,39 +89,14 @@ el_init <- function(self, private) {
   invisible(self)
 }
 
-el_add_http <- function(self, private, handle, callback, progress, file,
-                        deferred) {
-
-  self; private; handle; callback; progress; file; deferred
-  func  <- function() {
-    curl_add_http(self, private, handle, callback, progress, file,
-                  deferred, id)
-  }
-  id <- private$create_task(
-    callback = function(err, res) {
-      if (!is.null(err)) {
-        callback(err)
-      } else {
-        ## We re-create the task with the same ID
-        private$create_task(callback, list(handle = handle), deferred,
-                            id = id)
-      }
-    },
-    data = list(func = func),
-    deferred = deferred)
-
-  private$next_ticks <- c(private$next_ticks, id)
-
-  id
-}
-
 #' @importFrom curl multi_add parse_headers_list handle_data
 
-curl_add_http <- function(self, private, handle, callback, progress, file,
-                          deferred, id) {
-  self; private; handle; callback; progress; outfile <- file; id
+el_add_http <- function(self, private, handle, callback, progress, file,
+                        deferred) {
+  self; private; handle; callback; progress; outfile <- file
   num_bytes <- 0L; total <- NULL; content <- NULL
 
+  id  <- private$create_task(callback, list(handle = handle), deferred)
   private$ensure_pool()
   if (!is.null(outfile) && file.exists(outfile)) unlink(outfile)
   multi_add(

@@ -135,7 +135,10 @@ async_def_init <- function(deferred, private, action, on_progress,
     args$progress <- private$progress
   }
 
-  do.call(action, args)
+  private$event_loop$add_next_tick(
+    function() do.call(action, args),
+    function(err, res) if (!is.null(err)) stop(err),
+    deferred = deferred)
 
   invisible(deferred)
 }
