@@ -135,9 +135,7 @@ async_def_init <- function(deferred, private, action, on_progress,
     args$progress <- private$progress
   }
 
-  ## We do not check for errors here. Instead the error is returned
-  ## synchronously.
-  async_stack_run(deferred, do.call(action, args))
+  do.call(action, args)
 
   invisible(deferred)
 }

@@ -322,7 +322,7 @@ call_with_callback <- function(func, callback, deferred) {
   result <- NULL
   tryCatch(
     withCallingHandlers(
-      result <- async_stack_run(deferred, func()),
+      result <- func(),
       error = function(e) {
         recerror <<- e;
         handler <- getOption("async.error")
@@ -334,4 +334,3 @@ call_with_callback <- function(func, callback, deferred) {
   callback(recerror, result)
 }
 
-async_stack_run <- function(deferred, expr) { deferred; expr }
