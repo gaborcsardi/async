@@ -59,8 +59,8 @@ event_loop <- R6Class(
   ),
 
   private = list(
-    create_task = function(callback, deferred, ...)
-      el__create_task(self, private, callback, deferred, ...),
+    create_task = function(callback, deferred, ..., id =  NULL)
+      el__create_task(self, private, callback, deferred, ..., id = id),
     ensure_pool = function(...)
       el__ensure_pool(self, private, ...),
     get_poll_timeout = function()
@@ -89,14 +89,39 @@ el_init <- function(self, private) {
   invisible(self)
 }
 
-#' @importFrom curl multi_add parse_headers_list handle_data
-
 el_add_http <- function(self, private, handle, callback, progress, file,
                         deferred) {
-  self; private; handle; callback; progress; outfile <- file
+
+  self; private; handle; callback; progress; file; deferred
+  func  <- function() {
+    curl_add_http(self, private, handle, callback, progress, file,
+                  deferred, id)
+  }
+  id <- private$create_task(
+    callback = function(err, res) {
+      if (!is.null(err)) {
+        callback(err)
+      } else {
+        ## We re-create the task with the same ID
+        private$create_task(callback, list(handle = handle), deferred,
+                            id = id)
+      }
+    },
+    data = list(func = func),
+    deferred = deferred)
+
+  private$next_ticks <- c(private$next_ticks, id)
+
+  id
+}
+
+#' @importFrom curl multi_add parse_headers_list handle_data
+
+curl_add_http <- function(self, private, handle, callback, progress, file,
+                          deferred, id) {
+  self; private; handle; callback; progress; outfile <- file; id
   num_bytes <- 0L; total <- NULL; content <- NULL
-  id <- private$create_task(callback, data = list(handle = handle),
-                            deferred = deferred)
+
   private$ensure_pool()
   if (!is.null(outfile) && file.exists(outfile)) unlink(outfile)
   multi_add(
@@ -235,8 +260,9 @@ el__run_pending <- function(self, private) {
 
 #' @importFrom uuid UUIDgenerate
 
-el__create_task <- function(self, private, callback, data, deferred, ...) {
-  id <- UUIDgenerate()
+el__create_task <- function(self, private, callback, data, deferred, ...,
+                            id) {
+  id <- id %||% UUIDgenerate()
   private$tasks[[id]] <- list(
     id = id,
     callback = callback,
