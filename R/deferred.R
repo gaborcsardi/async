@@ -69,9 +69,8 @@ NULL
 deferred <- R6Class(
   "deferred",
   public = list(
-    initialize = function(action, on_progress = NULL, on_cancel = NULL,
-                          parent = NULL)
-      async_def_init(self, private, action, on_progress, on_cancel, parent),
+    initialize = function(action, on_progress = NULL, on_cancel = NULL)
+      async_def_init(self, private, action, on_progress, on_cancel),
     get_state = function()
       private$state,
     get_value = function()
@@ -98,7 +97,7 @@ deferred <- R6Class(
     cancel_callback = NULL,
     cancelled = FALSE,
     start_stack = NULL,
-    parent = NULL,
+    dead_end = FALSE,
 
     resolve = function(value)
       def__resolve(self, private, value),
@@ -113,10 +112,9 @@ deferred <- R6Class(
 )
 
 async_def_init <- function(deferred, private, action, on_progress,
-                           on_cancel, parent) {
+                           on_cancel) {
 
   private$event_loop <- get_default_event_loop()
-  private$parent <- parent
 
   if (!is.function(action)) {
     action <- as_function(action)
@@ -137,8 +135,7 @@ async_def_init <- function(deferred, private, action, on_progress,
 
   private$event_loop$add_next_tick(
     function() do.call(action, args),
-    function(err, res) if (!is.null(err)) stop(err),
-    deferred = deferred)
+    function(err, res) if (!is.null(err)) stop(err))
 
   invisible(deferred)
 }
@@ -182,19 +179,16 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
   on_fulfilled <- if (!is.null(on_fulfilled)) as_function(on_fulfilled)
   on_rejected  <- if (!is.null(on_rejected))  as_function(on_rejected)
 
-  deferred$new(parent = self, function(resolve, reject) {
+  deferred$new(function(resolve, reject) {
     force(resolve)
     force(reject)
-
-    myself <- environment(resolve)$self
 
     handle <- function(func) {
       force(func)
       function(value) {
         private$event_loop$add_next_tick(
           make_then_function(func, value),
-          function(err, res) if (is.null(err)) resolve(res) else reject(err),
-          deferred = myself
+          function(err, res) if (is.null(err)) resolve(res) else reject(err)
         )
       }
     }

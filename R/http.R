@@ -83,8 +83,7 @@ make_deferred_http <- function(handle, file, on_progress) {
         handle,
         function(err, res) if (is.null(err)) resolve(res) else reject(err),
         progress,
-        file,
-        deferred = environment(resolve)$self
+        file
       )
     },
     on_progress = on_progress,

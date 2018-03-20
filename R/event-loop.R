@@ -46,21 +46,20 @@ event_loop <- R6Class(
     initialize = function()
       el_init(self, private),
 
-    add_http = function(handle, callback, file = NULL, progress = NULL,
-                        deferred)
-      el_add_http(self, private, handle, callback, file, progress, deferred),
-    add_delayed = function(delay, func, callback, deferred)
-      el_add_delayed(self, private, delay, func, callback, deferred),
-    add_next_tick = function(func, callback, deferred)
-      el_add_next_tick(self, private, func, callback, deferred),
+    add_http = function(handle, callback, file = NULL, progress = NULL)
+      el_add_http(self, private, handle, callback, file, progress),
+    add_delayed = function(delay, func, callback)
+      el_add_delayed(self, private, delay, func, callback),
+    add_next_tick = function(func, callback)
+      el_add_next_tick(self, private, func, callback),
 
     run = function(mode = c("default", "nowait", "once"))
       el_run(self, private, mode = match.arg(mode))
   ),
 
   private = list(
-    create_task = function(callback, deferred, ..., id =  NULL)
-      el__create_task(self, private, callback, deferred, ..., id = id),
+    create_task = function(callback, ..., id =  NULL)
+      el__create_task(self, private, callback, ..., id = id),
     ensure_pool = function(...)
       el__ensure_pool(self, private, ...),
     get_poll_timeout = function()
@@ -91,12 +90,11 @@ el_init <- function(self, private) {
 
 #' @importFrom curl multi_add parse_headers_list handle_data
 
-el_add_http <- function(self, private, handle, callback, progress, file,
-                        deferred) {
+el_add_http <- function(self, private, handle, callback, progress, file) {
   self; private; handle; callback; progress; outfile <- file
   num_bytes <- 0L; total <- NULL; content <- NULL
 
-  id  <- private$create_task(callback, list(handle = handle), deferred)
+  id  <- private$create_task(callback, list(handle = handle))
   private$ensure_pool()
   if (!is.null(outfile) && file.exists(outfile)) unlink(outfile)
   multi_add(
@@ -164,21 +162,19 @@ el_add_http <- function(self, private, handle, callback, progress, file,
   id
 }
 
-el_add_delayed <- function(self, private, delay, func, callback, deferred) {
+el_add_delayed <- function(self, private, delay, func, callback) {
   force(self); force(private); force(delay); force(func); force(callback)
   id <- private$create_task(
     callback,
-    data = list(delay = delay, func = func),
-    deferred = deferred
+    data = list(delay = delay, func = func)
   )
   private$timers[id] <- Sys.time() + as.difftime(delay, units = "secs")
   id
 }
 
-el_add_next_tick <- function(self, private, func, callback, deferred) {
+el_add_next_tick <- function(self, private, func, callback) {
   force(self) ; force(private) ; force(callback)
-  id <- private$create_task(callback, data = list(func = func),
-                            deferred = deferred)
+  id <- private$create_task(callback, data = list(func = func))
   private$next_ticks <- c(private$next_ticks, id)
 }
 
@@ -227,7 +223,7 @@ el__run_pending <- function(self, private) {
   for (id in next_ticks) {
     task <- private$tasks[[id]]
     private$tasks[[id]] <- NULL
-    call_with_callback(task$data$func, task$callback, task$deferred)
+    call_with_callback(task$data$func, task$callback)
   }
 
   length(next_ticks) > 0
@@ -235,13 +231,11 @@ el__run_pending <- function(self, private) {
 
 #' @importFrom uuid UUIDgenerate
 
-el__create_task <- function(self, private, callback, data, deferred, ...,
-                            id) {
+el__create_task <- function(self, private, callback, data, ..., id) {
   id <- id %||% UUIDgenerate()
   private$tasks[[id]] <- list(
     id = id,
     callback = callback,
-    deferred = deferred,
     data = data,
     error = NULL,
     result = NULL
@@ -266,7 +260,7 @@ el__run_timers <- function(self, private) {
     task <- private$tasks[[id]]
     private$tasks[[id]] <- NULL
     private$timers <- private$timers[setdiff(names(private$timers), id)]
-    call_with_callback(task$data$func, task$callback, task$deferred)
+    call_with_callback(task$data$func, task$callback)
   }
 }
 
@@ -292,7 +286,7 @@ el__update_time <- function(self, private) {
 #'
 #' @keywords internal
 
-call_with_callback <- function(func, callback, deferred) {
+call_with_callback <- function(func, callback) {
   recerror <- NULL
   result <- NULL
   tryCatch(
