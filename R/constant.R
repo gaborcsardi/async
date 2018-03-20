@@ -17,5 +17,13 @@
 
 async_constant <- function(value = NULL) {
   force(value)
-  deferred$new(function(resolve, reject) resolve(value))
+  deferred$new(function(resolve, reject) {
+    force(resolve)
+    force(reject)
+    get_default_event_loop()$add_next_tick(
+      function() { },
+      function(err, res) if (is.null(err)) resolve(value) else reject(err),
+      deferred = environment(resolve)$self
+    )
+  })
 }
