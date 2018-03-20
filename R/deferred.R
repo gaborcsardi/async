@@ -69,8 +69,9 @@ NULL
 deferred <- R6Class(
   "deferred",
   public = list(
-    initialize = function(action, on_progress = NULL, on_cancel = NULL)
-      async_def_init(self, private, action, on_progress, on_cancel),
+    initialize = function(action, on_progress = NULL, on_cancel = NULL,
+                          lazy = TRUE)
+      async_def_init(self, private, action, on_progress, on_cancel, lazy),
     get_state = function()
       private$state,
     get_value = function()
@@ -112,7 +113,7 @@ deferred <- R6Class(
 )
 
 async_def_init <- function(deferred, private, action, on_progress,
-                           on_cancel) {
+                           on_cancel, lazy) {
 
   private$event_loop <- get_default_event_loop()
 
@@ -133,9 +134,14 @@ async_def_init <- function(deferred, private, action, on_progress,
     args$progress <- private$progress
   }
 
-  private$event_loop$add_next_tick(
-    function() do.call(action, args),
-    function(err, res) if (!is.null(err)) stop(err))
+  if (lazy) {
+    private$event_loop$add_next_tick(
+      function() do.call(action, args),
+      function(err, res) if (!is.null(err)) stop(err))
+
+  } else {
+    do.call(action, args)
+  }
 
   invisible(deferred)
 }
@@ -179,7 +185,7 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
   on_fulfilled <- if (!is.null(on_fulfilled)) as_function(on_fulfilled)
   on_rejected  <- if (!is.null(on_rejected))  as_function(on_rejected)
 
-  deferred$new(function(resolve, reject) {
+  deferred$new(lazy = FALSE, function(resolve, reject) {
     force(resolve)
     force(reject)
 
