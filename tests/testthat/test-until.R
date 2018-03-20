@@ -33,6 +33,7 @@ test_that("async_until is always called once", {
 
 test_that("test function throws", {
 
+  called  <- FALSE
   expect_error(
     synchronise(async_until(
       function() stop("doh"),
