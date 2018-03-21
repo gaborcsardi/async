@@ -2,16 +2,6 @@
 async_env <- new.env(parent = emptyenv())
 async_env$loops <- list()
 
-#' Default event loop of the R session.
-#'
-#' This event loop is created when the `async` package is loaded, and
-#' all asyncronous constructs use this event loop by default.
-#'
-#' @return The default event loop of the R session.
-#'
-#' @seealso [event_loop]
-#' @keywords internal
-
 get_default_event_loop <- function() {
   num_loops <- length(async_env$loops)
   if (num_loops == 0) {

@@ -4,7 +4,7 @@
 \alias{async_detect}
 \title{Find the value of a match, asynchronously}
 \usage{
-async_detect(.x, .p, ..., .limit = Inf)
+async_detect(.x, .p, ..., .limit = Inf, cancel = TRUE)
 }
 \arguments{
 \item{.x}{A list or atomic vector.}
@@ -15,6 +15,10 @@ async_detect(.x, .p, ..., .limit = Inf)
 
 \item{.limit}{Number of elements to process simulateneously.
 If it is 1, then the predicate is applied sequentially.}
+
+\item{cancel}{Whether to cancel the deferred computations that are
+not needed to finish \code{async_detect()}, including the case when
+\code{.p} throws an error.}
 }
 \value{
 A deferred value for the result.

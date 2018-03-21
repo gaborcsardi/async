@@ -16,10 +16,10 @@ test_that("async_map", {
 test_that("async_map with limit", {
 
   list <- structure(as.list(1:10), names = letters[1:10])
-  fun <- async(function(x) {
+  fun <- function(x) {
     force(x)
     delay(1/10000)$then(function(value) x * 2)
-  })
+  }
 
   for (l in 1:10) {
     result <- synchronise(async_map(list, fun, .limit = l))

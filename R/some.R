@@ -2,7 +2,8 @@
 #' @export
 #' @rdname async_every
 
-async_some <- function(.x, .p, ...) {
+async_some <- function(.x, .p, ..., cancel = TRUE) {
+  force(cancel)
   defs <- lapply(.x, async(.p), ...)
   num_todo <- length(defs)
   done <- FALSE
@@ -16,14 +17,18 @@ async_some <- function(.x, .p, ...) {
         function(value) {
           if (!done && isTRUE(value)) {
             done <<- TRUE
+            def__cancel_pending(defs, cancel)
             resolve(TRUE)
           } else {
             num_todo <<- num_todo - 1
             if (num_todo == 0) resolve(FALSE)
           }
         },
-        function(reason) reject(reason)
-      )
+        function(reason) {
+          def__cancel_pending(defs, cancel)
+          reject(reason)
+        }
+      )$null()
     })
   })
 }

@@ -4,12 +4,15 @@
 \alias{when_all}
 \title{Deferred value for a set of deferred values}
 \usage{
-when_all(..., .list = list())
+when_all(..., .list = list(), cancel = TRUE)
 }
 \arguments{
 \item{...}{Deferred values.}
 
 \item{.list}{More deferred values.}
+
+\item{cancel}{Whether to cancel the deferred computations if one of
+them throws an error.}
 }
 \value{
 A deferred value, that is conditioned on all deferred values

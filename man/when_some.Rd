@@ -5,9 +5,9 @@
 \alias{when_any}
 \title{Resolve a deferred as soon as some deferred from a list resolve}
 \usage{
-when_some(count, ..., .list = list())
+when_some(count, ..., .list = list(), cancel = TRUE)
 
-when_any(..., .list = list())
+when_any(..., .list = list(), cancel = TRUE)
 }
 \arguments{
 \item{count}{Number of deferred values that need to resolve.}
@@ -15,6 +15,10 @@ when_any(..., .list = list())
 \item{...}{Deferred values.}
 
 \item{.list}{More deferred values.}
+
+\item{cancel}{Whether to cancel the deferred computations that are
+not needed to finish \code{when_some()} or \code{when_any()}, including the
+case when one of them throws an error.}
 }
 \value{
 A deferred value, that is conditioned on all deferred values
@@ -32,11 +36,11 @@ the returned deferred value is rejected.
 }
 \examples{
 ## Use the URL that returns first
-afun <- async(function() {
+afun <- function() {
   u1 <- http_get("https://eu.httpbin.org")
   u2 <- http_get("https://eu.httpbin.org/get")
   when_any(u1, u2)$then(~ .$url)
-})
+}
 synchronise(afun())
 }
 \seealso{

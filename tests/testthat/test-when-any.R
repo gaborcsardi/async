@@ -17,8 +17,10 @@ test_that("when_any, non-deferred", {
     d1 <- delay(1/100)$then(function(value) "foo")
     d2 <- "bar"
 
-    dx <- when_any(d1, d2)$
-      then(function(value) expect_equal(value, "bar"))
+    when_any(d1, d2)$
+      then(function(value) expect_equal(value, "bar"))$
+      then(~ d1)$
+      catch(identity)
   })
   synchronise(do())
 })

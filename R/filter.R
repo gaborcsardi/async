@@ -4,6 +4,8 @@
 #' @param .x A list or atomic vector.
 #' @param .p An asynchronous predicate function.
 #' @param ... Additional arguments to the predicate function.
+#' @param cancel Whether to cancel the deferred computations if `.p`
+#'   throws an error.
 #' @return A deferred value for the result.
 #'
 #' @family async iterators
@@ -18,7 +20,8 @@
 #'           "https://eu.httpbin.org/status/404")
 #' synchronise(afun(urls))
 
-async_filter <- function(.x, .p, ...) {
+async_filter <- function(.x, .p, ..., cancel = TRUE) {
+  force(cancel)
   defs <- lapply(.x, async(.p), ...)
   num_todo <- length(defs)
   keep <- logical(num_todo)
@@ -32,10 +35,15 @@ async_filter <- function(.x, .p, ...) {
         function(value) {
           num_todo <<- num_todo - 1
           keep[i] <<- as.logical(value)
-          if (num_todo == 0) resolve(.x[keep])
+          if (num_todo == 0) {
+            resolve(.x[keep])
+          }
         },
-        function(reason) reject(reason)
-      )
+        function(reason) {
+          def__cancel_pending(defs, cancel)
+          reject(reason)
+        }
+      )$null()
     })
   })
 }

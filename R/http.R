@@ -54,11 +54,11 @@ http_get <- function(url, headers = character(), file = NULL,
 #' synchronise(afun())
 #'
 #' # Check a list of URLs in parallel
-#' afun <- async(function(urls) {
+#' afun <- function(urls) {
 #'   when_all(.list = lapply(urls, http_head))$
 #'     then(~ lapply(., "[[", "status_code"))
-#' })
-#' urls <- c("https://r-project.org", "https://eu.httpbin.org")
+#' }
+#' urls <- c("https://httpbin.org", "https://eu.httpbin.org")
 #' synchronise(afun(urls))
 
 http_head <- function(url, headers = character(), file = NULL,
@@ -71,15 +71,16 @@ http_head <- function(url, headers = character(), file = NULL,
   make_deferred_http(handle, file, on_progress)
 }
 
-#' @importFrom curl multi_cancel
+#' @importFrom curl multi_cancel multi_run
 
 make_deferred_http <- function(handle, file, on_progress) {
   handle; file; on_progress
+  id <- NULL
   deferred$new(
     function(resolve, reject, progress) {
       force(resolve)
       force(reject)
-      get_default_event_loop()$add_http(
+      id <<- get_default_event_loop()$add_http(
         handle,
         function(err, res) if (is.null(err)) resolve(res) else reject(err),
         progress,
@@ -87,7 +88,10 @@ make_deferred_http <- function(handle, file, on_progress) {
       )
     },
     on_progress = on_progress,
-    on_cancel = function(reason) multi_cancel(handle)
+    on_cancel = function(reason) {
+      multi_cancel(handle)
+      get_default_event_loop()$cancel(id)
+    }
   )
 }
 

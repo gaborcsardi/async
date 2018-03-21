@@ -53,6 +53,9 @@ event_loop <- R6Class(
     add_next_tick = function(func, callback)
       el_add_next_tick(self, private, func, callback),
 
+    cancel = function(id)
+      el_cancel(self, private, id),
+
     run = function(mode = c("default", "nowait", "once"))
       el_run(self, private, mode = match.arg(mode))
   ),
@@ -176,6 +179,11 @@ el_add_next_tick <- function(self, private, func, callback) {
   force(self) ; force(private) ; force(callback)
   id <- private$create_task(callback, data = list(func = func))
   private$next_ticks <- c(private$next_ticks, id)
+}
+
+el_cancel <- function(self, private, id) {
+  private$tasks[[id]] <- NULL
+  invisible(self)
 }
 
 #' @importFrom curl multi_run
@@ -302,4 +310,3 @@ call_with_callback <- function(func, callback) {
   )
   callback(recerror, result)
 }
-

@@ -35,7 +35,7 @@ test_that("when_all, non-deferred", {
 
 test_that("when_all, non-deferred only", {
   done <- FALSE
-  do <- async(function() {
+  do <- function() {
     d1 <- "foo"
     d2 <- "bar"
 
@@ -44,7 +44,7 @@ test_that("when_all, non-deferred only", {
         done <<- TRUE
         expect_equal(value, list("foo", "bar"))
       })
-  })
+  }
   synchronise(do())
   expect_true(done)
 })

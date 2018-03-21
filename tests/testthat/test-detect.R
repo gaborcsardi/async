@@ -3,31 +3,33 @@ context("async_detect")
 
 test_that("async_detect", {
 
-  is_odd <- async(function(x) {
+  is_odd <- function(x) {
     force(x)
     delay(1/1000)$
       then(function(value) as.logical(x %% 2))
-  })
+  }
 
-  test <- async(function(limit) {
-    async_detect(1:10, is_odd, .limit = limit)$
+  test <- function(limit) {
+    d1 <- async_detect(1:10, is_odd, .limit = limit)$
       then(~ expect_true(. %in% c(1L, 3L, 5L, 7L, 9L)))
 
-    async_detect(2:10, is_odd, .limit = limit)$
+    d2 <- async_detect(2:10, is_odd, .limit = limit)$
       then(~ expect_true(. %in% c(3L, 5L, 7L, 9L)))
 
-    async_detect(2, is_odd, .limit = limit)$
+    d3 <- async_detect(2, is_odd, .limit = limit)$
       then(~ expect_null(.))
 
-    async_detect(c(1:10 * 2L, 43L), is_odd, .limit = limit)$
+    d4 <- async_detect(c(1:10 * 2L, 43L), is_odd, .limit = limit)$
       then(~ expect_identical(., 43L))
 
-    async_detect(numeric(), is_odd, .limit = limit)$
+    d5 <- async_detect(numeric(), is_odd, .limit = limit)$
       then(~ expect_null(.))
 
-    async_detect(1:10 * 2, is_odd, .limit = limit)$
+    d6 <- async_detect(1:10 * 2, is_odd, .limit = limit)$
       then(~ expect_null(.))
-  })
+
+    when_all(d1, d2, d3, d4, d5, d6)
+  }
 
   lapply(c(Inf, 1, 2, 3, 5, 10, 20), function(x) synchronise(test(x)))
 })

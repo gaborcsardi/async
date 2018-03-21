@@ -4,7 +4,7 @@
 \alias{async_timeout}
 \title{Asynchronous function call with a timeout}
 \usage{
-async_timeout(task, timeout, ...)
+async_timeout(task, timeout, ..., cancel = TRUE)
 }
 \arguments{
 \item{task}{Asynchronous function.}
@@ -12,6 +12,8 @@ async_timeout(task, timeout, ...)
 \item{timeout}{Timeout as a \code{difftime} object, or number of seconds.}
 
 \item{...}{Additional arguments to \code{task}.}
+
+\item{cancel}{Whether to cancel the task if a timeout happens.}
 }
 \value{
 A deferred value that is rejected if it is not resolved

@@ -84,6 +84,8 @@ deferred <- R6Class(
       def_finally(self, private, on_finally),
     cancel = function(reason = NULL)
       def_cancel(self, private, reason),
+    null = function()
+      def_null(self, private),
 
     get_event_loop = function() private$event_loop
   ),
@@ -242,11 +244,21 @@ def_cancel <- function(self, private, reason) {
   private$reject(cancel_cond)
 }
 
+def_null <- function(self, private) {
+  def__dead_end(self)
+  invisible(self)
+}
+
 def__resolve <- function(self, private, value) {
+  if (private$cancelled) return()
   if (private$state != "pending") stop("Deferred value already resolved")
   if (is_deferred(value)) {
-    value$then(private$resolve, private$reject)
+    dx <- value$then(private$resolve, private$reject)
+    def__dead_end(dx)
   } else {
+    if (!private$dead_end && !length(private$on_fulfilled)) {
+      stop("Computation going nowhere...")
+    }
     private$state <- "fulfilled"
     private$value <- value
     for (f in private$on_fulfilled) f(value)
@@ -274,7 +286,8 @@ def__reject <- function(self, private, reason) {
   if (private$cancelled) return()
   if (private$state != "pending") stop("Deferred value already rejected")
   if (is_deferred(reason)) {
-    reason$then(private$resolve, private$reject)
+    dx <- reason$then(private$resolve, private$reject)
+    def__dead_end(dx)
   } else {
     private$state <- "rejected"
     private$make_error_object(reason)
@@ -290,7 +303,7 @@ def__reject <- function(self, private, reason) {
 }
 
 def__progress <- function(self, private, data) {
-  if (private$state != "pending") stop("Deferred value already resolved")
+  if (private$state != "pending") return()
   if (is.null(private$progress_callback)) return()
   private$progress_callback(data)
 }
@@ -303,11 +316,27 @@ def__progress <- function(self, private, data) {
 #' @export
 #' @examples
 #' is_deferred(1:10)
-#' afun <- async(function() {
+#' afun <- function() {
 #'   print(is_deferred(dx <- delay(1/100)))
-#' })
+#'   dx
+#' }
 #' synchronise(afun())
 
 is_deferred <- function(x) {
   inherits(x, "deferred")
+}
+
+def__dead_end <- function(def) {
+  def$.__enclos_env__$private$dead_end <- TRUE
+}
+
+def__cancel_pending <- function(defs, cancel) {
+  if (cancel) {
+    for (i in seq_along(defs)) {
+      if (is_deferred(defs[[i]])) {
+        defs[[i]]$null()
+        defs[[i]]$cancel()
+      }
+    }
+  }
 }

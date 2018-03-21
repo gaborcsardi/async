@@ -38,7 +38,7 @@ async_retry <- function(task, times, ...) {
       }
     }
 
-    task(...)$then(xresolve, xreject)
+    task(...)$then(xresolve, xreject)$null()
   })
 }
 

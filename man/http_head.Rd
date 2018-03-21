@@ -35,11 +35,11 @@ afun <- async(function() {
 synchronise(afun())
 
 # Check a list of URLs in parallel
-afun <- async(function(urls) {
+afun <- function(urls) {
   when_all(.list = lapply(urls, http_head))$
     then(~ lapply(., "[[", "status_code"))
-})
-urls <- c("https://r-project.org", "https://eu.httpbin.org")
+}
+urls <- c("https://httpbin.org", "https://eu.httpbin.org")
 synchronise(afun(urls))
 }
 \seealso{

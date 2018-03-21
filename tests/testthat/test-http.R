@@ -35,8 +35,10 @@ test_that("headers", {
     dx <- http_get("https://eu.httpbin.org/headers", headers = headers)$
       then(~ jsonlite::fromJSON(rawToChar(.$content), simplifyVector = FALSE))
 
-    dx$then(~ expect_equal(.$headers$`X-Header-Test`, "foobar"))
-    dx$then(~ expect_equal(.$headers$`X-Another`, "boooyakasha"))
+    when_all(
+      dx$then(~ expect_equal(.$headers$`X-Header-Test`, "foobar")),
+      dx$then(~ expect_equal(.$headers$`X-Another`, "boooyakasha"))
+    )
   })
   synchronise(do())
 })
@@ -70,10 +72,12 @@ test_that("http progress bars", {
       }
     )
 
-    dx$then(~ expect_equal(.$status_code, 200))
-    dx$then(~ expect_true(file.exists(tmp)))
-    dx$then(~ expect_equal(file.info(tmp)$size, amountx))
-    dx$then(~ expect_equal(totalx, amountx))
+    when_all(
+      dx$then(~ expect_equal(.$status_code, 200)),
+      dx$then(~ expect_true(file.exists(tmp))),
+      dx$then(~ expect_equal(file.info(tmp)$size, amountx)),
+      dx$then(~ expect_equal(totalx, amountx))
+    )
   })
   synchronise(do())
 })
@@ -99,10 +103,12 @@ test_that("http progress bars & etags", {
       }
     )
 
-    dx$then(~ expect_equal(.$status_code, 304))
-    dx$then(~ expect_equal(statusx, 304))
-    dx$then(~ expect_equal(length(.$content), 0))
-    dx$then(~ expect_false(file.exists(tmp)))
+    when_all(
+      dx$then(~ expect_equal(.$status_code, 304)),
+      dx$then(~ expect_equal(statusx, 304)),
+      dx$then(~ expect_equal(length(.$content), 0)),
+      dx$then(~ expect_false(file.exists(tmp)))
+    )
   })
   synchronise(do())
 })

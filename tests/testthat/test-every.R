@@ -3,19 +3,22 @@ context("async_every")
 
 test_that("async_every", {
 
-  is_odd <- async(
-    function(x) delay(1/1000)$then(function(value) as.logical(x %% 2))
-  )
+  is_odd <- function(x) {
+    force(x)
+    delay(1/1000)$then(function(value) as.logical(x %% 2))
+  }
 
-  do <- async(function() {
-    async_every(1:10, is_odd)$
+  do <- function() {
+    d1 <- async_every(1:10, is_odd)$
       then(~ expect_identical(., FALSE))
 
-    async_every(numeric(), is_odd)$
+    d2 <- async_every(numeric(), is_odd)$
       then(~ expect_identical(., TRUE))
 
-    async_every(1:10 * 2 + 1, is_odd)$
+    d3 <- async_every(1:10 * 2 + 1, is_odd)$
       then(~ expect_identical(., TRUE))
-  })
+
+    when_all(d1, d2, d3)
+  }
   synchronise(do())
 })

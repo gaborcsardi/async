@@ -2,22 +2,31 @@
 context("async_constant")
 
 test_that("creates a deferred value", {
-  do <- async(function() {
+  do <- function() {
     dx <- async_constant()
     expect_true(is_deferred(dx))
+    dx
+  }
+  synchronise(do())
+
+  do <- function() {
     dx <- async_constant("foobar")
     expect_true(is_deferred(dx))
-  })
+    dx
+  }
   synchronise(do())
 })
 
 test_that("resolves to the specified value", {
-  do <- async(function() {
-    dx <- async_constant()
-    dx$then(function(x) expect_null(x))
+  do <- function() {
+    async_constant("foobar")$
+      then(function(x) expect_equal(x, "foobar"))
+  }
+  synchronise(do())
 
-    dx <- async_constant("foobar")
-    dx$then(function(x) expect_equal(x, "foobar"))
-  })
+  do <- function() {
+    async_constant()$
+      then(function(x) expect_null(x))
+  }
   synchronise(do())
 })

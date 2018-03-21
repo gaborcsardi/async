@@ -35,13 +35,13 @@ async_until <- function(test, task, ...) {
         if (test()) {
           resolve(value)
         } else {
-          task(...)$then(xresolve, xreject)
+          task(...)$then(xresolve, xreject)$null()
         },
         error = function(e) reject(e)
       )
     }
     xreject <- function(reason) reject(reason)
 
-    task(...)$then(xresolve, xreject)
+    task(...)$then(xresolve, xreject)$null()
   })
 }
