@@ -72,9 +72,7 @@ deferred <- R6Class(
     cancel = function(reason = NULL)
       def_cancel(self, private, reason),
     null = function()
-      def_null(self, private),
-
-    get_event_loop = function() private$event_loop
+      def_null(self, private)
   ),
 
   private = list(
