@@ -75,3 +75,67 @@ test_that("finally", {
   expect_equal(synchronise(do()), "this one")
   expect_true(called)
 })
+
+test_that("error in action, lazy", {
+  do <- function() {
+    deferred$new(lazy = TRUE, function(resolve, reject) stop("foobar"))
+  }
+
+  err <- tryCatch(synchronise(do()), error = identity)
+  expect_s3_class(err, "async_rejected")
+  expect_match(conditionMessage(err), "foobar")
+})
+
+test_that("error in action, eager", {
+  do <- function() {
+    deferred$new(lazy = FALSE, function(resolve, reject) stop("foobar"))
+  }
+
+  err <- tryCatch(synchronise(do()), error = identity)
+  expect_s3_class(err, "async_rejected")
+  expect_match(conditionMessage(err), "foobar")
+})
+
+test_that("error in then function", {
+  do <- function() {
+    delay(1/100)$then(function(x) stop("foobar"))
+  }
+
+  err <- tryCatch(synchronise(do()), error = identity)
+  expect_s3_class(err, "async_rejected")
+  expect_match(conditionMessage(err), "foobar")
+})
+
+test_that("can catch error in action, lazy", {
+  do <- function() {
+    deferred$new(lazy = TRUE, function(resolve, reject) stop("foobar"))$
+      catch(function(e) e)
+  }
+
+  err  <- synchronise(do())
+  expect_s3_class(err, "async_rejected")
+  expect_match(conditionMessage(err), "foobar")
+})
+
+test_that("can catch error in action, eager", {
+  do <- function() {
+    deferred$new(lazy = FALSE, function(resolve, reject) stop("foobar"))$
+      catch(function(e) e)
+  }
+
+  err  <- synchronise(do())
+  expect_s3_class(err, "async_rejected")
+  expect_match(conditionMessage(err), "foobar")
+})
+
+test_that("can catch error in then function", {
+  do <- function() {
+    delay(1/100)$
+      then(function(x) stop("foobar"))$
+      catch(function(e) e)
+  }
+
+  err <- synchronise(do())
+  expect_s3_class(err, "async_rejected")
+  expect_match(conditionMessage(err), "foobar")
+})

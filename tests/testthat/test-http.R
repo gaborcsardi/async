@@ -136,3 +136,15 @@ test_that("progress bar for in-memory data", {
   expect_equal(bytes, 2048)
   expect_equal(length(ret$content), 2048)
 })
+
+test_that("error, invalid arg", {
+
+  skip("These errors are not async yet")
+
+  do <- function() {
+    dx <- http_get(12123)
+  }
+
+  err <- tryCatch(synchronise(do()), error = identity)
+  expect_s3_class(err, "async_rejected")
+})

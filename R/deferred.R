@@ -102,8 +102,10 @@ deferred <- R6Class(
   )
 )
 
-async_def_init <- function(deferred, private, action, on_progress,
+async_def_init <- function(self, private, action, on_progress,
                            on_cancel, lazy) {
+
+  ## TODO: handle errors that happen here, maybe.
 
   private$event_loop <- get_default_event_loop()
 
@@ -124,16 +126,22 @@ async_def_init <- function(deferred, private, action, on_progress,
     args$progress <- private$progress
   }
 
-  if (lazy) {
+  ## We use isTRUE, because then we don't need to assert_flag(lazy),
+  ## which could result an error, and it is not clear if that error
+  ## should be reported synchronously or not
+
+  if (isTRUE(lazy)) {
     private$event_loop$add_next_tick(
       function() do.call(action, args),
-      function(err, res) if (!is.null(err)) stop(err))
+      function(err, res) if (!is.null(err)) private$reject(err))
 
   } else {
-    do.call(action, args)
+    call_with_callback(
+      function() do.call(action, args),
+      function(err, res) if (!is.null(err)) private$reject(err))
   }
 
-  invisible(deferred)
+  invisible(self)
 }
 
 def__get_value <- function(self, private) {

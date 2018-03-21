@@ -281,32 +281,3 @@ el__is_alive <- function(self, private) {
 el__update_time <- function(self, private) {
   private$time <- Sys.time()
 }
-
-#' Call `func` and then call `callback` with the result
-#'
-#' `callback` will be called with two arguments, the first one will the
-#' error object if `func()` threw an error, or `NULL` otherwise. The second
-#' argument is `NULL` on error, and the result of `func()` otherwise.
-#'
-#' @param func Function to call.
-#' @param callback Callback to call with the result of `func()`,
-#'   or the error thrown.
-#'
-#' @keywords internal
-
-call_with_callback <- function(func, callback) {
-  recerror <- NULL
-  result <- NULL
-  tryCatch(
-    withCallingHandlers(
-      result <- func(),
-      error = function(e) {
-        recerror <<- e;
-        handler <- getOption("async.error")
-        if (is.function(handler)) handler()
-      }
-    ),
-    error = identity
-  )
-  callback(recerror, result)
-}
