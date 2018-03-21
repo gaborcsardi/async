@@ -11,18 +11,6 @@ viapply <- function(X, FUN, ..., FUN.VALUE = integer(1)) {
   vapply(X, FUN, FUN.VALUE = FUN.VALUE, ...)
 }
 
-get_state_x <- function(x) {
-  if (is_deferred(x)) x$get_state() else "not-deferred"
-}
-
-get_state_check_x <- function(x, event_loop) {
-  if (is_deferred(x)) {
-    x$get_state()
-  } else {
-    "not-deferred"
-  }
-}
-
 get_value_x <- function(x) {
   if (is_deferred(x)) x$get_value() else x
 }
@@ -84,4 +72,8 @@ unique_names <- function(x) {
 has_utf8 <- function() {
   ## TODO: this is a hack, we need to export `has_utf8()` from `cli`
   cli::get_spinner()$name == "dots"
+}
+
+private <- function(x) {
+  x$.__enclos_env__$private
 }

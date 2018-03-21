@@ -5,7 +5,6 @@
 #' ```
 #' dx <- deferred$new(action)
 #'
-#' dx$get_state()
 #' dx$get_value()
 #' dx$then(on_fulfilled = NULL, on_rejected = NULL)
 #' dx$catch(on_rejected)
@@ -34,9 +33,6 @@
 #' result of the I/O or computation (like the return value). If the task
 #' fails, call `reject(reason)`, where `reason` is either an error object,
 #' or a character string.
-#'
-#' `dx$get_state()` returns the state of the deferred value. A deferred
-#' value can be in three states: `"pending"`, `"resolved"` or `"rejected"`.
 #'
 #' `dx$get_value()` returns the resolved value, or the error message or
 #' object of a deferred value. It is an error to call this method on a
@@ -72,8 +68,6 @@ deferred <- R6Class(
     initialize = function(action, on_progress = NULL, on_cancel = NULL,
                           lazy = TRUE)
       async_def_init(self, private, action, on_progress, on_cancel, lazy),
-    get_state = function()
-      private$state,
     get_value = function()
       def_get_value(self, private),
     then = function(on_fulfilled = NULL, on_rejected = NULL)

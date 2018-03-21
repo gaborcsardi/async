@@ -92,7 +92,6 @@ afun <- async(function() {
   def <- http_get("https://httpbin.org")
   status <- def$then(function(response) response$status_code)
   print(status)
-  status$get_state()
 })
 synchronise(afun())
 ```
