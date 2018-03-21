@@ -42,8 +42,6 @@ The `async` package contains some async functions:
 - `http_get()` and `http_head()` perform HTTP requests, asynchronously.
 - `async_constant()` is an async function that represents a value.
 
-More async functions can be created using `async()`.
-
 ## Synchronization barriers
 
 Asynchronous computation is carried out in async functions, and async
@@ -83,44 +81,15 @@ will be known.
 
 ```r
 library(async)
-afun <- async(function() {
+afun <- function() {
   def <- http_get("https://httpbin.org")
-  status <- def$then(function(response) response$status_code)
-  print(status)
-})
+  def$then(function(response) response$status_code)
+}
 synchronise(afun())
 ```
 
 ```
-#> <deferred>
-#>   Public:
-#>     cancel: function (reason = NULL) 
-#>     catch: function (on_rejected) 
-#>     clone: function (deep = FALSE) 
-#>     finally: function (on_finally) 
-#>     get_event_loop: function () 
-#>     get_value: function () 
-#>     initialize: function (action, on_progress = NULL, on_cancel = NULL, parent = NULL) 
-#>     then: function (on_fulfilled = NULL, on_rejected = NULL) 
-#>   Private:
-#>     cancel_callback: NULL
-#>     cancelled: FALSE
-#>     event_loop: event_loop, R6
-#>     make_error_object: function (err) 
-#>     on_fulfilled: list
-#>     on_rejected: list
-#>     parent: deferred, R6
-#>     progress: function (data) 
-#>     progress_callback: NULL
-#>     reject: function (reason) 
-#>     resolve: function (value) 
-#>     start_stack: NULL
-#>     state: pending
-#>     value: NULL
-```
-
-```
-#> [1] "pending"
+#> [1] 200
 ```
 
 `then()` returns another deferred, which also has a `then()` method,
@@ -144,7 +113,7 @@ three HTTP requests in parallel:
 
 
 ```r
-afun <- async(function() {
+afun <- function() {
   http_status <- function(url) {
     http_get(url)$then(function(response) response$status_code)
   }
@@ -152,7 +121,7 @@ afun <- async(function() {
   r2 <- http_status("https://httpbin.org/status/404")
   r3 <- http_status("https://httpbin.org/status/200")
   when_all(r1, r2, r3)
-})
+}
 synchronise(afun())
 ```
 
@@ -177,13 +146,13 @@ also re-throw the error by calling `stop()`.
 
 
 ```r
-afun <- async(function() {
+afun <- function() {
   u1 <- http_get("https://httpbin.org")$
     then(function() "web server is up", function() "web server is down")
   u2 <- http_get("non-existing-url.for-sure")$
     then(function() "web server is up", function() "web server is down")
   when_all(u1, u2)
-})
+}
 synchronise(afun())
 ```
 
@@ -238,7 +207,6 @@ Control flow with deferred values can be challenging. Some helpers:
 
 ## Other Async Utilities
 
-* `async()` converts a synchronous function to async.
 * `async_constant()` takes a value and creates and asynchronous function
   that returns that value.
 * `when_all()` returns a deferred value that is resolved when all supplied
@@ -255,7 +223,7 @@ reverse dependencies.
 
 ```r
 fromJSON <- function(x) jsonlite::fromJSON(x, simplifyVector = FALSE)
-revdep_authors <- async(function() {
+revdep_authors <- function() {
   get_author <- function(package) {
     url <- paste0("https://crandb.r-pkg.org/", package)
     http_get(url)$
@@ -267,7 +235,7 @@ revdep_authors <- async(function() {
     then(~ fromJSON(rawToChar(.$content)))$
     then(~ names(unlist(.)))$
     then(~ async_map(., get_author))
-})
+}
 synchronise(revdep_authors())[1:3]
 ```
 
@@ -288,11 +256,11 @@ The following code returns the 2 URLs that respond first.
 
 
 ```r
-fastest_two <- async(function(urls) {
+fastest_two <- function(urls) {
   qs <- lapply(urls, http_head)
   t2 <- when_some(2, .list = qs)$
   then(function(top2) vapply(top2, "[[", character(1), "url"))
-})
+}
 urls <- c("https://cran.rstudio.com", "https://cran.r-project.org",
           "https://www.stats.bris.ac.uk/R/", "https://cran.uib.no/")
 synchronise(
