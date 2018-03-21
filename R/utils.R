@@ -12,7 +12,7 @@ viapply <- function(X, FUN, ..., FUN.VALUE = integer(1)) {
 }
 
 get_value_x <- function(x) {
-  if (is_deferred(x)) x$get_value() else x
+  if (is_deferred(x)) private(x)$get_value() else x
 }
 
 make_error <- function(message, class = "simpleError", call = NULL) {

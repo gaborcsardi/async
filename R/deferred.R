@@ -5,7 +5,6 @@
 #' ```
 #' dx <- deferred$new(action)
 #'
-#' dx$get_value()
 #' dx$then(on_fulfilled = NULL, on_rejected = NULL)
 #' dx$catch(on_rejected)
 #' dx$finally(on_finally)
@@ -33,10 +32,6 @@
 #' result of the I/O or computation (like the return value). If the task
 #' fails, call `reject(reason)`, where `reason` is either an error object,
 #' or a character string.
-#'
-#' `dx$get_value()` returns the resolved value, or the error message or
-#' object of a deferred value. It is an error to call this method on a
-#' deferred value that is pending.
 #'
 #' `dx$then()` creates a deferred value whose resolution (and rejection)
 #' depends on the `dx` deferred value. When `dx` is successfully
@@ -68,8 +63,6 @@ deferred <- R6Class(
     initialize = function(action, on_progress = NULL, on_cancel = NULL,
                           lazy = TRUE)
       async_def_init(self, private, action, on_progress, on_cancel, lazy),
-    get_value = function()
-      def_get_value(self, private),
     then = function(on_fulfilled = NULL, on_rejected = NULL)
       def_then(self, private, on_fulfilled, on_rejected),
     catch = function(on_rejected)
@@ -95,6 +88,9 @@ deferred <- R6Class(
     cancelled = FALSE,
     start_stack = NULL,
     dead_end = FALSE,
+
+    get_value = function()
+      def__get_value(self, private),
 
     resolve = function(value)
       def__resolve(self, private, value),
@@ -142,7 +138,7 @@ async_def_init <- function(deferred, private, action, on_progress,
   invisible(deferred)
 }
 
-def_get_value <- function(self, private) {
+def__get_value <- function(self, private) {
   if (private$state == "pending") {
     stop("Deferred value not resolved yet")
   } else if (private$state == "rejected") {

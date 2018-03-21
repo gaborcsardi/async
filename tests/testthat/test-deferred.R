@@ -4,7 +4,7 @@ context("deferred")
 test_that("error if not done yet", {
   do <- async(function() {
     dx <- delay(1/1000)
-    expect_error(dx$get_value())
+    expect_error(private(dx)$get_value())
     dx
   })
   synchronise(do())

@@ -9,7 +9,6 @@ Deferred value
 \section{Usage}{
 \preformatted{dx <- deferred$new(action)
 
-dx$get_value()
 dx$then(on_fulfilled = NULL, on_rejected = NULL)
 dx$catch(on_rejected)
 dx$finally(on_finally)
@@ -41,10 +40,6 @@ successfully completes, call \code{resolve(value)} where \code{value} is the
 result of the I/O or computation (like the return value). If the task
 fails, call \code{reject(reason)}, where \code{reason} is either an error object,
 or a character string.
-
-\code{dx$get_value()} returns the resolved value, or the error message or
-object of a deferred value. It is an error to call this method on a
-deferred value that is pending.
 
 \code{dx$then()} creates a deferred value whose resolution (and rejection)
 depends on the \code{dx} deferred value. When \code{dx} is successfully
