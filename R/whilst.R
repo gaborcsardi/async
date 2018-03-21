@@ -35,13 +35,17 @@ async_whilst <- function(test, task, ...) {
         if (!test()) {
           resolve(value)
         } else {
-          task(...)$then(xresolve, xreject)$null()
+          task(...)$then(xresolve)$catch(xreject)$null()
         },
         error = function(e) reject(e)
       )
     }
     xreject <- function(reason) reject(reason)
 
-    if (test()) task(...)$then(xresolve, xreject)$null() else resolve(NULL)
+    if (test()) {
+      task(...)$then(xresolve)$catch(xreject)$null()
+    } else {
+      resolve(NULL)
+    }
   })
 }

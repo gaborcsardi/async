@@ -53,7 +53,7 @@ test_that("when_any, late error is ignored", {
     d2 <- delay(1/10000)$then(function(value) "bar")
 
     dx <- when_any(d1, d2)$
-      then(NULL, function(value) expect_equal(value, "bar"))
+      catch(function(value) expect_equal(value, "bar"))
   })
   expect_silent(synchronise(do()))
 })
@@ -64,7 +64,7 @@ test_that("when_any, multiple errors", {
     d2 <- delay(1/10000)$then(function(value) stop("bar"))
 
     dx <- when_any(d1, d2)$
-      then(NULL, function(reason) expect_match(reason$message, "foo"))
+      catch(function(reason) expect_match(reason$message, "foo"))
   })
   synchronise(do())
 })

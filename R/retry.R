@@ -32,13 +32,13 @@ async_retry <- function(task, times, ...) {
     xreject  <- function(reason) {
       times <<- times - 1
       if (times > 0) {
-        task(...)$then(xresolve, xreject)
+        task(...)$then(xresolve)$catch(xreject)
       } else {
         reject(reason)
       }
     }
 
-    task(...)$then(xresolve, xreject)$null()
+    task(...)$then(xresolve)$catch(xreject)$null()
   })
 }
 

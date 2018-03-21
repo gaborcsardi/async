@@ -32,7 +32,7 @@ later.
 ## You can catch the error, asynchronously
 synchronise(
   async_timeout(function() delay(1/10)$then(~ "OK"), 1/1000)$
-    then(NULL, ~ "Timed out")
+    catch(~ "Timed out")
 )
 
 ## Or synchronously

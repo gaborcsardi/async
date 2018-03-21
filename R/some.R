@@ -13,22 +13,26 @@ async_some <- function(.x, .p, ..., cancel = TRUE) {
     if (length(defs) == 0) return(resolve(FALSE))
 
     lapply(seq_along(defs), function(i) {
-      defs[[i]]$then(
-        function(value) {
-          if (!done && isTRUE(value)) {
-            done <<- TRUE
-            def__cancel_pending(defs, cancel)
-            resolve(TRUE)
-          } else {
-            num_todo <<- num_todo - 1
-            if (num_todo == 0) resolve(FALSE)
+      defs[[i]]$
+        then(
+          function(value) {
+            if (!done && isTRUE(value)) {
+              done <<- TRUE
+              def__cancel_pending(defs, cancel)
+              resolve(TRUE)
+            } else {
+              num_todo <<- num_todo - 1
+              if (num_todo == 0) resolve(FALSE)
+            }
           }
-        },
-        function(reason) {
-          def__cancel_pending(defs, cancel)
-          reject(reason)
-        }
-      )$null()
+        )$
+        catch(
+          function(reason) {
+            def__cancel_pending(defs, cancel)
+            reject(reason)
+          }
+        )$
+        null()
     })
   })
 }

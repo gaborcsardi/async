@@ -21,7 +21,7 @@
 #' ## You can catch the error, asynchronously
 #' synchronise(
 #'   async_timeout(function() delay(1/10)$then(~ "OK"), 1/1000)$
-#'     then(NULL, ~ "Timed out")
+#'     catch(~ "Timed out")
 #' )
 #'
 #' ## Or synchronously
@@ -39,10 +39,10 @@ async_timeout <- function(task, timeout, ..., cancel = TRUE) {
   done <- FALSE
 
   deferred$new(function(resolve, reject) {
-    task(...)$then(
-      function(value) { if (!done) resolve(value); done <<- TRUE },
-      function(reason) { if (!done) reject(reason); done <<- TRUE }
-    )$null()
+    task(...)$
+      then(function(value) { if (!done) resolve(value); done <<- TRUE })$
+      catch(function(reason) { if (!done) reject(reason); done <<- TRUE })$
+      null()
 
     delay(timeout)$then(
       function(value) {

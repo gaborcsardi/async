@@ -69,7 +69,7 @@ test_that("when_all, error", {
     d2 <- delay(1/1000)$then(function(value) "bar")
 
     when_all(d1, d2)$
-      then(NULL, function(reason) {
+      catch(function(reason) {
         done <<-  TRUE
         expect_match(reason$message, "foo")
       })
@@ -85,7 +85,7 @@ test_that("when_all, multiple errors", {
     d2 <- delay(1/10000)$then(function(value) stop("bar"))
 
     dx <- when_all(d1, d2)$
-      then(NULL, function(reason) {
+      catch(function(reason) {
         done <<- TRUE
         expect_match(reason$message, "bar")
       })

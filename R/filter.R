@@ -31,19 +31,22 @@ async_filter <- function(.x, .p, ..., cancel = TRUE) {
     if (length(defs) == 0) return(resolve(.x))
 
     lapply(seq_along(defs), function(i) {
-      defs[[i]]$then(
-        function(value) {
-          num_todo <<- num_todo - 1
-          keep[i] <<- as.logical(value)
-          if (num_todo == 0) {
-            resolve(.x[keep])
+      defs[[i]]$
+        then(
+          function(value) {
+            num_todo <<- num_todo - 1
+            keep[i] <<- as.logical(value)
+            if (num_todo == 0) {
+              resolve(.x[keep])
+            }
+          })$
+        catch(
+          function(reason) {
+            def__cancel_pending(defs, cancel)
+            reject(reason)
           }
-        },
-        function(reason) {
-          def__cancel_pending(defs, cancel)
-          reject(reason)
-        }
-      )$null()
+        )$
+        null()
     })
   })
 }

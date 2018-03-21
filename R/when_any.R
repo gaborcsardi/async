@@ -73,7 +73,7 @@ when_some <- function(count, ..., .list = list(), cancel = TRUE) {
     }
 
     for (i in seq_along(defs)) {
-      defs[[i]]$then(handle_fulfill, handle_reject)$null()
+      defs[[i]]$then(handle_fulfill)$catch(handle_reject)$null()
     }
   })
 }

@@ -33,22 +33,25 @@ async_every <- function(.x, .p, ..., cancel = TRUE) {
     if (! num_todo) return(resolve(TRUE))
 
     lapply(seq_along(defs), function(i) {
-      defs[[i]]$then(
-        function(value) {
-          if (!done && !isTRUE(value)) {
-            done <<- TRUE
+      defs[[i]]$
+        then(
+          function(value) {
+            if (!done && !isTRUE(value)) {
+              done <<- TRUE
+              def__cancel_pending(defs, cancel)
+              resolve(FALSE)
+            } else {
+              num_todo <<- num_todo - 1
+              if (num_todo == 0) resolve(TRUE)
+            }
+          })$
+        catch(
+          function(reason) {
             def__cancel_pending(defs, cancel)
-            resolve(FALSE)
-          } else {
-            num_todo <<- num_todo - 1
-            if (num_todo == 0) resolve(TRUE)
+            reject(reason)
           }
-        },
-        function(reason) {
-          def__cancel_pending(defs, cancel)
-          reject(reason)
-        }
-      )$null()
+        )$
+        null()
     })
   })
 }

@@ -43,22 +43,24 @@ async_detect_nolimit <- function(.x, .p, ..., cancel) {
     if (length(defs) == 0) return(resolve(NULL))
 
     lapply(seq_along(defs), function(i) {
-      defs[[i]]$then(
-        function(value) {
-          if (!done && isTRUE(value)) {
-            done <<- TRUE
+      defs[[i]]$
+        then(
+          function(value) {
+            if (!done && isTRUE(value)) {
+              done <<- TRUE
+              def__cancel_pending(defs, cancel)
+              resolve(.x[[i]])
+            } else {
+              num_todo <<- num_todo - 1
+              if (num_todo == 0) resolve(NULL)
+            }
+          })$
+        catch(
+          function(reason) {
             def__cancel_pending(defs, cancel)
-            resolve(.x[[i]])
-          } else {
-            num_todo <<- num_todo - 1
-            if (num_todo == 0) resolve(NULL)
+            reject(reason)
           }
-        },
-        function(reason) {
-          def__cancel_pending(defs, cancel)
-          reject(reason)
-        }
-      )$null()
+        )$null()
     })
   })
 }
@@ -87,10 +89,10 @@ async_detect_limit <- function(.x, .p, ..., .limit = .limit, cancel) {
         if (num_todo == 0) return(resolve(NULL))
         if (nextone <= len) {
           i <- nextone
-          .p(.x[[i]])$then(
-            function(value) xfulfill(value, i),
-            xreject
-          )$null()
+          .p(.x[[i]])$
+            then(function(value) xfulfill(value, i))$
+            catch(xreject)$
+            null()
         }
       }
       nextone <<- nextone + 1
@@ -105,10 +107,10 @@ async_detect_limit <- function(.x, .p, ..., .limit = .limit, cancel) {
     for (ii in seq_len(.limit)) {
       local({
         i <- ii
-        .p(.x[[i]])$then(
-          function(value) xfulfill(value, i),
-          xreject
-        )$null()
+        .p(.x[[i]])$
+          then(function(value) xfulfill(value, i))$
+          catch(xreject)$
+          null()
       })
       nextone <- nextone + 1
     }

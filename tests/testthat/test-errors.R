@@ -32,7 +32,7 @@ test_that("handled error is not an error any more", {
   do <- async(function() {
     delay(1/10000)$
       then(function(x) stop("ohno!"))$
-      then(NULL, function(x) "OK")$
+      catch(function(x) "OK")$
       then(~ expect_equal(., "OK"))$
       catch(~ stop("not called"))
   })

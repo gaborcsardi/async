@@ -49,11 +49,10 @@ async_map_limit <- function(.x, .f, ..., .args = list(), .limit = Inf) {
       if (done == len) resolve(result)
       if (nextone <= len) {
         i <- nextone
-        dx <- do.call(.f, c(list(.x[[i]]), args))$then(
-          function(value) xfulfill(value, i),
-          xreject
-        )
-        def__dead_end(dx)
+        do.call(.f, c(list(.x[[i]]), args))$
+          then(function(value) xfulfill(value, i))$
+          catch(xreject)$
+          null()
       }
       nextone <<- nextone + 1
     }
@@ -62,11 +61,10 @@ async_map_limit <- function(.x, .f, ..., .args = list(), .limit = Inf) {
     for (ii in seq_len(.limit)) {
       local({
         i <- ii
-        dx <- do.call(.f, c(list(.x[[i]]), args))$then(
-          function(value) xfulfill(value, i),
-          xreject
-        )
-        def__dead_end(dx)
+        do.call(.f, c(list(.x[[i]]), args))$
+          then(function(value) xfulfill(value, i))$
+          catch(xreject)$
+          null()
       })
       nextone <- nextone + 1
     }

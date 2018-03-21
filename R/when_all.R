@@ -48,7 +48,7 @@ when_all <- function(..., .list = list(), cancel = TRUE) {
       if (!is_deferred(defs[[i]])) {
         num_todo <- num_todo - 1
       } else {
-        defs[[i]]$then(handle_fulfill, handle_reject)$null()
+        defs[[i]]$then(handle_fulfill)$catch(handle_reject)$null()
       }
     }
 

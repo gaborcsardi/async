@@ -148,9 +148,11 @@ also re-throw the error by calling `stop()`.
 ```r
 afun <- function() {
   u1 <- http_get("https://httpbin.org")$
-    then(function() "web server is up", function() "web server is down")
+    then(function() "web server is up")$
+    catch(function() "web server is down")
   u2 <- http_get("non-existing-url.for-sure")$
-    then(function() "web server is up", function() "web server is down")
+    then(function() "web server is up")$
+    catch(function() "web server is down")
   when_all(u1, u2)
 }
 synchronise(afun())

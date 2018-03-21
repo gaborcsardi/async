@@ -5,7 +5,7 @@
 #' ```
 #' dx <- deferred$new(action)
 #'
-#' dx$then(on_fulfilled = NULL, on_rejected = NULL)
+#' dx$then(on_fulfilled)
 #' dx$catch(on_rejected)
 #' dx$finally(on_finally)
 #' ```
@@ -33,19 +33,12 @@
 #' fails, call `reject(reason)`, where `reason` is either an error object,
 #' or a character string.
 #'
-#' `dx$then()` creates a deferred value whose resolution (and rejection)
-#' depends on the `dx` deferred value. When `dx` is successfully
-#' resolved, the `on_fulfilled` function is called, with the resolved
-#' value as an argument. If `dx` is rejected, then `on_rejected` is called,
-#' with the error object or message as the argument.
+#' `dx$then()` creates a deferred value whose resolution depends on the
+#' `dx` deferred value. When `dx` is successfully resolved, the
+#' `on_fulfilled` function is called, with the resolved value as an
+#' argument.
 #'
-#' Note that the deferred value created by `dx$then()` will resolve
-#' successfully, unless an error is throws from within `on_fulfilled` or
-#' `on_rejected`. Whether `dx` was rejected or not, does not matter in this
-#' case. This allows using `on_rejected` as an error handler.
-#'
-#' `dx$catch()` is a shortcut to provide an error handler, it is equivalent
-#' to `dx$thin()` with `on_fulfilled` set to `NULL`.
+#' `dx$catch()` is a TODO
 #'
 #' `dx$finally()` makes sure that `on_finally` runs once `dx` is resolved
 #' or rejected. It is ideal to specifying cleanup functions, e.g. closing
@@ -63,8 +56,8 @@ deferred <- R6Class(
     initialize = function(action, on_progress = NULL, on_cancel = NULL,
                           lazy = TRUE)
       async_def_init(self, private, action, on_progress, on_cancel, lazy),
-    then = function(on_fulfilled = NULL, on_rejected = NULL)
-      def_then(self, private, on_fulfilled, on_rejected),
+    then = function(on_fulfilled)
+      def_then(self, private, on_fulfilled),
     catch = function(on_rejected)
       def_catch(self, private, on_rejected),
     finally = function(on_finally)
@@ -169,7 +162,7 @@ make_then_function <- function(func, value) {
   }
 }
 
-def_then <- function(self, private, on_fulfilled, on_rejected) {
+def_then <- function(self, private, on_fulfilled = NULL, on_rejected = NULL) {
   force(self)
   force(private)
 
@@ -214,12 +207,14 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
 
 def_catch <- function(self, private, on_rejected) {
   force(on_rejected)
-  self$then(on_rejected = on_rejected)
+  def_then(self, private, on_rejected = on_rejected)
 }
 
 def_finally <- function(self, private, on_finally) {
   force(on_finally)
-  self$then(
+  def_then(
+    self,
+    private,
     on_fulfilled = function(value) {
       on_finally()
       value
@@ -249,7 +244,7 @@ def__resolve <- function(self, private, value) {
   if (private$cancelled) return()
   if (private$state != "pending") stop("Deferred value already resolved")
   if (is_deferred(value)) {
-    dx <- value$then(private$resolve, private$reject)
+    dx <- value$then(private$resolve)$catch(private$reject)
     def__dead_end(dx)
   } else {
     if (!private$dead_end && !length(private$on_fulfilled)) {
@@ -282,7 +277,7 @@ def__reject <- function(self, private, reason) {
   if (private$cancelled) return()
   if (private$state != "pending") stop("Deferred value already rejected")
   if (is_deferred(reason)) {
-    dx <- reason$then(private$resolve, private$reject)
+    dx <- reason$then(private$resolve)$catch(private$reject)
     def__dead_end(dx)
   } else {
     private$state <- "rejected"

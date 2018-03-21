@@ -9,7 +9,7 @@ Deferred value
 \section{Usage}{
 \preformatted{dx <- deferred$new(action)
 
-dx$then(on_fulfilled = NULL, on_rejected = NULL)
+dx$then(on_fulfilled)
 dx$catch(on_rejected)
 dx$finally(on_finally)
 }
@@ -41,19 +41,12 @@ result of the I/O or computation (like the return value). If the task
 fails, call \code{reject(reason)}, where \code{reason} is either an error object,
 or a character string.
 
-\code{dx$then()} creates a deferred value whose resolution (and rejection)
-depends on the \code{dx} deferred value. When \code{dx} is successfully
-resolved, the \code{on_fulfilled} function is called, with the resolved
-value as an argument. If \code{dx} is rejected, then \code{on_rejected} is called,
-with the error object or message as the argument.
+\code{dx$then()} creates a deferred value whose resolution depends on the
+\code{dx} deferred value. When \code{dx} is successfully resolved, the
+\code{on_fulfilled} function is called, with the resolved value as an
+argument.
 
-Note that the deferred value created by \code{dx$then()} will resolve
-successfully, unless an error is throws from within \code{on_fulfilled} or
-\code{on_rejected}. Whether \code{dx} was rejected or not, does not matter in this
-case. This allows using \code{on_rejected} as an error handler.
-
-\code{dx$catch()} is a shortcut to provide an error handler, it is equivalent
-to \code{dx$thin()} with \code{on_fulfilled} set to \code{NULL}.
+\code{dx$catch()} is a TODO
 
 \code{dx$finally()} makes sure that \code{on_finally} runs once \code{dx} is resolved
 or rejected. It is ideal to specifying cleanup functions, e.g. closing
