@@ -42,7 +42,7 @@ async_filter <- function(.x, .p, ..., cancel = TRUE) {
           })$
         catch(
           function(reason) {
-            def__cancel_pending(defs, cancel)
+            if (cancel) async_cancel_pending(.list = defs)
             reject(reason)
           }
         )$

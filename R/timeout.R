@@ -47,7 +47,7 @@ async_timeout <- function(task, timeout, ..., cancel = TRUE) {
     delay(timeout)$then(
       function(value) {
         if (!done) {
-          def__cancel_pending(list(task), cancel)
+          if (cancel) async_cancel_pending(task)
           reject(make_error("Timed out", "async_timeout"))
         }
         done <<- TRUE

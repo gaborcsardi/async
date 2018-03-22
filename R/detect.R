@@ -48,7 +48,7 @@ async_detect_nolimit <- function(.x, .p, ..., cancel) {
           function(value) {
             if (!done && isTRUE(value)) {
               done <<- TRUE
-              def__cancel_pending(defs, cancel)
+              if (cancel) async_cancel_pending(.list = defs)
               resolve(.x[[i]])
             } else {
               num_todo <<- num_todo - 1
@@ -57,7 +57,7 @@ async_detect_nolimit <- function(.x, .p, ..., cancel) {
           })$
         catch(
           function(reason) {
-            def__cancel_pending(defs, cancel)
+            if (cancel) async_cancel_pending(.list = defs)
             reject(reason)
           }
         )$null()
@@ -82,7 +82,7 @@ async_detect_limit <- function(.x, .p, ..., .limit = .limit, cancel) {
       if (done) return()
       if (isTRUE(value)) {
         done <<- TRUE
-        def__cancel_pending(.x, cancel)
+        if (cancel) async_cancel_pending(.list = .x)
         return(resolve(.x[[which]]))
       } else {
         num_todo <<- num_todo - 1
@@ -100,7 +100,7 @@ async_detect_limit <- function(.x, .p, ..., .limit = .limit, cancel) {
     xreject <- function(reason) {
       if (done) return()
       done <<- TRUE
-      def__cancel_pending(.x, cancel)
+      if (cancel) async_cancel_pending(.list = .x)
       reject(reason)
     }
 

@@ -42,7 +42,7 @@ when_some <- function(count, ..., .list = list(), cancel = TRUE) {
 
     ## Maybe we don't have that many deferred
     if (num_defs < count) {
-      def__cancel_pending(defs, cancel)
+      if (cancel) async_cancel_pending(.list = defs)
       return(reject(async_constant("Cannot resolve enough deferred values")))
     }
 
@@ -52,14 +52,14 @@ when_some <- function(count, ..., .list = list(), cancel = TRUE) {
 
     ## Maybe we already have enough
     if (length(resolved) >= count) {
-      def__cancel_pending(defs, cancel)
+      if (cancel) async_cancel_pending(.list = defs)
       return(resolve(async_constant(resolved[seq_len(count)])))
     }
 
     handle_fulfill <- function(value) {
       resolved <<- c(resolved, list(value))
       if (length(resolved) == count) {
-        def__cancel_pending(defs, cancel)
+        if (cancel) async_cancel_pending(.list = defs)
         resolve(resolved)
       }
     }
@@ -67,7 +67,7 @@ when_some <- function(count, ..., .list = list(), cancel = TRUE) {
     handle_reject <- function(reason) {
       num_failed <<- num_failed + 1
       if (num_failed + count == num_defs + 1) {
-        def__cancel_pending(defs, cancel)
+        if (cancel) async_cancel_pending(.list = defs)
         reject(reason)
       }
     }

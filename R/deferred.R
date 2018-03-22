@@ -315,13 +315,22 @@ is_deferred <- function(x) {
   inherits(x, "deferred")
 }
 
-def__cancel_pending <- function(defs, cancel) {
-  if (cancel) {
-    for (i in seq_along(defs)) {
-      if (is_deferred(defs[[i]])) {
-        defs[[i]]$null()
-        defs[[i]]$cancel()
-      }
+#' Cancel async tasks
+#'
+#' Does nothing for deferred values that are already resolved.
+#' Does nothing for objects that are not deferred values.
+#'
+#' @param ... Deferred values to cancel.
+#' @param .list More deferred values to cancel.
+#'
+#' @export
+
+async_cancel_pending <- function(..., .list = list()) {
+  defs <- c(list(...), .list)
+  for (i in seq_along(defs)) {
+    if (is_deferred(defs[[i]])) {
+      defs[[i]]$null()
+      defs[[i]]$cancel()
     }
   }
 }

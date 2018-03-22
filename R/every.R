@@ -38,7 +38,7 @@ async_every <- function(.x, .p, ..., cancel = TRUE) {
           function(value) {
             if (!done && !isTRUE(value)) {
               done <<- TRUE
-              def__cancel_pending(defs, cancel)
+              if (cancel) async_cancel_pending(.list = defs)
               resolve(FALSE)
             } else {
               num_todo <<- num_todo - 1
@@ -47,7 +47,7 @@ async_every <- function(.x, .p, ..., cancel = TRUE) {
           })$
         catch(
           function(reason) {
-            def__cancel_pending(defs, cancel)
+            if (cancel) async_cancel_pending(.list = defs)
             reject(reason)
           }
         )$

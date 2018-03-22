@@ -40,7 +40,7 @@ when_all <- function(..., .list = list(), cancel = TRUE) {
     }
 
     handle_reject <- function(reason) {
-      def__cancel_pending(defs, cancel)
+      if (cancel) async_cancel_pending(.list = defs)
       reject(reason)
     }
 
