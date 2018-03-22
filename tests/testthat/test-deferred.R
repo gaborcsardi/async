@@ -58,3 +58,17 @@ test_that("on_fulfilled / on_rejected without arguments", {
   })
   synchronise(do())
 })
+
+test_that("parent pointer", {
+
+  ## Parent pointer is added when the deferred is created, but it
+  ## is removed, once the promise is resolved
+  do <- function() {
+    d1 <- delay(1/1000)
+    d2 <- d1$then(force)
+    d3 <- d2$then(~ expect_true(is.null(private(d2)$parent)))
+    expect_false(is.null(private(d2)$parent))
+    when_all(d1, d2, d3)
+  }
+  synchronise(do())
+})

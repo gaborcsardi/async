@@ -54,8 +54,9 @@ deferred <- R6Class(
   "deferred",
   public = list(
     initialize = function(action, on_progress = NULL, on_cancel = NULL,
-                          lazy = TRUE)
-      async_def_init(self, private, action, on_progress, on_cancel, lazy),
+                          lazy = TRUE, parent = NULL)
+      async_def_init(self, private, action, on_progress, on_cancel, lazy,
+                     parent),
     then = function(on_fulfilled)
       def_then(self, private, on_fulfilled),
     catch = function(on_rejected)
@@ -78,6 +79,7 @@ deferred <- R6Class(
     cancel_callback = NULL,
     cancelled = FALSE,
     dead_end = FALSE,
+    parent = NULL,
 
     get_value = function()
       def__get_value(self, private),
@@ -95,11 +97,12 @@ deferred <- R6Class(
 )
 
 async_def_init <- function(self, private, action, on_progress,
-                           on_cancel, lazy) {
+                           on_cancel, lazy, parent) {
 
   ## TODO: handle errors that happen here, maybe.
 
   private$event_loop <- get_default_event_loop()
+  private$parent <- parent
 
   if (!is.function(action)) {
     action <- as_function(action)
@@ -175,7 +178,7 @@ def_then <- function(self, private, on_fulfilled = NULL, on_rejected = NULL) {
   on_fulfilled <- if (!is.null(on_fulfilled)) as_function(on_fulfilled)
   on_rejected  <- if (!is.null(on_rejected))  as_function(on_rejected)
 
-  deferred$new(lazy = FALSE, function(resolve, reject) {
+  deferred$new(lazy = FALSE, parent = self, function(resolve, reject) {
     force(resolve)
     force(reject)
 
@@ -252,6 +255,7 @@ def__resolve <- function(self, private, value) {
     private$value <- value
     for (f in private$on_fulfilled) f(value)
     private$on_fulfilled <- list()
+    private$parent <- NULL
   }
 }
 
@@ -287,6 +291,7 @@ def__reject <- function(self, private, reason) {
     }
     for (f in private$on_rejected) f(private$value)
     private$on_rejected <- list()
+    private$parent <- NULL
   }
 }
 
