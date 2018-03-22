@@ -139,8 +139,6 @@ test_that("progress bar for in-memory data", {
 
 test_that("error, invalid arg", {
 
-  skip("These errors are not async yet")
-
   do <- function() {
     dx <- http_get(12123)
   }
