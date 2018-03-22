@@ -182,6 +182,8 @@ el_add_next_tick <- function(self, private, func, callback) {
 }
 
 el_cancel <- function(self, private, id) {
+  private$next_ticks <- setdiff(private$next_ticks, id)
+  private$timers  <- private$timers[setdiff(names(private$times), id)]
   private$tasks[[id]] <- NULL
   invisible(self)
 }

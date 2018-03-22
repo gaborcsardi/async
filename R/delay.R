@@ -25,15 +25,20 @@
 
 delay <- function(delay) {
   assert_that(is_time_interval(delay))
+  id <- NULL
   deferred$new(
     function(resolve, reject) {
       force(resolve)
       force(reject)
-      get_default_event_loop()$add_delayed(
+      id <<- get_default_event_loop()$add_delayed(
         delay,
         function() TRUE,
         function(err, res) if (is.null(err)) resolve(res) else reject(err)
       )
+    },
+    on_cancel = function(reason) {
+      print("cancelling delay")
+      get_default_event_loop()$cancel(id)
     }
   )
 }
