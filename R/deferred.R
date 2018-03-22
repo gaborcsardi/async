@@ -236,7 +236,7 @@ def_cancel <- function(self, private, reason) {
 }
 
 def_null <- function(self, private) {
-  def__dead_end(self)
+  self$.__enclos_env__$private$dead_end <- TRUE
   invisible(self)
 }
 
@@ -244,8 +244,7 @@ def__resolve <- function(self, private, value) {
   if (private$cancelled) return()
   if (private$state != "pending") stop("Deferred value already resolved")
   if (is_deferred(value)) {
-    dx <- value$then(private$resolve)$catch(private$reject)
-    def__dead_end(dx)
+    value$then(private$resolve)$catch(private$reject)$null()
   } else {
     if (!private$dead_end && !length(private$on_fulfilled)) {
       stop("Computation going nowhere...")
@@ -277,8 +276,7 @@ def__reject <- function(self, private, reason) {
   if (private$cancelled) return()
   if (private$state != "pending") stop("Deferred value already rejected")
   if (is_deferred(reason)) {
-    dx <- reason$then(private$resolve)$catch(private$reject)
-    def__dead_end(dx)
+    reason$then(private$resolve)$catch(private$reject)$null()
   } else {
     private$state <- "rejected"
     private$make_error_object(reason)
@@ -315,10 +313,6 @@ def__progress <- function(self, private, data) {
 
 is_deferred <- function(x) {
   inherits(x, "deferred")
-}
-
-def__dead_end <- function(def) {
-  def$.__enclos_env__$private$dead_end <- TRUE
 }
 
 def__cancel_pending <- function(defs, cancel) {
