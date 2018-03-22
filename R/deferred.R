@@ -77,7 +77,6 @@ deferred <- R6Class(
     progress_callback = NULL,
     cancel_callback = NULL,
     cancelled = FALSE,
-    start_stack = NULL,
     dead_end = FALSE,
 
     get_value = function()
