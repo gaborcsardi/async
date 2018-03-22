@@ -18,3 +18,19 @@ test_that("async_some", {
   expect_identical(result, FALSE)
 
 })
+
+test_that("async_some, errors", {
+
+  called <- FALSE
+  do <- function()  {
+    async_some(1:10, function(x) stop("doh"))$
+      then(function() called <<- TRUE)$
+      catch(function(e) {
+        expect_equal(conditionMessage(e), "doh")
+        expect_s3_class(e, "async_rejected")
+      })
+  }
+
+  synchronise(do())
+  expect_false(called)
+})

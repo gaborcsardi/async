@@ -33,3 +33,18 @@ test_that("async_detect", {
 
   lapply(c(Inf, 1, 2, 3, 5, 10, 20), function(x) synchronise(test(x)))
 })
+
+test_that("async_detect errors", {
+  called <- FALSE
+  do <- function()  {
+    async_detect(1:10, function(x) stop("doh"))$
+      then(function() called <<- TRUE)$
+      catch(function(e) {
+        expect_equal(conditionMessage(e), "doh")
+        expect_s3_class(e, "async_rejected")
+      })
+  }
+
+  synchronise(do())
+  expect_false(called)
+})
