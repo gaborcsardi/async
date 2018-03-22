@@ -269,7 +269,7 @@ def__resolve <- function(self, private, value) {
 
 def__make_error_object <- function(self, private, err) {
   class(err) <- unique(c("async_rejected", class(err)))
-  private$value <- err
+  err
 }
 
 def__reject <- function(self, private, reason) {
@@ -279,7 +279,7 @@ def__reject <- function(self, private, reason) {
     reason$then(private$resolve)$catch(private$reject)$null()
   } else {
     private$state <- "rejected"
-    private$make_error_object(reason)
+    private$value <- private$make_error_object(reason)
     if (inherits(private$value, "async_cancelled")) {
       private$cancelled <- TRUE
       if (!is.null(private$cancel_callback)) {
