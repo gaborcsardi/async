@@ -4,7 +4,7 @@ context("deferred")
 test_that("error if not done yet", {
   do <- async(function() {
     dx <- delay(1/1000)
-    expect_error(private(dx)$get_value())
+    expect_error(get_private(dx)$get_value())
     dx
   })
   synchronise(do())
@@ -66,8 +66,8 @@ test_that("parent pointer", {
   do <- function() {
     d1 <- delay(1/1000)
     d2 <- d1$then(force)
-    d3 <- d2$then(~ expect_true(is.null(private(d2)$parent)))
-    expect_false(is.null(private(d2)$parent))
+    d3 <- d2$then(~ expect_true(is.null(get_private(d2)$parent)))
+    expect_false(is.null(get_private(d2)$parent))
     when_all(d1, d2, d3)
   }
   synchronise(do())

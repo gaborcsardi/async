@@ -16,7 +16,7 @@ test_that("on_cancel callback is called", {
     all <- when_all(
       dx$catch(function(e) expect_match(e$message, "changed my mind")),
       dx$catch(function(e) expect_s3_class(e, "async_cancelled")),
-      dx$catch(~ expect_equal(private(dx)$state, "rejected")),
+      dx$catch(~ expect_equal(get_private(dx)$state, "rejected")),
       dx$catch(~ expect_true(cancelled)),
       dx$catch(~ expect_match(cancel_msg, "changed my mind"))
     )
@@ -39,8 +39,8 @@ test_that("then() is also rejected on cancel", {
       dx$catch(function(e) expect_match(e$message, "changed my mind")),
       dx2$catch(function(e) expect_s3_class(e, "async_cancelled")),
       dx$catch(function(e) expect_s3_class(e, "async_cancelled")),
-      dx2$catch(~ expect_equal(private(dx2)$state, "rejected")),
-      dx$catch(~ expect_equal(private(dx)$state, "rejected"))
+      dx2$catch(~ expect_equal(get_private(dx2)$state, "rejected")),
+      dx$catch(~ expect_equal(get_private(dx)$state, "rejected"))
     )
 
     dx$cancel("changed my mind")

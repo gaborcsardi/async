@@ -12,7 +12,7 @@ viapply <- function(X, FUN, ..., FUN.VALUE = integer(1)) {
 }
 
 get_value_x <- function(x) {
-  if (is_deferred(x)) private(x)$get_value() else x
+  if (is_deferred(x)) get_private(x)$get_value() else x
 }
 
 make_error <- function(message, class = "simpleError", call = NULL) {
@@ -74,7 +74,7 @@ has_utf8 <- function() {
   cli::get_spinner()$name == "dots"
 }
 
-private <- function(x) {
+get_private <- function(x) {
   x$.__enclos_env__$private
 }
 
