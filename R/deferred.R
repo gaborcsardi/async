@@ -298,9 +298,9 @@ def__reject <- function(self, private, reason) {
     private$value <- private$make_error_object(reason)
     if (inherits(private$value, "async_cancelled")) {
       private$cancelled <- TRUE
-      if (!is.null(private$cancel_callback)) {
-        private$cancel_callback(conditionMessage(private$value))
-      }
+    }
+    if (!is.null(private$cancel_callback)) {
+      private$cancel_callback(conditionMessage(private$value))
     }
     for (x in private$children) def__call_then("then_reject", x, private$value)
     private$children <- list()
