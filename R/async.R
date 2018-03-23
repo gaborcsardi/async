@@ -28,22 +28,14 @@ async <- function(fun) {
   async_fun <- fun
   body(async_fun) <- expr({
     mget(ls(environment(), all.names = TRUE), environment())
-    (!! deferred)$new(
-      function(resolve, reject) {
-        force(resolve) ; force(reject)
-        (!! get_default_event_loop)()$add_next_tick(
-          function() {
-            evalq(
-              { !!! body(fun) },
-              envir = parent.env(parent.env(environment()))
-            )
-          },
-          function(err, res) {
-            if (is.null(err)) resolve(res) else reject(err)
-          }
-        )
-      }
-    )
+    fun2 <- function() {
+      evalq(
+      { !!! body(fun) },
+      envir = parent.env(environment())
+      )
+    }
+    deferred$new(function(resolve, reject) resolve(NULL), type = "async")$
+      then(~ fun2())
   })
 
   attr(async_fun, "async")$async <- TRUE
