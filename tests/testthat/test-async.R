@@ -86,3 +86,22 @@ test_that("triggers error on unhandled rejection", {
   )
   expect_true(did_trigger)
 })
+
+test_that("can be cancelled", {
+
+  called <- called2 <- FALSE
+  do <- function() {
+    afun <- async(function() called <<- TRUE)
+    dx <- afun()
+    dy <- dx$then(function() called2 <<- TRUE)
+    dx$cancel()
+    dy
+  }
+
+  err <- tryCatch(synchronise(do()), error = identity)
+  expect_equal(conditionMessage(err), "Cancelled")
+  expect_s3_class(err, "async_cancelled")
+  expect_s3_class(err, "async_rejected")
+  expect_false(called)
+  expect_false(called2)
+})

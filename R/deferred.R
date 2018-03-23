@@ -259,7 +259,21 @@ def__resolve <- function(self, private, value) {
   if (private$cancelled) return()
   if (private$state != "pending") stop("Deferred value already resolved")
   if (is_deferred(value)) {
-    value$then(private$resolve)$catch(private$reject)$null()
+
+    vpriv <- get_private(value)
+    if (vpriv$state == "pending")  {
+      vpriv$children <- c(vpriv$children, list(self))
+      private$then_resolve <- identity
+      private$then_reject <- stop
+      private$parent <- value
+
+    } else if (vpriv$state == "resolved") {
+      private$resolve(vpriv$value)
+
+    } else if (vpriv$state == "rejected") {
+      private$reject(vpriv$value)
+    }
+
   } else {
     if (!private$dead_end && !length(private$children)) {
       stop("Computation going nowhere...")

@@ -65,3 +65,36 @@ test_that("can catch and handle cancellation", {
   })
   synchronise(do())
 })
+
+test_that("cancel delay", {
+
+  do <- function() {
+    d1 <- delay(60)
+    d1$cancel()
+  }
+  tic <- Sys.time()
+  synchronise(do())
+  tac <- Sys.time()
+  expect_true(tac - tic < as.difftime(30, units  =  "secs"))
+})
+
+test_that("cancel delay after it has started", {
+
+  cancelled <- NULL
+  do <- function() {
+    d1 <- delay(5)
+    d1x <- d1$catch(identity)
+    d2 <- delay(1/100)$
+      then(function() { d1$cancel("nope"); "OK" })
+    when_all(d1x, d2)
+  }
+
+  tic <- Sys.time()
+  res <- synchronise(do())
+  tac <- Sys.time()
+
+  expect_s3_class(res[[1]], "async_cancelled")
+  expect_equal(conditionMessage(res[[1]]), "nope")
+  expect_equal(res[[2]], "OK")
+  expect_true(tac - tic < as.difftime(4, units  =  "secs"))
+})
