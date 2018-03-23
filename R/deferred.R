@@ -63,7 +63,7 @@ deferred <- R6Class(
       def_catch(self, private, on_rejected),
     finally = function(on_finally)
       def_finally(self, private, on_finally),
-    cancel = function(reason = NULL)
+    cancel = function(reason = "Cancelled")
       def_cancel(self, private, reason),
     null = function()
       def_null(self, private)
