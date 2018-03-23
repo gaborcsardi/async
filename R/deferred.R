@@ -73,8 +73,7 @@ deferred <- R6Class(
     state = c("pending", "fulfilled", "rejected")[1],
     event_loop = NULL,
     value = NULL,
-    on_fulfilled = list(),
-    on_rejected = list(),
+    children = list(),
     progress_callback = NULL,
     cancel_callback = NULL,
     cancelled = FALSE,
@@ -92,7 +91,10 @@ deferred <- R6Class(
       def__progress(self, private, data),
 
     make_error_object = function(err)
-      def__make_error_object(self, private, err)
+      def__make_error_object(self, private, err),
+
+    then_resolve = NULL,
+    then_reject = NULL
   )
 )
 
@@ -117,6 +119,9 @@ async_def_init <- function(self, private, action, on_progress,
 
   action_args <- names(formals(action))
   args <- list(private$resolve, private$reject)
+  if (!is.na(sf_arg <- match("myself", action_args))) {
+    args$myself <- self
+  }
   if (!is.na(pr_arg <- match("progress", action_args))) {
     args$progress <- private$progress
   }
@@ -178,7 +183,7 @@ def_then <- function(self, private, on_fulfilled = NULL, on_rejected = NULL) {
   on_fulfilled <- if (!is.null(on_fulfilled)) as_function(on_fulfilled)
   on_rejected  <- if (!is.null(on_rejected))  as_function(on_rejected)
 
-  deferred$new(lazy = FALSE, parent = self, function(resolve, reject) {
+  deferred$new(lazy = FALSE, parent = self, function(resolve, reject, myself) {
     force(resolve)
     force(reject)
 
@@ -193,10 +198,10 @@ def_then <- function(self, private, on_fulfilled = NULL, on_rejected = NULL) {
     }
 
     if (private$state == "pending") {
-      private$on_fulfilled <- c(private$on_fulfilled,
-                                list(handle(on_fulfilled)))
-      private$on_rejected <- c(private$on_rejected,
-                               list(handle(on_rejected %||% stop)))
+      private$children <- c(private$children, list(myself))
+      myprivate <- get_private(myself)
+      myprivate$then_resolve <- on_fulfilled
+      myprivate$then_reject <- on_rejected %||% stop
 
     } else if (private$state == "fulfilled") {
       handle(on_fulfilled)(private$value)
@@ -248,13 +253,13 @@ def__resolve <- function(self, private, value) {
   if (is_deferred(value)) {
     value$then(private$resolve)$catch(private$reject)$null()
   } else {
-    if (!private$dead_end && !length(private$on_fulfilled)) {
+    if (!private$dead_end && !length(private$children)) {
       stop("Computation going nowhere...")
     }
     private$state <- "fulfilled"
     private$value <- value
-    for (f in private$on_fulfilled) f(value)
-    private$on_fulfilled <- list()
+    for (x in private$children) def__call_then("then_resolve", x, value)
+    private$children <- list()
     private$parent <- NULL
   }
 }
@@ -289,10 +294,24 @@ def__reject <- function(self, private, reason) {
         private$cancel_callback(conditionMessage(private$value))
       }
     }
-    for (f in private$on_rejected) f(private$value)
-    private$on_rejected <- list()
+    for (x in private$children) def__call_then("then_reject", x, private$value)
+    private$children <- list()
     private$parent <- NULL
   }
+}
+
+def__call_then <- function(which, x, value)  {
+  force(value)
+  priv <- get_private(x)
+  if (priv$state != "pending") return()
+
+  cb <- priv[[which]]
+  priv$event_loop$add_next_tick(
+    make_then_function(cb, value),
+    function(err, res) {
+      if (is.null(err)) priv$resolve(res) else priv$reject(err)
+    }
+  )
 }
 
 def__progress <- function(self, private, data) {
