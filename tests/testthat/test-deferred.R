@@ -67,7 +67,7 @@ test_that("parent pointer", {
     d1 <- delay(1/1000)
     d2 <- d1$then(force)
     d3 <- d2$then(~ expect_true(is.null(get_private(d2)$parent)))
-    expect_false(is.null(get_private(d2)$parent))
+    expect_equal(length(get_private(d2)$parent), 0)
     when_all(d1, d2, d3)
   }
   synchronise(do())

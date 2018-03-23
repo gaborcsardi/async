@@ -54,9 +54,9 @@ deferred <- R6Class(
   "deferred",
   public = list(
     initialize = function(action, on_progress = NULL, on_cancel = NULL,
-                          lazy = TRUE, parent = NULL, type = NULL)
+                          lazy = TRUE, parents = NULL, type = NULL)
       async_def_init(self, private, action, on_progress, on_cancel, lazy,
-                     parent, type),
+                     parents, type),
     then = function(on_fulfilled)
       def_then(self, private, on_fulfilled),
     catch = function(on_rejected)
@@ -80,7 +80,7 @@ deferred <- R6Class(
     cancel_callback = NULL,
     cancelled = FALSE,
     dead_end = FALSE,
-    parent = NULL,
+    parents = NULL,
 
     get_value = function()
       def__get_value(self, private),
@@ -95,8 +95,8 @@ deferred <- R6Class(
     make_error_object = function(err)
       def__make_error_object(self, private, err),
 
-    maybe_cancel_parent = function(reason)
-      def__maybe_cancel_parent(self, private, reason),
+    maybe_cancel_parents = function(reason)
+      def__maybe_cancel_parents(self, private, reason),
 
     then_resolve = NULL,
     then_reject = NULL
@@ -104,14 +104,14 @@ deferred <- R6Class(
 )
 
 async_def_init <- function(self, private, action, on_progress,
-                           on_cancel, lazy, parent, type) {
+                           on_cancel, lazy, parents, type) {
 
   ## TODO: handle errors that happen here, maybe.
 
   private$type <- type
   private$id <- get_id()
   private$event_loop <- get_default_event_loop()
-  private$parent <- parent
+  private$parents <- parents
 
   if (!is.function(action)) {
     action <- as_function(action)
@@ -190,7 +190,8 @@ def_then <- function(self, private, on_fulfilled = NULL, on_rejected = NULL) {
   on_fulfilled <- if (!is.null(on_fulfilled)) as_function(on_fulfilled)
   on_rejected  <- if (!is.null(on_rejected))  as_function(on_rejected)
 
-  deferred$new(lazy = FALSE, parent = self, type = paste("then", private$id),
+  deferred$new(lazy = FALSE, parents = list(self),
+               type = paste("then", private$id),
                function(resolve, reject, myself) {
     force(resolve)
     force(reject)
@@ -265,7 +266,7 @@ def__resolve <- function(self, private, value) {
       vpriv$children <- c(vpriv$children, list(self))
       private$then_resolve <- identity
       private$then_reject <- stop
-      private$parent <- value
+      private$parents <- c(private$parents, list(value))
 
     } else if (vpriv$state == "resolved") {
       private$resolve(vpriv$value)
@@ -282,7 +283,8 @@ def__resolve <- function(self, private, value) {
     private$value <- value
     for (x in private$children) def__call_then("then_resolve", x, value)
     private$children <- list()
-    private$parent <- NULL
+    private$maybe_cancel_parents(private$value)
+    private$parents <- NULL
   }
 }
 
@@ -318,21 +320,22 @@ def__reject <- function(self, private, reason) {
     }
     for (x in private$children) def__call_then("then_reject", x, private$value)
     private$children <- list()
-    private$maybe_cancel_parent(private$value)
-    private$parent <- NULL
+    private$maybe_cancel_parents(private$value)
+    private$parents <- NULL
   }
 }
 
-def__maybe_cancel_parent <- function(self, private, reason) {
-  parent <- private$parent
-  if (is.null(parent)) return()
+def__maybe_cancel_parents <- function(self, private, reason) {
+  for (parent in private$parents) {
+    if (is.null(parent)) next
 
-  parent_priv <- get_private(parent)
-  if (parent_priv$state != "pending") return()
+    parent_priv <- get_private(parent)
+    if (parent_priv$state != "pending") next
 
-  chld <- parent_priv$children
-  parent_priv$children <- chld[! vlapply(chld, identical, self)]
-  if (!length(parent_priv$children)) parent$cancel(reason)
+    chld <- parent_priv$children
+    parent_priv$children <- chld[! vlapply(chld, identical, self)]
+    if (!length(parent_priv$children)) parent$cancel(reason)
+  }
 }
 
 def__call_then <- function(which, x, value)  {
