@@ -304,8 +304,21 @@ def__reject <- function(self, private, reason) {
     }
     for (x in private$children) def__call_then("then_reject", x, private$value)
     private$children <- list()
+    private$maybe_cancel_parent(private$value)
     private$parent <- NULL
   }
+}
+
+def__maybe_cancel_parent <- function(self, private, reason) {
+  parent <- private$parent
+  if (is.null(parent)) return()
+
+  parent_priv <- get_private(parent)
+  if (parent_priv$state != "pending") return()
+
+  chld <- parent_priv$children
+  parent_priv$children <- chld[! vlapply(chld, identical, self)]
+  if (!length(parent_priv$children)) parent$cancel(reason)
 }
 
 def__call_then <- function(which, x, value)  {
