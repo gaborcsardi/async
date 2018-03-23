@@ -99,7 +99,9 @@ deferred <- R6Class(
       def__make_error_object(self, private, err),
 
     maybe_cancel_parents = function(reason)
-      def__maybe_cancel_parents(self, private, reason)
+      def__maybe_cancel_parents(self, private, reason),
+    add_as_parent = function(child)
+      def__add_as_parent(self, private, child)
   )
 )
 
@@ -125,15 +127,7 @@ async_def_init <- function(self, private, action, on_progress,
 
   for (prt in parents) {
     prt_pvt <- get_private(prt)
-    if (prt_pvt$state == "pending") {
-      prt_pvt$children <- c(prt_pvt$children, list(self))
-
-    } else if (prt_pvt$state == "fulfilled") {
-      def__call_then("parent_resolve", self, prt_pvt$value)
-
-    } else {
-      def__call_then("parent_reject", self, prt_pvt$value)
-    }
+    prt_pvt$add_as_parent(self)
   }
 
   if (!is.null(action)) {
@@ -240,21 +234,13 @@ def_null <- function(self, private) {
 def__resolve <- function(self, private, value) {
   if (private$cancelled) return()
   if (private$state != "pending") stop("Deferred value already resolved")
+
   if (is_deferred(value)) {
 
-    vpriv <- get_private(value)
-    if (vpriv$state == "pending")  {
-      vpriv$children <- c(vpriv$children, list(self))
-      private$parent_resolve <- def__make_parent_resolve(NULL)
-      private$parent_reject <- def__make_parent_reject(NULL)
-      private$parents <- c(private$parents, list(value))
-
-    } else if (vpriv$state == "resolved") {
-      def__call_then("parent_resolve", self, vpriv$value)
-
-    } else if (vpriv$state == "rejected") {
-      def__call_then("parent_reject", self, vpriv$value)
-    }
+    private$parent_resolve <- def__make_parent_resolve(NULL)
+    private$parent_reject <- def__make_parent_reject(NULL)
+    private$parents <- c(private$parents, list(value))
+    get_private(value)$add_as_parent(self)
 
   } else {
     if (!private$dead_end && !length(private$children)) {
@@ -324,8 +310,13 @@ def__make_parent_reject <- function(fun) {
 def__reject <- function(self, private, reason) {
   if (private$cancelled) return()
   if (private$state != "pending") stop("Deferred value already rejected")
+
   if (is_deferred(reason)) {
-    reason$then(private$resolve)$catch(private$reject)$null()
+    private$parent_resolve <- def__make_parent_resolve(NULL)
+    private$parent_reject <- def__make_parent_reject(NULL)
+    private$parents <- c(private$parents, list(reason))
+    get_private(reason)$add_as_parent(self)
+
   } else {
     private$state <- "rejected"
     private$value <- private$make_error_object(reason)
@@ -364,6 +355,18 @@ def__call_then <- function(which, x, value)  {
   private$event_loop$add_next_tick(
     function() private[[which]](value, private$resolve, private$reject),
     function(err, res) if (!is.null(err)) private$reject(err))
+}
+
+def__add_as_parent <- function(self, private, child) {
+  if (private$state == "pending") {
+    private$children <- c(private$children, list(child))
+
+  } else if (private$state == "fulfilled") {
+    def__call_then("parent_resolve", child, private$value)
+
+  } else {
+    def__call_then("parent_reject", child, private$value)
+  }
 }
 
 def__progress <- function(self, private, data) {
