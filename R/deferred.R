@@ -53,10 +53,11 @@ NULL
 deferred <- R6Class(
   "deferred",
   public = list(
-    initialize = function(action, on_progress = NULL, on_cancel = NULL,
-                          lazy = TRUE, parents = NULL, type = NULL)
+    initialize = function(action = NULL, on_progress = NULL, on_cancel = NULL,
+                          lazy = TRUE, parents = NULL, parent_resolve = NULL,
+                          parent_reject = NULL, type = NULL)
       async_def_init(self, private, action, on_progress, on_cancel, lazy,
-                     parents, type),
+                     parents, parent_resolve, parent_reject, type),
     then = function(on_fulfilled)
       def_then(self, private, on_fulfilled),
     catch = function(on_rejected)
@@ -81,6 +82,8 @@ deferred <- R6Class(
     cancelled = FALSE,
     dead_end = FALSE,
     parents = NULL,
+    parent_resolve = NULL,
+    parent_reject = NULL,
 
     get_value = function()
       def__get_value(self, private),
@@ -96,15 +99,13 @@ deferred <- R6Class(
       def__make_error_object(self, private, err),
 
     maybe_cancel_parents = function(reason)
-      def__maybe_cancel_parents(self, private, reason),
-
-    then_resolve = NULL,
-    then_reject = NULL
+      def__maybe_cancel_parents(self, private, reason)
   )
 )
 
 async_def_init <- function(self, private, action, on_progress,
-                           on_cancel, lazy, parents, type) {
+                           on_cancel, lazy, parents, parent_resolve,
+                           parent_reject, type) {
 
   ## TODO: handle errors that happen here, maybe.
 
@@ -113,39 +114,59 @@ async_def_init <- function(self, private, action, on_progress,
   private$event_loop <- get_default_event_loop()
   private$parents <- parents
 
-  if (!is.function(action)) {
-    action <- as_function(action)
-    formals(action) <- alist(resolve = NULL, reject = NULL,
-                             progress = NULL)
-  }
-  assert_that(is_action_function(action))
   assert_that(is.null(on_progress) || is.function(on_progress))
   private$progress_callback <- on_progress
   assert_that(is.null(on_cancel) || is.function(on_cancel))
   private$cancel_callback <- on_cancel
 
-  action_args <- names(formals(action))
-  args <- list(private$resolve, private$reject)
-  if (!is.na(sf_arg <- match("myself", action_args))) {
-    args$myself <- self
+  ## Handle the parents
+  private$parent_resolve <- def__make_parent_resolve(parent_resolve)
+  private$parent_reject <- def__make_parent_reject(parent_reject)
+
+  for (prt in parents) {
+    prt_pvt <- get_private(prt)
+    if (prt_pvt$state == "pending") {
+      prt_pvt$children <- c(prt_pvt$children, list(self))
+
+    } else if (prt_pvt$state == "fulfilled") {
+      def__call_then("parent_resolve", self, prt_pvt$value)
+
+    } else {
+      def__call_then("parent_reject", self, prt_pvt$value)
+    }
   }
-  if (!is.na(pr_arg <- match("progress", action_args))) {
-    args$progress <- private$progress
-  }
 
-  ## We use isTRUE, because then we don't need to assert_flag(lazy),
-  ## which could result an error, and it is not clear if that error
-  ## should be reported synchronously or not
+  if (!is.null(action)) {
+    if (!is.function(action)) {
+      action <- as_function(action)
+      formals(action) <- alist(resolve = NULL, reject = NULL,
+                               progress = NULL)
+    }
+    assert_that(is_action_function(action))
 
-  if (isTRUE(lazy)) {
-    private$event_loop$add_next_tick(
-      function() do.call(action, args),
-      function(err, res) if (!is.null(err)) private$reject(err))
+    action_args <- names(formals(action))
+    args <- list(private$resolve, private$reject)
+    if (!is.na(sf_arg <- match("myself", action_args))) {
+      args$myself <- self
+    }
+    if (!is.na(pr_arg <- match("progress", action_args))) {
+      args$progress <- private$progress
+    }
 
-  } else {
-    call_with_callback(
-      function() do.call(action, args),
-      function(err, res) if (!is.null(err)) private$reject(err))
+    ## We use isTRUE, because then we don't need to assert_flag(lazy),
+    ## which could result an error, and it is not clear if that error
+    ## should be reported synchronously or not
+
+    if (isTRUE(lazy)) {
+      private$event_loop$add_next_tick(
+        function() do.call(action, args),
+        function(err, res) if (!is.null(err)) private$reject(err))
+
+    } else {
+      call_with_callback(
+        function() do.call(action, args),
+        function(err, res) if (!is.null(err)) private$reject(err))
+    }
   }
 
   invisible(self)
@@ -161,22 +182,8 @@ def__get_value <- function(self, private) {
   }
 }
 
-make_then_function <- function(func, value) {
-  func; value
-  function() {
-    if (is.function(func)) {
-      if (num_args(func) >= 1) {
-        func(value)
-      } else {
-        func()
-      }
-    } else {
-      value
-    }
-  }
-}
-
-def_then <- function(self, private, on_fulfilled = NULL, on_rejected = NULL) {
+def_then <- function(self, private, on_fulfilled = NULL,
+                     on_rejected = NULL) {
   force(self)
   force(private)
 
@@ -187,38 +194,12 @@ def_then <- function(self, private, on_fulfilled = NULL, on_rejected = NULL) {
     stop(err)
   }
 
-  on_fulfilled <- if (!is.null(on_fulfilled)) as_function(on_fulfilled)
-  on_rejected  <- if (!is.null(on_rejected))  as_function(on_rejected)
+  parent_resolve <- def__make_parent_resolve(on_fulfilled)
+  parent_reject <- def__make_parent_reject(on_rejected)
 
-  deferred$new(lazy = FALSE, parents = list(self),
-               type = paste("then", private$id),
-               function(resolve, reject, myself) {
-    force(resolve)
-    force(reject)
-
-    handle <- function(func) {
-      force(func)
-      function(value) {
-        private$event_loop$add_next_tick(
-          make_then_function(func, value),
-          function(err, res) if (is.null(err)) resolve(res) else reject(err)
-        )
-      }
-    }
-
-    if (private$state == "pending") {
-      private$children <- c(private$children, list(myself))
-      myprivate <- get_private(myself)
-      myprivate$then_resolve <- on_fulfilled
-      myprivate$then_reject <- on_rejected %||% stop
-
-    } else if (private$state == "fulfilled") {
-      handle(on_fulfilled)(private$value)
-
-    } else if (private$state == "rejected") {
-      handle(on_rejected %||% stop)(private$value)
-    }
-  })
+  deferred$new(parents = list(self), type = paste("then", private$id),
+               parent_resolve = parent_resolve,
+               parent_reject = parent_reject)
 }
 
 def_catch <- function(self, private, on_rejected) {
@@ -264,15 +245,15 @@ def__resolve <- function(self, private, value) {
     vpriv <- get_private(value)
     if (vpriv$state == "pending")  {
       vpriv$children <- c(vpriv$children, list(self))
-      private$then_resolve <- identity
-      private$then_reject <- stop
+      private$parent_resolve <- def__make_parent_resolve(NULL)
+      private$parent_reject <- def__make_parent_reject(NULL)
       private$parents <- c(private$parents, list(value))
 
     } else if (vpriv$state == "resolved") {
-      private$resolve(vpriv$value)
+      def__call_then("parent_resolve", self, vpriv$value)
 
     } else if (vpriv$state == "rejected") {
-      private$reject(vpriv$value)
+      def__call_then("parent_reject", self, vpriv$value)
     }
 
   } else {
@@ -281,7 +262,7 @@ def__resolve <- function(self, private, value) {
     }
     private$state <- "fulfilled"
     private$value <- value
-    for (x in private$children) def__call_then("then_resolve", x, value)
+    for (x in private$children) def__call_then("parent_resolve", x, value)
     private$children <- list()
     private$maybe_cancel_parents(private$value)
     private$parents <- NULL
@@ -304,6 +285,42 @@ def__make_error_object <- function(self, private, err) {
   err
 }
 
+def__make_parent_resolve <- function(fun) {
+  if (is.null(fun)) {
+    function(value, resolve, reject) resolve(value)
+  } else if (!is.function(fun)) {
+    fun <- as_function(fun)
+    function(value, resolve, reject) resolve(fun(value))
+  } else if (num_args(fun) == 0) {
+    function(value, resolve, reject) resolve(fun())
+  } else if (num_args(fun) == 1) {
+    function(value, resolve, reject) resolve(fun(value))
+  } else if (identical(names(formals(fun)),
+                       c("value", "resolve", "reject"))) {
+    fun
+  } else {
+    stop("Invalid parent_resolve callback")
+  }
+}
+
+def__make_parent_reject <- function(fun) {
+  if (is.null(fun)) {
+    function(value, resolve, reject) stop(value)
+  } else if (!is.function(fun)) {
+    fun <- as_function(fun)
+    function(value, resolve, reject) resolve(fun(value))
+  } else if (num_args(fun) == 0) {
+    function(value, resolve, reject) resolve(fun())
+  } else if (num_args(fun) == 1) {
+    function(value, resolve, reject) resolve(fun(value))
+  } else if (identical(names(formals(fun)),
+                       c("value", "resolve", "reject"))) {
+    fun
+  } else {
+    stop("Invalid parent_reject callback")
+  }
+}
+
 def__reject <- function(self, private, reason) {
   if (private$cancelled) return()
   if (private$state != "pending") stop("Deferred value already rejected")
@@ -318,7 +335,7 @@ def__reject <- function(self, private, reason) {
     if (!is.null(private$cancel_callback)) {
       private$cancel_callback(conditionMessage(private$value))
     }
-    for (x in private$children) def__call_then("then_reject", x, private$value)
+    for (x in private$children) def__call_then("parent_reject", x, private$value)
     private$children <- list()
     private$maybe_cancel_parents(private$value)
     private$parents <- NULL
@@ -340,16 +357,13 @@ def__maybe_cancel_parents <- function(self, private, reason) {
 
 def__call_then <- function(which, x, value)  {
   force(value)
-  priv <- get_private(x)
-  if (priv$state != "pending") return()
+  private <- get_private(x)
+  if (private$state != "pending") return()
 
-  cb <- priv[[which]]
-  priv$event_loop$add_next_tick(
-    make_then_function(cb, value),
-    function(err, res) {
-      if (is.null(err)) priv$resolve(res) else priv$reject(err)
-    }
-  )
+  cb <- private[[which]]
+  private$event_loop$add_next_tick(
+    function() private[[which]](value, private$resolve, private$reject),
+    function(err, res) if (!is.null(err)) private$reject(err))
 }
 
 def__progress <- function(self, private, data) {
