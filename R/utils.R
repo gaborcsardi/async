@@ -106,3 +106,11 @@ call_with_callback <- function(func, callback) {
   )
   callback(recerror, result)
 }
+
+get_id <- local({
+  id <- 0
+  function() {
+    id <<- id + 1
+    id
+  }
+})

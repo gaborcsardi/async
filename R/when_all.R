@@ -29,7 +29,7 @@ when_all <- function(..., .list = list(), cancel = TRUE) {
   force(cancel)
   defs <- c(list(...), .list)
 
-  deferred$new(lazy = FALSE, function(resolve, reject) {
+  deferred$new(lazy = FALSE, type = "when-all", function(resolve, reject) {
     num_todo <- length(defs)
 
     handle_fulfill <- function(value) {
