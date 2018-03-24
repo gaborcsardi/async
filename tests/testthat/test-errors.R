@@ -76,19 +76,9 @@ test_that("finally", {
   expect_true(called)
 })
 
-test_that("error in action, lazy", {
+test_that("error in action", {
   do <- function() {
-    deferred$new(lazy = TRUE, function(resolve, reject) stop("foobar"))
-  }
-
-  err <- tryCatch(synchronise(do()), error = identity)
-  expect_s3_class(err, "async_rejected")
-  expect_match(conditionMessage(err), "foobar")
-})
-
-test_that("error in action, eager", {
-  do <- function() {
-    deferred$new(lazy = FALSE, function(resolve, reject) stop("foobar"))
+    deferred$new(function(resolve, reject) stop("foobar"))
   }
 
   err <- tryCatch(synchronise(do()), error = identity)
@@ -106,20 +96,9 @@ test_that("error in then function", {
   expect_match(conditionMessage(err), "foobar")
 })
 
-test_that("can catch error in action, lazy", {
+test_that("can catch error in action", {
   do <- function() {
-    deferred$new(lazy = TRUE, function(resolve, reject) stop("foobar"))$
-      catch(function(e) e)
-  }
-
-  err  <- synchronise(do())
-  expect_s3_class(err, "async_rejected")
-  expect_match(conditionMessage(err), "foobar")
-})
-
-test_that("can catch error in action, eager", {
-  do <- function() {
-    deferred$new(lazy = FALSE, function(resolve, reject) stop("foobar"))$
+    deferred$new(function(resolve, reject) stop("foobar"))$
       catch(function(e) e)
   }
 

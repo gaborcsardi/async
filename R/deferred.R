@@ -54,9 +54,9 @@ deferred <- R6Class(
   "deferred",
   public = list(
     initialize = function(action = NULL, on_progress = NULL, on_cancel = NULL,
-                          lazy = TRUE, parents = NULL, parent_resolve = NULL,
+                          parents = NULL, parent_resolve = NULL,
                           parent_reject = NULL, type = NULL)
-      async_def_init(self, private, action, on_progress, on_cancel, lazy,
+      async_def_init(self, private, action, on_progress, on_cancel,
                      parents, parent_resolve, parent_reject, type),
     then = function(on_fulfilled)
       def_then(self, private, on_fulfilled),
@@ -108,7 +108,7 @@ deferred <- R6Class(
 )
 
 async_def_init <- function(self, private, action, on_progress,
-                           on_cancel, lazy, parents, parent_resolve,
+                           on_cancel, parents, parent_resolve,
                            parent_reject, type) {
 
   ## TODO: handle errors that happen here, maybe.
@@ -126,6 +126,7 @@ async_def_init <- function(self, private, action, on_progress,
   private$cancel_callback <- on_cancel
 
   ## Handle the parents
+
   private$parent_resolve <- def__make_parent_resolve(parent_resolve)
   private$parent_reject <- def__make_parent_reject(parent_reject)
 
@@ -133,6 +134,8 @@ async_def_init <- function(self, private, action, on_progress,
     prt_pvt <- get_private(prt)
     prt_pvt$add_as_parent(self)
   }
+
+  ## Handle the action
 
   if (!is.null(action)) {
     if (!is.function(action)) {
@@ -151,20 +154,9 @@ async_def_init <- function(self, private, action, on_progress,
       args$progress <- private$progress
     }
 
-    ## We use isTRUE, because then we don't need to assert_flag(lazy),
-    ## which could result an error, and it is not clear if that error
-    ## should be reported synchronously or not
-
-    if (isTRUE(lazy)) {
-      private$event_loop$add_next_tick(
-        function() do.call(action, args),
-        function(err, res) if (!is.null(err)) private$reject(err))
-
-    } else {
-      call_with_callback(
-        function() do.call(action, args),
-        function(err, res) if (!is.null(err)) private$reject(err))
-    }
+    private$event_loop$add_next_tick(
+      function() do.call(action, args),
+      function(err, res) if (!is.null(err)) private$reject(err))
   }
 
   invisible(self)
