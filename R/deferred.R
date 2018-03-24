@@ -115,9 +115,6 @@ async_def_init <- function(self, private, action, on_progress,
 
     action_args <- names(formals(action))
     args <- list(private$resolve, private$reject)
-    if (!is.na(sf_arg <- match("myself", action_args))) {
-      args$myself <- self
-    }
     if (!is.na(pr_arg <- match("progress", action_args))) {
       args$progress <- private$progress
     }
