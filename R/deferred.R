@@ -193,7 +193,7 @@ def_then <- function(self, private, on_fulfilled = NULL,
   parent_resolve <- def__make_parent_resolve(on_fulfilled)
   parent_reject <- def__make_parent_reject(on_rejected)
 
-  deferred$new(parents = list(self), type = paste("then", private$id),
+  deferred$new(parents = list(self), type = paste0("then-", private$id),
                parent_resolve = parent_resolve,
                parent_reject = parent_reject)
 }
