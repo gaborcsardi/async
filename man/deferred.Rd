@@ -7,49 +7,17 @@
 Deferred value
 }
 \section{Usage}{
-\preformatted{dx <- deferred$new(action)
-
-dx$then(on_fulfilled)
-dx$catch(on_rejected)
-dx$finally(on_finally)
+\preformatted{TODO
 }
 }
 
 \section{Arguments}{
 
-\describe{
-\item{action}{Function to kick off asynchronous I/O or computation.
-See more below.}
-\item{on_fulfilled}{Function to call when the deferred value was
-success fully resolved.}
-\item{on_rejected}{Function to call when the deferrred value was
-rejected because of an error.}
-\item{on_finally}{Function to call after the deferred was resolved or
-rejected.}
-}
+TODO
 }
 
 \section{Details}{
 
-
-\code{deferred$new} creates a new deferred value. It argument is an \code{action}
-function, which must have two arguments: \code{resolve} and \code{reject}.
-The \code{action} function should be a piece of code that returns quickly, but
-initiates a potentially long-running, asynchronous task. If/when the task
-successfully completes, call \code{resolve(value)} where \code{value} is the
-result of the I/O or computation (like the return value). If the task
-fails, call \code{reject(reason)}, where \code{reason} is either an error object,
-or a character string.
-
-\code{dx$then()} creates a deferred value whose resolution depends on the
-\code{dx} deferred value. When \code{dx} is successfully resolved, the
-\code{on_fulfilled} function is called, with the resolved value as an
-argument.
-
-\code{dx$catch()} is a TODO
-
-\code{dx$finally()} makes sure that \code{on_finally} runs once \code{dx} is resolved
-or rejected. It is ideal to specifying cleanup functions, e.g. closing
-a database.
+TODO
 }
 

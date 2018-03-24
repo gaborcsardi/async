@@ -3,46 +3,14 @@
 #'
 #' @section Usage:
 #' ```
-#' dx <- deferred$new(action)
-#'
-#' dx$then(on_fulfilled)
-#' dx$catch(on_rejected)
-#' dx$finally(on_finally)
+#' TODO
 #' ```
 #'
 #' @section Arguments:
-#' \describe{
-#'   \item{action}{Function to kick off asynchronous I/O or computation.
-#'     See more below.}
-#'   \item{on_fulfilled}{Function to call when the deferred value was
-#'     success fully resolved.}
-#'   \item{on_rejected}{Function to call when the deferrred value was
-#'     rejected because of an error.}
-#'   \item{on_finally}{Function to call after the deferred was resolved or
-#'     rejected.}
-#' }
+#' TODO
 #'
 #' @section Details:
-#'
-#' `deferred$new` creates a new deferred value. It argument is an `action`
-#' function, which must have two arguments: `resolve` and `reject`.
-#' The `action` function should be a piece of code that returns quickly, but
-#' initiates a potentially long-running, asynchronous task. If/when the task
-#' successfully completes, call `resolve(value)` where `value` is the
-#' result of the I/O or computation (like the return value). If the task
-#' fails, call `reject(reason)`, where `reason` is either an error object,
-#' or a character string.
-#'
-#' `dx$then()` creates a deferred value whose resolution depends on the
-#' `dx` deferred value. When `dx` is successfully resolved, the
-#' `on_fulfilled` function is called, with the resolved value as an
-#' argument.
-#'
-#' `dx$catch()` is a TODO
-#'
-#' `dx$finally()` makes sure that `on_finally` runs once `dx` is resolved
-#' or rejected. It is ideal to specifying cleanup functions, e.g. closing
-#' a database.
+#' TODO
 #'
 #' @name deferred
 NULL
