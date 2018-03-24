@@ -22,3 +22,9 @@ test_that("next tick", {
   expect_null(error)
   expect_true(result)
 })
+
+test_that("event loop with only timers sleeps", {
+  tim <- system.time(synchronise(delay(1/2)))
+  expect_true(tim[[1]] + tim[[2]] < 0.4)
+  expect_true(tim[[3]] >= 0.4)
+})

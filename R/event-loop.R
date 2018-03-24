@@ -188,7 +188,7 @@ el_cancel <- function(self, private, id) {
   invisible(self)
 }
 
-#' @importFrom curl multi_run
+#' @importFrom curl multi_run multi_list
 
 el_run <- function(self, private, mode) {
 
@@ -204,11 +204,16 @@ el_run <- function(self, private, mode) {
     ## private$run_idle()
     ## private$run_prepare()
 
+    num_poll <- length(multi_list(pool = private$pool))
     timeout <- 0
     if (mode == "once" && !ran_pending || mode == "default") {
       timeout <- private$get_poll_timeout()
     }
-    multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
+    if (num_poll) {
+      multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
+    } else if (length(private$timers)) {
+      Sys.sleep(timeout / 1000)
+    }
 
     ## private$run_check()
     ## private$run_closing_handles()
