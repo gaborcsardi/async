@@ -73,10 +73,16 @@ test_that("parent pointer", {
   synchronise(do())
 })
 
-test_that("dead end", {
+test_that("unused computation is never created", {
+  called1 <- called2 <- FALSE
   do <- function() {
-    d1 <- delay(1/1000)
-    delay(1/1000)
+    d1 <- deferred$new(
+      function(resolve, reject) { called1 <<- TRUE; resolve("foo") })
+    d2 <- deferred$new(
+      function(resolve, reject) { called2 <<- TRUE; resolve("bar") })
+    d2
   }
-  expect_warning(synchronise(do()),  "going nowhere")
+  expect_equal(synchronise(do()), "bar")
+  expect_false(called1)
+  expect_true(called2)
 })
