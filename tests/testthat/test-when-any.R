@@ -6,7 +6,7 @@ test_that("when_any", {
     d1 <- delay(1/10)$then(function(value) "foo")
     d2 <- delay(1/10000)$then(function(value) "bar")
 
-    dx <- when_any(d1, d2)$
+    when_any(d1, d2)$
       then(function(value) expect_equal(value, "bar"))
   })
   synchronise(do())

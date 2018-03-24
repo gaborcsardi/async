@@ -2,37 +2,23 @@
 #' @export
 #' @rdname async_every
 
-async_some <- function(.x, .p, ..., cancel = TRUE) {
-  force(cancel)
+async_some <- function(.x, .p, ...) {
   defs <- lapply(.x, async(.p), ...)
-  num_todo <- length(defs)
+  nx <- length(defs)
   done <- FALSE
 
-  deferred$new(function(resolve, reject) {
-
-    if (length(defs) == 0) return(resolve(FALSE))
-
-    lapply(seq_along(defs), function(i) {
-      defs[[i]]$
-        then(
-          function(value) {
-            if (!done && isTRUE(value)) {
-              done <<- TRUE
-              if (cancel) async_cancel_pending(.list = defs)
-              resolve(TRUE)
-            } else {
-              num_todo <<- num_todo - 1
-              if (num_todo == 0) resolve(FALSE)
-            }
-          }
-        )$
-        catch(
-          function(reason) {
-            if (cancel) async_cancel_pending(.list = defs)
-            reject(reason)
-          }
-        )$
-        null()
-    })
-  })
+  deferred$new(
+    type = "async_some",
+    parents = defs,
+    action = function(resolve, reject) if (nx == 0) resolve(FALSE),
+    parent_resolve = function(value, resolve, reject) {
+      if (!done && isTRUE(value)) {
+        done <<- TRUE
+        resolve(TRUE)
+      } else if (!done) {
+        nx <<- nx - 1L
+        if (nx == 0) resolve(FALSE)
+      }
+    }
+  )
 }

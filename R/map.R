@@ -27,46 +27,39 @@ async_map <- function(.x, .f, ..., .args = list(), .limit = Inf) {
 }
 
 async_map_limit <- function(.x, .f, ..., .args = list(), .limit = Inf) {
-  force(.limit)
-  .f <- async(.f)
-
   len <- length(.x)
+  nx <- len
+  .f <- async(.f)
+  args <- c(list(...), .args)
+
+  nextone <- .limit + 1L
+  firsts <- lapply_args(.x[seq_len(.limit)], .f, .args = args)
+  ids <- viapply(firsts, function(x) x$get_id())
+
   result <- structure(
     vector(mode = "list", length = len),
     names = names(.x)
   )
-  args <- c(list(...), .args)
-  done <- 0
 
-  deferred$new(function(resolve, reject) {
-    force(resolve)
-    force(reject)
-    nextone <- 1
-
-    xfulfill <- function(value, which) {
-      done <<- done + 1
-      result[[which]] <<- value
-      if (done == len) resolve(result)
-      if (nextone <= len) {
-        i <- nextone
-        do.call(.f, c(list(.x[[i]]), args))$
-          then(function(value) xfulfill(value, i))$
-          catch(xreject)$
-          null()
+  self <- deferred$new(
+    type = "async_map (limit)",
+    parents = firsts,
+    action = function(resolve, reject) if (nx == 0) resolve(result),
+    parent_resolve = function(value, resolve, reject, id) {
+      nx <<- nx - 1L
+      result[[match(id, ids)]] <<- value
+      if (nx == 0) {
+        resolve(result)
+      } else if (nextone <= len) {
+        dx <- do.call(".f", c(list(.x[[nextone]]), args))
+        ids <<- c(ids, dx$get_id())
+        get_private(dx)$add_as_parent(self)
+        private <- get_private(self)
+        private$parents <- c(private$parents, dx)
+        nextone <<- nextone + 1L
       }
-      nextone <<- nextone + 1
     }
-    xreject <- function(reason) reject(reason)
+  )
 
-    for (ii in seq_len(.limit)) {
-      local({
-        i <- ii
-        do.call(.f, c(list(.x[[i]]), args))$
-          then(function(value) xfulfill(value, i))$
-          catch(xreject)$
-          null()
-      })
-      nextone <- nextone + 1
-    }
-  })
+  self
 }

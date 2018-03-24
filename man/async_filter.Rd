@@ -4,7 +4,7 @@
 \alias{async_filter}
 \title{Keep element using an asyncronous predicate function}
 \usage{
-async_filter(.x, .p, ..., cancel = TRUE)
+async_filter(.x, .p, ...)
 }
 \arguments{
 \item{.x}{A list or atomic vector.}
@@ -12,9 +12,6 @@ async_filter(.x, .p, ..., cancel = TRUE)
 \item{.p}{An asynchronous predicate function.}
 
 \item{...}{Additional arguments to the predicate function.}
-
-\item{cancel}{Whether to cancel the deferred computations if \code{.p}
-throws an error.}
 }
 \value{
 A deferred value for the result.

@@ -9,9 +9,6 @@
 #' @param ... Additional arguments to the predicate function.
 #' @param .limit Number of elements to process simulateneously.
 #'   If it is 1, then the predicate is applied sequentially.
-#' @param cancel Whether to cancel the deferred computations that are
-#'   not needed to finish `async_detect()`, including the case when
-#'   `.p` throws an error.
 #' @return A deferred value for the result.
 #'
 #' @family async iterators
@@ -23,96 +20,70 @@
 #'   async_sequence(http_head, function(x) x$status_code == 200)
 #' ))
 
-async_detect <- function(.x, .p, ..., .limit = Inf, cancel = TRUE) {
+async_detect <- function(.x, .p, ..., .limit = Inf) {
   if (.limit < length(.x)) {
-    async_detect_limit(.x, .p, ..., .limit = .limit, cancel = cancel)
+    async_detect_limit(.x, .p, ..., .limit = .limit)
   } else {
-    async_detect_nolimit(.x, .p, ..., cancel = cancel)
+    async_detect_nolimit(.x, .p, ...)
   }
 }
 
-async_detect_nolimit <- function(.x, .p, ..., cancel) {
-  force(cancel)
-
+async_detect_nolimit <- function(.x, .p, ...) {
   defs <- lapply(.x, async(.p), ...)
-  num_todo <- length(defs)
+  nx <- length(defs)
   done <- FALSE
 
-  deferred$new(function(resolve, reject) {
-
-    if (length(defs) == 0) return(resolve(NULL))
-
-    lapply(seq_along(defs), function(i) {
-      defs[[i]]$
-        then(
-          function(value) {
-            if (!done && isTRUE(value)) {
-              done <<- TRUE
-              if (cancel) async_cancel_pending(.list = defs)
-              resolve(.x[[i]])
-            } else {
-              num_todo <<- num_todo - 1
-              if (num_todo == 0) resolve(NULL)
-            }
-          })$
-        catch(
-          function(reason) {
-            if (cancel) async_cancel_pending(.list = defs)
-            reject(reason)
-          }
-        )$null()
-    })
-  })
+  deferred$new(
+    type = "async_detect",
+    parents = defs,
+    action = function(resolve, reject) if (nx == 0) resolve(NULL),
+    parent_resolve = function(value, resolve, reject, id) {
+      if (!done && isTRUE(value)) {
+        done <<- TRUE
+        ids <- viapply(defs, function(x) x$get_id())
+        resolve(.x[[match(id, ids)]])
+      } else if (!done) {
+        nx <<- nx - 1L
+        if (nx == 0) resolve(NULL)
+      }
+    }
+  )
 }
 
-async_detect_limit <- function(.x, .p, ..., .limit = .limit, cancel) {
-  force(.limit); force(cancel)
-  .p <- async(.p)
-
+async_detect_limit <- function(.x, .p, ..., .limit = .limit) {
   len <- length(.x)
-  num_todo <- len
+  nx <- len
+  .p <- async(.p)
   args <- list(...)
+
   done <- FALSE
+  nextone <- .limit + 1L
+  firsts <- lapply(.x[seq_len(.limit)], .p, ...)
+  ids <- viapply(firsts, function(x) x$get_id())
 
-  deferred$new(function(resolve, reject) {
-    force(resolve) ; force(reject)
-    nextone <- 1
-
-    xfulfill <- function(value, which) {
-      if (done) return()
-      if (isTRUE(value)) {
+  self <- deferred$new(
+    type = "async_detect (limit)",
+    parents = firsts,
+    action = function(resolve, reject) if (nx == 0) resolve(NULL),
+    parent_resolve = function(value, resolve, reject, id) {
+      if (!done && isTRUE(value)) {
         done <<- TRUE
-        if (cancel) async_cancel_pending(.list = .x)
-        return(resolve(.x[[which]]))
-      } else {
-        num_todo <<- num_todo - 1
-        if (num_todo == 0) return(resolve(NULL))
-        if (nextone <= len) {
-          i <- nextone
-          .p(.x[[i]])$
-            then(function(value) xfulfill(value, i))$
-            catch(xreject)$
-            null()
+        resolve(.x[[match(id, ids)]])
+      } else if (!done) {
+        nx <<- nx - 1L
+        if (nx == 0) {
+          resolve(NULL)
+        } else if (nextone <= len) {
+          dx <- .p(.x[[nextone]], ...)
+          ids <<- c(ids, dx$get_id())
+          get_private(dx)$add_as_parent(self)
+          private <- get_private(self)
+          private$parents <- c(private$parents, dx)
+          nextone <<- nextone + 1L
         }
       }
-      nextone <<- nextone + 1
     }
-    xreject <- function(reason) {
-      if (done) return()
-      done <<- TRUE
-      if (cancel) async_cancel_pending(.list = .x)
-      reject(reason)
-    }
+  )
 
-    for (ii in seq_len(.limit)) {
-      local({
-        i <- ii
-        .p(.x[[i]])$
-          then(function(value) xfulfill(value, i))$
-          catch(xreject)$
-          null()
-      })
-      nextone <- nextone + 1
-    }
-  })
+  self
 }

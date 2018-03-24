@@ -10,10 +10,10 @@ test_that("when_all", {
     when_all(d1, d2)$
       then(function(value) {
         done <<- TRUE
-        expect_equal(value, list("foo", "bar"))
+        value
       })
   })
-  synchronise(do())
+  expect_equal(synchronise(do()), list("foo", "bar"))
   expect_true(done)
 })
 

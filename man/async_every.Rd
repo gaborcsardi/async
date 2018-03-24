@@ -5,9 +5,9 @@
 \alias{async_some}
 \title{Do every or some elements of a list satisfy an asynchronous predicate?}
 \usage{
-async_every(.x, .p, ..., cancel = TRUE)
+async_every(.x, .p, ...)
 
-async_some(.x, .p, ..., cancel = TRUE)
+async_some(.x, .p, ...)
 }
 \arguments{
 \item{.x}{A list or atomic vector.}
@@ -15,10 +15,6 @@ async_some(.x, .p, ..., cancel = TRUE)
 \item{.p}{An asynchronous predicate function.}
 
 \item{...}{Additional arguments to the predicate function.}
-
-\item{cancel}{Whether to cancel the deferred computations that are
-not needed to finish \code{async_every()} including the case when \code{.p}
-throws an error.}
 }
 \value{
 A deferred value for the result.

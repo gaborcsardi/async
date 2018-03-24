@@ -108,9 +108,13 @@ call_with_callback <- function(func, callback) {
 }
 
 get_id <- local({
-  id <- 0
+  id <- 0L
   function() {
-    id <<- id + 1
+    id <<- id + 1L
     id
   }
 })
+
+lapply_args <- function(X, FUN, ..., .args = list()) {
+  do.call("lapply", c(list(X = X, FUN = FUN), list(...), .args))
+}

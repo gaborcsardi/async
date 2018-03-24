@@ -66,8 +66,7 @@ deferred <- R6Class(
       def_finally(self, private, on_finally),
     cancel = function(reason = "Cancelled")
       def_cancel(self, private, reason),
-    null = function()
-      def_null(self, private)
+    get_id = function() private$id
   ),
 
   private = list(
@@ -87,6 +86,9 @@ deferred <- R6Class(
 
     get_value = function()
       def__get_value(self, private),
+
+    null = function()
+      def__null(self, private),
 
     resolve = function(value)
       def__resolve(self, private, value),
@@ -226,14 +228,14 @@ def_cancel <- function(self, private, reason) {
   private$reject(cancel_cond)
 }
 
-def_null <- function(self, private) {
+def__null <- function(self, private) {
   self$.__enclos_env__$private$dead_end <- TRUE
   invisible(self)
 }
 
 def__resolve <- function(self, private, value) {
   if (private$cancelled) return()
-  if (private$state != "pending") stop("Deferred value already resolved")
+  if (private$state != "pending") return()
 
   if (is_deferred(value)) {
 
@@ -248,7 +250,9 @@ def__resolve <- function(self, private, value) {
     }
     private$state <- "fulfilled"
     private$value <- value
-    for (x in private$children) def__call_then("parent_resolve", x, value)
+    for (x in private$children) {
+      def__call_then("parent_resolve", x, value, self$get_id())
+    }
     private$children <- list()
     private$maybe_cancel_parents(private$value)
     private$parents <- NULL
@@ -273,16 +277,19 @@ def__make_error_object <- function(self, private, err) {
 
 def__make_parent_resolve <- function(fun) {
   if (is.null(fun)) {
-    function(value, resolve, reject) resolve(value)
+    function(value, resolve, reject, id) resolve(value)
   } else if (!is.function(fun)) {
     fun <- as_function(fun)
-    function(value, resolve, reject) resolve(fun(value))
+    function(value, resolve, reject, id) resolve(fun(value))
   } else if (num_args(fun) == 0) {
-    function(value, resolve, reject) resolve(fun())
+    function(value, resolve, reject, id) resolve(fun())
   } else if (num_args(fun) == 1) {
-    function(value, resolve, reject) resolve(fun(value))
+    function(value, resolve, reject, id) resolve(fun(value))
   } else if (identical(names(formals(fun)),
                        c("value", "resolve", "reject"))) {
+    function(value, resolve, reject, id) fun(value, resolve, reject)
+  } else if (identical(names(formals(fun)),
+                       c("value", "resolve", "reject", "id"))) {
     fun
   } else {
     stop("Invalid parent_resolve callback")
@@ -291,16 +298,19 @@ def__make_parent_resolve <- function(fun) {
 
 def__make_parent_reject <- function(fun) {
   if (is.null(fun)) {
-    function(value, resolve, reject) stop(value)
+    function(value, resolve, reject, id) stop(value)
   } else if (!is.function(fun)) {
     fun <- as_function(fun)
-    function(value, resolve, reject) resolve(fun(value))
+    function(value, resolve, reject, id) resolve(fun(value))
   } else if (num_args(fun) == 0) {
-    function(value, resolve, reject) resolve(fun())
+    function(value, resolve, reject, id) resolve(fun())
   } else if (num_args(fun) == 1) {
-    function(value, resolve, reject) resolve(fun(value))
+    function(value, resolve, reject, id) resolve(fun(value))
   } else if (identical(names(formals(fun)),
                        c("value", "resolve", "reject"))) {
+    function(value, resolve, reject, id) fun(value, resolve, reject)
+  } else if (identical(names(formals(fun)),
+                       c("value", "resolve", "reject", "id"))) {
     fun
   } else {
     stop("Invalid parent_reject callback")
@@ -309,7 +319,7 @@ def__make_parent_reject <- function(fun) {
 
 def__reject <- function(self, private, reason) {
   if (private$cancelled) return()
-  if (private$state != "pending") stop("Deferred value already rejected")
+  if (private$state != "pending") return()
 
   if (is_deferred(reason)) {
     private$parent_resolve <- def__make_parent_resolve(NULL)
@@ -326,7 +336,9 @@ def__reject <- function(self, private, reason) {
     if (!is.null(private$cancel_callback)) {
       private$cancel_callback(conditionMessage(private$value))
     }
-    for (x in private$children) def__call_then("parent_reject", x, private$value)
+    for (x in private$children) {
+      def__call_then("parent_reject", x, private$value, self$get_id())
+    }
     private$children <- list()
     private$maybe_cancel_parents(private$value)
     private$parents <- NULL
@@ -346,14 +358,14 @@ def__maybe_cancel_parents <- function(self, private, reason) {
   }
 }
 
-def__call_then <- function(which, x, value)  {
-  force(value)
+def__call_then <- function(which, x, value, id)  {
+  force(value); force(id)
   private <- get_private(x)
   if (private$state != "pending") return()
 
   cb <- private[[which]]
   private$event_loop$add_next_tick(
-    function() private[[which]](value, private$resolve, private$reject),
+    function() private[[which]](value, private$resolve, private$reject, id),
     function(err, res) if (!is.null(err)) private$reject(err))
 }
 
@@ -362,10 +374,10 @@ def__add_as_parent <- function(self, private, child) {
     private$children <- c(private$children, list(child))
 
   } else if (private$state == "fulfilled") {
-    def__call_then("parent_resolve", child, private$value)
+    def__call_then("parent_resolve", child, private$value, self$get_id())
 
   } else {
-    def__call_then("parent_reject", child, private$value)
+    def__call_then("parent_reject", child, private$value, self$get_id())
   }
 }
 
@@ -391,24 +403,4 @@ def__progress <- function(self, private, data) {
 
 is_deferred <- function(x) {
   inherits(x, "deferred")
-}
-
-#' Cancel async tasks
-#'
-#' Does nothing for deferred values that are already resolved.
-#' Does nothing for objects that are not deferred values.
-#'
-#' @param ... Deferred values to cancel.
-#' @param .list More deferred values to cancel.
-#'
-#' @export
-
-async_cancel_pending <- function(..., .list = list()) {
-  defs <- c(list(...), .list)
-  for (i in seq_along(defs)) {
-    if (is_deferred(defs[[i]])) {
-      defs[[i]]$null()
-      defs[[i]]$cancel()
-    }
-  }
 }

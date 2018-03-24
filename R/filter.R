@@ -4,8 +4,6 @@
 #' @param .x A list or atomic vector.
 #' @param .p An asynchronous predicate function.
 #' @param ... Additional arguments to the predicate function.
-#' @param cancel Whether to cancel the deferred computations if `.p`
-#'   throws an error.
 #' @return A deferred value for the result.
 #'
 #' @family async iterators
@@ -20,33 +18,20 @@
 #'           "https://eu.httpbin.org/status/404")
 #' synchronise(afun(urls))
 
-async_filter <- function(.x, .p, ..., cancel = TRUE) {
-  force(cancel)
+async_filter <- function(.x, .p, ...) {
   defs <- lapply(.x, async(.p), ...)
-  num_todo <- length(defs)
-  keep <- logical(num_todo)
+  nx <- length(defs)
+  ids <- viapply(defs, function(x) x$get_id())
+  keep <- structure(rep(FALSE, length(ids)), names = as.character(ids))
 
-  deferred$new(function(resolve, reject) {
-
-    if (length(defs) == 0) return(resolve(.x))
-
-    lapply(seq_along(defs), function(i) {
-      defs[[i]]$
-        then(
-          function(value) {
-            num_todo <<- num_todo - 1
-            keep[i] <<- as.logical(value)
-            if (num_todo == 0) {
-              resolve(.x[keep])
-            }
-          })$
-        catch(
-          function(reason) {
-            if (cancel) async_cancel_pending(.list = defs)
-            reject(reason)
-          }
-        )$
-        null()
-    })
-  })
+  deferred$new(
+    type = "async_filter",
+    parents = defs,
+    action = function(resolve, reject) if (nx == 0) resolve(.x),
+    parent_resolve = function(value, resolve, reject, id) {
+      nx <<- nx - 1L
+      if  (isTRUE(value))  keep[as.character(id)] <<- TRUE
+      if (nx == 0) resolve(.x[keep])
+    }
+  )
 }

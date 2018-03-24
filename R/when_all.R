@@ -8,8 +8,6 @@
 #'
 #' @param ... Deferred values.
 #' @param .list More deferred values.
-#' @param cancel Whether to cancel the deferred computations if one of
-#'   them throws an error.
 #' @return A deferred value, that is conditioned on all deferred values
 #'   in `...` and `.list`.
 #'
@@ -25,33 +23,19 @@
 #' })
 #' synchronise(afun())
 
-when_all <- function(..., .list = list(), cancel = TRUE) {
-  force(cancel)
+when_all <- function(..., .list = list()) {
+
   defs <- c(list(...), .list)
+  isdef <- vlapply(defs, is_deferred)
+  nx <- sum(isdef)
 
-  deferred$new(lazy = FALSE, type = "when-all", function(resolve, reject) {
-    num_todo <- length(defs)
-
-    handle_fulfill <- function(value) {
-      num_todo <<- num_todo - 1
-      if (num_todo == 0) {
-        resolve(lapply(defs, get_value_x))
-      }
+  deferred$new(
+    type = "when_all",
+    parents = defs[isdef],
+    action = function(resolve, reject) if (nx == 0) resolve(defs),
+    parent_resolve = function(value, resolve, reject) {
+      nx <<- nx - 1L
+      if (nx == 0L) resolve(lapply(defs, get_value_x))
     }
-
-    handle_reject <- function(reason) {
-      if (cancel) async_cancel_pending(.list = defs)
-      reject(reason)
-    }
-
-    for (i in seq_along(defs)) {
-      if (!is_deferred(defs[[i]])) {
-        num_todo <- num_todo - 1
-      } else {
-        defs[[i]]$then(handle_fulfill)$catch(handle_reject)$null()
-      }
-    }
-
-    if (num_todo == 0) resolve(async_constant(defs))
-  })
+  )
 }

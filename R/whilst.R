@@ -25,27 +25,29 @@ async_whilst <- function(test, task, ...) {
   force(test)
   task <- async(task)
 
-  deferred$new(function(resolve, reject) {
-
-    force(resolve)
-    force(reject)
-
-    xresolve <- function(value) {
-      tryCatch(
-        if (!test()) {
-          resolve(value)
-        } else {
-          task(...)$then(xresolve)$catch(xreject)$null()
-        },
-        error = function(e) reject(e)
-      )
+  self <- deferred$new(
+    type = "async_whilst",
+    action = function(resolve, reject)  {
+      if (!test()) {
+        resolve(NULL)
+      } else {
+        dx <- task(...)
+        get_private(dx)$add_as_parent(self)
+        private <- get_private(self)
+        private$parents <- c(private$parents, list(dx))
+      }
+    },
+    parent_resolve = function(value, resolve, reject) {
+      if  (!test()) {
+        resolve(value)
+      } else {
+        dx <- task(...)
+        get_private(dx)$add_as_parent(self)
+        private <- get_private(self)
+        private$parents <- c(private$parents, list(dx))
+      }
     }
-    xreject <- function(reason) reject(reason)
+  )
 
-    if (test()) {
-      task(...)$then(xresolve)$catch(xreject)$null()
-    } else {
-      resolve(NULL)
-    }
-  })
+  self
 }
