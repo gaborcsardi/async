@@ -260,7 +260,11 @@ el__ensure_pool <- function(self, private, ...) {
 }
 
 el__get_poll_timeout <- function(self, private) {
-  max(0, min(Inf, private$timers - private$time))
+  if (length(private$next_ticks)) {
+    0
+  } else {
+    max(0, min(Inf, private$timers - private$time))
+  }
 }
 
 el__run_timers <- function(self, private) {
