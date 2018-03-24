@@ -212,7 +212,7 @@ el_run <- function(self, private, mode) {
     if (num_poll) {
       multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
     } else if (length(private$timers)) {
-      Sys.sleep(timeout / 1000)
+      Sys.sleep(timeout)
     }
 
     ## private$run_check()
