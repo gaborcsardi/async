@@ -38,6 +38,8 @@ deferred <- R6Class(
   ),
 
   private = list(
+    action = NULL,
+    running = FALSE,
     id = NULL,
     type = NULL,
     state = c("pending", "fulfilled", "rejected")[1],
@@ -51,6 +53,9 @@ deferred <- R6Class(
     parents = NULL,
     parent_resolve = NULL,
     parent_reject = NULL,
+
+    run_action = function()
+      def__run_action(self, private),
 
     get_value = function()
       def__get_value(self, private),
@@ -85,6 +90,7 @@ async_def_init <- function(self, private, action, on_progress,
   private$id <- get_id()
   private$event_loop <- get_default_event_loop()
   private$parents <- parents
+  private$action <- action
 
   "!DEBUG NEW `private$id` (`type`)"
 
@@ -103,7 +109,15 @@ async_def_init <- function(self, private, action, on_progress,
     prt_pvt$add_as_parent(self)
   }
 
-  ## Handle the action
+  invisible(self)
+}
+
+def__run_action <- function(self, private) {
+  if (private$running) return()
+  action <- private$action
+  private$running <- TRUE
+  private$action <- NULL
+  "!DEBUG ACTION `private$type` `private$id`"
 
   if (!is.null(action)) {
     if (!is.function(action)) {
@@ -124,7 +138,7 @@ async_def_init <- function(self, private, action, on_progress,
       function(err, res) if (!is.null(err)) private$reject(err))
   }
 
-  invisible(self)
+  for (prt in private$parents) get_private(prt)$run_action()
 }
 
 def__get_value <- function(self, private) {
@@ -205,6 +219,7 @@ def__resolve <- function(self, private, value) {
 
   } else {
     if (!private$dead_end && !length(private$children)) {
+      "!DEBUG ??? DEAD END `self$get_id()`"
       warning("Computation going nowhere...")
     }
 
@@ -333,6 +348,7 @@ def__call_then <- function(which, x, value, id)  {
 
 def__add_as_parent <- function(self, private, child) {
   "!DEBUG EDGE [`private$id` -> `child$get_id()`]"
+  if (get_private(child)$running) private$run_action()
   if (private$state == "pending") {
     private$children <- c(private$children, list(child))
 
