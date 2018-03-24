@@ -118,6 +118,8 @@ async_def_init <- function(self, private, action, on_progress,
   private$event_loop <- get_default_event_loop()
   private$parents <- parents
 
+  "!DEBUG NEW `private$id` (`type`)"
+
   assert_that(is.null(on_progress) || is.function(on_progress))
   private$progress_callback <- on_progress
   assert_that(is.null(on_cancel) || is.function(on_cancel))
@@ -248,6 +250,8 @@ def__resolve <- function(self, private, value) {
     if (!private$dead_end && !length(private$children)) {
       stop("Computation going nowhere...")
     }
+
+    "!DEBUG +++ RESOLVE `self$get_id()`"
     private$state <- "fulfilled"
     private$value <- value
     for (x in private$children) {
@@ -328,6 +332,7 @@ def__reject <- function(self, private, reason) {
     get_private(reason)$add_as_parent(self)
 
   } else {
+    "!DEBUG !!! REJECT `self$get_id()`"
     private$state <- "rejected"
     private$value <- private$make_error_object(reason)
     if (inherits(private$value, "async_cancelled")) {
@@ -370,6 +375,7 @@ def__call_then <- function(which, x, value, id)  {
 }
 
 def__add_as_parent <- function(self, private, child) {
+  "!DEBUG EDGE [`private$id` -> `child$get_id()`]"
   if (private$state == "pending") {
     private$children <- c(private$children, list(child))
 

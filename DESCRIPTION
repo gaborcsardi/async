@@ -13,6 +13,7 @@ BugReports: https://github.com/r-lib/async/issues
 RoxygenNote: 6.0.1.9000
 Suggests:
     covr,
+    debugme,
     jsonlite,
     mockery,
     testthat
