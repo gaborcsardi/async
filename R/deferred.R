@@ -205,7 +205,7 @@ def__resolve <- function(self, private, value) {
 
   } else {
     if (!private$dead_end && !length(private$children)) {
-      stop("Computation going nowhere...")
+      warning("Computation going nowhere...")
     }
 
     "!DEBUG +++ RESOLVE `self$get_id()`"

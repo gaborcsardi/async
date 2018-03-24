@@ -72,3 +72,11 @@ test_that("parent pointer", {
   }
   synchronise(do())
 })
+
+test_that("dead end", {
+  do <- function() {
+    d1 <- delay(1/1000)
+    delay(1/1000)
+  }
+  expect_warning(synchronise(do()),  "going nowhere")
+})
