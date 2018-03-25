@@ -131,7 +131,7 @@ el_add_http <- function(self, private, handle, callback, progress, file) {
         ## so limited in their numbers.
         con <- tryCatch(
           file(outfile, open = "ab"),
-          error = function(e) { gc(); file(outfile, open = "ab") }
+          error = function(e) { gc(); file(outfile, open = "ab") } # nocov
         )
         writeBin(bytes, con)
         close(con)
