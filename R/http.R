@@ -133,7 +133,7 @@ http_error <- function(resp, call = sys.call(-1)) {
 }
 
 http_status <- function(status) {
-  status_desc <- http_statuses[[as.character(status)]]
+  status_desc <- http_statuses[as.character(status)]
   if (is.na(status_desc)) {
     stop("Unknown http status code: ", status, call. = FALSE)
   }
