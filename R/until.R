@@ -32,10 +32,7 @@ async_until <- function(test, task, ...) {
       if (test()) {
         resolve(value)
       } else {
-        dx <- task(...)
-        get_private(dx)$add_as_parent(self)
-        private <- get_private(self)
-        private$parents <- c(private$parents, list(dx))
+        task(...)$then(self)
       }
     }
   )

@@ -53,9 +53,7 @@ async_map_limit <- function(.x, .f, ..., .args = list(), .limit = Inf) {
       } else if (nextone <= len) {
         dx <- do.call(".f", c(list(.x[[nextone]]), args))
         ids <<- c(ids, dx$get_id())
-        get_private(dx)$add_as_parent(self)
-        private <- get_private(self)
-        private$parents <- c(private$parents, dx)
+        dx$then(self)
         nextone <<- nextone + 1L
       }
     }
