@@ -219,8 +219,9 @@ def__resolve <- function(self, private, value) {
 
   } else {
     if (!private$dead_end && !length(private$children)) {
-      "!DEBUG ??? DEAD END `self$get_id()`"
-      warning("Computation going nowhere...")
+      ## This cannot happen currently
+      "!DEBUG ??? DEAD END `self$get_id()`"   # nocov
+      warning("Computation going nowhere...")   # nocov
     }
 
     "!DEBUG +++ RESOLVE `self$get_id()`"
