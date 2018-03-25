@@ -31,20 +31,14 @@ async_whilst <- function(test, task, ...) {
       if (!test()) {
         resolve(NULL)
       } else {
-        dx <- task(...)
-        get_private(dx)$add_as_parent(self)
-        private <- get_private(self)
-        private$parents <- c(private$parents, list(dx))
+        task(...)$then(self)
       }
     },
     parent_resolve = function(value, resolve, reject) {
       if  (!test()) {
         resolve(value)
       } else {
-        dx <- task(...)
-        get_private(dx)$add_as_parent(self)
-        private <- get_private(self)
-        private$parents <- c(private$parents, list(dx))
+        task(...)$then(self)
       }
     }
   )

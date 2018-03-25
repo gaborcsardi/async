@@ -76,9 +76,7 @@ async_detect_limit <- function(.x, .p, ..., .limit = .limit) {
         } else if (nextone <= len) {
           dx <- .p(.x[[nextone]], ...)
           ids <<- c(ids, dx$get_id())
-          get_private(dx)$add_as_parent(self)
-          private <- get_private(self)
-          private$parents <- c(private$parents, dx)
+          dx$then(self)
           nextone <<- nextone + 1L
         }
       }

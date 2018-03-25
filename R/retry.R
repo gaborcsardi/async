@@ -33,10 +33,7 @@ async_retry <- function(task, times, ...) {
     parent_reject = function(value, resolve, reject) {
       times <<- times - 1L
       if (times > 0) {
-        dx <- task(...)
-        get_private(dx)$add_as_parent(self)
-        private <- get_private(self)
-        private$parents <- c(private$parents, list(dx))
+        task(...)$then(self)
       } else {
         reject(value)
       }

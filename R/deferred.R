@@ -163,12 +163,24 @@ def_then <- function(self, private, on_fulfilled = NULL,
     stop(err)
   }
 
-  parent_resolve <- def__make_parent_resolve(on_fulfilled)
-  parent_reject <- def__make_parent_reject(on_rejected)
+  if (!is_deferred(on_fulfilled)) {
+    parent_resolve <- def__make_parent_resolve(on_fulfilled)
+    parent_reject <- def__make_parent_reject(on_rejected)
 
-  deferred$new(parents = list(self), type = paste0("then-", private$id),
-               parent_resolve = parent_resolve,
-               parent_reject = parent_reject)
+    deferred$new(parents = list(self), type = paste0("then-", private$id),
+                 parent_resolve = parent_resolve,
+                 parent_reject = parent_reject)
+
+  } else {
+    if (!is.null(on_rejected)) {
+      stop("on_rejected must be NULL is then arg is a deferred value")
+    }
+
+    private$add_as_parent(on_fulfilled)
+    child_private <- get_private(on_fulfilled)
+    child_private$parents <- c(child_private$parents, self)
+    self
+  }
 }
 
 def_catch <- function(self, private, condition, ...) {
@@ -214,8 +226,7 @@ def__resolve <- function(self, private, value) {
 
     private$parent_resolve <- def__make_parent_resolve(NULL)
     private$parent_reject <- def__make_parent_reject(NULL)
-    private$parents <- c(private$parents, list(value))
-    get_private(value)$add_as_parent(self)
+    value$then(self)
 
   } else {
     if (!private$dead_end && !length(private$children)) {
@@ -301,8 +312,7 @@ def__reject <- function(self, private, reason) {
   if (is_deferred(reason)) {
     private$parent_resolve <- def__make_parent_resolve(NULL)
     private$parent_reject <- def__make_parent_reject(NULL)
-    private$parents <- c(private$parents, list(reason))
-    get_private(reason)$add_as_parent(self)
+    reason$then(self)
 
   } else {
     "!DEBUG !!! REJECT `self$get_id()`"
