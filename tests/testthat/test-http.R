@@ -146,3 +146,59 @@ test_that("error, invalid arg", {
   err <- tryCatch(synchronise(do()), error = identity)
   expect_s3_class(err, "async_rejected")
 })
+
+test_that("automatic cancellation", {
+
+  skip_if_offline()
+
+  called <- 0L
+  do <- function() {
+    r1 <- http_get("https://httpbin.org/delay/5")$
+      then(function() called <<- called + 1L)
+    r2 <- http_get("https://httpbin.org/get")$
+      then(function() called <<- called + 1L)
+    when_any(r1, r2)
+  }
+
+  tic <- Sys.time()
+  synchronise(do())
+  toc <- Sys.time()
+
+  expect_equal(called, 1L)
+  expect_true(toc - tic < as.difftime(4, units = "secs"))
+})
+
+test_that("http_status",  {
+  expect_error(
+    http_status(0),
+    "Unknown http status code"
+  )
+})
+
+test_that("timeout, failed request", {
+
+  skip_if_offline()
+
+  do <- function() {
+    http_get("https://httpbin.org/delay/5", options = list(timeout = 1))
+  }
+
+  tic <- Sys.time()
+  err <- tryCatch(synchronise(do()), error = identity)
+  toc <- Sys.time()
+
+  expect_s3_class(err, "async_rejected")
+  expect_match(conditionMessage(err), "timed out")
+  expect_true(toc - tic < as.difftime(4, units = "secs"))
+
+  do2 <- function() {
+    do()$catch(~ "fixed")
+  }
+
+  tic <- Sys.time()
+  res <- synchronise(do2())
+  toc <- Sys.time()
+
+  expect_equal(res, "fixed")
+  expect_true(toc - tic < as.difftime(4, units = "secs"))
+})
