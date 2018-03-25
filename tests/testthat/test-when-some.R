@@ -45,3 +45,16 @@ test_that("too many errors", {
   })
   expect_error(synchronise(do()), "ooops again")
 })
+
+test_that("not enough values", {
+  do <- async(function() {
+    when_some(3, delay(5), delay(5))
+  })
+  err <- tryCatch(synchronise(do()), error = identity)
+  expect_s3_class(err, "async_rejected")
+
+  do2 <- async(function() {
+    do()$catch(~ "repaired")
+  })
+  expect_equal(synchronise(do2()), "repaired")
+})
