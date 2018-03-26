@@ -64,7 +64,10 @@ test_that("when_any, multiple errors", {
     d2 <- delay(1/10000)$then(function(value) stop("bar"))
 
     dx <- when_any(d1, d2)$
-      catch(function(reason) expect_match(reason$message, "foo"))
+      catch(function(reason) {
+        expect_match(conditionMessage(reason$errors[[1]]), "bar")
+        expect_match(conditionMessage(reason$errors[[2]]), "foo")
+      })
   })
   synchronise(do())
 })

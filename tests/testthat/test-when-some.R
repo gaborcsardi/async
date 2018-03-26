@@ -43,7 +43,10 @@ test_that("too many errors", {
 
     when_some(2, d1, d2, d3)
   })
-  expect_error(synchronise(do()), "ooops again")
+  err <- tryCatch(synchronise(do()), error = identity)
+  expect_equal(conditionMessage(err), "when_some / when_any failed")
+  expect_equal(conditionMessage(err$errors[[1]]), "ooops")
+  expect_equal(conditionMessage(err$errors[[2]]), "ooops again")
 })
 
 test_that("not enough values", {
