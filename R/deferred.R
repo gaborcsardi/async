@@ -138,7 +138,17 @@ def__run_action <- function(self, private) {
       function(err, res) if (!is.null(err)) private$reject(err))
   }
 
-  for (prt in private$parents) get_private(prt)$run_action()
+  ## If some parents are done, we want them to notify us.
+  ## We also start the ones that are not running yet
+  for (prt in private$parents) {
+    prt_priv <- get_private(prt)
+    if (prt_priv$state != "pending") {
+      def__call_then(
+        if (prt_priv$state == "fulfilled") "parent_resolve" else "parent_reject",
+        self, prt_priv$value, prt_priv$id)
+    }
+    prt_priv$run_action()
+  }
 }
 
 def__get_value <- function(self, private) {
@@ -349,6 +359,7 @@ def__maybe_cancel_parents <- function(self, private, reason) {
 def__call_then <- function(which, x, value, id)  {
   force(value); force(id)
   private <- get_private(x)
+  if (!private$running) return()
   if (private$state != "pending") return()
 
   cb <- private[[which]]

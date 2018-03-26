@@ -86,3 +86,16 @@ test_that("unused computation is never created", {
   expect_false(called1)
   expect_true(called2)
 })
+
+test_that("children are not started by parents", {
+  called1 <- called2 <- FALSE
+  do <- function() {
+    d1 <- delay(1/1000)
+    d1$then(function() called1 <<- TRUE)$then(~ "foo")
+    d2 <- d1$then(function() called2 <<- TRUE)$then(~ "bar")
+    d2
+  }
+  expect_equal(synchronise(do()), "bar")
+  expect_false(called1)
+  expect_true(called2)
+})
