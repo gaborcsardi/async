@@ -127,7 +127,7 @@ http_error <- function(resp, call = sys.call(-1)) {
   status_type <- (status %/% 100) * 100
   http_class <- paste0("async_http_", unique(c(status, status_type, "error")))
   structure(
-    list(message = message, call = call),
+    list(message = message, call = call, response = resp),
     class = c(http_class, "error", "condition")
   )
 }
