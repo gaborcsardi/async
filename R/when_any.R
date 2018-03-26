@@ -33,6 +33,7 @@ when_some <- function(count, ..., .list = list()) {
   num_failed <- 0L
   ifdef <- vlapply(defs, is_deferred)
   resolved <- defs[!ifdef]
+  errors <- list()
 
   deferred$new(
     type = "when_some",
@@ -50,7 +51,13 @@ when_some <- function(count, ..., .list = list()) {
     },
     parent_reject = function(value, resolve, reject) {
       num_failed <<- num_failed + 1L
-      if (num_failed + count == num_defs + 1L) reject(value)
+      errors <<- c(errors, list(value))
+      if (num_failed + count == num_defs + 1L) {
+        err <- structure(
+          list(errors = errors, message = "when_some / when_any failed"),
+          class = c("async_rejected", "error", "condition"))
+        reject(err)
+      }
     }
   )
 }
