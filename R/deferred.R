@@ -73,8 +73,6 @@ deferred <- R6Class(
     make_error_object = function(err)
       def__make_error_object(self, private, err),
 
-    maybe_cancel_parents = function(reason)
-      def__maybe_cancel_parents(self, private, reason),
     add_as_parent = function(child)
       def__add_as_parent(self, private, child)
   )
@@ -189,7 +187,7 @@ def_then <- function(self, private, on_fulfilled = NULL,
     private$add_as_parent(on_fulfilled)
     child_private <- get_private(on_fulfilled)
     child_private$parents <- c(child_private$parents, self)
-    self
+    on_fulfilled
   }
 }
 
@@ -252,7 +250,6 @@ def__resolve <- function(self, private, value) {
       def__call_then("parent_resolve", x, value, self$get_id())
     }
     private$children <- list()
-    private$maybe_cancel_parents(private$value)
     private$parents <- NULL
   }
 }
@@ -338,21 +335,7 @@ def__reject <- function(self, private, reason) {
       def__call_then("parent_reject", x, private$value, self$get_id())
     }
     private$children <- list()
-    private$maybe_cancel_parents(private$value)
     private$parents <- NULL
-  }
-}
-
-def__maybe_cancel_parents <- function(self, private, reason) {
-  for (parent in private$parents) {
-    if (is.null(parent)) next
-
-    parent_priv <- get_private(parent)
-    if (parent_priv$state != "pending") next
-
-    chld <- parent_priv$children
-    parent_priv$children <- chld[! vlapply(chld, identical, self)]
-    if (!length(parent_priv$children)) parent$cancel(reason)
   }
 }
 
