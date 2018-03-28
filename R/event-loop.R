@@ -55,14 +55,16 @@ event_loop <- R6Class(
 
     cancel = function(id)
       el_cancel(self, private, id),
+    cancel_all = function()
+      el_cancel_all(self, private),
 
     run = function(mode = c("default", "nowait", "once"))
       el_run(self, private, mode = match.arg(mode))
   ),
 
   private = list(
-    create_task = function(callback, ..., id =  NULL)
-      el__create_task(self, private, callback, ..., id = id),
+    create_task = function(callback, ..., id =  NULL, type = "foobar")
+      el__create_task(self, private, callback, ..., id = id, type = type),
     ensure_pool = function(...)
       el__ensure_pool(self, private, ...),
     get_poll_timeout = function()
@@ -97,7 +99,7 @@ el_add_http <- function(self, private, handle, callback, progress, file) {
   self; private; handle; callback; progress; outfile <- file
   num_bytes <- 0L; total <- NULL; content <- NULL
 
-  id  <- private$create_task(callback, list(handle = handle))
+  id  <- private$create_task(callback, list(handle = handle), type = "http")
   private$ensure_pool()
   if (!is.null(outfile) && file.exists(outfile)) unlink(outfile)
   multi_add(
@@ -169,7 +171,8 @@ el_add_delayed <- function(self, private, delay, func, callback) {
   force(self); force(private); force(delay); force(func); force(callback)
   id <- private$create_task(
     callback,
-    data = list(delay = delay, func = func)
+    data = list(delay = delay, func = func),
+    type = "delayed"
   )
   private$timers[id] <- Sys.time() + as.difftime(delay, units = "secs")
   id
@@ -177,13 +180,19 @@ el_add_delayed <- function(self, private, delay, func, callback) {
 
 el_add_next_tick <- function(self, private, func, callback) {
   force(self) ; force(private) ; force(callback)
-  id <- private$create_task(callback, data = list(func = func))
+  id <- private$create_task(callback, data = list(func = func),
+                            type = "nexttick")
   private$next_ticks <- c(private$next_ticks, id)
 }
+
+#' @importFrom curl multi_cancel
 
 el_cancel <- function(self, private, id) {
   private$next_ticks <- setdiff(private$next_ticks, id)
   private$timers  <- private$timers[setdiff(names(private$times), id)]
+  if (id %in% names(private$tasks) && private$tasks[[id]]$type == "http") {
+    multi_cancel(private$tasks[[id]]$data$handle, pool = private$pool)
+  }
   private$tasks[[id]] <- NULL
   invisible(self)
 }
@@ -246,9 +255,10 @@ el__run_pending <- function(self, private) {
 
 #' @importFrom uuid UUIDgenerate
 
-el__create_task <- function(self, private, callback, data, ..., id) {
+el__create_task <- function(self, private, callback, data, ..., id, type) {
   id <- id %||% UUIDgenerate()
   private$tasks[[id]] <- list(
+    type = type,
     id = id,
     callback = callback,
     data = data,
