@@ -191,7 +191,7 @@ el_cancel <- function(self, private, id) {
   private$next_ticks <- setdiff(private$next_ticks, id)
   private$timers  <- private$timers[setdiff(names(private$times), id)]
   if (id %in% names(private$tasks) && private$tasks[[id]]$type == "http") {
-    multi_cancel(private$tasks[[id]]$data$handle, pool = private$pool)
+    multi_cancel(private$tasks[[id]]$data$handle)
   }
   private$tasks[[id]] <- NULL
   invisible(self)
