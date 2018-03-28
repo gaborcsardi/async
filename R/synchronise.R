@@ -10,11 +10,25 @@
 synchronise <- function(expr) {
   new_el <- push_event_loop()
   on.exit(pop_event_loop())
+
   res <- expr
+
   if (is_deferred(res)) {
-    get_private(res)$null()
-    get_private(res)$run_action()
+    priv <- get_private(res)
+    if (! identical(priv$event_loop, new_el)) {
+      err <- make_error(
+        "Cannot create deferred chain across synchronization barrier",
+        class = "async_synchronization_barrier_error")
+      stop(err)
+    }
+
+    priv$null()
+    priv$run_action()
+
+    while (priv$state == "pending") new_el$run("once")
+
+    new_el$cancel_all()
   }
-  new_el$run()
+
   get_value_x(res)
 }

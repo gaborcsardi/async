@@ -197,6 +197,17 @@ el_cancel <- function(self, private, id) {
   invisible(self)
 }
 
+#' @importFrom curl multi_cancel multi_list
+
+el_cancel_all <- function(self, private) {
+  http <- multi_list(pool = private$pool)
+  lapply(http, multi_cancel)
+  private$next_ticks <- character()
+  private$timers <- Sys.time()[numeric()]
+  private$tasks <-  list()
+  invisible(self)
+}
+
 #' @importFrom curl multi_run multi_list
 
 el_run <- function(self, private, mode) {
