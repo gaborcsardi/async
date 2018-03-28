@@ -71,7 +71,7 @@ http_head <- function(url, headers = character(), file = NULL,
   make_deferred_http(handle, file, on_progress)
 }
 
-#' @importFrom curl multi_cancel multi_run
+#' @importFrom curl multi_run
 
 make_deferred_http <- function(handle, file, on_progress) {
   handle; file; on_progress
@@ -89,7 +89,6 @@ make_deferred_http <- function(handle, file, on_progress) {
     },
     on_progress = on_progress,
     on_cancel = function(reason) {
-      multi_cancel(handle)
       get_default_event_loop()$cancel(id)
     }
   )
