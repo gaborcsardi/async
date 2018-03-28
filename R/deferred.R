@@ -353,6 +353,14 @@ def__call_then <- function(which, x, value, id)  {
 
 def__add_as_parent <- function(self, private, child) {
   "!DEBUG EDGE [`private$id` -> `child$get_id()`]"
+
+  if (! identical(private$event_loop, get_private(child)$event_loop)) {
+    err <- make_error(
+      "Cannot create deferred chain across synchronization barrier",
+      class = "async_synchronization_barrier_error")
+    stop(err)
+  }
+
   if (get_private(child)$running) private$run_action()
   if (private$state == "pending") {
     private$children <- c(private$children, list(child))
