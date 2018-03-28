@@ -150,7 +150,6 @@ test_that("error, invalid arg", {
 test_that("automatic cancellation", {
 
   skip_if_offline()
-  skip("Does not work currently")
 
   called <- 0L
   do <- function() {
