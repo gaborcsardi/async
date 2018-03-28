@@ -28,3 +28,4 @@ Imports:
     uuid
 Remotes: gaborcsardi/curl@fix/trimws
 Roxygen: list(markdown = TRUE)
+KeepSource: yes
