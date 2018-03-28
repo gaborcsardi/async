@@ -56,8 +56,8 @@ event_loop <- R6Class(
     cancel = function(id)
       el_cancel(self, private, id),
 
-    run = function()
-      el_run(self, private)
+    run = function(mode = c("default", "nowait", "once"))
+      el_run(self, private, mode = match.arg(mode))
   ),
 
   private = list(
@@ -190,7 +190,7 @@ el_cancel <- function(self, private, id) {
 
 #' @importFrom curl multi_run multi_list
 
-el_run <- function(self, private) {
+el_run <- function(self, private, mode) {
 
   ## This is closely modeled after the libuv event loop, on purpose,
   ## because some time we might switch to that.
@@ -205,7 +205,10 @@ el_run <- function(self, private) {
     ## private$run_prepare()
 
     num_poll <- length(multi_list(pool = private$pool))
-    timeout <- private$get_poll_timeout()
+    timeout <- 0
+    if (mode == "once" && !ran_pending || mode == "default") {
+      timeout <- private$get_poll_timeout()
+    }
     if (num_poll) {
       multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
     } else if (length(private$timers)) {
@@ -215,7 +218,13 @@ el_run <- function(self, private) {
     ## private$run_check()
     ## private$run_closing_handles()
 
+    if (mode == "once") {
+      private$update_time()
+      private$run_timers()
+    }
+
     alive <- private$is_alive()
+    if (mode == "once" || mode == "nowait") break
   }
 
   private$stop_flag <- FALSE
