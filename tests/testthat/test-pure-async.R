@@ -11,11 +11,15 @@ test_that("pure deferred values are marked as expected", {
     p3
   })
 
-  synchronise(p())
+  synchronise({
+    pp <- p()
+    expect_false(get_private(pp)$locked)
+    pp
+  })
 
   expect_true(get_private(p1)$locked)
   expect_true(get_private(p2)$locked)
-  expect_false(get_private(p3)$locked)
+  expect_true(get_private(p3)$locked)
 })
 
 test_that("non-pure inside pure async", {
@@ -63,18 +67,39 @@ test_that("cannot chain on locked promise", {
   expect_match(conditionMessage(err), "Deferred is locked")
 })
 
-test_that("pure_async allows auto-cancellation", {
+test_that("more auto-cancellation", {
+
+  x1 <- x2 <- x3 <- NULL
+  f <- pure_async(function() {
+    x1 <<- delay(1)
+    x2 <<- x1$then(~ 42)
+    x3 <<- x2$then(~ . * 42)
+
+    y <- delay(1/100)$then(~ x3$cancel())
+
+    when_all(x3, y)
+  })
+
+  err  <- tryCatch(synchronise(f()),  error = identity)
+  expect_s3_class(err, "async_cancelled")
+  expect_true(get_private(x1)$cancelled)
+  expect_true(get_private(x2)$cancelled)
+  expect_true(get_private(x3)$cancelled)
+})
+
+test_that("when_any auto-cancellation", {
 
   skip_if_offline()
 
-  was_cancelled <- NULL
+  http <- NULL
+  idx <- 0
 
   do <- async(function() {
-    req_done <- 0L
 
     response_time <- pure_async(function(url) {
-      http_head(url)$
-        then(function(x) { req_done <<- req_done + 1L ; x })$
+      idx <<- idx + 1L
+      http[[idx]] <<- http_head(url)
+      http[[idx]]$
         then(http_stop_for_status)$
         then(~ setNames(.[["times"]][["total"]], url))$
         catch(~ setNames(Inf, url))
@@ -84,14 +109,13 @@ test_that("pure_async allows auto-cancellation", {
               "https://httpbin.org/get")
 
     reqs <- lapply(urls, response_time)
-    when_any(.list = reqs)$
-      then(~ sort(unlist(.)))$
-      then(function() was_cancelled <<- get_private(reqs[[1]])$cancelled)
+    when_any(.list = reqs, .cancel = TRUE)$
+      then(~ sort(unlist(.)))
   })
 
   tic <- Sys.time()
-  synchronise(do())
+  err <- tryCatch(synchronise(do()), error = identity)
   toc <- Sys.time()
   expect_true(toc - tic < as.difftime(2, units = "secs"))
-  expect_true(was_cancelled)
+  expect_true(get_private(http[[1]])$cancelled)
 })

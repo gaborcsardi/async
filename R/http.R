@@ -77,6 +77,7 @@ make_deferred_http <- function(handle, file, on_progress) {
   handle; file; on_progress
   id <- NULL
   deferred$new(
+    type = "http",
     function(resolve, reject, progress) {
       force(resolve)
       force(reject)
