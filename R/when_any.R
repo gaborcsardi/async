@@ -26,8 +26,8 @@
 #' }
 #' synchronise(afun())
 
-when_some <- function(count, ..., .list = list(), .cancel = TRUE) {
-  force(count); force(.cancel)
+when_some <- function(count, ..., .list = list()) {
+  force(count)
   defs <- c(list(...), .list)
   num_defs <- length(defs)
   num_failed <- 0L
@@ -35,28 +35,19 @@ when_some <- function(count, ..., .list = list(), .cancel = TRUE) {
   resolved <- defs[!ifdef]
   errors <- list()
 
-  cancel_all <- function() {
-    for (x in defs[ifdef]) x$cancel("Not needed for when_any")
-  }
-
   deferred$new(
     type = "when_some",
     parents = defs[ifdef],
     action = function(resolve, reject) {
       if (num_defs < count) {
-        if (.cancel) cancel_all()
         reject("Cannot resolve enough deferred values")
       } else if (length(resolved) >= count) {
-        if (.cancel) cancel_all()
         resolve(resolved[seq_len(count)])
       }
     },
     parent_resolve = function(value, resolve, reject) {
       resolved <<- c(resolved, list(value))
-      if (length(resolved) == count) {
-        if (.cancel) cancel_all()
-        resolve(resolved)
-      }
+      if (length(resolved) == count) resolve(resolved)
     },
     parent_reject = function(value, resolve, reject) {
       num_failed <<- num_failed + 1L
@@ -65,7 +56,6 @@ when_some <- function(count, ..., .list = list(), .cancel = TRUE) {
         err <- structure(
           list(errors = errors, message = "when_some / when_any failed"),
           class = c("async_rejected", "error", "condition"))
-        if (.cancel) cancel_all()
         reject(err)
       }
     }
@@ -75,6 +65,6 @@ when_some <- function(count, ..., .list = list(), .cancel = TRUE) {
 #' @export
 #' @rdname when_some
 
-when_any <- function(..., .list = list(), .cancel = FALSE) {
-  when_some(1, ..., .list = .list, .cancel = .cancel)$then(~ .[[1]])
+when_any <- function(..., .list = list()) {
+  when_some(1, ..., .list = .list)$then(~ .[[1]])
 }

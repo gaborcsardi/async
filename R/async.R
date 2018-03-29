@@ -29,20 +29,13 @@ async <- function(fun) {
   body(async_fun) <- expr({
     mget(ls(environment(), all.names = TRUE), environment())
     fun2 <- function() {
-      evalq({
-        el <- get_default_event_loop()
-        el$add_context(pure = FALSE)
-        withCallingHandlers(
-          { ret <- { !!! body(fun) }; el$drop_context(); ret },
-          condition = function(c) el$drop_context()
-        )
-      }, envir = parent.env(environment()))
+      evalq(
+      { !!! body(fun) },
+      envir = parent.env(environment())
+      )
     }
-    d1 <- deferred$new(function(resolve, reject) resolve(NULL), type = "async")
-    d2 <- deferred$new(
-      parent_resolve = function(value, resolve, reject) resolve(fun2()),
-      parents = list(d1))
-    d2
+    deferred$new(function(resolve, reject) resolve(NULL), type = "async")$
+      then(~ fun2())
   })
 
   attr(async_fun, "async")$async <- TRUE
@@ -60,39 +53,13 @@ pure_async <- function(fun) {
   body(async_fun) <- expr({
     mget(ls(environment(), all.names = TRUE), environment())
     fun2 <- function() {
-      evalq({
-        el <- get_default_event_loop()
-        el$add_context(pure = TRUE)
-        withCallingHandlers({
-          ret <- { !!! body(fun) }
-          el$drop_context(unlock = ret)
-          ret
-        }, condition = function(c) el$drop_context())
-      }, envir = parent.env(environment()))
+      evalq(
+      { !!! body(fun) },
+      envir = parent.env(environment())
+      )
     }
-
-    ## This is ridiculously difficult...
-    d1 <- deferred$new(
-      action = function(resolve, reject) resolve(NULL),
-      type = "tick")
-    d2 <- deferred$new(
-      type = "pure_async",
-      parent_resolve = function(value, resolve, reject) {
-        res <- fun2()
-        if (is_deferred(res)) {
-          priv <- get_private(d2)
-          priv$parent_resolve <- def__make_parent_resolve(NULL)
-          priv$parents <- list(res)
-          get_private(res)$add_as_parent(d2)
-          res$lock()
-        } else {
-          resolve(res)
-        }
-      },
-      parents = list(d1))
-
-    d1$lock()
-    d2
+    deferred$new(function(resolve, reject) resolve(NULL), type = "async")$
+      then(~ fun2())
   })
 
   attr(async_fun, "async")$async <- TRUE

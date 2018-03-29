@@ -59,30 +59,7 @@ event_loop <- R6Class(
       el_cancel_all(self, private),
 
     run = function(mode = c("default", "nowait", "once"))
-      el_run(self, private, mode = match.arg(mode)),
-
-    add_context = function(pure = FALSE) {
-      new <- if (pure) length(private$context_stack) else 0
-      push(private$context_stack) <- new
-    },
-    drop_context = function(unlock = NULL) {
-      ctx <- tail(private$context_stack, 1)
-      private$context_stack <- head(private$context_stack, -1)
-      if (ctx > 0) {
-        while (length(private$to_lock) > 0) {
-          t <- tail(private$to_lock, 1)[[1]]
-          private$to_lock <- head(private$to_lock, -1)
-          if (t[[2]] != ctx) break
-          if (identical(t[[1]], unlock)) next
-          t[[1]]$lock()
-        }
-      }
-    },
-    lock_me = function(deferred) {
-      ctx <- tail(private$context_stack, 1)
-      if (ctx == 0) return()
-      push(private$to_lock) <- list(deferred, ctx)
-    }
+      el_run(self, private, mode = match.arg(mode))
   ),
 
   private = list(
@@ -106,9 +83,7 @@ event_loop <- R6Class(
     tasks = list(),
     timers = Sys.time()[numeric()],
     pool = NULL,
-    next_ticks = character(),
-    context_stack = c(0L),
-    to_lock = list()
+    next_ticks = character()
   )
 )
 
