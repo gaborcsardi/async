@@ -53,6 +53,7 @@ deferred <- R6Class(
     parents = NULL,
     parent_resolve = NULL,
     parent_reject = NULL,
+    locked = FALSE,
 
     run_action = function()
       def__run_action(self, private),
@@ -106,6 +107,8 @@ async_def_init <- function(self, private, action, on_progress,
     prt_pvt <- get_private(prt)
     prt_pvt$add_as_parent(self)
   }
+
+  private$locked <- private$event_loop$is_locked()
 
   invisible(self)
 }
