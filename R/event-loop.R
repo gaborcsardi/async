@@ -59,7 +59,12 @@ event_loop <- R6Class(
       el_cancel_all(self, private),
 
     run = function(mode = c("default", "nowait", "once"))
-      el_run(self, private, mode = match.arg(mode))
+      el_run(self, private, mode = match.arg(mode)),
+
+    lock = function(lock = TRUE) {
+      r <- private$locked; private$locked <- lock; r },
+    unlock = function(lock = FALSE) self$lock(lock),
+    is_locked = function() private$locked
   ),
 
   private = list(
@@ -83,7 +88,8 @@ event_loop <- R6Class(
     tasks = list(),
     timers = Sys.time()[numeric()],
     pool = NULL,
-    next_ticks = character()
+    next_ticks = character(),
+    locked = FALSE
   )
 )
 

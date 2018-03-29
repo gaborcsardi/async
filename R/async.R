@@ -29,10 +29,13 @@ async <- function(fun) {
   body(async_fun) <- expr({
     mget(ls(environment(), all.names = TRUE), environment())
     fun2 <- function() {
-      evalq(
-      { !!! body(fun) },
-      envir = parent.env(environment())
-      )
+      evalq({
+        el <- get_default_event_loop()
+        l <- el$unlock()
+        ret <- { !!! body(fun) }
+        el$lock(l)
+        ret
+      }, envir = parent.env(environment()))
     }
     deferred$new(function(resolve, reject) resolve(NULL), type = "async")$
       then(~ fun2())
@@ -53,10 +56,13 @@ pure_async <- function(fun) {
   body(async_fun) <- expr({
     mget(ls(environment(), all.names = TRUE), environment())
     fun2 <- function() {
-      evalq(
-      { !!! body(fun) },
-      envir = parent.env(environment())
-      )
+      evalq({
+        el <- get_default_event_loop()
+        l <- el$lock()
+        ret <- { !!! body(fun) }
+        el$unlock(l)
+        ret
+      }, envir = parent.env(environment()))
     }
     deferred$new(function(resolve, reject) resolve(NULL), type = "async")$
       then(~ fun2())
