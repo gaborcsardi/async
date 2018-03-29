@@ -18,6 +18,51 @@ test_that("pure deferred values are marked as expected", {
   expect_false(get_private(p3)$locked)
 })
 
+test_that("non-pure inside pure async", {
+
+  xx <- NULL
+  f2 <- async(function() {
+    xx <<- delay(1/1000)
+    delay(1/1000)
+  })
+
+  p1 <- p2 <- p3 <- NULL
+  f <- pure_async(function() {
+    p1 <<- f2()
+    p2 <<- p1$then(delay(1/1000))
+    p3 <<- p2$then(delay(1/1000))
+    p3$then(~ xx$then(~ "foobar"))
+  })
+
+  synchronise(f())
+
+  expect_true(get_private(p1)$locked)
+  expect_true(get_private(p2)$locked)
+  expect_true(get_private(p3)$locked)
+  expect_false(get_private(xx)$locked)
+})
+
+test_that("cannot chain on locked promise", {
+
+  p1 <- p2 <- p3 <- NULL
+  p <- pure_async(function() {
+    p1 <<- delay(1/1000)
+    p2 <<- p1$then(delay(1/1000))
+    p3 <<- p2$then(delay(1/1000))
+    p3
+  })
+
+  do <- async(function() {
+    px <- p()
+    px$then(~ "yes")
+    px$then(function() p1$then(~ "no!"))
+  })
+
+  err <- tryCatch(synchronise(do()), error = identity)
+  expect_s3_class(err, "async_rejected")
+  expect_match(conditionMessage(err), "Deferred is locked")
+})
+
 test_that("pure_async allows auto-cancellation", {
 
   skip_if_offline()

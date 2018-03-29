@@ -64,7 +64,7 @@ pure_async <- function(fun) {
           ret <- { !!! body(fun) }
           el$drop_context(unlock = ret)
           ret
-        }, condition = function(c) el$drop_context(unlock = ret))
+        }, condition = function(c) el$drop_context())
       }, envir = parent.env(environment()))
     }
     deferred$new(function(resolve, reject) resolve(NULL), type = "async")$
