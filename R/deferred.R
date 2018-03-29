@@ -54,6 +54,7 @@ deferred <- R6Class(
     parent_resolve = NULL,
     parent_reject = NULL,
     locked = FALSE,
+    lock = function() private$locked <- TRUE,
 
     run_action = function()
       def__run_action(self, private),
@@ -108,7 +109,7 @@ async_def_init <- function(self, private, action, on_progress,
     prt_pvt$add_as_parent(self)
   }
 
-  private$locked <- private$event_loop$is_locked()
+  private$event_loop$lock_me(self)
 
   invisible(self)
 }
@@ -356,6 +357,10 @@ def__call_then <- function(which, x, value, id)  {
 
 def__add_as_parent <- function(self, private, child) {
   "!DEBUG EDGE [`private$id` -> `child$get_id()`]"
+
+  if (private$locked) {
+    stop("Deferred is locked, cannot be a new parent of another deferred")
+  }
 
   if (! identical(private$event_loop, get_private(child)$event_loop)) {
     err <- make_error(
