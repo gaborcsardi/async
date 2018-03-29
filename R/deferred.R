@@ -34,7 +34,13 @@ deferred <- R6Class(
       def_finally(self, private, on_finally),
     cancel = function(reason = "Cancelled")
       def_cancel(self, private, reason),
-    get_id = function() private$id
+    get_id = function() private$id,
+
+    lock = function() {
+      "!DEBUG Locking `private$id`"
+      private$locked <- TRUE
+      self
+    }
   ),
 
   private = list(
@@ -54,7 +60,6 @@ deferred <- R6Class(
     parent_resolve = NULL,
     parent_reject = NULL,
     locked = FALSE,
-    lock = function() private$locked <- TRUE,
 
     run_action = function()
       def__run_action(self, private),
@@ -75,6 +80,8 @@ deferred <- R6Class(
     make_error_object = function(err)
       def__make_error_object(self, private, err),
 
+    maybe_cancel_parents = function(reason)
+      def__maybe_cancel_parents(self, private, reason),
     add_as_parent = function(child)
       def__add_as_parent(self, private, child)
   )
@@ -218,6 +225,7 @@ def_finally <- function(self, private, on_finally) {
 
 def_cancel <- function(self, private, reason) {
   if (private$state != "pending") return()
+  "!DEBUG Cancelling `private$id`"
   cancel_cond <- structure(
     list(message = reason %||% "Deferred computation cancelled", call = NULL),
     class = c("async_cancelled", "error", "condition")
@@ -241,12 +249,6 @@ def__resolve <- function(self, private, value) {
     value$then(self)
 
   } else {
-    if (!private$dead_end && !length(private$children)) {
-      ## This cannot happen currently
-      "!DEBUG ??? DEAD END `self$get_id()`"   # nocov
-      warning("Computation going nowhere...")   # nocov
-    }
-
     "!DEBUG +++ RESOLVE `self$get_id()`"
     private$state <- "fulfilled"
     private$value <- value
@@ -254,6 +256,7 @@ def__resolve <- function(self, private, value) {
       def__call_then("parent_resolve", x, value, self$get_id())
     }
     private$children <- list()
+    private$maybe_cancel_parents(private$value)
     private$parents <- NULL
   }
 }
@@ -339,7 +342,30 @@ def__reject <- function(self, private, reason) {
       def__call_then("parent_reject", x, private$value, self$get_id())
     }
     private$children <- list()
+    private$maybe_cancel_parents(private$value)
     private$parents <- NULL
+  }
+}
+
+def__maybe_cancel_parents <- function(self, private, reason) {
+  for (parent in private$parents) {
+    parent_priv <- get_private(parent)
+
+    ## Remove from list of children, always
+    chld <- parent_priv$children
+    parent_priv$children <- chld[! vlapply(chld, identical, self)]
+
+    if (parent_priv$state != "pending") {
+      "!DEBUG *NOT* cancelling parent `parent_priv$id`, already done"
+      next
+    }
+    if (! parent_priv$locked) {
+      "!DEBUG *NOT* cancelling parent `parent_priv$id`, not locked"
+      next
+    }
+
+    "!DEBUG cancelling parent: `parent_priv$id`"
+    if (!length(parent_priv$children)) parent$cancel(reason)
   }
 }
 

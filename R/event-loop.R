@@ -74,8 +74,7 @@ event_loop <- R6Class(
           private$to_lock <- head(private$to_lock, -1)
           if (t[[2]] != ctx) break
           if (identical(t[[1]], unlock)) next
-          "!DEBUG Locking `get_private(t[[1]])$id`"
-          get_private(t[[1]])$lock()
+          t[[1]]$lock()
         }
       }
     },
