@@ -31,10 +31,11 @@ async <- function(fun) {
     fun2 <- function() {
       evalq({
         el <- get_default_event_loop()
-        l <- el$unlock()
-        ret <- { !!! body(fun) }
-        el$lock(l)
-        ret
+        el$add_context(pure = FALSE)
+        withCallingHandlers(
+          { ret <- { !!! body(fun) }; el$drop_context(); ret },
+          condition = function(c) el$drop_context()
+        )
       }, envir = parent.env(environment()))
     }
     deferred$new(function(resolve, reject) resolve(NULL), type = "async")$
@@ -58,10 +59,12 @@ pure_async <- function(fun) {
     fun2 <- function() {
       evalq({
         el <- get_default_event_loop()
-        l <- el$lock()
-        ret <- { !!! body(fun) }
-        el$unlock(l)
-        ret
+        el$add_context(pure = TRUE)
+        withCallingHandlers({
+          ret <- { !!! body(fun) }
+          el$drop_context(unlock = ret)
+          ret
+        }, condition = function(c) el$drop_context(unlock = ret))
       }, envir = parent.env(environment()))
     }
     deferred$new(function(resolve, reject) resolve(NULL), type = "async")$

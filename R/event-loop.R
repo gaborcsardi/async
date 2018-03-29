@@ -61,10 +61,29 @@ event_loop <- R6Class(
     run = function(mode = c("default", "nowait", "once"))
       el_run(self, private, mode = match.arg(mode)),
 
-    lock = function(lock = TRUE) {
-      r <- private$locked; private$locked <- lock; r },
-    unlock = function(lock = FALSE) self$lock(lock),
-    is_locked = function() private$locked
+    add_context = function(pure = FALSE) {
+      new <- if (pure) length(private$context_stack) else 0
+      push(private$context_stack) <- new
+    },
+    drop_context = function(unlock = NULL) {
+      ctx <- tail(private$context_stack, 1)
+      private$context_stack <- head(private$context_stack, -1)
+      if (ctx > 0) {
+        while (length(private$to_lock) > 0) {
+          t <- tail(private$to_lock, 1)[[1]]
+          private$to_lock <- head(private$to_lock, -1)
+          if (t[[2]] != ctx) break
+          if (identical(t[[1]], unlock)) next
+          "!DEBUG Locking `get_private(t[[1]])$id`"
+          get_private(t[[1]])$lock()
+        }
+      }
+    },
+    lock_me = function(deferred) {
+      ctx <- tail(private$context_stack, 1)
+      if (ctx == 0) return()
+      push(private$to_lock) <- list(deferred, ctx)
+    }
   ),
 
   private = list(
@@ -89,7 +108,8 @@ event_loop <- R6Class(
     timers = Sys.time()[numeric()],
     pool = NULL,
     next_ticks = character(),
-    locked = FALSE
+    context_stack = c(0L),
+    to_lock = list()
   )
 )
 

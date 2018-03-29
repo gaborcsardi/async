@@ -67,3 +67,11 @@ get_id <- local({
 lapply_args <- function(X, FUN, ..., .args = list()) {
   do.call("lapply", c(list(X = X, FUN = FUN), list(...), .args))
 }
+
+`push<-` <- function(l, value) {
+  if (is.list(l)) {
+    c(l, list(value))
+  } else {
+    c(l, value)
+  }
+}
