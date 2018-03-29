@@ -43,6 +43,31 @@ async <- function(fun) {
   async_fun
 }
 
+#' @export
+
+pure_async <- function(fun) {
+  fun <- as_function(fun)
+  if (is_async(fun)) return(fun)
+
+  async_fun <- fun
+  body(async_fun) <- expr({
+    mget(ls(environment(), all.names = TRUE), environment())
+    fun2 <- function() {
+      evalq(
+      { !!! body(fun) },
+      envir = parent.env(environment())
+      )
+    }
+    deferred$new(function(resolve, reject) resolve(NULL), type = "async")$
+      then(~ fun2())
+  })
+
+  attr(async_fun, "async")$async <- TRUE
+
+  async_fun
+}
+
+
 #' Checks if a function is async
 #'
 #' If `fun` is not a function, an error is thrown.
