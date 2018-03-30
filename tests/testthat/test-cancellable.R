@@ -1,35 +1,37 @@
 
-context("pure_async")
+context("cancellable")
 
-test_that("pure_async allows auto-cancellation", {
+test_that("auto-cancellation", {
 
   skip_if_offline()
 
-  was_cancelled <- NULL
-  
+  http <- NULL
+  idx <- 0
+
   do <- async(function() {
     req_done <- 0L
     
-    response_time <- pure_async(function(url) {
-      http_head(url)$
+    response_time <- async(function(url) {
+      idx <<- idx + 1
+      http[[idx]] <<- http_head(url)
+      http[[idx]]$
         then(function(x) { req_done <<- req_done + 1L ; x })$
         then(http_stop_for_status)$
         then(~ setNames(.[["times"]][["total"]], url))$
-        catch(~ setNames(Inf, url))
+        catch(~ setNames(Inf, url))$
+        cancellable()
     })
     
     urls <- c("https://httpbin.org/delay/5",
               "https://httpbin.org/get")
-    
+
     reqs <- lapply(urls, response_time)
-    when_any(.list = reqs)$
-      then(~ sort(unlist(.)))$
-      then(function() was_cancelled <<- get_private(reqs[[1]])$cancelled)
+    when_any(.list = reqs, .cancel = TRUE)
   })
 
   tic <- Sys.time()
-  synchronise(do())
+  err <- tryCatch(synchronise(do()), error = identity)
   toc <- Sys.time()
   expect_true(toc - tic < as.difftime(2, units = "secs"))
-  expect_true(was_cancelled)
+  expect_true(get_private(http[[1]])$cancelled)
 })
