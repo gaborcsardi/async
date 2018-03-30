@@ -1,7 +1,5 @@
 
 
-## TODO: think about error handling
-
 #' Event loop
 #'
 #' @section Usage:
@@ -88,8 +86,6 @@ event_loop <- R6Class(
 )
 
 el_init <- function(self, private) {
-  ## TODO
-  ## reg.finalizer(self, function(me) me$run("default"), onexit = TRUE)
   invisible(self)
 }
 

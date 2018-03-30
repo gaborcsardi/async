@@ -1,5 +1,5 @@
 
-#' Synchronously wrap on asynchronous code
+#' Synchronously wrap asynchronous code
 #'
 #' TODO
 #'

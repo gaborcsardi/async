@@ -81,8 +81,6 @@ async_def_init <- function(self, private, action, on_progress,
                            on_cancel, parents, parent_resolve,
                            parent_reject, type) {
 
-  ## TODO: handle errors that happen here, maybe.
-
   private$type <- type
   private$id <- get_id()
   private$event_loop <- get_default_event_loop()

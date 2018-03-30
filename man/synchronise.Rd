@@ -2,7 +2,7 @@
 % Please edit documentation in R/synchronise.R
 \name{synchronise}
 \alias{synchronise}
-\title{Synchronously wrap on asynchronous code}
+\title{Synchronously wrap asynchronous code}
 \usage{
 synchronise(expr)
 }

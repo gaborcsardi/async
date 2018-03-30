@@ -1,9 +1,4 @@
 
-## TODO: methods
-## TODO: headers
-## TODO: options
-## TODO: can we save to file?
-
 #' Asynchronous HTTP GET request
 #'
 #' Start an HTTP GET request in the background, and report its completion
