@@ -13,22 +13,23 @@ synchronise <- function(expr) {
 
   res <- expr
 
-  if (is_deferred(res)) {
-    priv <- get_private(res)
-    if (! identical(priv$event_loop, new_el)) {
-      err <- make_error(
-        "Cannot create deferred chain across synchronization barrier",
-        class = "async_synchronization_barrier_error")
-      stop(err)
-    }
+  if (!is_deferred(res)) return(res)
 
-    priv$null()
-    priv$run_action()
 
-    while (priv$state == "pending") new_el$run("once")
-
-    new_el$cancel_all()
+  priv <- get_private(res)
+  if (! identical(priv$event_loop, new_el)) {
+    err <- make_error(
+      "Cannot create deferred chain across synchronization barrier",
+      class = "async_synchronization_barrier_error")
+    stop(err)
   }
 
-  get_value_x(res)
+  priv$null()
+  priv$run_action()
+
+  while (priv$state == "pending") new_el$run("once")
+
+  new_el$cancel_all()
+
+  if (priv$state == "fulfilled") priv$value else stop(priv$value)
 }

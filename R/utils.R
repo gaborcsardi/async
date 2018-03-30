@@ -7,10 +7,6 @@ viapply <- function(X, FUN, ..., FUN.VALUE = integer(1)) {
   vapply(X, FUN, FUN.VALUE = FUN.VALUE, ...)
 }
 
-get_value_x <- function(x) {
-  if (is_deferred(x)) get_private(x)$get_value() else x
-}
-
 make_error <- function(message, class = "simpleError", call = NULL) {
   class <- c(class, "error", "condition")
   structure(

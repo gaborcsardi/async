@@ -1,5 +1,5 @@
 
-context("cancellable")
+context("auto-cancellation")
 
 test_that("auto-cancellation", {
 

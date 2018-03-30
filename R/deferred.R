@@ -57,9 +57,6 @@ deferred <- R6Class(
     run_action = function()
       def__run_action(self, private),
 
-    get_value = function()
-      def__get_value(self, private),
-
     null = function()
       def__null(self, private),
 
@@ -148,16 +145,6 @@ def__run_action <- function(self, private) {
         self, prt_priv$value, prt_priv$id)
     }
     prt_priv$run_action()
-  }
-}
-
-def__get_value <- function(self, private) {
-  if (private$state == "pending") {
-    stop("Deferred value not resolved yet")
-  } else if (private$state == "rejected") {
-    stop(private$value)
-  } else {
-    private$value
   }
 }
 

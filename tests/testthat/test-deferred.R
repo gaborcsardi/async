@@ -1,15 +1,6 @@
 
 context("deferred")
 
-test_that("error if not done yet", {
-  do <- async(function() {
-    dx <- delay(1/1000)
-    expect_error(get_private(dx)$get_value())
-    dx
-  })
-  synchronise(do())
-})
-
 test_that("rejecting with a deferred", {
   do <- async(function() {
     deferred$new(function(resolve, reject) {
