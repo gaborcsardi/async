@@ -30,17 +30,16 @@ test_that("headers", {
 
   skip_if_offline()
 
+  xx <- NULL
   do <- async(function() {
     headers = c("X-Header-Test" = "foobar", "X-Another" = "boooyakasha")
-    dx <- http_get("https://eu.httpbin.org/headers", headers = headers)$
-      then(~ jsonlite::fromJSON(rawToChar(.$content), simplifyVector = FALSE))
-
-    when_all(
-      dx$then(~ expect_equal(.$headers$`X-Header-Test`, "foobar")),
-      dx$then(~ expect_equal(.$headers$`X-Another`, "boooyakasha"))
-    )
+    http_get("https://eu.httpbin.org/headers", headers = headers)$
+      then(~ jsonlite::fromJSON(rawToChar(.$content), simplifyVector = FALSE))$
+      then(function(x) xx <<- x)
   })
   synchronise(do())
+  expect_equal(xx$headers$`X-Header-Test`, "foobar")
+  expect_equal(xx$headers$`X-Another`, "boooyakasha")
 })
 
 test_that("304 is not an error", {
@@ -58,59 +57,59 @@ test_that("http progress bars", {
 
   skip_if_offline()
 
+  xx <- NULL
+  totalx <- NULL
+  amountx <- 0
+  tmp <- tempfile()
+
   do <- async(function() {
-    totalx <- NULL
-    amountx <- 0
-    tmp <- tempfile()
     on.exit(unlink(tmp, recursive = TRUE), add = TRUE)
-    dx <- http_get(
+    http_get(
       "https://eu.httpbin.org/image/jpeg",
-      file = tmp <- tempfile(),
+      file = tmp <<- tempfile(),
       on_progress = function(data) {
         if (!is.null(data$total)) totalx <<- data$total
         if (!is.null(data$amount)) amountx <<- amountx + data$amount
       }
-    )
-
-    when_all(
-      dx$then(~ expect_equal(.$status_code, 200)),
-      dx$then(~ expect_true(file.exists(tmp))),
-      dx$then(~ expect_equal(file.info(tmp)$size, amountx)),
-      dx$then(~ expect_equal(totalx, amountx))
-    )
+    )$then(function(x) xx <<- x)
   })
+
   synchronise(do())
+
+  expect_equal(xx$status_code, 200)
+  expect_true(file.exists(tmp))
+  expect_equal(file.info(tmp)$size, amountx)
+  expect_equal(totalx, amountx)
 })
 
 test_that("http progress bars & etags", {
 
   skip_if_offline()
 
+  xx <- NULL
+  totalx <- NULL
+  amountx <- NULL
+  statusx <- NULL
+  tmp <- tempfile()
+
   do <- async(function() {
-    totalx <- NULL
-    amountx <- NULL
-    statusx <- NULL
-    tmp <- tempfile()
     on.exit(unlink(tmp, recursive = TRUE), add = TRUE)
-    dx <- http_get(
+    http_get(
       "https://eu.httpbin.org/etag/etag",
-      file = tmp <- tempfile(),
+      file = tmp,
       headers = c("If-None-Match" = "etag"),
       on_progress = function(data) {
         if (!is.null(data$total)) totalx <<- data$total
         amountx <<- c(amountx, data$amount)
         statusx <<- data$status_code
       }
-    )
-
-    when_all(
-      dx$then(~ expect_equal(.$status_code, 304)),
-      dx$then(~ expect_equal(statusx, 304)),
-      dx$then(~ expect_equal(length(.$content), 0)),
-      dx$then(~ expect_false(file.exists(tmp)))
-    )
+    )$then(function(x) xx <<- x)
   })
   synchronise(do())
+  expect_equal(xx$status_code, 304)
+  expect_equal(statusx, 304)
+  expect_equal(length(xx$content), 0)
+  expect_false(file.exists(tmp))
 })
 
 test_that("progress bar for in-memory data", {

@@ -18,15 +18,14 @@ test_that("auto-cancellation", {
         then(function(x) { req_done <<- req_done + 1L ; x })$
         then(http_stop_for_status)$
         then(~ setNames(.[["times"]][["total"]], url))$
-        catch(~ setNames(Inf, url))$
-        cancellable()
+        catch(~ setNames(Inf, url))
     })
     
     urls <- c("https://httpbin.org/delay/5",
               "https://httpbin.org/get")
 
     reqs <- lapply(urls, response_time)
-    when_any(.list = reqs, .cancel = TRUE)
+    when_any(.list = reqs)
   })
 
   tic <- Sys.time()

@@ -45,7 +45,7 @@ deferred <- R6Class(
     state = c("pending", "fulfilled", "rejected")[1],
     event_loop = NULL,
     value = NULL,
-    children = list(),
+    child = NULL,
     progress_callback = NULL,
     cancel_callback = NULL,
     cancelled = FALSE,
@@ -221,6 +221,7 @@ def_cancel <- function(self, private, reason) {
     class = c("async_cancelled", "error", "condition")
   )
   private$reject(cancel_cond)
+  invisible(self)
 }
 
 def__null <- function(self, private) {
@@ -233,13 +234,12 @@ def__resolve <- function(self, private, value) {
   if (private$state != "pending") return()
 
   if (is_deferred(value)) {
-
     private$parent_resolve <- def__make_parent_resolve(NULL)
     private$parent_reject <- def__make_parent_reject(NULL)
     value$then(self)
 
   } else {
-    if (!private$dead_end && !length(private$children)) {
+    if (!private$dead_end && !length(private$child)) {
       ## This cannot happen currently
       "!DEBUG ??? DEAD END `self$get_id()`"   # nocov
       warning("Computation going nowhere...")   # nocov
@@ -248,10 +248,9 @@ def__resolve <- function(self, private, value) {
     "!DEBUG +++ RESOLVE `self$get_id()`"
     private$state <- "fulfilled"
     private$value <- value
-    for (x in private$children) {
-      def__call_then("parent_resolve", x, value, self$get_id())
+    if (!is.null(private$child)) {
+      def__call_then("parent_resolve", private$child, value, self$get_id())
     }
-    private$children <- list()
     private$maybe_cancel_parents(private$value)
     private$parents <- NULL
   }
@@ -334,10 +333,10 @@ def__reject <- function(self, private, reason) {
     if (!is.null(private$cancel_callback)) {
       private$cancel_callback(conditionMessage(private$value))
     }
-    for (x in private$children) {
-      def__call_then("parent_reject", x, private$value, self$get_id())
+    if (!is.null(private$child)) {
+      def__call_then("parent_reject", private$child, private$value,
+                     self$get_id())
     }
-    private$children <- list()
     private$maybe_cancel_parents(private$value)
     private$parents <- NULL
   }
@@ -349,10 +348,7 @@ def__maybe_cancel_parents <- function(self, private, reason) {
 
     parent_priv <- get_private(parent)
     if (parent_priv$state != "pending") next
-
-    chld <- parent_priv$children
-    parent_priv$children <- chld[! vlapply(chld, identical, self)]
-    if (!length(parent_priv$children)) parent$cancel(reason)
+    parent$cancel(reason)
   }
 }
 
@@ -377,10 +373,15 @@ def__add_as_parent <- function(self, private, child) {
       class = "async_synchronization_barrier_error")
     stop(err)
   }
+  if (! is.null(private$child)) {
+    stop("Deferred value is already owned")
+  }
+
+  private$child <- child
 
   if (get_private(child)$running) private$run_action()
   if (private$state == "pending") {
-    private$children <- c(private$children, list(child))
+    ## Nothing to do
 
   } else if (private$state == "fulfilled") {
     def__call_then("parent_resolve", child, private$value, self$get_id())

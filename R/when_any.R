@@ -26,8 +26,8 @@
 #' }
 #' synchronise(afun())
 
-when_some <- function(count, ..., .list = list(), .cancel = FALSE) {
-  force(count); force(.cancel)
+when_some <- function(count, ..., .list = list()) {
+  force(count)
   defs <- c(list(...), .list)
   num_defs <- length(defs)
   num_failed <- 0L
@@ -42,17 +42,14 @@ when_some <- function(count, ..., .list = list(), .cancel = FALSE) {
     parents = defs[ifdef],
     action = function(resolve, reject) {
       if (num_defs < count) {
-        if (.cancel) cancel_all()
         reject("Cannot resolve enough deferred values")
       } else if (length(resolved) >= count) {
-        if (.cancel) cancel_all()
         resolve(resolved[seq_len(count)])
       }
     },
     parent_resolve = function(value, resolve, reject) {
       resolved <<- c(resolved, list(value))
       if (length(resolved) == count) {
-        if (.cancel) cancel_all()
         resolve(resolved)
       }
     },
@@ -63,7 +60,6 @@ when_some <- function(count, ..., .list = list(), .cancel = FALSE) {
         err <- structure(
           list(errors = errors, message = "when_some / when_any failed"),
           class = c("async_rejected", "error", "condition"))
-        if (.cancel) cancel_all()
         reject(err)
       }
     }

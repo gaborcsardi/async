@@ -40,8 +40,9 @@ test_that("then for fulfilled", {
 
   do <- async(function() {
     dx <- http_head("https://eu.httpbin.org/status/404")
+    dx2 <- http_head("https://eu.httpbin.org/status/404")
     dx$then(function() {
-      dx$
+      dx2$
         then(function(value) value$status_code)$
         then(function(value) expect_equal(value, 404))
     })
@@ -49,29 +50,16 @@ test_that("then for fulfilled", {
   synchronise(do())
 })
 
-test_that("multiple then clauses", {
-  skip_if_offline()
+test_that("multiple then clauses are not allowed", {
+  do <- async(function() {
+    dx <- delay(1/1000)
+    dx$then(~ 1)
+    dx$then(~ 2)
+  })
 
-  do <- function() {
-    dx <- http_head("https://eu.httpbin.org/status/404")
-    dx2 <- dx$then(function(value) http_get(value$url))
-    dx3 <- dx$then(function(value) value$status_code)
-    dx4 <- dx$then(function(value) http_head(value$url))
-
-    dxx <- when_all(dx2, dx3, dx4)
-
-    when_all(
-      dxx$then(function(result) expect_equal(result[[1]]$status_code, 404)),
-      dxx$then(function(result) expect_equal(result[[2]], 404)),
-      dxx$then(function(result) expect_equal(result[[3]]$url, result[[1]]$url)),
-      dx2$then(function(x) expect_equal(x$status_code, 404)),
-      dx3$then(function(x) expect_equal(x, 404)),
-      dx4$then(function(x) {
-        dx$then(function(x2) expect_equal(x$url, x2$url))
-      })
-    )
-  }
-  synchronise(do())
+  err <- tryCatch(synchronise(do()), error = identity)
+  expect_s3_class(err, "async_rejected")
+  expect_match(conditionMessage(err), "already owned")
 })
 
 test_that("compact function notation", {
