@@ -34,8 +34,6 @@ deferred <- R6Class(
       def_finally(self, private, on_finally),
     cancel = function(reason = "Cancelled")
       def_cancel(self, private, reason),
-    cancellable = function()
-      def_cancellable(self, private),
     get_id = function() private$id
   ),
 
@@ -51,7 +49,6 @@ deferred <- R6Class(
     progress_callback = NULL,
     cancel_callback = NULL,
     cancelled = FALSE,
-    can_cancel = FALSE,
     dead_end = FALSE,
     parents = NULL,
     parent_resolve = NULL,
@@ -226,12 +223,6 @@ def_cancel <- function(self, private, reason) {
   private$reject(cancel_cond)
 }
 
-def_cancellable <- function(self, private) {
-  private$can_cancel <- TRUE
-  for (p in private$parents) p$cancellable()
-  invisible(self)
-}
-
 def__null <- function(self, private) {
   self$.__enclos_env__$private$dead_end <- TRUE
   invisible(self)
@@ -358,7 +349,6 @@ def__maybe_cancel_parents <- function(self, private, reason) {
 
     parent_priv <- get_private(parent)
     if (parent_priv$state != "pending") next
-    if (!parent_priv$can_cancel) next
 
     chld <- parent_priv$children
     parent_priv$children <- chld[! vlapply(chld, identical, self)]
