@@ -229,6 +229,7 @@ def_cancel <- function(self, private, reason) {
 def_cancellable <- function(self, private) {
   private$can_cancel <- TRUE
   for (p in private$parents) p$cancellable()
+  invisible(self)
 }
 
 def__null <- function(self, private) {
@@ -357,6 +358,7 @@ def__maybe_cancel_parents <- function(self, private, reason) {
 
     parent_priv <- get_private(parent)
     if (parent_priv$state != "pending") next
+    if (!parent_priv$can_cancel) next
 
     chld <- parent_priv$children
     parent_priv$children <- chld[! vlapply(chld, identical, self)]
