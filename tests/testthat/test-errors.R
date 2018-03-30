@@ -118,3 +118,28 @@ test_that("can catch error in then function", {
   expect_s3_class(err, "async_rejected")
   expect_match(conditionMessage(err), "foobar")
 })
+
+test_that("catch handers", {
+
+  spec <- foobar1 <- foobar2 <- NULL
+  do <- async(function() {
+    async_constant(42)$
+      then(function() {
+        err <- structure(
+          list(message = "foobar"),
+          class = c("foobar", "error", "condition"))
+        stop(err)
+      })$
+      catch(special = function(e) spec <<- e)$
+      catch(foobar = function(e) foobar1 <<- e)$
+      then(function(e) foobar2 <<- e)$
+      then(~ "ok")
+  })
+
+  expect_equal(synchronise(do()), "ok")
+  expect_null(spec)
+  expect_s3_class(foobar1, "foobar")
+  expect_s3_class(foobar1, "error")
+  expect_s3_class(foobar2, "foobar")
+  expect_s3_class(foobar2, "error")
+})

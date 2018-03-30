@@ -28,8 +28,8 @@ deferred <- R6Class(
                      parents, parent_resolve, parent_reject, type),
     then = function(on_fulfilled)
       def_then(self, private, on_fulfilled),
-    catch = function(condition, ...)
-      def_catch(self, private, condition, ...),
+    catch = function(error = NULL, ...)
+      def_catch(self, private, error, ...),
     finally = function(on_finally)
       def_finally(self, private, on_finally),
     cancel = function(reason = "Cancelled")
@@ -178,9 +178,12 @@ def_then <- function(self, private, on_fulfilled = NULL,
   }
 }
 
-def_catch <- function(self, private, condition, ...) {
-  force(condition)
-  def_then(self, private, on_rejected = condition)
+def_catch <- function(self, private, error, ...) {
+  if (length(list(...)) == 0) {
+    def_then(self, private, on_rejected = error)
+  } else {
+    def_then(self, private, on_rejected = list(error, ...))
+  }
 }
 
 def_finally <- function(self, private, on_finally) {
@@ -281,6 +284,8 @@ def__make_parent_resolve <- function(fun) {
 def__make_parent_reject <- function(fun) {
   if (is.null(fun)) {
     function(value, resolve, reject, id) stop(value)
+  } else if (is.list(fun)) {
+    def__make_parent_reject_catch(fun)
   } else if (!is.function(fun)) {
     fun <- as_function(fun)
     function(value, resolve, reject, id) resolve(fun(value))
@@ -296,6 +301,21 @@ def__make_parent_reject <- function(fun) {
     fun
   } else {
     stop("Invalid parent_reject callback")
+  }
+}
+
+def__make_parent_reject_catch <- function(handlers) {
+  force(handlers)
+  function(value, resolve, reject, id) {
+    ok <- FALSE
+    ret <- tryCatch({
+      quo <- quo(tryCatch(stop(value), !!!handlers))
+      ret <- eval_tidy(quo)
+      ok <- TRUE
+      ret
+    }, error = function(x) x)
+
+    if (ok) resolve(ret) else reject(ret)
   }
 }
 
