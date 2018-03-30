@@ -31,11 +31,20 @@
 
 http_get <- function(url, headers = character(), file = NULL,
                      options = list(timeout = 600), on_progress = NULL) {
-  assert_that(is_string(url))
-  handle <- new_handle(url = url)
-  handle_setheaders(handle, .list = headers)
-  handle_setopt(handle, .list = options)
-  make_deferred_http(handle, file, on_progress)
+
+  url; headers; file; options; on_progress
+
+  make_deferred_http(
+    function() {
+      assert_that(is_string(url))
+      handle <- new_handle(url = url)
+      handle_setheaders(handle, .list = headers)
+      handle_setopt(handle, .list = options)
+      handle
+    },
+    file,
+    on_progress
+  )
 }
 
 #' Asynchronous HTTP HEAD request
@@ -63,33 +72,40 @@ http_get <- function(url, headers = character(), file = NULL,
 
 http_head <- function(url, headers = character(), file = NULL,
                       options = list(timeout = 600), on_progress = NULL) {
-  assert_that(is_string(url))
-  handle <- new_handle(url = url)
-  handle_setheaders(handle, .list = headers)
-  handle_setopt(handle, customrequest = "HEAD", nobody = TRUE,
-                .list = options)
-  make_deferred_http(handle, file, on_progress)
+
+  url; headers; file; options; on_progress
+
+  make_deferred_http(
+    function() {
+      assert_that(is_string(url))
+      handle <- new_handle(url = url)
+      handle_setheaders(handle, .list = headers)
+      handle_setopt(handle, customrequest = "HEAD", nobody = TRUE,
+                    .list = options)
+      handle
+    },
+    file,
+    on_progress
+  )
 }
 
-#' @importFrom curl multi_run
-
-make_deferred_http <- function(handle, file, on_progress) {
-  handle; file; on_progress
+make_deferred_http <- function(cb, file, on_progress) {
+  cb; file; on_progress
   id <- NULL
   deferred$new(
-    function(resolve, reject, progress) {
-      force(resolve)
-      force(reject)
+    type = "http",
+    action = function(resolve, reject, progress) {
+      resolve; reject; progress
+      handle <- cb()
       id <<- get_default_event_loop()$add_http(
         handle,
         function(err, res) if (is.null(err)) resolve(res) else reject(err),
         progress,
-        file
-      )
+        file)
     },
     on_progress = on_progress,
     on_cancel = function(reason) {
-      get_default_event_loop()$cancel(id)
+      if (!is.null(id)) get_default_event_loop()$cancel(id)
     }
   )
 }
