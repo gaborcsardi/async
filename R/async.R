@@ -34,8 +34,11 @@ async <- function(fun) {
       envir = parent.env(environment())
       )
     }
-    deferred$new(function(resolve, reject) resolve(NULL), type = "async")$
-      then(~ fun2())
+
+    deferred$new(
+      type = "async",
+      action = function(resolve, reject) resolve(fun2())
+    )
   })
 
   attr(async_fun, "async")$async <- TRUE
