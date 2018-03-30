@@ -34,6 +34,8 @@ deferred <- R6Class(
       def_finally(self, private, on_finally),
     cancel = function(reason = "Cancelled")
       def_cancel(self, private, reason),
+    cancellable = function()
+      def_cancellable(self, private),
     get_id = function() private$id
   ),
 
@@ -49,6 +51,7 @@ deferred <- R6Class(
     progress_callback = NULL,
     cancel_callback = NULL,
     cancelled = FALSE,
+    can_cancel = FALSE,
     dead_end = FALSE,
     parents = NULL,
     parent_resolve = NULL,
@@ -73,6 +76,8 @@ deferred <- R6Class(
     make_error_object = function(err)
       def__make_error_object(self, private, err),
 
+    maybe_cancel_parents = function(reason)
+      def__maybe_cancel_parents(self, private, reason),
     add_as_parent = function(child)
       def__add_as_parent(self, private, child)
   )
@@ -187,7 +192,7 @@ def_then <- function(self, private, on_fulfilled = NULL,
     private$add_as_parent(on_fulfilled)
     child_private <- get_private(on_fulfilled)
     child_private$parents <- c(child_private$parents, self)
-    on_fulfilled
+    self
   }
 }
 
@@ -221,6 +226,11 @@ def_cancel <- function(self, private, reason) {
   private$reject(cancel_cond)
 }
 
+def_cancellable <- function(self, private) {
+  private$can_cancel <- TRUE
+  for (p in private$parents) p$cancellable()
+}
+
 def__null <- function(self, private) {
   self$.__enclos_env__$private$dead_end <- TRUE
   invisible(self)
@@ -250,6 +260,7 @@ def__resolve <- function(self, private, value) {
       def__call_then("parent_resolve", x, value, self$get_id())
     }
     private$children <- list()
+    private$maybe_cancel_parents(private$value)
     private$parents <- NULL
   }
 }
@@ -335,7 +346,21 @@ def__reject <- function(self, private, reason) {
       def__call_then("parent_reject", x, private$value, self$get_id())
     }
     private$children <- list()
+    private$maybe_cancel_parents(private$value)
     private$parents <- NULL
+  }
+}
+
+def__maybe_cancel_parents <- function(self, private, reason) {
+  for (parent in private$parents) {
+    if (is.null(parent)) next
+
+    parent_priv <- get_private(parent)
+    if (parent_priv$state != "pending") next
+
+    chld <- parent_priv$children
+    parent_priv$children <- chld[! vlapply(chld, identical, self)]
+    if (!length(parent_priv$children)) parent$cancel(reason)
   }
 }
 
