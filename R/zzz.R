@@ -1,5 +1,4 @@
 
-async_constant <- async(async_constant)
 async_detect   <- async(async_detect)
 async_every    <- async(async_every)
 async_filter   <- async(async_filter)
