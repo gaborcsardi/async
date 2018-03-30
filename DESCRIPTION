@@ -21,7 +21,6 @@ Encoding: UTF-8
 Imports:
     assertthat,
     backports,
-    cli,
     curl (>= 3.0),
     R6,
     rlang,
