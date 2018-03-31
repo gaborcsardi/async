@@ -7,13 +7,45 @@
 Deferred value
 }
 \section{Usage}{
-\preformatted{TODO
+\preformatted{dx <- deferred$new(action = NULL, on_progress = NULL, on_cancel = NULL,
+         parents = NULL, parent_resolve = NULL, parent_reject = NULL,
+         type = NULL)
+dx$then(on_fulfilled)
+dx$catch(...)
+dx$finally(on_finally)
+dx$cancel(reason = "Cancelled")
 }
 }
 
 \section{Arguments}{
 
-TODO
+\itemize{
+\item \code{action}: Function to call when the deferred value starts running.
+it needs to have at least two arguments: \code{resolve} and \code{reject},
+and the third \code{progress} argument is optional. See details below.
+\item \code{on_progress}: A function to call to report progress. See details
+below.
+\item \code{on_cancel}: A function to call when the deferred is cancelled. See
+details below.
+\item \code{parents}: A list of deferred values that will be the parents of the
+deferred value being created. If some of them are already owned,
+an error is thrown.
+\item \code{parent_resolve}: A function to call when a parent is resolved.
+See details below.
+\item \code{parent_reject}: A function to call when a parent throws an error.
+See details below.
+\item \code{type}: A label that can be used to indicate the type of the deferred
+value to create. This might be useful for debugging, but otherwise
+it is not used.
+\item \code{on_fulfilled}: Function to call when the parent deferred is resolved.
+Essentially this is the \code{parent_resolve} function of the \code{then()}
+deferred.
+\item \code{...} Error handlers, as in \code{tryCatch()}, see details below.
+\item \code{on_finally}: Function to call, after the deferred value is resolved
+or after it has thrown an error. It will be called without arguments.
+\item \code{reason} Error message or error object that will be used to cancel the
+deferred.
+}
 }
 
 \section{Details}{

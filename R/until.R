@@ -1,5 +1,5 @@
 
-#' Repeatedly call task until it return `TRUE`
+#' Repeatedly call task until it its test function returns `TRUE`
 #'
 #' @param test Synchronous test function.
 #' @param task Asynchronous function to call repeatedly.

@@ -2,9 +2,11 @@
 #' Deferred value for a set of deferred values
 #'
 #' Create a deferred value that is resolved when all listed deferred values
-#' are resolved. Note that the rejection of an input deferred value
-#' triggers the rejection of the deferred value returned by `when_all` as
-#' well.
+#' are resolved. Note that the error of an input deferred value
+#' triggers the error `when_all` as well.
+#'
+#' async has auto-cancellation, so if one deferred value errors, the rest
+#' of them will be automatically cancelled.
 #'
 #' @param ... Deferred values.
 #' @param .list More deferred values.

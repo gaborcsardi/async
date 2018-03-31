@@ -7,8 +7,27 @@
 synchronise(expr)
 }
 \arguments{
-\item{expr}{Async function call expression.}
+\item{expr}{Async function call expression. If it does not evaluate
+to a deferred value, then it is just returned.}
 }
 \description{
-TODO
+Evaluate an expression in an async phase. It creates an event loop,
+then evaluates the supplied expression. If its result is a deferred
+value, it keeps running the event loop, until the deferred value is
+resolved, and returns its resolved value.
+}
+\details{
+If an error is not handled in the async phase, \code{synchronise()} will
+re-throw that error.
+
+\code{synchronise()} cancels all async processes on interrupt or extrenal
+error.
+}
+\examples{
+http_status <- function(url, ...) {
+  http_get(url, ...)$
+    then(~ .$status_code)
+}
+
+synchronise(http_status("https://httpbin.org/status/418"))
 }

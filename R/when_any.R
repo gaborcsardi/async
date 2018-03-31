@@ -7,7 +7,15 @@
 #' `when_any` is a special case for a single.
 #'
 #' If the specified number of deferred values cannot be resolved, then
-#' the returned deferred value is rejected.
+#' `when_any` throws an error.
+#'
+#' async has auto-cancellation, so if the required number of deferred values
+#' are resolved, or too many of them throw error, the rest of the are
+#' cancelled.
+#'
+#' If `when_any` throws an error, then all the underlying error objects
+#' are returned in the `errors` member of the error object thrown by
+#' `when_any`.
 #'
 #' @param count Number of deferred values that need to resolve.
 #' @param ... Deferred values.

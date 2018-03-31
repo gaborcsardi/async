@@ -28,7 +28,15 @@ specified number of deferred values resolve.
 \code{when_any} is a special case for a single.
 
 If the specified number of deferred values cannot be resolved, then
-the returned deferred value is rejected.
+\code{when_any} throws an error.
+
+async has auto-cancellation, so if the required number of deferred values
+are resolved, or too many of them throw error, the rest of the are
+cancelled.
+
+If \code{when_any} throws an error, then all the underlying error objects
+are returned in the \code{errors} member of the error object thrown by
+\code{when_any}.
 }
 \examples{
 ## Use the URL that returns first

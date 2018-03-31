@@ -1,6 +1,9 @@
 
 #' Compose asynchronous functions
 #'
+#' This is equivalent to using the `$then()` method of a deferred, but
+#' it is easier to use programmatically.
+#'
 #' @param ... Asynchronous functions to compose.
 #' @param .list Mose asynchronous functions to compose.
 #' @return Asynchronous function, the composition of all input functions.

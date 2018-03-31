@@ -3,6 +3,9 @@
 #'
 #' This is sometimes useful to start a deferred chain.
 #'
+#' Note that the evaluation of `value` is forced when the deferred value
+#' is created.
+#'
 #' @param value The value to resolve to.
 #' @return A deferred value.
 #'

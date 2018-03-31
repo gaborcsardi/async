@@ -1,41 +1,4 @@
 
-
-#' Event loop
-#'
-#' @section Usage:
-#' ```
-#' el <- event_loop$new()
-#'
-#' el$add_http(handle, callback)
-#' el$add_delayed(delay, func, callback)
-#' ```
-#'
-#' @section Arguments:
-#' \describe{
-#'   \item{handle}{A `curl` handle to use for the `HTTP` operation.}
-#'   \item{callback}{Callback function to call when the asynchronous
-#'      operation is done. See details below.}
-#'   \item{delay}{Number of seconds to delay the execution of the callback.}
-#'   \item{func}{TODO}
-#' }
-#'
-#' @section Details:
-#' `$add_http()` starts an asynchronous HTTP request, with the specified
-#' `curl` handle. Once the request is done, and the response is available
-#' (or an error happens), the callback is called with two arguments, the
-#' error object or message (if any) and the `curl` response object.
-#'
-#' `$add_delayed()` starts a task with the specified delay.
-#'
-#' @section The default event loop:
-#'
-#' The `async` package creates a default event loop when it is loaded.
-#' All asyncronous constructs use this event loop by default.
-#'
-#' @name event_loop
-#' @keywords internal
-NULL
-
 #' @importFrom R6 R6Class
 
 event_loop <- R6Class(

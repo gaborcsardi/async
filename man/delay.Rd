@@ -2,21 +2,20 @@
 % Please edit documentation in R/delay.R
 \name{delay}
 \alias{delay}
-\title{Run a function after the specified time interval}
+\title{Delay async computation for the specified time}
 \usage{
 delay(delay)
 }
 \arguments{
 \item{delay}{Time interval in seconds, the amount of time to delay
-to delay the execution of the callback. It can be a fraction of a
-second.}
+to delay the execution. It can be a fraction of a second.}
 }
 \value{
 A deferred object.
 }
 \description{
-Since R is single-threaded, the callback might be executed (much) later
-than the specified time period.
+Since R is single-threaded, the deferred value might be resolved (much)
+later than the specified time period.
 }
 \examples{
 ## Two HEAD requests with 1/2 sec delay between them

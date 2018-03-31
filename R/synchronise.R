@@ -1,11 +1,28 @@
 
 #' Synchronously wrap asynchronous code
 #'
-#' TODO
+#' Evaluate an expression in an async phase. It creates an event loop,
+#' then evaluates the supplied expression. If its result is a deferred
+#' value, it keeps running the event loop, until the deferred value is
+#' resolved, and returns its resolved value.
 #'
-#' @param expr Async function call expression.
+#' If an error is not handled in the async phase, `synchronise()` will
+#' re-throw that error.
+#'
+#' `synchronise()` cancels all async processes on interrupt or extrenal
+#' error.
+#' 
+#' @param expr Async function call expression. If it does not evaluate
+#' to a deferred value, then it is just returned.
 #'
 #' @export
+#' @examples
+#' http_status <- function(url, ...) {
+#'   http_get(url, ...)$
+#'     then(~ .$status_code)
+#' }
+#'
+#' synchronise(http_status("https://httpbin.org/status/418"))
 
 synchronise <- function(expr) {
   new_el <- push_event_loop()
