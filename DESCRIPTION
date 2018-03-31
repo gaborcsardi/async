@@ -21,10 +21,9 @@ Encoding: UTF-8
 Imports:
     assertthat,
     backports,
-    curl (>= 3.0),
+    curl (>= 3.2),
     R6,
     rlang,
     uuid
-Remotes: gaborcsardi/curl@fix/trimws
 Roxygen: list(markdown = TRUE)
 KeepSource: yes
