@@ -190,7 +190,7 @@ synchronise(response_time("https://google.com"))
 
 ```
 #> https://google.com 
-#>           0.294605
+#>           0.323265
 ```
 
 ```r
@@ -250,6 +250,11 @@ if too many parents fail for `when_some()` to be successful.
 When `synchronise()` is called on a deferred value, the tree rooted there
 is called the async tree of the async phase.
 
+When the strict shared ownership model is too restrictive, certain
+deferred values can be marked as shared, via the `$share()` method.
+These can have multiple owners (children) and they are also not
+auto-cancelled (see Auto-Cancellation later).
+
 ## Lazy Evaluation
 
 async does not evaluate deferred values that are not part of the async
@@ -303,6 +308,10 @@ async also has another type of cancellation, when `synchronise()` is
 interrupted externally, either by the user or some system error. In this
 case all processes and resources that were created in the event loop,
 are cancelled and freed.
+
+Shared deferred values (see `$share()`) are not auto-cancelled when their
+children are resolved or errored, but they are always cancelled at the
+end of the async phase.
 
 ## Async Iterators
 
@@ -407,7 +416,7 @@ synchronise(fastest_urls(urls))
 
 ```
 #>   https://cran.rstudio.com https://cran.r-project.org 
-#>                   0.127355                   0.207452
+#>                   0.166877                   0.249149
 ```
 
 See the package vignettes for more examples.

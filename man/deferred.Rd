@@ -14,6 +14,7 @@ dx$then(on_fulfilled)
 dx$catch(...)
 dx$finally(on_finally)
 dx$cancel(reason = "Cancelled")
+dx$share()
 }
 }
 
