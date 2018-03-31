@@ -8,8 +8,4 @@
   if (requireNamespace("debugme", quietly = TRUE)) debugme::debugme()
 }
 
-.onUnload <- function(libpath) {
-  message("Unloading async package, waiting for all tasks...")
-}
-
 ## nocov end
