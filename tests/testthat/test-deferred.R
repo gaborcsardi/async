@@ -17,13 +17,13 @@ test_that("action in formula notation", {
       then(~ expect_true(.))
 
     dx2 <- deferred$new(~ reject("oops"))$
-      catch(~ expect_match(., "oops"))
+      catch(error = ~ expect_match(conditionMessage(.), "oops"))
 
     dx3 <- deferred$new(~ if (TRUE) resolve(TRUE) else reject("oops"))$
       then(~ expect_true(.))
 
     dx4 <- deferred$new(~ if (FALSE) resolve(TRUE) else reject("oops"))$
-      catch(~ expect_match(., "oops"))
+      catch(error = ~ expect_match(conditionMessage(.), "oops"))
 
     when_all(dx1, dx2, dx3, dx4)
   }
@@ -38,11 +38,11 @@ test_that("on_fulfilled / on_rejected without arguments", {
 
     dx2 <- deferred$new(~resolve(TRUE))$
       then(~ stop("oops"))$
-      catch(~ expect_match(conditionMessage(.), "oops"))
+      catch(error = ~ expect_match(conditionMessage(.), "oops"))
 
     dx3 <- deferred$new(~resolve(TRUE))$
       then(~ stop("ooops"))$
-      catch(~ "aaah")$
+      catch(error = ~ "aaah")$
       then(~ expect_equal(., "aaah"))
 
     when_all(dx1, dx2, dx3)

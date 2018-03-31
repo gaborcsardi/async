@@ -9,7 +9,7 @@ test_that("unsuccessful async_retry", {
       function() { x <<- x - 1; if (x) stop("error") else "OK" },
       times = 3
     )$
-      catch(function(e) expect_match(e$message, "error"))
+      catch(error = function(e) expect_match(e$message, "error"))
   })
   synchronise(do())
 })

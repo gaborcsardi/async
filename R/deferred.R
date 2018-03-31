@@ -28,8 +28,8 @@ deferred <- R6Class(
                      parents, parent_resolve, parent_reject, type),
     then = function(on_fulfilled)
       def_then(self, private, on_fulfilled),
-    catch = function(error = NULL, ...)
-      def_catch(self, private, error, ...),
+    catch = function(...)
+      def_catch(self, private, ...),
     finally = function(on_finally)
       def_finally(self, private, on_finally),
     cancel = function(reason = "Cancelled")
@@ -178,12 +178,8 @@ def_then <- function(self, private, on_fulfilled = NULL,
   }
 }
 
-def_catch <- function(self, private, error, ...) {
-  if (length(list(...)) == 0) {
-    def_then(self, private, on_rejected = error)
-  } else {
-    def_then(self, private, on_rejected = list(error, ...))
-  }
+def_catch <- function(self, private, ...) {
+  def_then(self, private, on_rejected = list(...))
 }
 
 def_finally <- function(self, private, on_finally) {
@@ -305,7 +301,7 @@ def__make_parent_reject <- function(fun) {
 }
 
 def__make_parent_reject_catch <- function(handlers) {
-  force(handlers)
+  handlers <- lapply(handlers, as_function)
   function(value, resolve, reject, id) {
     ok <- FALSE
     ret <- tryCatch({

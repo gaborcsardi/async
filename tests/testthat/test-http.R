@@ -191,7 +191,7 @@ test_that("timeout, failed request", {
   expect_true(toc - tic < as.difftime(4, units = "secs"))
 
   do2 <- function() {
-    do()$catch(~ "fixed")
+    do()$catch(error = ~ "fixed")
   }
 
   tic <- Sys.time()

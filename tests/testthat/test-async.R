@@ -59,7 +59,7 @@ test_that("rejects with the thrown error", {
     exp <- simpleError("Expected thrown value to match rejection value")
     foo <- async(function() { stop(exp); "blah" })
     dx <- foo()$
-      catch(function(err) { act <<- exp; exp })$
+      catch(error = function(err) { act <<- exp; exp })$
       then(function(value) {
         if (is.null(act)) {
           stop("Extected function to throw")

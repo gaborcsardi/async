@@ -48,7 +48,7 @@ test_that("can catch and handle cancellation", {
   err <- NULL
   do <- async(function() {
     dx <- deferred$new(action = function(resolve, reject) { })
-    dx2 <- dx$catch(function(e) err <<- e)
+    dx2 <- dx$catch(error = function(e) err <<- e)
     dx$cancel("changed my mind")
     dx2
   })
@@ -75,7 +75,7 @@ test_that("cancel delay after it has started", {
   cancelled <- NULL
   do <- function() {
     d1 <- delay(5)
-    d1x <- d1$catch(identity)
+    d1x <- d1$catch(error = identity)
     d2 <- delay(1/100)$
       then(function() { d1$cancel("nope"); "OK" })
     when_all(d1x, d2)

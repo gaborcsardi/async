@@ -48,7 +48,8 @@ test_that("error", {
 
   i <- 1
   do2 <- function() {
-    do()$catch(function(e) expect_equal(conditionMessage(e), "doh"))
+    do()$
+      catch(error = function(e) expect_equal(conditionMessage(e), "doh"))
   }
   synchronise(do2())
 })
@@ -71,7 +72,8 @@ test_that("test function throws", {
 
   called <- FALSE
   do2 <- function() {
-    do()$catch(function(e) expect_equal(conditionMessage(e), "doh"))
+    do()$
+      catch(error = function(e) expect_equal(conditionMessage(e), "doh"))
   }
   synchronise(do2())
   expect_true(called)

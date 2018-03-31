@@ -57,7 +57,7 @@ test_that("not enough values", {
   expect_s3_class(err, "async_rejected")
 
   do2 <- async(function() {
-    do()$catch(~ "repaired")
+    do()$catch(error = ~ "repaired")
   })
   expect_equal(synchronise(do2()), "repaired")
 })
