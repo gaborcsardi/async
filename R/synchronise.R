@@ -9,7 +9,7 @@
 
 synchronise <- function(expr) {
   new_el <- push_event_loop()
-  on.exit(pop_event_loop())
+  on.exit({ new_el$cancel_all(); pop_event_loop() }, add = TRUE)
 
   res <- expr
 
