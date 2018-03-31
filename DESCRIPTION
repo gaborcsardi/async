@@ -14,9 +14,13 @@ RoxygenNote: 6.0.1.9000
 Suggests:
     covr,
     debugme,
+    desc,
     jsonlite,
+    knitr,
     mockery,
+    rmarkdown,
     testthat
+VignetteBuilder: knitr
 Encoding: UTF-8
 Imports:
     assertthat,

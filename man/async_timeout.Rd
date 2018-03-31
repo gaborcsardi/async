@@ -25,7 +25,7 @@ it will be rejected, with an \code{async_timeout} error.
 ## You can catch the error, asynchronously
 synchronise(
   async_timeout(function() delay(1/10)$then(~ "OK"), 1/1000)$
-    catch(~ "Timed out")
+    catch(error = ~ "Timed out")
 )
 
 ## Or synchronously
