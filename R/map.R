@@ -26,6 +26,8 @@ async_map <- function(.x, .f, ..., .args = list(), .limit = Inf) {
   }
 }
 
+async_map <- mark_as_async(async_map)
+
 async_map_limit <- function(.x, .f, ..., .args = list(), .limit = Inf) {
   len <- length(.x)
   nx <- len

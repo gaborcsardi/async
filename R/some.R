@@ -22,3 +22,5 @@ async_some <- function(.x, .p, ...) {
     }
   )
 }
+
+async_some <- mark_as_async(async_some)

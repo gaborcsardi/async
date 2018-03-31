@@ -39,3 +39,5 @@ async_every <- function(.x, .p, ...) {
     }
   )
 }
+
+async_every <- mark_as_async(async_every)

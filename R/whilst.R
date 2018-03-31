@@ -45,3 +45,5 @@ async_whilst <- function(test, task, ...) {
 
   self
 }
+
+async_whilst <- mark_as_async(async_whilst)

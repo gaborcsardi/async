@@ -24,3 +24,5 @@ async_sequence <- function(..., .list = NULL) {
     dx
   }
 }
+
+async_sequence <- mark_as_async(async_sequence)

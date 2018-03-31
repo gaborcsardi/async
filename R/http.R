@@ -42,6 +42,8 @@ http_get <- function(url, headers = character(), file = NULL,
   )
 }
 
+http_get <- mark_as_async(http_get)
+
 #' Asynchronous HTTP HEAD request
 #'
 #' @inheritParams http_get
@@ -83,6 +85,8 @@ http_head <- function(url, headers = character(), file = NULL,
     on_progress
   )
 }
+
+http_head <- mark_as_async(http_head)
 
 make_deferred_http <- function(cb, file, on_progress) {
   cb; file; on_progress

@@ -35,3 +35,5 @@ async_filter <- function(.x, .p, ...) {
     }
   )
 }
+
+async_filter <- mark_as_async(async_filter)

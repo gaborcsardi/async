@@ -26,3 +26,5 @@ async_reflect <- function(task) {
       catch(error = function(reason) list(error = reason, result = NULL))
   }
 }
+
+async_reflect <- mark_as_async(async_reflect)

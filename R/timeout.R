@@ -48,3 +48,5 @@ async_timeout <- function(task, timeout, ...) {
     }
   )
 }
+
+async_timeout <- mark_as_async(async_timeout)

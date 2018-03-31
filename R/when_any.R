@@ -66,9 +66,13 @@ when_some <- function(count, ..., .list = list()) {
   )
 }
 
+when_some <- mark_as_async(when_some)
+
 #' @export
 #' @rdname when_some
 
 when_any <- function(..., .list = list()) {
   when_some(1, ..., .list = .list)$then(~ .[[1]])
 }
+
+when_any <- mark_as_async(when_any)

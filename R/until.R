@@ -39,3 +39,5 @@ async_until <- function(test, task, ...) {
 
   self
 }
+
+async_until <- mark_as_async(async_until)

@@ -28,6 +28,8 @@ async_detect <- function(.x, .p, ..., .limit = Inf) {
   }
 }
 
+async_detect <- mark_as_async(async_detect)
+
 async_detect_nolimit <- function(.x, .p, ...) {
   defs <- lapply(.x, async(.p), ...)
   nx <- length(defs)

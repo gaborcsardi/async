@@ -40,6 +40,8 @@ when_all <- function(..., .list = list()) {
   )
 }
 
+when_all <- mark_as_async(when_all)
+
 get_value_x <- function(x) {
   if (is_deferred(x)) get_private(x)$value else x
 }

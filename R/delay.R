@@ -43,3 +43,5 @@ delay <- function(delay) {
     }
   )
 }
+
+delay <- mark_as_async(delay)

@@ -41,6 +41,8 @@ async_retry <- function(task, times, ...) {
   )
 }
 
+async_retry <- mark_as_async(async_retry)
+
 #' Make an asynchronous funcion retryable
 #'
 #' @param task An asynchronous function.
