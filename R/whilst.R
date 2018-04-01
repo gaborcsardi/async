@@ -34,7 +34,7 @@ async_whilst <- function(test, task, ...) {
         task(...)$then(self)
       }
     },
-    parent_resolve = function(value, resolve, reject) {
+    parent_resolve = function(value, resolve) {
       if  (!test()) {
         resolve(value)
       } else {

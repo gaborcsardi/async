@@ -55,20 +55,20 @@ when_some <- function(count, ..., .list = list()) {
         resolve(resolved[seq_len(count)])
       }
     },
-    parent_resolve = function(value, resolve, reject) {
+    parent_resolve = function(value, resolve) {
       resolved <<- c(resolved, list(value))
       if (length(resolved) == count) {
         resolve(resolved)
       }
     },
-    parent_reject = function(value, resolve, reject) {
+    parent_reject = function(value, resolve) {
       num_failed <<- num_failed + 1L
       errors <<- c(errors, list(value))
       if (num_failed + count == num_defs + 1L) {
         err <- structure(
           list(errors = errors, message = "when_some / when_any failed"),
           class = c("async_rejected", "error", "condition"))
-        reject(err)
+        stop(err)
       }
     }
   )

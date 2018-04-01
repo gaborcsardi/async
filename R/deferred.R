@@ -291,19 +291,19 @@ def__make_error_object <- function(self, private, err) {
 
 def__make_parent_resolve <- function(fun) {
   if (is.null(fun)) {
-    function(value, resolve, reject, id) resolve(value)
+    function(value, resolve, id) resolve(value)
   } else if (!is.function(fun)) {
     fun <- as_function(fun)
-    function(value, resolve, reject, id) resolve(fun(value))
+    function(value, resolve, id) resolve(fun(value))
   } else if (num_args(fun) == 0) {
-    function(value, resolve, reject, id) resolve(fun())
+    function(value, resolve, id) resolve(fun())
   } else if (num_args(fun) == 1) {
-    function(value, resolve, reject, id) resolve(fun(value))
+    function(value, resolve, id) resolve(fun(value))
   } else if (identical(names(formals(fun)),
-                       c("value", "resolve", "reject"))) {
-    function(value, resolve, reject, id) fun(value, resolve, reject)
+                       c("value", "resolve"))) {
+    function(value, resolve, id) fun(value, resolve)
   } else if (identical(names(formals(fun)),
-                       c("value", "resolve", "reject", "id"))) {
+                       c("value", "resolve", "id"))) {
     fun
   } else {
     stop("Invalid parent_resolve callback")
@@ -312,21 +312,21 @@ def__make_parent_resolve <- function(fun) {
 
 def__make_parent_reject <- function(fun) {
   if (is.null(fun)) {
-    function(value, resolve, reject, id) stop(value)
+    function(value, resolve, id) stop(value)
   } else if (is.list(fun)) {
     def__make_parent_reject_catch(fun)
   } else if (!is.function(fun)) {
     fun <- as_function(fun)
-    function(value, resolve, reject, id) resolve(fun(value))
+    function(value, resolve, id) resolve(fun(value))
   } else if (num_args(fun) == 0) {
-    function(value, resolve, reject, id) resolve(fun())
+    function(value, resolve, id) resolve(fun())
   } else if (num_args(fun) == 1) {
-    function(value, resolve, reject, id) resolve(fun(value))
+    function(value, resolve, id) resolve(fun(value))
   } else if (identical(names(formals(fun)),
-                       c("value", "resolve", "reject"))) {
-    function(value, resolve, reject, id) fun(value, resolve, reject)
+                       c("value", "resolve"))) {
+    function(value, resolve, id) fun(value, resolve)
   } else if (identical(names(formals(fun)),
-                       c("value", "resolve", "reject", "id"))) {
+                       c("value", "resolve", "id"))) {
     fun
   } else {
     stop("Invalid parent_reject callback")
@@ -335,7 +335,7 @@ def__make_parent_reject <- function(fun) {
 
 def__make_parent_reject_catch <- function(handlers) {
   handlers <- lapply(handlers, as_function)
-  function(value, resolve, reject, id) {
+  function(value, resolve, id) {
     ok <- FALSE
     ret <- tryCatch({
       quo <- quo(tryCatch(stop(value), !!!handlers))
@@ -344,7 +344,7 @@ def__make_parent_reject_catch <- function(handlers) {
       ret
     }, error = function(x) x)
 
-    if (ok) resolve(ret) else reject(ret)
+    if (ok) resolve(ret) else stop(ret)
   }
 }
 
@@ -394,7 +394,7 @@ def__call_then <- function(which, x, value, id)  {
 
   cb <- private[[which]]
   private$event_loop$add_next_tick(
-    function() private[[which]](value, private$resolve, private$reject, id),
+    function() private[[which]](value, private$resolve, id),
     function(err, res) if (!is.null(err)) private$reject(err))
 }
 

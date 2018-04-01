@@ -11,7 +11,7 @@ async_some <- function(.x, .p, ...) {
     type = "async_some",
     parents = defs,
     action = function(resolve) if (nx == 0) resolve(FALSE),
-    parent_resolve = function(value, resolve, reject) {
+    parent_resolve = function(value, resolve) {
       if (!done && isTRUE(value)) {
         done <<- TRUE
         resolve(TRUE)

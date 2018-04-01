@@ -28,7 +28,7 @@ async_every <- function(.x, .p, ...) {
     type = "async_every",
     parents = defs,
     action = function(resolve) if (nx == 0) resolve(TRUE),
-    parent_resolve = function(value, resolve, reject) {
+    parent_resolve = function(value, resolve) {
       if (!done && !isTRUE(value)) {
         done <<- TRUE
         resolve(FALSE)

@@ -30,12 +30,12 @@ async_retry <- function(task, times, ...) {
   self <- deferred$new(
     type = "retry",
     parents = list(task(...)),
-    parent_reject = function(value, resolve, reject) {
+    parent_reject = function(value, resolve) {
       times <<- times - 1L
       if (times > 0) {
         task(...)$then(self)
       } else {
-        reject(value)
+        stop(value)
       }
     }
   )

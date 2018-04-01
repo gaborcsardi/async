@@ -39,7 +39,7 @@ async_detect_nolimit <- function(.x, .p, ...) {
     type = "async_detect",
     parents = defs,
     action = function(resolve) if (nx == 0) resolve(NULL),
-    parent_resolve = function(value, resolve, reject, id) {
+    parent_resolve = function(value, resolve, id) {
       if (!done && isTRUE(value)) {
         done <<- TRUE
         ids <- viapply(defs, function(x) x$get_id())
@@ -67,7 +67,7 @@ async_detect_limit <- function(.x, .p, ..., .limit = .limit) {
     type = "async_detect (limit)",
     parents = firsts,
     action = function(resolve) if (nx == 0) resolve(NULL),
-    parent_resolve = function(value, resolve, reject, id) {
+    parent_resolve = function(value, resolve, id) {
       if (!done && isTRUE(value)) {
         done <<- TRUE
         resolve(.x[[match(id, ids)]])

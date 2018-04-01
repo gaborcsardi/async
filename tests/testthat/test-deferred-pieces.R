@@ -8,17 +8,16 @@ test_that("def__make_parent_*", {
     ~ .,
     ~ .x,
     function() 42,
-    function(value, resolve, reject) resolve(value),
-    function(value, resolve, reject, id) resolve(value)
+    function(value, resolve) resolve(value),
+    function(value, resolve, id) resolve(value)
   )
 
   bad <- list(
     123,
-    function(value, resolve) resolve(value),
-    function(value, reject) reject(value)
+    function(a, b, c) resolve(value)
   )
 
-  eta <- function(value, resolve, reject, id) { }
+  eta <- function(value, resolve, id) { }
   
   for (f in good) {
     res <- def__make_parent_resolve(f)
@@ -40,7 +39,6 @@ test_that("def__make_parent_resolve", {
   val <- NULL
   r1(42,
      function(x) { res <<- "resolve"; val <<- x },
-     function(x) { res <<- "reject"; val <<- x},
      1)
   expect_equal(res, "resolve")
   expect_equal(val, 42)
@@ -51,7 +49,6 @@ test_that("def__make_parent_resolve", {
   val <- NULL
   r2(42,
      function(x) { res <<- "resolve"; val <<- x },
-     function(x) { res <<- "reject"; val <<- x},
      1)
   expect_equal(res, "resolve")
   expect_equal(val, 42 * 42)
@@ -62,7 +59,6 @@ test_that("def__make_parent_resolve", {
   val <- NULL
   r2(42,
      function(x) { res <<- "resolve"; val <<- x },
-     function(x) { res <<- "reject"; val <<- x},
      1)
   expect_equal(res, "resolve")
   expect_equal(val, 42)
@@ -76,7 +72,6 @@ test_that("def__make_parent_resolve", {
   expect_error(
     r1("foobar",
        function(x) { res <<- "resolve"; val <<- x },
-       function(x) { res <<- "reject"; val <<- x},
        1),
     "foobar"
   )
@@ -89,7 +84,6 @@ test_that("def__make_parent_resolve", {
   val <- NULL
   r2(42,
      function(x) { res <<- "resolve"; val <<- x },
-     function(x) { res <<- "reject"; val <<- x},
      1)
   expect_equal(res, "resolve")
   expect_equal(val, 42 * 42)
@@ -100,7 +94,6 @@ test_that("def__make_parent_resolve", {
   val <- NULL
   r2(42,
      function(x) { res <<- "resolve"; val <<- x },
-     function(x) { res <<- "reject"; val <<- x},
      1)
   expect_equal(res, "resolve")
   expect_equal(val, 42)
