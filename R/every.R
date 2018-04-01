@@ -27,7 +27,7 @@ async_every <- function(.x, .p, ...) {
   deferred$new(
     type = "async_every",
     parents = defs,
-    action = function(resolve, reject) if (nx == 0) resolve(TRUE),
+    action = function(resolve) if (nx == 0) resolve(TRUE),
     parent_resolve = function(value, resolve, reject) {
       if (!done && !isTRUE(value)) {
         done <<- TRUE

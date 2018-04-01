@@ -150,13 +150,12 @@ def__run_action <- function(self, private) {
   if (!is.null(action)) {
     if (!is.function(action)) {
       action <- as_function(action)
-      formals(action) <- alist(resolve = NULL, reject = NULL,
-                               progress = NULL)
+      formals(action) <- alist(resolve = NULL, progress = NULL)
     }
     assert_that(is_action_function(action))
 
     action_args <- names(formals(action))
-    args <- list(private$resolve, private$reject)
+    args <- list(private$resolve)
     if (!is.na(pr_arg <- match("progress", action_args))) {
       args$progress <- private$progress
     }

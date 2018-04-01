@@ -38,7 +38,7 @@ async_detect_nolimit <- function(.x, .p, ...) {
   deferred$new(
     type = "async_detect",
     parents = defs,
-    action = function(resolve, reject) if (nx == 0) resolve(NULL),
+    action = function(resolve) if (nx == 0) resolve(NULL),
     parent_resolve = function(value, resolve, reject, id) {
       if (!done && isTRUE(value)) {
         done <<- TRUE
@@ -66,7 +66,7 @@ async_detect_limit <- function(.x, .p, ..., .limit = .limit) {
   self <- deferred$new(
     type = "async_detect (limit)",
     parents = firsts,
-    action = function(resolve, reject) if (nx == 0) resolve(NULL),
+    action = function(resolve) if (nx == 0) resolve(NULL),
     parent_resolve = function(value, resolve, reject, id) {
       if (!done && isTRUE(value)) {
         done <<- TRUE

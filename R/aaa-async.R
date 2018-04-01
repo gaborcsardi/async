@@ -37,7 +37,7 @@ async <- function(fun) {
 
     deferred$new(
       type = "async",
-      action = function(resolve, reject) resolve(fun2())
+      action = function(resolve) resolve(fun2())
     )
   })
 

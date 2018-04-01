@@ -48,9 +48,9 @@ when_some <- function(count, ..., .list = list()) {
   deferred$new(
     type = "when_some",
     parents = defs[ifdef],
-    action = function(resolve, reject) {
+    action = function(resolve) {
       if (num_defs < count) {
-        reject("Cannot resolve enough deferred values")
+        stop("Cannot resolve enough deferred values")
       } else if (length(resolved) >= count) {
         resolve(resolved[seq_len(count)])
       }

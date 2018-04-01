@@ -10,7 +10,7 @@ async_some <- function(.x, .p, ...) {
   deferred$new(
     type = "async_some",
     parents = defs,
-    action = function(resolve, reject) if (nx == 0) resolve(FALSE),
+    action = function(resolve) if (nx == 0) resolve(FALSE),
     parent_resolve = function(value, resolve, reject) {
       if (!done && isTRUE(value)) {
         done <<- TRUE

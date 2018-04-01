@@ -1,28 +1,18 @@
 
 context("deferred")
 
-test_that("rejecting with a deferred", {
-  do <- async(function() {
-    deferred$new(function(resolve, reject) {
-      reject(delay(1/1000)$then(function(value) "OK"))
-    })
-  })
-  res <- synchronise(do())
-  expect_equal(res, "OK")
-})
-
 test_that("action in formula notation", {
   do <- function() {
     dx1 <- deferred$new(~ resolve(TRUE))$
       then(~ expect_true(.))
 
-    dx2 <- deferred$new(~ reject("oops"))$
+    dx2 <- deferred$new(~ stop("oops"))$
       catch(error = ~ expect_match(conditionMessage(.), "oops"))
 
-    dx3 <- deferred$new(~ if (TRUE) resolve(TRUE) else reject("oops"))$
+    dx3 <- deferred$new(~ if (TRUE) resolve(TRUE) else stop("oops"))$
       then(~ expect_true(.))
 
-    dx4 <- deferred$new(~ if (FALSE) resolve(TRUE) else reject("oops"))$
+    dx4 <- deferred$new(~ if (FALSE) resolve(TRUE) else stop("oops"))$
       catch(error = ~ expect_match(conditionMessage(.), "oops"))
 
     when_all(dx1, dx2, dx3, dx4)

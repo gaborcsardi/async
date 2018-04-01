@@ -27,7 +27,7 @@ async_filter <- function(.x, .p, ...) {
   deferred$new(
     type = "async_filter",
     parents = defs,
-    action = function(resolve, reject) if (nx == 0) resolve(.x),
+    action = function(resolve) if (nx == 0) resolve(.x),
     parent_resolve = function(value, resolve, reject, id) {
       nx <<- nx - 1L
       if  (isTRUE(value))  keep[as.character(id)] <<- TRUE

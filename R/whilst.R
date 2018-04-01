@@ -27,7 +27,7 @@ async_whilst <- function(test, task, ...) {
 
   self <- deferred$new(
     type = "async_whilst",
-    action = function(resolve, reject)  {
+    action = function(resolve)  {
       if (!test()) {
         resolve(NULL)
       } else {

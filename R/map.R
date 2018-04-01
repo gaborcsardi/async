@@ -46,7 +46,7 @@ async_map_limit <- function(.x, .f, ..., .args = list(), .limit = Inf) {
   self <- deferred$new(
     type = "async_map (limit)",
     parents = firsts,
-    action = function(resolve, reject) if (nx == 0) resolve(result),
+    action = function(resolve) if (nx == 0) resolve(result),
     parent_resolve = function(value, resolve, reject, id) {
       nx <<- nx - 1L
       result[[match(id, ids)]] <<- value

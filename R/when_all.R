@@ -34,7 +34,7 @@ when_all <- function(..., .list = list()) {
   deferred$new(
     type = "when_all",
     parents = defs[isdef],
-    action = function(resolve, reject) if (nx == 0) resolve(defs),
+    action = function(resolve) if (nx == 0) resolve(defs),
     parent_resolve = function(value, resolve, reject) {
       nx <<- nx - 1L
       if (nx == 0L) resolve(lapply(defs, get_value_x))

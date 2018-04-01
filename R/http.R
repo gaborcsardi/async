@@ -93,8 +93,12 @@ make_deferred_http <- function(cb, file, on_progress) {
   id <- NULL
   deferred$new(
     type = "http",
-    action = function(resolve, reject, progress) {
-      resolve; reject; progress
+    action = function(resolve, progress) {
+      resolve; progress
+      ## This is a temporary hack until we have proper pollables
+      ## Then the deferred will have a "work" callback, which will
+      ## be able to throw.
+      reject <- environment(resolve)$private$reject
       handle <- cb()
       id <<- get_default_event_loop()$add_http(
         handle,
