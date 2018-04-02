@@ -171,3 +171,19 @@ test_that("synchronization barriers, when_some", {
     synchronise(afun()),
     class = "async_synchronization_barrier_error")
 })
+
+test_that("synchronization barriers, leaked deferred", {
+
+  leak <- NULL
+  do <- function() {
+    leak <<- async_constant(1)
+    leak
+  }
+
+  synchronise(do())
+
+  expect_false(is.null(leak))
+  expect_error(
+    synchronise(leak),
+    class = "async_synchronization_barrier_error")
+})

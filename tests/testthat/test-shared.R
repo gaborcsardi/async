@@ -25,3 +25,12 @@ test_that("not cancelled at auto-cancellation", {
   expect_false(get_private(d1)$cancelled)
   expect_true(get_private(d2)$cancelled)
 })
+
+test_that("shared on an already fulfilled one", {
+
+  do <- function() {
+    d1 <- async_constant(42)$share()
+    d1$then(function(x) d1$then(~ x + 1))
+  }
+  expect_equal(synchronise(do()), 43)
+})
