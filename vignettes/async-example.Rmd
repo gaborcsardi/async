@@ -82,11 +82,18 @@ For this example we'll implement two package types:
 
 We start with GitHub packages, these are more complicated.
 First, we need to set the `Accept` HTTP header when we talk to
-the GitHub API, so define a helper function for that.
+the GitHub API, so define a helper function for that. We also set
+a GitHub token to avoid GitHub rate limits, this should be in the
+`GITHUB_PAT` environment variable.
 
 ```{r}
 default_gh_headers <- function() {
-  c("Accept" = "application/vnd.github.v3+json")
+  headers <- c("Accept" = "application/vnd.github.v3+json")
+  pat <- Sys.getenv("GITHUB_PAT", "")
+  if (pat != "") {
+    headers <- c(headers, Authorization = paste("token", pat))
+  }
+  headers
 }
 ```
 
