@@ -246,7 +246,8 @@ el__ensure_pool <- function(self, private, ...) {
 
 el__get_poll_timeout <- function(self, private) {
   if (length(private$next_ticks)) {
-    0
+    ## TODO: can this happen at all? Probably not, but it does not hurt...
+    0 # nocov
   } else {
     max(0, min(Inf, private$timers - private$time))
   }
