@@ -19,7 +19,7 @@ The body of the response is written to this file.}
 \code{\link[curl:handle_setopt]{curl::handle_setopt()}}.}
 
 \item{on_progress}{Progress handler function. It is only used if the
-response body is written to a file.}
+response body is written to a file. See details below.}
 }
 \value{
 Deferred object.
@@ -28,6 +28,28 @@ Deferred object.
 Start an HTTP GET request in the background, and report its completion
 via a deferred.
 }
+\section{Progress bars}{
+
+
+\code{http_get} can report on the progress of the download, via the
+\code{on_progress} argument. This is called with a list, that describes an
+event that happened to the HTTP request. The list will always have an
+\code{event} entry, which is set to the string \code{"data"} or \code{"done"}.
+The former means that some data was received, that latter means that
+the request is done. Additional list entries:
+\itemize{
+\item \code{status_code}: the HTTP status code.
+\item \code{total}: the total number of bytes.
+\item \code{amount}: the number of bytes received so far.
+\item \code{ratio}: the ratio of the bytes already received. This is \code{NULL} if
+the size of the response is unknown.
+}
+
+Note that \code{on_progress} is currently only used for downloads that write
+to the disk. This will be fixed in the future:
+\url{https://github.com/r-lib/async/issues/40}
+}
+
 \examples{
 afun <- async(function() {
   http_get("https://eu.httpbin.org/status/200")$

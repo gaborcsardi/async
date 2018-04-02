@@ -190,7 +190,7 @@ synchronise(response_time("https://google.com"))
 
 ```
 #> https://google.com 
-#>           0.323265
+#>           0.952807
 ```
 
 ```r
@@ -207,7 +207,7 @@ asynchronously, then the deferred value will throw an error when itself
 or one of its descendants is `synchronise()`-ed. This can be caught with
 `tryCatch()`.
 
-## Ownership and the Async Tree
+## Ownership and the Async DAG
 
 When the `$then()` method of a deferred value is called to create another
 deferred value:
@@ -219,8 +219,9 @@ d2 <- d1$then(~ ...)
 then we say that `d2` owns `d1`. We also say that `d2` is the child of `d1`,
 and `d1` is the parent of `d2`. async has a strong ownership model, and it
 only allows a single owner (i.e. a single child) for each deferred.
-The parent-child relationships define a directed forest graph (i.e. a
-collection of directed trees).
+The parent-child relationships define a directed forest graph, a
+collection of directed trees. (This is without shared deferred values,
+see the manual.)
 
 The strong ownership model does not allow calling `$then()` multiple times
 on the same deferred value, i.e. the following generates an error:
@@ -247,8 +248,10 @@ of its parents throw errors then `when_any()` throws as well.
 soon as the specified number of its parents resolve without error, or
 if too many parents fail for `when_some()` to be successful.
 
-When `synchronise()` is called on a deferred value, the tree rooted there
-is called the async tree of the async phase.
+When `synchronise()` is called on a deferred value, the DAG rooted there
+is called the async DAG of the async phase. (This is usually a directed
+tree, and in this README we do not deal with shared deferred values,
+which would result more general DAGs.)
 
 When the strict shared ownership model is too restrictive, certain
 deferred values can be marked as shared, via the `$share()` method.
@@ -258,12 +261,12 @@ auto-cancelled (see Auto-Cancellation later).
 ## Lazy Evaluation
 
 async does not evaluate deferred values that are not part of the async
-tree of the async phase. These are clearly not needed to compute the
+DAG of the async phase. These are clearly not needed to compute the
 result of the async phase, so it would be a waste of resources working on
 them. (It is also unclear how their errors should be handled.)
 
 In the following example, `d1` and `d2` are created, but they are not
-part of the async tree, so they are never evaluated.
+part of the async DAG, so they are never evaluated.
 
 
 ```r
@@ -284,15 +287,15 @@ invisible(synchronise(do()))
 
 ## Auto-Cancellation
 
-In an async phase, it might happen that parts of the async tree are not
+In an async phase, it might happen that parts of the async DAG are not
 needed for the final result any more. E.g. if a parent of a `when_all()`
 node throws an error, then the other parents don't have to be computed.
 In this case the event loop of the phase automatically cancels these
 deferred values. Similarly, if a single parent of a `when_any()` node is
 resolved, the other parents can be cancelled.
 
-In general, if a node of the async tree is resolved, the whole directed
-tree, rooted at that node, can be cancelled (except for nodes that were
+In general, if a node of the async DAG is resolved, the whole directed
+DAG, rooted at that node, can be cancelled (except for nodes that were
 already resolved and nodes that have already failed).
 
 Auto-cancellation is very convenient, as you can be sure that resources
@@ -342,8 +345,7 @@ Control flow with deferred values can be challenging. Some helpers:
   equivalent calling `then()` on them, but `async_sequence()` is easier to
   use programmatically.
 * `async_until()` and `async_whilst()` let you call an async function
-  repeatedly, until or while a (syncronous or asynchronous) condition
-  holds.
+  repeatedly, until or while a (syncronous) condition holds.
 * `async_timeout()` runs an async function with a timeout.
 
 ## Other Async Utilities
@@ -416,7 +418,7 @@ synchronise(fastest_urls(urls))
 
 ```
 #>   https://cran.rstudio.com https://cran.r-project.org 
-#>                   0.166877                   0.249149
+#>                   0.216551                   0.294147
 ```
 
 See the package vignettes for more examples.

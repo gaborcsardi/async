@@ -11,8 +11,26 @@
 #' @param options Options to set on the handle. Passed to
 #'   [curl::handle_setopt()].
 #' @param on_progress Progress handler function. It is only used if the
-#'   response body is written to a file.
+#'   response body is written to a file. See details below.
 #' @return Deferred object.
+#'
+#' @section Progress bars:
+#'
+#' `http_get` can report on the progress of the download, via the
+#' `on_progress` argument. This is called with a list, that describes an
+#' event that happened to the HTTP request. The list will always have an
+#' `event` entry, which is set to the string `"data"` or `"done"`.
+#' The former means that some data was received, that latter means that
+#' the request is done. Additional list entries:
+#' * `status_code`: the HTTP status code.
+#' * `total`: the total number of bytes.
+#' * `amount`: the number of bytes received so far.
+#' * `ratio`: the ratio of the bytes already received. This is `NULL` if
+#'   the size of the response is unknown.
+#'
+#' Note that `on_progress` is currently only used for downloads that write
+#' to the disk. This will be fixed in the future:
+#' <https://github.com/r-lib/async/issues/40>
 #'
 #' @family asyncronous HTTP calls
 #' @export

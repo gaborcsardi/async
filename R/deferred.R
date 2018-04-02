@@ -16,7 +16,7 @@
 #' @section Arguments:
 #' * `action`: Function to call when the deferred value starts running.
 #'      it needs to have at least two arguments: `resolve` and `reject`,
-#'      and the third `progress` argument is optional. See details below. 
+#'      and the third `progress` argument is optional. See details below.
 #' * `on_progress`: A function to call to report progress. See details
 #'      below.
 #' * `on_cancel`: A function to call when the deferred is cancelled. See
@@ -40,9 +40,358 @@
 #' * `reason` Error message or error object that will be used to cancel the
 #'      deferred.
 #'
-#' @section Details:
-#' TODO
+#' @section Deferred values:
 #'
+#' Asynchronous computation is represented by deferred values.
+#' A deferred value is an [R6](https://github.com/wch/R6) object.
+#'
+#' ```
+#' deferred$new(action = NULL, on_progress = NULL, on_cancel = NULL,
+#'    parents = NULL, parent_resolve = NULL, parent_reject = NULL,
+#'    type = NULL)
+#' ```
+#'
+#' Creates a new deferred value. `action` is a function that is called
+#' once the deferred value is _started_ (i.e. _not_ when `dx` is created).
+#' It must have one or two arguments: `resolve`, or `resolve` and `progress`
+#' It should call `resolve` when it is done, with the final value of the
+#' deferred as the argument. (See examples below.) If it has two arguments,
+#' then the second one is a callback function for creating progress bars.
+#' The deferred value may report its progress through this function.
+#' See details in the _Progress bars_ section below.
+#'
+#' `action` is called when the evaluation of the deferred value is started.
+#' Only deferred values that are needed to calculate the value of the
+#' async phase, are evaluated. (See also _Lazy Evaluation_ below.)
+#'
+#' Note that `action` is optional, for some deferred values, no action is
+#' takes when they are started. (These typically depend on their parent
+#' nodes.)
+#'
+#' `on_cancel` is a function that is called without arguments when a
+#' deferred value is cancelled. This includes explicit cancellation by
+#' calling its `$cancel()` method, or auto-cancellation (see below).
+#'
+#' `parents` is a list of deferred values that need to be computed before
+#' the current deferred value. When a parent deferred is resolved, the
+#' `parent_resolve` function is called. When a parent referred throws an
+#' error, the parent_reject` function is called.
+#'
+#' `parent_resolve` is a function with (up to) three arguments:
+#' `value`, `resolve` and `id`. It will be called with the value of the
+#' parent, the `resolve` callback of the deferred, and the id of the parent.
+#' `parent_resolve` can resolve the dereffed by calling the supplied `resolve`
+#' callback, or it can keep waiting on other parents and/or external
+#' computation. It may throw an error to fail the deferred.
+#'
+#' `parent_resolve` allows some shorthands as well:
+#' * `NULL`: the deferred is resolved with the value of the parent.
+#' * A function with no arguments: this function is called, and the deferred
+#'   resolves to its return value.
+#' * A function with one argument: this function is called with the value
+#'   of the parent as the argument, and the deferred is resolved to its
+#'   return value.
+#' * A function in the `~` formula notation (see [rlang::as_function()].
+#'   This function is called with the value of the parent as the argument,
+#'   and the deferred is resolved to its  return value.
+#' * A function with arguments `value` and `resolve`. This function is
+#'   called with the value of the parent, and the resolve callback of the
+#'   deferred.
+#' * A function with arguments `value`, `resolve` and `id`. This is similar
+#'   to the previous one, but the id of the parent is also included in the
+#'   call.
+#'
+#' `parent_reject` is a function with (up to) three arguments:
+#' `value`, `resolve` and `id`. It will be called with the error object
+#' thrown by the parent, the `resolve` callback of the deferred and the id
+#' of the parent.
+#' `parent_resolve` can resolve the deferred by calling the supplied
+#' `resolve` callback, or it can keep waiting on other parents and/or
+#' external computation. It may throw an error to fail the deferred. It may
+#' also re-throw the error received from the parent, if it does not wish
+#' to handle it.
+#'
+#' `parent_reject` also accepts some shorthands as well:
+#' * `NULL`: the deferred throws the same error as the parent.
+#' * A function with no arguments: this function is called, and the deferred
+#'   resolves to its return value.
+#' * A function with one argument: this function is called with the value
+#'   of the parent as the argument, and the deferred is resolved to its
+#'   return value.
+#' * A function in the `~` notation (see [rlang::as_function()]. This
+#'   function is called with the value of the parent as the argument, and
+#'   the deferred is resolved to its return value.
+#' * A function with arguments `value` and `resolve`. This function is
+#'   called with the value of the parent, and the resolve callback of the
+#'   deferred.
+#' * A function with arguments `value`, `resolve` and `id`. This is similar
+#'   to the previous one, but the id of the parent is also included in the
+#'   call.
+#' * A list of named error handlers, corresponding to the error handlers
+#'   of `$catch()` (and `tryCatch()`). If these error handlers handle the
+#'   parent's error, the deferred is resolved with the result of the
+#'   handlers. Otherwise the deferred will be failed with the parent's
+#'   error. The error handlers may also throw a new error.
+#'
+#' @section Error handling:
+#'
+#' The action function of the deferred, and also the `parent_resolve` and
+#' `parent_reject` handlers may throw errors if the deferred cannot be
+#' computed. Errors can be handled wit the `$catch()` member function:
+#'
+#' ```
+#' dx$catch(...)
+#' ```
+#'
+#' It takes the same named error handler arguments as `tryCatch()`.
+#'
+#' Technically, `$catch()` creates a new deferred value, and this new
+#' deferred value is resolved to the result of the error handlers. Of the
+#' handlers do not handle the error, then the new deferred will fail
+#' with the same error.
+#'
+#' The `$finally()` method can be used to run create finalizer code that
+#' runs when a deferred is resolved or when it fails. It can be used to
+#' close database connections or other resources:
+#'
+#' ```
+#' dx$finally(on_finally)
+#' ```
+#'
+#' Technically, `$finally()` creates a new deferred, which will resolve
+#' or fail the same way as the original one, but before doing that it will
+#' call the `on_finally` function with no arguments.
+#'
+#' @section Builtin async functions:
+#'
+#' The async package comes with some basic async functions:
+#' * [delay()] sets a timer and then resolves to `TRUE`.
+#' * [async_constant()] resolves successfully to its argument.
+#' * [http_get()] and [http_head()] make HTTP GET and HEAD requests.
+#'
+#' @section Combining async values:
+#'
+#' Async computation (just like ordinary sync computation) usually
+#' consists of several steps that needs to be performed in the specified
+#' order. The `$then()` method specifies that a step of computation needs
+#' to be performed after the deferred value is known:
+#'
+#' ```
+#' dx$then(on_fulfilled)
+#' ```
+#'
+#' `on_fulfilled` is a function with zero or one formal arguments.
+#' It will be called once the result of the deferred is known, with its
+#' result. (The result is omitted if it has no arguments). It can also
+#' be a function specified with the `~` formula notation, see
+#' [rlang::as_function()].
+#'
+#' `$then()` creates another deferred value, that will resolve to the
+#' result of the `on_fulfilled` callback. Should this callback return
+#' with a deferred value, then `$then()` the deferred value will be a
+#' child of this newly creted deferred, and only resolve after that.
+#'
+#' See also [when_all()], [when_some()] and [when_any()], which can combine
+#' multiple deferred values into one.
+#'
+#' You cannot call `$then()` (or [when_any()], [when_all()], etc. on the
+#' same deferred value multiple times, unless it is a shared deferred
+#' value. See _Ownership_ below.
+#'
+#' The [async_reflect()], [async_retry()], [async_sequence()],
+#' [async_timeout()], [async_until()] and [async_whilst()] functions are
+#' helpers for more complex async control flow.
+#'
+#' @section Ownership:
+#'
+#' async follows a strong ownership model. Each deferred value must be
+#' owned by exactly one other deferred value  (unless they are shared, see
+#' below).
+#'
+#' After a `dx2 <- dx$then()` call, the `dx` deferred is _owned_ by the
+#' newly created deferred value. (The same applied to [when_any()], etc.)
+#' This means that it is not possible to call `$then()` on the same
+#' deferred value multiple times. The deferred value that is synchronized
+#' by calling [synchronise()] on it, is owned by [synchronise()], see
+#' _Synchronization_ below.
+#'
+#' The deferred values of an async phase form a directed graph, which we
+#' call the async DAG (directed, acyclic graph). Usually (when no deferred
+#' is shared, see below), this DAG is a rooted tree, the root of the tree
+#' is the synchronised deferred, the final result of the async phase.
+#'
+#' @section Shared Deferred Values:
+#'
+#' In the rare cases when the strong ownership model is too restrictive,
+#' a deferred value can be marked as _shared_:
+#'
+#' ```
+#' dx$share()
+#' ```
+#'
+#' This has the following implications:
+#' * A shared deferred value can have multiple children (owners) in the
+#'   async DAG.
+#' * A shared deferred value is started after its first child is started.
+#' * A shared deferred value is not auto-cancelled when all of its children
+#'   are finished. (Because it might have more children in the future.)
+#' * A shared deferred value is still auto-cancelled at the end of the
+#'   event loop.
+#'
+#' Use shared deferred values sparingly, only when they are really needed,
+#' as they forbid auto-cancellation, so deferred values will hold on to
+#' resources longer, until the async phase is finished.
+#'
+#' @section Synchronization:
+#'
+#' async allows embedding asynchronous computation in synchronous code.
+#' The execution of such a program has a sync phase and async phases. When the
+#' program starts, it is in the sync phase. In the sync phase you cannot
+#' create deferred values. (But you can still define (async) functions, that
+#' will create deferred values when called.)
+#'
+#' To enter into an async phase, call [synchronise()] on an expression that
+#' evaluates to a deferred value. The async phase will last until this
+#' deferred value is computed or an error is thrown (and the error reaches
+#' [synchronise()]).
+#'
+#' [synchronise()] creates an event loop, which manages the computation of
+#' the deferred values in this particular async phase.
+#'
+#' Async phases can be embedded into each other. I.e. a program may call
+#' [synchronise()] while in the async phase. The outer async phase's event
+#' loop then stops until the inner async phase terminates. Deferred values
+#' cannot be passed through a `synchronise()` barrier, to anoter (sync or
+#' async phase). Should this happen, an error is reported on the first
+#' operation on the leaked deferred value.
+#'
+#' In a typical application, a function is implemented asynchronously, and
+#' then used synchronously by the interactive user, or another piece of
+#' synchronous code, via [synchronise()] calls. The following example makes
+#' three HTTP requests in parallel:
+#'
+#' ```
+#' http_status3 <- function() {
+#'   http_status <- function(url) {
+#'     http_get(url)$then(function(response) response$status_code)
+#'   }
+#'   r1 <- http_status("https://httpbin.org/status/403")
+#'   r2 <- http_status("https://httpbin.org/status/404")
+#'   r3 <- http_status("https://httpbin.org/status/200")
+#'   when_all(r1, r2, r3)
+#' }
+#' synchronise(http_status3())
+#' ```
+#'
+#' This async function can also be used asychronously, as a parent of
+#' another deferred value, in an async phase.
+#'
+#' @section Lazy evaluation:
+#'
+#' async does not evaluate deferred values that are not part of the async
+#' DAG of the async phase. These are clearly not needed to compute the
+#' result of the async phase, so it would be a waste of resources working on
+#' them. (It is also unclear how their errors should be handled.)
+#'
+#' In the following example, `d1` and `d2` are created, but they are not
+#' part of the async DAG, so they are never evaluated.
+#'
+#' ```
+#' do <- function() {
+#'   d1 <- delay(1/100)$then(~ print("d1"))
+#'   d2 <- d1$then(~ print("d2"))
+#'   d3 <- delay(1/100)$then(~ print("d3"))
+#'   d4 <- d3$then(~ print("d4"))
+#'   d4
+#' }
+#' invisible(synchronise(do()))
+#' ```
+#'
+#' @section Cancellation:
+#'
+#' The computation of a deferred can be cancelled when it is not needed
+#' any more:
+#'
+#' ```
+#' dx$cancel(reason = "Cancelled")
+#' ```
+#'
+#' This will _fail_ the children of the deferred, unless they have been
+#' completed already. It will also auto-cancel the parent DAG of the
+#' deferred, unless they are shared deferreds, see the next Section.
+#'
+#' @section Auto-cancellation:
+#'
+#' In an async phase, it might happen that parts of the async DAG are not
+#' needed for the final result any more. E.g. if a parent of a `when_all()`
+#' node throws an error, then the other parents don't have to be computed.
+#' In this case the event loop of the phase automatically cancels these
+#' deferred values. Similarly, if a single parent of a [when_any()] node is
+#' resolved, the other parents can be cancelled.
+#'
+#' In general, if a node of the async DAG is resolved, the whole directed
+#' DAG, rooted at that node, can be cancelled (except for nodes that were
+#' already resolved and nodes that have already failed).
+#'
+#' Auto-cancellation is very convenient, as you can be sure that resources
+#' are free as soon as they are not needed. Some practical examples:
+#'
+#' * Making HTTP requests to many mirror web sites, to check their response
+#'   time. As soon as the first reply is in, the rest of the HTTP requests
+#'   are cancelled.
+#' * In multi-process computation, as soon as one process fails, the rest are
+#'   automatically cancelled. (Unless the failure is handled, of course.)
+#'
+#' async also has another type of cancellation, when [synchronise()] is
+#' interrupted externally, either by the user or some system error. In this
+#' case all processes and resources that were created in the event loop,
+#' are cancelled and freed.
+#'
+#' Shared deferred values (see `$share()`) are not auto-cancelled when their
+#' children are resolved or errored, but they are always cancelled at the
+#' end of the async phase.
+#'
+#' @section Progress bars:
+#'
+#' A deferred value may report on its progress, if its action has a progress
+#' callback. The progress callback is called with a list that describes
+#' and event. We suggest that it always has an `event` entry, which is a
+#' simple string. The rest of the list entries can be defined as needed,
+#' but typically there will be a counter counting ticks, or a ratio
+#' describing what part of the computation is already. See [http_get()]
+#' for an async function that reports progress.
+#'
+#' @section Collections helper functions:
+#'
+#' async provides some utilities that make it easier to deal with
+#' collections of deferred values:
+#'
+#' The current iterators:
+#' * [async_map()] applies an async function to all elements of a vector or
+#'   list (collection).
+#' * [async_detect()] finds an element of a collection that passed an async
+#'   truth test.
+#' * [async_every()] checks if every element of a collection satisfies an
+#'   async predicate. [async_some()] checks if any element does that.
+#' * [async_filter()] keeps elements that pass an async truth test.
+#'
+#' @section Control flow helper functions:
+#'
+#' Control flow with deferred values can be challenging. Some helpers:
+#' * [async_reflect()] creates an async function that always succeeds.
+#'   This is useful if you want to apply it to a collection, and don't
+#'   want to stop at the first error.
+#' * [async_retry()] tries an async function a number of times.
+#'   [async_retryable()] turns a regular function into a retryable one.
+#' * [async_sequence()] chains two async functions. Calling their sequence
+#'   is equivalent calling '$then()` on them, but [async_sequence()] is
+#'   easier to use programmatically.
+#' * [async_until()] and [async_whilst()] let you call an async function
+#'   repeatedly, until or while a (syncronous) condition holds.
+#' * [async_timeout()] runs an async function with a timeout.
+#'
+#' @section Examples:
+#' Please see the README and the vignettes for examples.
 #' @name deferred
 NULL
 
