@@ -20,7 +20,7 @@ test_that("when_any, non-deferred", {
     when_any(d1, d2)$
       then(function(value) expect_equal(value, "bar"))$
       then(~ d1)$
-      catch(identity)
+      catch(error = identity)
   })
   synchronise(do())
 })
@@ -53,7 +53,7 @@ test_that("when_any, late error is ignored", {
     d2 <- delay(1/10000)$then(function(value) "bar")
 
     dx <- when_any(d1, d2)$
-      catch(function(value) expect_equal(value, "bar"))
+      catch(error = function(value) expect_equal(value, "bar"))
   })
   expect_silent(synchronise(do()))
 })
@@ -64,7 +64,10 @@ test_that("when_any, multiple errors", {
     d2 <- delay(1/10000)$then(function(value) stop("bar"))
 
     dx <- when_any(d1, d2)$
-      catch(function(reason) expect_match(reason$message, "foo"))
+      catch(error = function(reason) {
+        expect_match(conditionMessage(reason$errors[[1]]), "bar")
+        expect_match(conditionMessage(reason$errors[[2]]), "foo")
+      })
   })
   synchronise(do())
 })

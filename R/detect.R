@@ -28,6 +28,8 @@ async_detect <- function(.x, .p, ..., .limit = Inf) {
   }
 }
 
+async_detect <- mark_as_async(async_detect)
+
 async_detect_nolimit <- function(.x, .p, ...) {
   defs <- lapply(.x, async(.p), ...)
   nx <- length(defs)
@@ -36,8 +38,8 @@ async_detect_nolimit <- function(.x, .p, ...) {
   deferred$new(
     type = "async_detect",
     parents = defs,
-    action = function(resolve, reject) if (nx == 0) resolve(NULL),
-    parent_resolve = function(value, resolve, reject, id) {
+    action = function(resolve) if (nx == 0) resolve(NULL),
+    parent_resolve = function(value, resolve, id) {
       if (!done && isTRUE(value)) {
         done <<- TRUE
         ids <- viapply(defs, function(x) x$get_id())
@@ -64,8 +66,8 @@ async_detect_limit <- function(.x, .p, ..., .limit = .limit) {
   self <- deferred$new(
     type = "async_detect (limit)",
     parents = firsts,
-    action = function(resolve, reject) if (nx == 0) resolve(NULL),
-    parent_resolve = function(value, resolve, reject, id) {
+    action = function(resolve) if (nx == 0) resolve(NULL),
+    parent_resolve = function(value, resolve, id) {
       if (!done && isTRUE(value)) {
         done <<- TRUE
         resolve(.x[[match(id, ids)]])
@@ -76,9 +78,7 @@ async_detect_limit <- function(.x, .p, ..., .limit = .limit) {
         } else if (nextone <= len) {
           dx <- .p(.x[[nextone]], ...)
           ids <<- c(ids, dx$get_id())
-          get_private(dx)$add_as_parent(self)
-          private <- get_private(self)
-          private$parents <- c(private$parents, dx)
+          dx$then(self)
           nextone <<- nextone + 1L
         }
       }

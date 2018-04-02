@@ -27,27 +27,23 @@ async_whilst <- function(test, task, ...) {
 
   self <- deferred$new(
     type = "async_whilst",
-    action = function(resolve, reject)  {
+    action = function(resolve)  {
       if (!test()) {
         resolve(NULL)
       } else {
-        dx <- task(...)
-        get_private(dx)$add_as_parent(self)
-        private <- get_private(self)
-        private$parents <- c(private$parents, list(dx))
+        task(...)$then(self)
       }
     },
-    parent_resolve = function(value, resolve, reject) {
+    parent_resolve = function(value, resolve) {
       if  (!test()) {
         resolve(value)
       } else {
-        dx <- task(...)
-        get_private(dx)$add_as_parent(self)
-        private <- get_private(self)
-        private$parents <- c(private$parents, list(dx))
+        task(...)$then(self)
       }
     }
   )
 
   self
 }
+
+async_whilst <- mark_as_async(async_whilst)

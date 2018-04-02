@@ -39,7 +39,7 @@ test_that("async_detect errors", {
   do <- function()  {
     async_detect(1:10, function(x) stop("doh"))$
       then(function() called <<- TRUE)$
-      catch(function(e) {
+      catch(error = function(e) {
         expect_equal(conditionMessage(e), "doh")
         expect_s3_class(e, "async_rejected")
       })

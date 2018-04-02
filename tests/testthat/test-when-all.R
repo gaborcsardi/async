@@ -69,7 +69,7 @@ test_that("when_all, error", {
     d2 <- delay(1/1000)$then(function(value) "bar")
 
     when_all(d1, d2)$
-      catch(function(reason) {
+      catch(error = function(reason) {
         done <<-  TRUE
         expect_match(reason$message, "foo")
       })
@@ -80,16 +80,18 @@ test_that("when_all, error", {
 
 test_that("when_all, multiple errors", {
   done <- FALSE
+  err <- NULL
   do <- async(function() {
-    d1 <- delay(1/100  )$then(function(value) stop("foo"))
+    d1 <- delay(2)$then(function(value) stop("foo"))
     d2 <- delay(1/10000)$then(function(value) stop("bar"))
 
     dx <- when_all(d1, d2)$
-      catch(function(reason) {
+      catch(error = function(reason) {
         done <<- TRUE
-        expect_match(reason$message, "bar")
+        err <<- reason
       })
   })
   synchronise(do())
   expect_true(done)
+  expect_match(conditionMessage(err), "bar")
 })

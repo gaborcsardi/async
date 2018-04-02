@@ -5,7 +5,7 @@ test_that("tick", {
 
   do <- async(function() {
     deferred$new(
-      function(resolve, reject, progress) {
+      function(resolve, progress) {
         for (i in 1:10) progress(list(tick = 1))
         progress(list(tick = 1))
         resolve("done")
@@ -17,7 +17,7 @@ test_that("tick", {
   ticked <- 0
   do <- async(function() {
     deferred$new(
-      function(resolve, reject, progress) {
+      function(resolve, progress) {
         for (i in 1:10) progress(list(tick = 1))
         resolve("done")
       },
@@ -33,7 +33,7 @@ test_that("total", {
   totalx <- NULL
   do <- async(function() {
     deferred$new(
-      function(resolve, reject, progress) {
+      function(resolve, progress) {
         progress(list(total = 10))
         for (i in 1:10) progress(list(tick = 1))
         resolve("done")
@@ -53,7 +53,7 @@ test_that("ratio", {
   ratiox <- 0
   do <- async(function() {
     deferred$new(
-      function(resolve, reject, progress) {
+      function(resolve, progress) {
         for (i in 1:10) progress(list(ratio = i / 10))
         resolve("done")
       },
@@ -69,7 +69,7 @@ test_that("amount", {
   totalx  <- 0
   do <- async(function() {
     deferred$new(
-      function(resolve, reject, progress) {
+      function(resolve, progress) {
         progress(list(total = 100))
         for (i in 1:10) progress(list(amount = 10))
         resolve("done")

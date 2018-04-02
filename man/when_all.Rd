@@ -17,9 +17,12 @@ in \code{...} and \code{.list}.
 }
 \description{
 Create a deferred value that is resolved when all listed deferred values
-are resolved. Note that the rejection of an input deferred value
-triggers the rejection of the deferred value returned by \code{when_all} as
-well.
+are resolved. Note that the error of an input deferred value
+triggers the error \code{when_all} as well.
+}
+\details{
+async has auto-cancellation, so if one deferred value errors, the rest
+of them will be automatically cancelled.
 }
 \examples{
 ## Check that the contents of two URLs are the same

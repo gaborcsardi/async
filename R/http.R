@@ -1,9 +1,4 @@
 
-## TODO: methods
-## TODO: headers
-## TODO: options
-## TODO: can we save to file?
-
 #' Asynchronous HTTP GET request
 #'
 #' Start an HTTP GET request in the background, and report its completion
@@ -16,8 +11,26 @@
 #' @param options Options to set on the handle. Passed to
 #'   [curl::handle_setopt()].
 #' @param on_progress Progress handler function. It is only used if the
-#'   response body is written to a file.
+#'   response body is written to a file. See details below.
 #' @return Deferred object.
+#'
+#' @section Progress bars:
+#'
+#' `http_get` can report on the progress of the download, via the
+#' `on_progress` argument. This is called with a list, that describes an
+#' event that happened to the HTTP request. The list will always have an
+#' `event` entry, which is set to the string `"data"` or `"done"`.
+#' The former means that some data was received, that latter means that
+#' the request is done. Additional list entries:
+#' * `status_code`: the HTTP status code.
+#' * `total`: the total number of bytes.
+#' * `amount`: the number of bytes received so far.
+#' * `ratio`: the ratio of the bytes already received. This is `NULL` if
+#'   the size of the response is unknown.
+#'
+#' Note that `on_progress` is currently only used for downloads that write
+#' to the disk. This will be fixed in the future:
+#' <https://github.com/r-lib/async/issues/40>
 #'
 #' @family asyncronous HTTP calls
 #' @export
@@ -31,12 +44,23 @@
 
 http_get <- function(url, headers = character(), file = NULL,
                      options = list(timeout = 600), on_progress = NULL) {
-  assert_that(is_string(url))
-  handle <- new_handle(url = url)
-  handle_setheaders(handle, .list = headers)
-  handle_setopt(handle, .list = options)
-  make_deferred_http(handle, file, on_progress)
+
+  url; headers; file; options; on_progress
+
+  make_deferred_http(
+    function() {
+      assert_that(is_string(url))
+      handle <- new_handle(url = url)
+      handle_setheaders(handle, .list = headers)
+      handle_setopt(handle, .list = options)
+      handle
+    },
+    file,
+    on_progress
+  )
 }
+
+http_get <- mark_as_async(http_get)
 
 #' Asynchronous HTTP HEAD request
 #'
@@ -63,34 +87,46 @@ http_get <- function(url, headers = character(), file = NULL,
 
 http_head <- function(url, headers = character(), file = NULL,
                       options = list(timeout = 600), on_progress = NULL) {
-  assert_that(is_string(url))
-  handle <- new_handle(url = url)
-  handle_setheaders(handle, .list = headers)
-  handle_setopt(handle, customrequest = "HEAD", nobody = TRUE,
-                .list = options)
-  make_deferred_http(handle, file, on_progress)
+
+  url; headers; file; options; on_progress
+
+  make_deferred_http(
+    function() {
+      assert_that(is_string(url))
+      handle <- new_handle(url = url)
+      handle_setheaders(handle, .list = headers)
+      handle_setopt(handle, customrequest = "HEAD", nobody = TRUE,
+                    .list = options)
+      handle
+    },
+    file,
+    on_progress
+  )
 }
 
-#' @importFrom curl multi_cancel multi_run
+http_head <- mark_as_async(http_head)
 
-make_deferred_http <- function(handle, file, on_progress) {
-  handle; file; on_progress
+make_deferred_http <- function(cb, file, on_progress) {
+  cb; file; on_progress
   id <- NULL
   deferred$new(
-    function(resolve, reject, progress) {
-      force(resolve)
-      force(reject)
+    type = "http",
+    action = function(resolve, progress) {
+      resolve; progress
+      ## This is a temporary hack until we have proper pollables
+      ## Then the deferred will have a "work" callback, which will
+      ## be able to throw.
+      reject <- environment(resolve)$private$reject
+      handle <- cb()
       id <<- get_default_event_loop()$add_http(
         handle,
         function(err, res) if (is.null(err)) resolve(res) else reject(err),
         progress,
-        file
-      )
+        file)
     },
     on_progress = on_progress,
     on_cancel = function(reason) {
-      multi_cancel(handle)
-      get_default_event_loop()$cancel(id)
+      if (!is.null(id)) get_default_event_loop()$cancel(id)
     }
   )
 }
@@ -127,13 +163,13 @@ http_error <- function(resp, call = sys.call(-1)) {
   status_type <- (status %/% 100) * 100
   http_class <- paste0("async_http_", unique(c(status, status_type, "error")))
   structure(
-    list(message = message, call = call),
+    list(message = message, call = call, response = resp),
     class = c(http_class, "error", "condition")
   )
 }
 
 http_status <- function(status) {
-  status_desc <- http_statuses[[as.character(status)]]
+  status_desc <- http_statuses[as.character(status)]
   if (is.na(status_desc)) {
     stop("Unknown http status code: ", status, call. = FALSE)
   }

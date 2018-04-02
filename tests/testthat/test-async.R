@@ -59,7 +59,7 @@ test_that("rejects with the thrown error", {
     exp <- simpleError("Expected thrown value to match rejection value")
     foo <- async(function() { stop(exp); "blah" })
     dx <- foo()$
-      catch(function(err) { act <<- exp; exp })$
+      catch(error = function(err) { act <<- exp; exp })$
       then(function(value) {
         if (is.null(act)) {
           stop("Extected function to throw")
@@ -104,4 +104,25 @@ test_that("can be cancelled", {
   expect_s3_class(err, "async_rejected")
   expect_false(called)
   expect_false(called2)
+})
+
+test_that("built-ins are marked as async", {
+  expect_true(is_async(async_constant))
+  expect_true(is_async(async_detect))
+  expect_true(is_async(async_every))
+  expect_true(is_async(async_filter))
+  expect_true(is_async(async_map))
+  expect_true(is_async(async_reflect))
+  expect_true(is_async(async_retry))
+  expect_true(is_async(async_sequence))
+  expect_true(is_async(async_some))
+  expect_true(is_async(async_timeout))
+  expect_true(is_async(async_until))
+  expect_true(is_async(async_whilst))
+  expect_true(is_async(delay))
+  expect_true(is_async(http_get))
+  expect_true(is_async(http_head))
+  expect_true(is_async(when_all))
+  expect_true(is_async(when_any))
+  expect_true(is_async(when_some))
 })

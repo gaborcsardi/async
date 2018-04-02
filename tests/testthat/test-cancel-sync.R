@@ -1,5 +1,5 @@
 
-context("cancellations")
+context("cancellation at sync point")
 
 test_that("detect, if one is done", {
   pinged <- 0L
@@ -232,7 +232,10 @@ test_that("when_some, if some error", {
   toc <- Sys.time()
 
   expect_s3_class(err, "async_rejected")
-  expect_equal(conditionMessage(err), "foobar")
+  expect_equal(conditionMessage(err), "when_some / when_any failed")
+  expect_equal(length(err$errors), 2)
+  expect_equal(conditionMessage(err$errors[[1]]), "foobar")
+  expect_equal(conditionMessage(err$errors[[2]]), "foobar")
   expect_equal(pinged, 2L)
   expect_true(toc - tic < as.difftime(4.5, units = "secs"))
 })

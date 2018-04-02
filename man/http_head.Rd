@@ -19,7 +19,7 @@ The body of the response is written to this file.}
 \code{\link[curl:handle_setopt]{curl::handle_setopt()}}.}
 
 \item{on_progress}{Progress handler function. It is only used if the
-response body is written to a file.}
+response body is written to a file. See details below.}
 }
 \value{
 Deferred object.

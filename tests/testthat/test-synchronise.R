@@ -132,8 +132,6 @@ test_that("synchronization barriers, then()", {
 
 test_that("synchronization barriers, when_all", {
 
-  skip("temporarily does not work")
-
   afun <- async(function() {
     x <- async_constant(1)
     synchronise(afun2(x))
@@ -151,11 +149,9 @@ test_that("synchronization barriers, when_all", {
 
 test_that("synchronization barriers, when_some", {
 
-  skip("temporarily does not work")
-
   afun <- async(function() {
     x <- async_constant(1)
-    x$null()
+    get_private(x)$null()
     synchronise(afun2(x))
   })
 
@@ -173,5 +169,21 @@ test_that("synchronization barriers, when_some", {
 
   expect_error(
     synchronise(afun()),
+    class = "async_synchronization_barrier_error")
+})
+
+test_that("synchronization barriers, leaked deferred", {
+
+  leak <- NULL
+  do <- function() {
+    leak <<- async_constant(1)
+    leak
+  }
+
+  synchronise(do())
+
+  expect_false(is.null(leak))
+  expect_error(
+    synchronise(leak),
     class = "async_synchronization_barrier_error")
 })

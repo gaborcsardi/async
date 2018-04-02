@@ -15,6 +15,10 @@ A deferred value.
 \description{
 This is sometimes useful to start a deferred chain.
 }
+\details{
+Note that the evaluation of \code{value} is forced when the deferred value
+is created.
+}
 \examples{
 afun <- async(function() {
   async_constant(1/100)$

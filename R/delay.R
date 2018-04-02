@@ -1,12 +1,11 @@
 
-#' Run a function after the specified time interval
+#' Delay async computation for the specified time
 #'
-#' Since R is single-threaded, the callback might be executed (much) later
-#' than the specified time period.
+#' Since R is single-threaded, the deferred value might be resolved (much)
+#' later than the specified time period.
 #'
 #' @param delay Time interval in seconds, the amount of time to delay
-#'   to delay the execution of the callback. It can be a fraction of a
-#'   second.
+#'   to delay the execution. It can be a fraction of a second.
 #' @return A deferred object.
 #'
 #' @export
@@ -24,21 +23,23 @@
 #' resp
 
 delay <- function(delay) {
-  assert_that(is_time_interval(delay))
+  force(delay)
   id <- NULL
   deferred$new(
     type = "delay",
-    function(resolve, reject) {
+    action = function(resolve) {
+      assert_that(is_time_interval(delay))
       force(resolve)
-      force(reject)
       id <<- get_default_event_loop()$add_delayed(
         delay,
         function() TRUE,
-        function(err, res) if (is.null(err)) resolve(res) else reject(err)
+        function(err, res) resolve(TRUE)
       )
     },
     on_cancel = function(reason) {
-      get_default_event_loop()$cancel(id)
+      if (!is.null(id)) get_default_event_loop()$cancel(id)
     }
   )
 }
+
+delay <- mark_as_async(delay)

@@ -30,19 +30,18 @@ async_retry <- function(task, times, ...) {
   self <- deferred$new(
     type = "retry",
     parents = list(task(...)),
-    parent_reject = function(value, resolve, reject) {
+    parent_reject = function(value, resolve) {
       times <<- times - 1L
       if (times > 0) {
-        dx <- task(...)
-        get_private(dx)$add_as_parent(self)
-        private <- get_private(self)
-        private$parents <- c(private$parents, list(dx))
+        task(...)$then(self)
       } else {
-        reject(value)
+        stop(value)
       }
     }
   )
 }
+
+async_retry <- mark_as_async(async_retry)
 
 #' Make an asynchronous funcion retryable
 #'
@@ -56,7 +55,7 @@ async_retry <- function(task, times, ...) {
 #' ## Create a downloader that retries five times
 #' http_get_5 <- async_retryable(http_get, times = 5)
 #' ret <- synchronise(
-#'   http_get("https://eu.httpbin.org/get?q=1")$
+#'   http_get_5("https://eu.httpbin.org/get?q=1")$
 #'     then(~ rawToChar(.$content))
 #' )
 #' cat(ret)

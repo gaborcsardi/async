@@ -14,18 +14,19 @@ async_timeout(task, timeout, ...)
 \item{...}{Additional arguments to \code{task}.}
 }
 \value{
-A deferred value that is rejected if it is not resolved
-within the specified timeout.
+A deferred value. An \code{async_timeout} error is thrown if it is
+not resolved within the specified timeout.
 }
 \description{
 If the deferred value is not resolved before the timeout expires,
-it will be rejected, with an \code{async_timeout} error.
+\code{async_timeout()} throws an \code{async_timeout} error.
 }
 \examples{
 ## You can catch the error, asynchronously
 synchronise(
   async_timeout(function() delay(1/10)$then(~ "OK"), 1/1000)$
-    catch(~ "Timed out")
+    catch(async_timeout = ~ "Timed out",
+          error = ~ "Other error")
 )
 
 ## Or synchronously

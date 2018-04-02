@@ -1,38 +1,19 @@
 
 context("deferred")
 
-test_that("error if not done yet", {
-  do <- async(function() {
-    dx <- delay(1/1000)
-    expect_error(get_private(dx)$get_value())
-    dx
-  })
-  synchronise(do())
-})
-
-test_that("rejecting with a deferred", {
-  do <- async(function() {
-    deferred$new(function(resolve, reject) {
-      reject(delay(1/1000)$then(function(value) "OK"))
-    })
-  })
-  res <- synchronise(do())
-  expect_equal(res, "OK")
-})
-
 test_that("action in formula notation", {
   do <- function() {
     dx1 <- deferred$new(~ resolve(TRUE))$
       then(~ expect_true(.))
 
-    dx2 <- deferred$new(~ reject("oops"))$
-      catch(~ expect_match(., "oops"))
+    dx2 <- deferred$new(~ stop("oops"))$
+      catch(error = ~ expect_match(conditionMessage(.), "oops"))
 
-    dx3 <- deferred$new(~ if (TRUE) resolve(TRUE) else reject("oops"))$
+    dx3 <- deferred$new(~ if (TRUE) resolve(TRUE) else stop("oops"))$
       then(~ expect_true(.))
 
-    dx4 <- deferred$new(~ if (FALSE) resolve(TRUE) else reject("oops"))$
-      catch(~ expect_match(., "oops"))
+    dx4 <- deferred$new(~ if (FALSE) resolve(TRUE) else stop("oops"))$
+      catch(error = ~ expect_match(conditionMessage(.), "oops"))
 
     when_all(dx1, dx2, dx3, dx4)
   }
@@ -47,11 +28,11 @@ test_that("on_fulfilled / on_rejected without arguments", {
 
     dx2 <- deferred$new(~resolve(TRUE))$
       then(~ stop("oops"))$
-      catch(~ expect_match(conditionMessage(.), "oops"))
+      catch(error = ~ expect_match(conditionMessage(.), "oops"))
 
     dx3 <- deferred$new(~resolve(TRUE))$
       then(~ stop("ooops"))$
-      catch(~ "aaah")$
+      catch(error = ~ "aaah")$
       then(~ expect_equal(., "aaah"))
 
     when_all(dx1, dx2, dx3)
@@ -68,15 +49,21 @@ test_that("parent pointer", {
     d2 <- d1$then(force)
     d3 <- d2$then(~ expect_true(is.null(get_private(d2)$parent)))
     expect_equal(length(get_private(d2)$parent), 0)
-    when_all(d1, d2, d3)
+    d3
   }
   synchronise(do())
 })
 
-test_that("dead end", {
+test_that("unused computation is never created", {
+  called1 <- called2 <- FALSE
   do <- function() {
-    d1 <- delay(1/1000)
-    delay(1/1000)
+    d1 <- deferred$new(
+      function(resolve, reject) { called1 <<- TRUE; resolve("foo") })
+    d2 <- deferred$new(
+      function(resolve, reject) { called2 <<- TRUE; resolve("bar") })
+    d2
   }
-  expect_warning(synchronise(do()),  "going nowhere")
+  expect_equal(synchronise(do()), "bar")
+  expect_false(called1)
+  expect_true(called2)
 })

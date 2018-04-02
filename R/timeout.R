@@ -2,13 +2,13 @@
 #' Asynchronous function call with a timeout
 #'
 #' If the deferred value is not resolved before the timeout expires,
-#' it will be rejected, with an `async_timeout` error.
+#' `async_timeout()` throws an `async_timeout` error.
 #'
 #' @param task Asynchronous function.
 #' @param timeout Timeout as a `difftime` object, or number of seconds.
 #' @param ... Additional arguments to `task`.
-#' @return A deferred value that is rejected if it is not resolved
-#'   within the specified timeout.
+#' @return A deferred value. An `async_timeout` error is thrown if it is
+#'   not resolved within the specified timeout.
 #'
 #' @family async utilities
 #' @export
@@ -16,7 +16,8 @@
 #' ## You can catch the error, asynchronously
 #' synchronise(
 #'   async_timeout(function() delay(1/10)$then(~ "OK"), 1/1000)$
-#'     catch(~ "Timed out")
+#'     catch(async_timeout = ~ "Timed out",
+#'           error = ~ "Other error")
 #' )
 #'
 #' ## Or synchronously
@@ -36,15 +37,17 @@ async_timeout <- function(task, timeout, ...) {
   deferred$new(
     type = "timeout",
     parents = list(d1 <- task(...), d2 <- delay(timeout)),
-    parent_resolve = function(value, resolve, reject, id) {
+    parent_resolve = function(value, resolve, id) {
       if (!done) {
         done <<- TRUE
         if (id == d1$get_id()) {
           resolve(value)
         } else {
-          reject("Timed out")
+          stop("Timed out")
         }
       }
     }
   )
 }
+
+async_timeout <- mark_as_async(async_timeout)

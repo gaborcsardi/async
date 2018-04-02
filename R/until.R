@@ -1,5 +1,5 @@
 
-#' Repeatedly call task until it return `TRUE`
+#' Repeatedly call task until it its test function returns `TRUE`
 #'
 #' @param test Synchronous test function.
 #' @param task Asynchronous function to call repeatedly.
@@ -28,17 +28,16 @@ async_until <- function(test, task, ...) {
   self <- deferred$new(
     type = "async_until",
     parents = list(task(...)),
-    parent_resolve = function(value, resolve, reject) {
+    parent_resolve = function(value, resolve) {
       if (test()) {
         resolve(value)
       } else {
-        dx <- task(...)
-        get_private(dx)$add_as_parent(self)
-        private <- get_private(self)
-        private$parents <- c(private$parents, list(dx))
+        task(...)$then(self)
       }
     }
   )
 
   self
 }
+
+async_until <- mark_as_async(async_until)

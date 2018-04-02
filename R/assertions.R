@@ -11,7 +11,7 @@ on_failure(is_string) <- function(call, env) {
 }
 
 is_action_function <- function(x) {
-  is.function(x) && length(formals(x)) %in% 2:3
+  is.function(x) && length(formals(x)) %in% 1:2
 }
 
 on_failure(is_action_function) <- function(call, env) {

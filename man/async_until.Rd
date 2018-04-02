@@ -2,7 +2,7 @@
 % Please edit documentation in R/until.R
 \name{async_until}
 \alias{async_until}
-\title{Repeatedly call task until it return \code{TRUE}}
+\title{Repeatedly call task until it its test function returns \code{TRUE}}
 \usage{
 async_until(test, task, ...)
 }
@@ -17,7 +17,7 @@ async_until(test, task, ...)
 Deferred value, that is resolved when the iteration is done.
 }
 \description{
-Repeatedly call task until it return \code{TRUE}
+Repeatedly call task until it its test function returns \code{TRUE}
 }
 \examples{
 ## Keep calling until it "returns" a number less than < 0.1

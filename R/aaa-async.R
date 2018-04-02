@@ -34,13 +34,19 @@ async <- function(fun) {
       envir = parent.env(environment())
       )
     }
-    deferred$new(function(resolve, reject) resolve(NULL), type = "async")$
-      then(~ fun2())
+
+    deferred$new(
+      type = "async",
+      action = function(resolve) resolve(fun2())
+    )
   })
 
-  attr(async_fun, "async")$async <- TRUE
+  mark_as_async(async_fun)
+}
 
-  async_fun
+mark_as_async <- function(fun) {
+  attr(fun, "async")$async <- TRUE
+  fun
 }
 
 #' Checks if a function is async

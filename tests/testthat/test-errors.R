@@ -6,7 +6,7 @@ test_that("rejection", {
   do <- async(function() {
     dx <- delay(1/10000)$
       then(~ stop("ohno!"))$
-      catch(~ expect_match(.$message, "ohno!"))
+      catch(error = ~ expect_match(.$message, "ohno!"))
   })
   synchronise(do())
 })
@@ -21,7 +21,7 @@ test_that("error propagates", {
       then(function(x) called <<- TRUE)
 
     dx$
-      catch(~ expect_match(.$message, "ohno!"))$
+      catch(error = ~ expect_match(.$message, "ohno!"))$
       then(function(x) expect_false(called))
   })
   synchronise(do())
@@ -32,9 +32,9 @@ test_that("handled error is not an error any more", {
   do <- async(function() {
     delay(1/10000)$
       then(function(x) stop("ohno!"))$
-      catch(function(x) "OK")$
+      catch(error = function(x) "OK")$
       then(~ expect_equal(., "OK"))$
-      catch(~ stop("not called"))
+      catch(error = ~ stop("not called"))
   })
   synchronise(do())
 })
@@ -45,7 +45,7 @@ test_that("catch", {
       then(~ .)$
       then(~ stop("ooops"))$
       then(~ "not this one")$
-      catch(~ "nothing to see here")
+      catch(error = ~ "nothing to see here")
   })
   expect_equal(
     synchronise(do()),
@@ -99,7 +99,7 @@ test_that("error in then function", {
 test_that("can catch error in action", {
   do <- function() {
     deferred$new(function(resolve, reject) stop("foobar"))$
-      catch(function(e) e)
+      catch(error = function(e) e)
   }
 
   err  <- synchronise(do())
@@ -111,10 +111,35 @@ test_that("can catch error in then function", {
   do <- function() {
     delay(1/100)$
       then(function(x) stop("foobar"))$
-      catch(function(e) e)
+      catch(error = function(e) e)
   }
 
   err <- synchronise(do())
   expect_s3_class(err, "async_rejected")
   expect_match(conditionMessage(err), "foobar")
+})
+
+test_that("catch handers", {
+
+  spec <- foobar1 <- foobar2 <- NULL
+  do <- async(function() {
+    async_constant(42)$
+      then(function() {
+        err <- structure(
+          list(message = "foobar"),
+          class = c("foobar", "error", "condition"))
+        stop(err)
+      })$
+      catch(special = function(e) spec <<- e)$
+      catch(foobar = function(e) foobar1 <<- e)$
+      then(function(e) foobar2 <<- e)$
+      then(~ "ok")
+  })
+
+  expect_equal(synchronise(do()), "ok")
+  expect_null(spec)
+  expect_s3_class(foobar1, "foobar")
+  expect_s3_class(foobar1, "error")
+  expect_s3_class(foobar2, "foobar")
+  expect_s3_class(foobar2, "error")
 })

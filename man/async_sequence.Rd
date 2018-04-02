@@ -17,7 +17,8 @@ They are performed left to right, the ones in \code{.list} are the last
 ones.
 }
 \description{
-Compose asynchronous functions
+This is equivalent to using the \code{$then()} method of a deferred, but
+it is easier to use programmatically.
 }
 \examples{
 check_url <- async_sequence(http_head, ~ identical(.$status_code, 200L))

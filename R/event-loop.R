@@ -1,43 +1,4 @@
 
-
-## TODO: think about error handling
-
-#' Event loop
-#'
-#' @section Usage:
-#' ```
-#' el <- event_loop$new()
-#'
-#' el$add_http(handle, callback)
-#' el$add_delayed(delay, func, callback)
-#' ```
-#'
-#' @section Arguments:
-#' \describe{
-#'   \item{handle}{A `curl` handle to use for the `HTTP` operation.}
-#'   \item{callback}{Callback function to call when the asynchronous
-#'      operation is done. See details below.}
-#'   \item{delay}{Number of seconds to delay the execution of the callback.}
-#'   \item{func}{TODO}
-#' }
-#'
-#' @section Details:
-#' `$add_http()` starts an asynchronous HTTP request, with the specified
-#' `curl` handle. Once the request is done, and the response is available
-#' (or an error happens), the callback is called with two arguments, the
-#' error object or message (if any) and the `curl` response object.
-#'
-#' `$add_delayed()` starts a task with the specified delay.
-#'
-#' @section The default event loop:
-#'
-#' The `async` package creates a default event loop when it is loaded.
-#' All asyncronous constructs use this event loop by default.
-#'
-#' @name event_loop
-#' @keywords internal
-NULL
-
 #' @importFrom R6 R6Class
 
 event_loop <- R6Class(
@@ -55,14 +16,16 @@ event_loop <- R6Class(
 
     cancel = function(id)
       el_cancel(self, private, id),
+    cancel_all = function()
+      el_cancel_all(self, private),
 
     run = function(mode = c("default", "nowait", "once"))
       el_run(self, private, mode = match.arg(mode))
   ),
 
   private = list(
-    create_task = function(callback, ..., id =  NULL)
-      el__create_task(self, private, callback, ..., id = id),
+    create_task = function(callback, ..., id =  NULL, type = "foobar")
+      el__create_task(self, private, callback, ..., id = id, type = type),
     ensure_pool = function(...)
       el__ensure_pool(self, private, ...),
     get_poll_timeout = function()
@@ -86,8 +49,6 @@ event_loop <- R6Class(
 )
 
 el_init <- function(self, private) {
-  ## TODO
-  ## reg.finalizer(self, function(me) me$run("default"), onexit = TRUE)
   invisible(self)
 }
 
@@ -97,7 +58,7 @@ el_add_http <- function(self, private, handle, callback, progress, file) {
   self; private; handle; callback; progress; outfile <- file
   num_bytes <- 0L; total <- NULL; content <- NULL
 
-  id  <- private$create_task(callback, list(handle = handle))
+  id  <- private$create_task(callback, list(handle = handle), type = "http")
   private$ensure_pool()
   if (!is.null(outfile) && file.exists(outfile)) unlink(outfile)
   multi_add(
@@ -131,7 +92,7 @@ el_add_http <- function(self, private, handle, callback, progress, file) {
         ## so limited in their numbers.
         con <- tryCatch(
           file(outfile, open = "ab"),
-          error = function(e) { gc(); file(outfile, open = "ab") }
+          error = function(e) { gc(); file(outfile, open = "ab") } # nocov
         )
         writeBin(bytes, con)
         close(con)
@@ -169,7 +130,8 @@ el_add_delayed <- function(self, private, delay, func, callback) {
   force(self); force(private); force(delay); force(func); force(callback)
   id <- private$create_task(
     callback,
-    data = list(delay = delay, func = func)
+    data = list(delay = delay, func = func),
+    type = "delayed"
   )
   private$timers[id] <- Sys.time() + as.difftime(delay, units = "secs")
   id
@@ -177,14 +139,31 @@ el_add_delayed <- function(self, private, delay, func, callback) {
 
 el_add_next_tick <- function(self, private, func, callback) {
   force(self) ; force(private) ; force(callback)
-  id <- private$create_task(callback, data = list(func = func))
+  id <- private$create_task(callback, data = list(func = func),
+                            type = "nexttick")
   private$next_ticks <- c(private$next_ticks, id)
 }
+
+#' @importFrom curl multi_cancel
 
 el_cancel <- function(self, private, id) {
   private$next_ticks <- setdiff(private$next_ticks, id)
   private$timers  <- private$timers[setdiff(names(private$times), id)]
+  if (id %in% names(private$tasks) && private$tasks[[id]]$type == "http") {
+    multi_cancel(private$tasks[[id]]$data$handle)
+  }
   private$tasks[[id]] <- NULL
+  invisible(self)
+}
+
+#' @importFrom curl multi_cancel multi_list
+
+el_cancel_all <- function(self, private) {
+  http <- multi_list(pool = private$pool)
+  lapply(http, multi_cancel)
+  private$next_ticks <- character()
+  private$timers <- Sys.time()[numeric()]
+  private$tasks <-  list()
   invisible(self)
 }
 
@@ -246,9 +225,10 @@ el__run_pending <- function(self, private) {
 
 #' @importFrom uuid UUIDgenerate
 
-el__create_task <- function(self, private, callback, data, ..., id) {
+el__create_task <- function(self, private, callback, data, ..., id, type) {
   id <- id %||% UUIDgenerate()
   private$tasks[[id]] <- list(
+    type = type,
     id = id,
     callback = callback,
     data = data,
@@ -266,7 +246,8 @@ el__ensure_pool <- function(self, private, ...) {
 
 el__get_poll_timeout <- function(self, private) {
   if (length(private$next_ticks)) {
-    0
+    ## TODO: can this happen at all? Probably not, but it does not hurt...
+    0 # nocov
   } else {
     max(0, min(Inf, private$timers - private$time))
   }

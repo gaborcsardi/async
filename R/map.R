@@ -26,6 +26,8 @@ async_map <- function(.x, .f, ..., .args = list(), .limit = Inf) {
   }
 }
 
+async_map <- mark_as_async(async_map)
+
 async_map_limit <- function(.x, .f, ..., .args = list(), .limit = Inf) {
   len <- length(.x)
   nx <- len
@@ -44,8 +46,8 @@ async_map_limit <- function(.x, .f, ..., .args = list(), .limit = Inf) {
   self <- deferred$new(
     type = "async_map (limit)",
     parents = firsts,
-    action = function(resolve, reject) if (nx == 0) resolve(result),
-    parent_resolve = function(value, resolve, reject, id) {
+    action = function(resolve) if (nx == 0) resolve(result),
+    parent_resolve = function(value, resolve, id) {
       nx <<- nx - 1L
       result[[match(id, ids)]] <<- value
       if (nx == 0) {
@@ -53,9 +55,7 @@ async_map_limit <- function(.x, .f, ..., .args = list(), .limit = Inf) {
       } else if (nextone <= len) {
         dx <- do.call(".f", c(list(.x[[nextone]]), args))
         ids <<- c(ids, dx$get_id())
-        get_private(dx)$add_as_parent(self)
-        private <- get_private(self)
-        private$parents <- c(private$parents, dx)
+        dx$then(self)
         nextone <<- nextone + 1L
       }
     }

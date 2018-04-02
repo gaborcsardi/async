@@ -2,68 +2,60 @@
 context("cancellation")
 
 test_that("on_cancel callback is called", {
+
+  dx <- NULL
+  cancelled <- FALSE
+  cancel_msg <- NULL
   do <- async(function() {
-    cancelled <- FALSE
-    cancel_msg <- NULL
-    dx <- deferred$new(
-      action = function(resolve, reject) { },
+    dx <<- deferred$new(
+      action = function(resolve) { },
       on_cancel = function(msg) {
         cancelled <<- TRUE
         cancel_msg <<- msg
-      }
-    )
-
-    all <- when_all(
-      dx$catch(function(e) expect_match(e$message, "changed my mind")),
-      dx$catch(function(e) expect_s3_class(e, "async_cancelled")),
-      dx$catch(~ expect_equal(get_private(dx)$state, "rejected")),
-      dx$catch(~ expect_true(cancelled)),
-      dx$catch(~ expect_match(cancel_msg, "changed my mind"))
-    )
-
+      })
     dx$cancel("changed my mind")
-
-    all
   })
 
-  synchronise(do())
+  err <- tryCatch(synchronise(do()), error = function(e) e)
+  expect_match(conditionMessage(err), "changed my mind")
+  expect_s3_class(err, "async_cancelled")
+  expect_equal(get_private(dx)$state, "rejected")
+  expect_true(cancelled)
+  expect_match(cancel_msg, "changed my mind")
 })
 
 test_that("then() is also rejected on cancel", {
+
+  dx <- dx2 <- NULL
   do <- async(function() {
-    dx <- deferred$new(action = function(resolve, reject) { })
-    dx2 <- dx$then(function() "not this far")
-
-    all <- when_all(
-      dx2$catch(function(e) expect_match(e$message, "changed my mind")),
-      dx$catch(function(e) expect_match(e$message, "changed my mind")),
-      dx2$catch(function(e) expect_s3_class(e, "async_cancelled")),
-      dx$catch(function(e) expect_s3_class(e, "async_cancelled")),
-      dx2$catch(~ expect_equal(get_private(dx2)$state, "rejected")),
-      dx$catch(~ expect_equal(get_private(dx)$state, "rejected"))
-    )
-
+    dx <<- deferred$new(action = function(resolve) { })
+    dx2 <<- dx$then(function() "not this far")
     dx$cancel("changed my mind")
-
-    all
+    dx2
   })
-  synchronise(do())
+
+  err <- tryCatch(synchronise(do()), error = function(e) e)
+  expect_match(conditionMessage(get_private(dx)$value), "changed my mind")
+  expect_match(conditionMessage(get_private(dx2)$value), "changed my mind")
+  expect_s3_class(get_private(dx)$value, "async_cancelled")
+  expect_s3_class(get_private(dx2)$value, "async_cancelled")
+  expect_equal(get_private(dx2)$state, "rejected")
+  expect_equal(get_private(dx)$state, "rejected")
 })
 
 test_that("can catch and handle cancellation", {
 
+  err <- NULL
   do <- async(function() {
-    dx <- deferred$new(action = function(resolve, reject) { })
-    all <- when_all(
-      dx$catch(function(e) expect_s3_class(e, "async_cancelled")),
-      dx$catch(function(e) expect_match(e$message, "changed my mind"))
-    )
-
+    dx <- deferred$new(action = function(resolve) { })
+    dx2 <- dx$catch(error = function(e) err <<- e)
     dx$cancel("changed my mind")
-
-    all
+    dx2
   })
+
   synchronise(do())
+  expect_s3_class(err, "async_cancelled")
+  expect_match(conditionMessage(err), "changed my mind")
 })
 
 test_that("cancel delay", {
@@ -73,7 +65,7 @@ test_that("cancel delay", {
     d1$cancel()
   }
   tic <- Sys.time()
-  synchronise(do())
+  expect_error(synchronise(do()), "Cancelled")
   tac <- Sys.time()
   expect_true(tac - tic < as.difftime(30, units  =  "secs"))
 })
@@ -83,7 +75,7 @@ test_that("cancel delay after it has started", {
   cancelled <- NULL
   do <- function() {
     d1 <- delay(5)
-    d1x <- d1$catch(identity)
+    d1x <- d1$catch(error = identity)
     d2 <- delay(1/100)$
       then(function() { d1$cancel("nope"); "OK" })
     when_all(d1x, d2)
