@@ -29,78 +29,61 @@ async_detect <- function(.x, .p, ..., .limit = Inf) {
 }
 
 async_detect_nolimit <- function(.x, .p, ...) {
-
   defs <- lapply(.x, async(.p), ...)
-  num_todo <- length(defs)
+  nx <- length(defs)
   done <- FALSE
 
-  deferred$new(function(resolve, reject) {
-
-    if (length(defs) == 0) return(resolve(NULL))
-
-    lapply(seq_along(defs), function(i) {
-      defs[[i]]$then(
-        function(value) {
-          if (!done && isTRUE(value)) {
-            done <<- TRUE
-            resolve(.x[[i]])
-          } else {
-            num_todo <<- num_todo - 1
-            if (num_todo == 0) resolve(NULL)
-          }
-        },
-        function(reason) reject(reason)
-      )
-    })
-  })
+  deferred$new(
+    type = "async_detect",
+    parents = defs,
+    action = function(resolve, reject) if (nx == 0) resolve(NULL),
+    parent_resolve = function(value, resolve, reject, id) {
+      if (!done && isTRUE(value)) {
+        done <<- TRUE
+        ids <- viapply(defs, function(x) x$get_id())
+        resolve(.x[[match(id, ids)]])
+      } else if (!done) {
+        nx <<- nx - 1L
+        if (nx == 0) resolve(NULL)
+      }
+    }
+  )
 }
 
 async_detect_limit <- function(.x, .p, ..., .limit = .limit) {
-  force(.limit)
-  .p <- async(.p)
-
   len <- length(.x)
-  num_todo <- len
+  nx <- len
+  .p <- async(.p)
   args <- list(...)
+
   done <- FALSE
+  nextone <- .limit + 1L
+  firsts <- lapply(.x[seq_len(.limit)], .p, ...)
+  ids <- viapply(firsts, function(x) x$get_id())
 
-  deferred$new(function(resolve, reject) {
-    force(resolve) ; force(reject)
-    nextone <- 1
-
-    xfulfill <- function(value, which) {
-      if (done) return()
-      if (isTRUE(value)) {
+  self <- deferred$new(
+    type = "async_detect (limit)",
+    parents = firsts,
+    action = function(resolve, reject) if (nx == 0) resolve(NULL),
+    parent_resolve = function(value, resolve, reject, id) {
+      if (!done && isTRUE(value)) {
         done <<- TRUE
-        return(resolve(.x[[which]]))
-      } else {
-        num_todo <<- num_todo - 1
-        if (num_todo == 0) return(resolve(NULL))
-        if (nextone <= len) {
-          i <- nextone
-          .p(.x[[i]])$then(
-            function(value) xfulfill(value, i),
-            xreject
-          )
+        resolve(.x[[match(id, ids)]])
+      } else if (!done) {
+        nx <<- nx - 1L
+        if (nx == 0) {
+          resolve(NULL)
+        } else if (nextone <= len) {
+          dx <- .p(.x[[nextone]], ...)
+          ids <<- c(ids, dx$get_id())
+          get_private(dx)$add_as_parent(self)
+          private <- get_private(self)
+          private$parents <- c(private$parents, dx)
+          nextone <<- nextone + 1L
         }
       }
-      nextone <<- nextone + 1
     }
-    xreject <- function(reason) {
-      if (done) return()
-      done <<- TRUE
-      reject(reason)
-    }
+  )
 
-    for (ii in seq_len(.limit)) {
-      local({
-        i <- ii
-        .p(.x[[i]])$then(
-          function(value) xfulfill(value, i),
-          xreject
-        )
-      })
-      nextone <- nextone + 1
-    }
-  })
+  self
 }

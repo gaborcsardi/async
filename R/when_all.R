@@ -24,28 +24,18 @@
 #' synchronise(afun())
 
 when_all <- function(..., .list = list()) {
+
   defs <- c(list(...), .list)
+  isdef <- vlapply(defs, is_deferred)
+  nx <- sum(isdef)
 
-  deferred$new(function(resolve, reject) {
-    num_todo <- length(defs)
-
-    handle_fulfill <- function(value) {
-      num_todo <<- num_todo - 1
-      if (num_todo == 0) resolve(lapply(defs, get_value_x))
+  deferred$new(
+    type = "when_all",
+    parents = defs[isdef],
+    action = function(resolve, reject) if (nx == 0) resolve(defs),
+    parent_resolve = function(value, resolve, reject) {
+      nx <<- nx - 1L
+      if (nx == 0L) resolve(lapply(defs, get_value_x))
     }
-
-    handle_reject <- function(reason) {
-      reject(reason)
-    }
-
-    for (i in seq_along(defs)) {
-      if (!is_deferred(defs[[i]])) {
-        num_todo <- num_todo - 1
-      } else {
-        defs[[i]]$then(handle_fulfill, handle_reject)
-      }
-    }
-
-    if (num_todo == 0) resolve(defs)
-  })
+  )
 }

@@ -40,7 +40,6 @@ An async function is special:
 - it can stop its execution to wait for results from other async
   functions.
 - it can create deferred values, that represent asynchronous computation.
-- it can wait on deferred values, using the `await()` functions.
 - it returns a deferred value.
 - it can call other asynchronous functions.
 
@@ -48,8 +47,6 @@ The `async` package contains some async functions:
 - `delay()` invokes computation that is carried out after a timer expires.
 - `http_get()` and `http_head()` perform HTTP requests, asynchronously.
 - `async_constant()` is an async function that represents a value.
-
-More async functions can be created using `async()`.
 
 ## Synchronization barriers
 
@@ -89,12 +86,10 @@ will be known.
 
 ```{r}
 library(async)
-afun <- async(function() {
+afun <- function() {
   def <- http_get("https://httpbin.org")
-  status <- def$then(function(response) response$status_code)
-  print(status)
-  status$get_state()
-})
+  def$then(function(response) response$status_code)
+}
 synchronise(afun())
 ```
 
@@ -105,46 +100,30 @@ operations on the resolved value.
 
 ## Synchronization
 
-The `await()` function allows mixing synchronous and asynchronous code.
-It can be called on a deferred value, and it stops the synchronous
-computation until the deferred value is resolved (i.e. fulfilled or
-rejected). Importantly, `await()` runs an event loop that is working
-towards he resolution of all deferred values. `await()` calls don't lead
-deadlocks.
+The `synchroniset()` function allows mixing synchronous and asynchronous
+code. It can be called on an expression that creates deferred values,
+and it stops the synchronous until all deferred values are resolved
+(i.e. fulfilled or rejected). Importantly, `synchronise()` creates a new
+event loop and works towards he resolution of all deferred values
+created within this event loop.
 
 In a typical application, a function is implemented asynchronously, and
 then used synchronously by the interactive user, or another piece of
-synchronous code, via `await()` calls. The following example makes three
-HTTP requests in parallel:
+synchronous code, via `synchronise()` calls. The following example makes
+three HTTP requests in parallel:
 
 ```{r}
-afun <- async(function() {
+afun <- function() {
   http_status <- function(url) {
     http_get(url)$then(function(response) response$status_code)
   }
   r1 <- http_status("https://httpbin.org/status/403")
   r2 <- http_status("https://httpbin.org/status/404")
   r3 <- http_status("https://httpbin.org/status/200")
-  await_all(r1, r2, r3)
-})
+  when_all(r1, r2, r3)
+}
 synchronise(afun())
 ```
-
-`await_all()` waits until all supplied deferred values are resolved.
-Note that
-```
-await_all(r1, r2, r3)
-```
-is completely equivalent to
-```
-await(r1)
-await(r2)
-await(r3)
-```
-since `await()` works towards the resolution of all deferreds, not just
-the specified ones. `await_all()` is easier to use programmatically if you
-have a list of deferred values. `await_any()` waits until at least one
-deferred value is resolved.
 
 ## Error handling
 
@@ -155,13 +134,15 @@ and by default turns them into regular values. Alternatively, they can
 also re-throw the error by calling `stop()`.
 
 ```{r}
-afun <- async(function() {
+afun <- function() {
   u1 <- http_get("https://httpbin.org")$
-    then(function() "web server is up", function() "web server is down")
+    then(function() "web server is up")$
+    catch(function() "web server is down")
   u2 <- http_get("non-existing-url.for-sure")$
-    then(function() "web server is up", function() "web server is down")
-  await_all(u1, u2)
-})
+    then(function() "web server is up")$
+    catch(function() "web server is down")
+  when_all(u1, u2)
+}
 synchronise(afun())
 ```
 
@@ -170,7 +151,7 @@ equivalent to `then()` with its first argument set to `NULL`.
 
 Errors can also be handled synchronously. If an error is not handled
 asynchronously in a `then()` or `catch()` method, then the deferred value
-will throw an error when it is `await()`-ed. This can be caught via
+will throw an error when it is `synchronise()`-ed. This can be caught via
 `tryCatch()`.
 
 ## Async Iterators
@@ -208,7 +189,6 @@ Control flow with deferred values can be challenging. Some helpers:
 
 ## Other Async Utilities
 
-* `async()` converts a synchronous function to async.
 * `async_constant()` takes a value and creates and asynchronous function
   that returns that value.
 * `when_all()` returns a deferred value that is resolved when all supplied
@@ -224,7 +204,7 @@ reverse dependencies.
 
 ```{r}
 fromJSON <- function(x) jsonlite::fromJSON(x, simplifyVector = FALSE)
-revdep_authors <- async(function() {
+revdep_authors <- function() {
   get_author <- function(package) {
     url <- paste0("https://crandb.r-pkg.org/", package)
     http_get(url)$
@@ -232,13 +212,11 @@ revdep_authors <- async(function() {
       then(~ .$Author)
   }
 
-  gx <- http_get("https://crandb.r-pkg.org/-/topdeps/devel")$
+  http_get("https://crandb.r-pkg.org/-/topdeps/devel")$
     then(~ fromJSON(rawToChar(.$content)))$
     then(~ names(unlist(.)))$
     then(~ async_map(., get_author))
-
-  await(gx)
-})
+}
 synchronise(revdep_authors())[1:3]
 ```
 
@@ -247,11 +225,11 @@ synchronise(revdep_authors())[1:3]
 The following code returns the 2 URLs that respond first.
 
 ```{r}
-fastest_two <- async(function(urls) {
+fastest_two <- function(urls) {
   qs <- lapply(urls, http_head)
   t2 <- when_some(2, .list = qs)$
   then(function(top2) vapply(top2, "[[", character(1), "url"))
-})
+}
 urls <- c("https://cran.rstudio.com", "https://cran.r-project.org",
           "https://www.stats.bris.ac.uk/R/", "https://cran.uib.no/")
 synchronise(

@@ -29,20 +29,6 @@ test_that("when called it returns a deferred", {
   expect_true(is_deferred(dx))
 })
 
-test_that("begins asynchronously", {
-  do <- async(function() {
-    x <- 5
-    foo <- async(function() x <<- 7)
-    dx <- foo()$
-      then(function() expect_equal(x, 7))
-    expect_equal(x, 5)
-    x <- 9
-    await(dx)
-    expect_equal(x, 7)
-  })
-  synchronise(do())
-})
-
 test_that("preserves closure", {
   env <- new.env()
   foo <- local(envir = env, {
@@ -73,7 +59,7 @@ test_that("rejects with the thrown error", {
     exp <- simpleError("Expected thrown value to match rejection value")
     foo <- async(function() { stop(exp); "blah" })
     dx <- foo()$
-      then(NULL, function(err) { act <<- exp; exp })$
+      catch(function(err) { act <<- exp; exp })$
       then(function(value) {
         if (is.null(act)) {
           stop("Extected function to throw")
@@ -86,33 +72,36 @@ test_that("rejects with the thrown error", {
   expect_silent(synchronise(do()))
 })
 
-test_that("works with await", {
-
-  do <- async(function() {
-    foo <- async(function() {
-      await(delay(20/1000)$then(function(value) "blah"))
-    })
-
-    dx <- foo()$
-      then(function(result) expect_equal(result, "blah"))
-  })
-
-  synchronise(do())
-})
-
 test_that("triggers error on unhandled rejection", {
 
+  did_trigger <- FALSE
   do <- async(function() {
     foo <- async(function() stop("Nobody handled me"))
-    did_trigger <- FALSE
-
-    tryCatch(
-      await(foo()),
-      error = function(e) did_trigger <<- TRUE
-    )
-
-    expect_true(did_trigger)
+    foo()
   })
 
-  synchronise(do())
+  tryCatch(
+    synchronise(do()),
+    error = function(e) did_trigger <<- TRUE
+  )
+  expect_true(did_trigger)
+})
+
+test_that("can be cancelled", {
+
+  called <- called2 <- FALSE
+  do <- function() {
+    afun <- async(function() called <<- TRUE)
+    dx <- afun()
+    dy <- dx$then(function() called2 <<- TRUE)
+    dx$cancel()
+    dy
+  }
+
+  err <- tryCatch(synchronise(do()), error = identity)
+  expect_equal(conditionMessage(err), "Cancelled")
+  expect_s3_class(err, "async_cancelled")
+  expect_s3_class(err, "async_rejected")
+  expect_false(called)
+  expect_false(called2)
 })

@@ -21,26 +21,21 @@
 
 async_every <- function(.x, .p, ...) {
   defs <- lapply(.x, async(.p), ...)
-  num_todo <- length(defs)
+  nx <- length(defs)
   done <- FALSE
 
-  deferred$new(function(resolve, reject) {
-
-    if (length(defs) == 0) return(resolve(TRUE))
-
-    lapply(seq_along(defs), function(i) {
-      defs[[i]]$then(
-        function(value) {
-          if (!done && !isTRUE(value)) {
-            done <<- TRUE
-            resolve(FALSE)
-          } else {
-            num_todo <<- num_todo - 1
-            if (num_todo == 0) resolve(TRUE)
-          }
-        },
-        function(reason) reject(reason)
-      )
-    })
-  })
+  deferred$new(
+    type = "async_every",
+    parents = defs,
+    action = function(resolve, reject) if (nx == 0) resolve(TRUE),
+    parent_resolve = function(value, resolve, reject) {
+      if (!done && !isTRUE(value)) {
+        done <<- TRUE
+        resolve(FALSE)
+      } else if (!done) {
+        nx <<- nx - 1L
+        if (nx == 0) resolve(TRUE)
+      }
+    }
+  )
 }

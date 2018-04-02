@@ -3,31 +3,48 @@ context("async_detect")
 
 test_that("async_detect", {
 
-  is_odd <- async(function(x) {
+  is_odd <- function(x) {
     force(x)
     delay(1/1000)$
       then(function(value) as.logical(x %% 2))
-  })
+  }
 
-  test <- async(function(limit) {
-    result <- await(async_detect(1:10, is_odd, .limit = limit))
-    expect_true(result %in% c(1L, 3L, 5L, 7L, 9L))
+  test <- function(limit) {
+    d1 <- async_detect(1:10, is_odd, .limit = limit)$
+      then(~ expect_true(. %in% c(1L, 3L, 5L, 7L, 9L)))
 
-    result <- await(async_detect(2:10, is_odd, .limit = limit))
-    expect_true(result %in% c(3L, 5L, 7L, 9L))
+    d2 <- async_detect(2:10, is_odd, .limit = limit)$
+      then(~ expect_true(. %in% c(3L, 5L, 7L, 9L)))
 
-    result <- await(async_detect(2, is_odd, .limit = limit))
-    expect_null(result)
+    d3 <- async_detect(2, is_odd, .limit = limit)$
+      then(~ expect_null(.))
 
-    result <- await(async_detect(c(1:10 * 2L, 43L), is_odd, .limit = limit))
-    expect_identical(result, 43L)
+    d4 <- async_detect(c(1:10 * 2L, 43L), is_odd, .limit = limit)$
+      then(~ expect_identical(., 43L))
 
-    result <- await(async_detect(numeric(), is_odd, .limit = limit))
-    expect_null(result)
+    d5 <- async_detect(numeric(), is_odd, .limit = limit)$
+      then(~ expect_null(.))
 
-    result <- await(async_detect(1:10 * 2, is_odd, .limit = limit))
-    expect_null(result)
-  })
+    d6 <- async_detect(1:10 * 2, is_odd, .limit = limit)$
+      then(~ expect_null(.))
+
+    when_all(d1, d2, d3, d4, d5, d6)
+  }
 
   lapply(c(Inf, 1, 2, 3, 5, 10, 20), function(x) synchronise(test(x)))
+})
+
+test_that("async_detect errors", {
+  called <- FALSE
+  do <- function()  {
+    async_detect(1:10, function(x) stop("doh"))$
+      then(function() called <<- TRUE)$
+      catch(function(e) {
+        expect_equal(conditionMessage(e), "doh")
+        expect_s3_class(e, "async_rejected")
+      })
+  }
+
+  synchronise(do())
+  expect_false(called)
 })

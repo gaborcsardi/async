@@ -12,30 +12,33 @@
 #' @export
 #' @examples
 #' ## Two HEAD requests with 1/2 sec delay between them
+#' resp <- list()
 #' afun <- async(function() {
-#'   resp <- list()
-#'   dx <- http_head("https://eu.httpbin.org?q=2")$
+#'   http_head("https://eu.httpbin.org?q=2")$
 #'     then(function(value) resp[[1]] <<- value$status_code)$
 #'     then(function(...) delay(1/2))$
 #'     then(function(...) http_head("https://eu.httpbin.org?q=2"))$
 #'     then(function(value) resp[[2]] <<- value$status_code)
-#'   await(dx)
-#'   resp
 #' })
 #' synchronise(afun())
+#' resp
 
 delay <- function(delay) {
   assert_that(is_time_interval(delay))
+  id <- NULL
   deferred$new(
+    type = "delay",
     function(resolve, reject) {
       force(resolve)
       force(reject)
-      get_default_event_loop()$add_delayed(
+      id <<- get_default_event_loop()$add_delayed(
         delay,
         function() TRUE,
-        function(err, res) if (is.null(err)) resolve(res) else reject(err),
-        deferred = environment(resolve)$self
+        function(err, res) if (is.null(err)) resolve(res) else reject(err)
       )
+    },
+    on_cancel = function(reason) {
+      get_default_event_loop()$cancel(id)
     }
   )
 }

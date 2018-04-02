@@ -24,22 +24,24 @@
 
 async_retry <- function(task, times, ...) {
   task <- async(task)
-  force(times)
+  times <- times
+  force(list(...))
 
-  deferred$new(function(resolve, reject) {
-
-    xresolve <- function(value) resolve(value)
-    xreject  <- function(reason) {
-      times <<- times - 1
+  self <- deferred$new(
+    type = "retry",
+    parents = list(task(...)),
+    parent_reject = function(value, resolve, reject) {
+      times <<- times - 1L
       if (times > 0) {
-        task(...)$then(xresolve, xreject)
+        dx <- task(...)
+        get_private(dx)$add_as_parent(self)
+        private <- get_private(self)
+        private$parents <- c(private$parents, list(dx))
       } else {
-        reject(reason)
+        reject(value)
       }
     }
-
-    task(...)$then(xresolve, xreject)
-  })
+  )
 }
 
 #' Make an asynchronous funcion retryable

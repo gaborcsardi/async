@@ -34,15 +34,46 @@ test_that("async_whilst with false test", {
 
 test_that("error", {
 
-  i <- 1
-  expect_error(
-    synchronise(async_whilst(
+  do <- function() {
+    async_whilst(
       function() i < 5,
       function() delay(1/1000)$then(function(value) {
         i <<- i + 1
-        if (i >= 3) stop("This is bad")
+        if (i >= 3) stop("doh")
       })
-    )),
-    "This is bad"
-  )
+    )
+  }
+
+  i <- 1
+  expect_error(synchronise(do()), "doh")
+
+  i <- 1
+  do2 <- function() {
+    do()$catch(function(e) expect_equal(conditionMessage(e), "doh"))
+  }
+  synchronise(do2())
+})
+
+test_that("test throws", {
+
+  called  <- FALSE
+
+  do <- function() {
+    async_whilst(
+      function() stop("doh"),
+      function() {
+        delay(1/1000)$then(function(value) called <<- TRUE)
+      }
+    )
+  }
+
+  expect_error(synchronise(do()), "doh")
+  expect_false(called)
+
+  called <- FALSE
+  do2 <- function() {
+    do()$catch(function(e) expect_equal(conditionMessage(e), "doh"))
+  }
+  synchronise(do2())
+  expect_false(called)
 })

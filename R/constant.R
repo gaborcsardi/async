@@ -17,5 +17,5 @@
 
 async_constant <- function(value = NULL) {
   force(value)
-  deferred$new(function(resolve, reject) resolve(value))
+  deferred$new(function(resolve, reject) resolve(value), type = "constant")
 }

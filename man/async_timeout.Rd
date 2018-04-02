@@ -21,16 +21,11 @@ within the specified timeout.
 If the deferred value is not resolved before the timeout expires,
 it will be rejected, with an \code{async_timeout} error.
 }
-\details{
-Note that currently the task is not cancelled, we just don't wait for
-its return value, and we ignore the return value when it is resolved
-later.
-}
 \examples{
 ## You can catch the error, asynchronously
 synchronise(
   async_timeout(function() delay(1/10)$then(~ "OK"), 1/1000)$
-    then(NULL, ~ "Timed out")
+    catch(~ "Timed out")
 )
 
 ## Or synchronously
@@ -42,4 +37,3 @@ tryCatch(
   error = function(e) paste("Other error:", e$message)
 )
 }
-\concept{async utilities}

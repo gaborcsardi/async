@@ -21,9 +21,8 @@
 async_reflect <- function(task) {
   task <- async(task)
   function(...) {
-    task(...)$then(
-      function(value)  list(error = NULL, result = value),
-      function(reason) list(error = reason, result = NULL)
-    )
+    task(...)$
+      then(function(value)  list(error = NULL, result = value))$
+      catch(function(reason) list(error = reason, result = NULL))
   }
 }

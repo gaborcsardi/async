@@ -3,9 +3,10 @@ context("async_some")
 
 test_that("async_some", {
 
-  is_odd <- async(
-    function(x) delay(1/1000)$then(function(value) as.logical(x %% 2))
-  )
+  is_odd <- function(x) {
+    force(x)
+    delay(1/1000)$then(function(value) as.logical(x %% 2))
+  }
 
   result <- synchronise(async_some(1:10, is_odd))
   expect_identical(result, TRUE)
@@ -18,18 +19,18 @@ test_that("async_some", {
 
 })
 
-test_that("async_some, asyncify", {
+test_that("async_some, errors", {
 
-  is_odd <- async(
-    function(x) delay(1/1000)$then(function(value) as.logical(x %% 2))
-  )
+  called <- FALSE
+  do <- function()  {
+    async_some(1:10, function(x) stop("doh"))$
+      then(function() called <<- TRUE)$
+      catch(function(e) {
+        expect_equal(conditionMessage(e), "doh")
+        expect_s3_class(e, "async_rejected")
+      })
+  }
 
-  result <- synchronise(async_some(1:10, is_odd))
-  expect_identical(result, TRUE)
-
-  result <- synchronise(async_some(numeric(), is_odd))
-  expect_identical(result, FALSE)
-
-  result <- synchronise(async_some(1:10 * 2, is_odd))
-  expect_identical(result, FALSE)
+  synchronise(do())
+  expect_false(called)
 })

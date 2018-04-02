@@ -7,65 +7,17 @@
 Deferred value
 }
 \section{Usage}{
-\preformatted{dx <- deferred$new(action)
-
-dx$get_state()
-dx$get_value()
-dx$then(on_fulfilled = NULL, on_rejected = NULL)
-dx$catch(on_rejected)
-dx$finally(on_finally)
+\preformatted{TODO
 }
 }
 
 \section{Arguments}{
 
-\describe{
-\item{action}{Function to kick off asynchronous I/O or computation.
-See more below.}
-\item{on_fulfilled}{Function to call when the deferred value was
-success fully resolved.}
-\item{on_rejected}{Function to call when the deferrred value was
-rejected because of an error.}
-\item{on_finally}{Function to call after the deferred was resolved or
-rejected.}
-}
+TODO
 }
 
 \section{Details}{
 
-
-\code{deferred$new} creates a new deferred value. It argument is an \code{action}
-function, which must have two arguments: \code{resolve} and \code{reject}.
-The \code{action} function should be a piece of code that returns quickly, but
-initiates a potentially long-running, asynchronous task. If/when the task
-successfully completes, call \code{resolve(value)} where \code{value} is the
-result of the I/O or computation (like the return value). If the task
-fails, call \code{reject(reason)}, where \code{reason} is either an error object,
-or a character string.
-
-\code{dx$get_state()} returns the state of the deferred value. A deferred
-value can be in three states: \code{"pending"}, \code{"resolved"} or \code{"rejected"}.
-
-\code{dx$get_value()} returns the resolved value, or the error message or
-object of a deferred value. It is an error to call this method on a
-deferred value that is pending.
-
-\code{dx$then()} creates a deferred value whose resolution (and rejection)
-depends on the \code{dx} deferred value. When \code{dx} is successfully
-resolved, the \code{on_fulfilled} function is called, with the resolved
-value as an argument. If \code{dx} is rejected, then \code{on_rejected} is called,
-with the error object or message as the argument.
-
-Note that the deferred value created by \code{dx$then()} will resolve
-successfully, unless an error is throws from within \code{on_fulfilled} or
-\code{on_rejected}. Whether \code{dx} was rejected or not, does not matter in this
-case. This allows using \code{on_rejected} as an error handler.
-
-\code{dx$catch()} is a shortcut to provide an error handler, it is equivalent
-to \code{dx$thin()} with \code{on_fulfilled} set to \code{NULL}.
-
-\code{dx$finally()} makes sure that \code{on_finally} runs once \code{dx} is resolved
-or rejected. It is ideal to specifying cleanup functions, e.g. closing
-a database.
+TODO
 }
 

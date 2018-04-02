@@ -11,26 +11,8 @@ viapply <- function(X, FUN, ..., FUN.VALUE = integer(1)) {
   vapply(X, FUN, FUN.VALUE = FUN.VALUE, ...)
 }
 
-get_state_x <- function(x) {
-  if (is_deferred(x)) x$get_state() else "not-deferred"
-}
-
-get_state_check_x <- function(x, event_loop) {
-  if (is_deferred(x)) {
-    if (!identical(x$get_event_loop(), event_loop)) {
-      err <- make_error(
-        "Cannot await() across synchronization barrier",
-        class = "async_synchronization_barrier_error")
-      stop(err)
-    }
-    x$get_state()
-  } else {
-    "not-deferred"
-  }
-}
-
 get_value_x <- function(x) {
-  if (is_deferred(x)) x$get_value() else x
+  if (is_deferred(x)) get_private(x)$get_value() else x
 }
 
 make_error <- function(message, class = "simpleError", call = NULL) {
@@ -90,4 +72,49 @@ unique_names <- function(x) {
 has_utf8 <- function() {
   ## TODO: this is a hack, we need to export `has_utf8()` from `cli`
   cli::get_spinner()$name == "dots"
+}
+
+get_private <- function(x) {
+  x$.__enclos_env__$private
+}
+
+#' Call `func` and then call `callback` with the result
+#'
+#' `callback` will be called with two arguments, the first one will the
+#' error object if `func()` threw an error, or `NULL` otherwise. The second
+#' argument is `NULL` on error, and the result of `func()` otherwise.
+#'
+#' @param func Function to call.
+#' @param callback Callback to call with the result of `func()`,
+#'   or the error thrown.
+#'
+#' @keywords internal
+
+call_with_callback <- function(func, callback) {
+  recerror <- NULL
+  result <- NULL
+  tryCatch(
+    withCallingHandlers(
+      result <- func(),
+      error = function(e) {
+        recerror <<- e;
+        handler <- getOption("async.error")
+        if (is.function(handler)) handler()
+      }
+    ),
+    error = identity
+  )
+  callback(recerror, result)
+}
+
+get_id <- local({
+  id <- 0L
+  function() {
+    id <<- id + 1L
+    id
+  }
+})
+
+lapply_args <- function(X, FUN, ..., .args = list()) {
+  do.call("lapply", c(list(X = X, FUN = FUN), list(...), .args))
 }

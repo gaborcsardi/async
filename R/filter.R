@@ -20,22 +20,18 @@
 
 async_filter <- function(.x, .p, ...) {
   defs <- lapply(.x, async(.p), ...)
-  num_todo <- length(defs)
-  keep <- logical(num_todo)
+  nx <- length(defs)
+  ids <- viapply(defs, function(x) x$get_id())
+  keep <- structure(rep(FALSE, length(ids)), names = as.character(ids))
 
-  deferred$new(function(resolve, reject) {
-
-    if (length(defs) == 0) return(resolve(.x))
-
-    lapply(seq_along(defs), function(i) {
-      defs[[i]]$then(
-        function(value) {
-          num_todo <<- num_todo - 1
-          keep[i] <<- as.logical(value)
-          if (num_todo == 0) resolve(.x[keep])
-        },
-        function(reason) reject(reason)
-      )
-    })
-  })
+  deferred$new(
+    type = "async_filter",
+    parents = defs,
+    action = function(resolve, reject) if (nx == 0) resolve(.x),
+    parent_resolve = function(value, resolve, reject, id) {
+      nx <<- nx - 1L
+      if  (isTRUE(value))  keep[as.character(id)] <<- TRUE
+      if (nx == 0) resolve(.x[keep])
+    }
+  )
 }

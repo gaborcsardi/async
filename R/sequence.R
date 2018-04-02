@@ -20,7 +20,7 @@ async_sequence <- function(..., .list = NULL) {
 
   function(...) {
     dx <- async(funcs[[1]])(...)
-    for (i in seq_along(funcs)[-1]) dx <- dx$then(as_function(funcs[[i]]))
+    for (i in seq_along(funcs)[-1]) dx <- dx$then(funcs[[i]])
     dx
   }
 }

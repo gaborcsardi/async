@@ -3,19 +3,38 @@ context("async_filter")
 
 test_that("async_filter", {
 
-  is_odd <- async(
-    function(x) delay(1/1000)$then(function(value) as.logical(x %% 2))
-  )
+  is_odd <- function(x) {
+    force(x)
+    delay(1/1000)$then(function(value) as.logical(x %% 2))
+  }
 
-  do <- async(function() {
-    result <- await(async_filter(1:10, is_odd))
-    expect_identical(result, c(1L, 3L, 5L, 7L, 9L))
+  do <- function() {
+    d1 <- async_filter(1:10, is_odd)$
+      then(~ expect_identical(., c(1L, 3L, 5L, 7L, 9L)))
 
-    result <- await(async_filter(numeric(), is_odd))
-    expect_identical(result, numeric())
+    d2 <- async_filter(numeric(), is_odd)$
+      then(~ expect_identical(., numeric()))
 
-    result <- await(async_filter(1:10 * 2, is_odd))
-    expect_identical(result, numeric())
-  })
+    d3 <- async_filter(1:10 * 2, is_odd)$
+      then(~ expect_identical(., numeric()))
+
+    when_all(d1, d2, d3)
+  }
   synchronise(do())
+})
+
+test_that("async_filter, errors", {
+
+  called <- FALSE
+  do <- function()  {
+    async_filter(1:10, function(x) stop("doh"))$
+      then(function() called <<- TRUE)$
+      catch(function(e) {
+        expect_equal(conditionMessage(e), "doh")
+        expect_s3_class(e, "async_rejected")
+      })
+  }
+
+  synchronise(do())
+  expect_false(called)
 })
