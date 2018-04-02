@@ -548,10 +548,6 @@ def_then <- function(self, private, on_fulfilled = NULL,
                  parent_reject = parent_reject)
 
   } else {
-    if (!is.null(on_rejected)) {
-      stop("on_rejected must be NULL is then arg is a deferred value")
-    }
-
     private$add_as_parent(on_fulfilled)
     child_private <- get_private(on_fulfilled)
     child_private$parents <- c(child_private$parents, self)
@@ -701,27 +697,22 @@ def__reject <- function(self, private, reason) {
   if (private$cancelled) return()
   if (private$state != "pending") return()
 
-  if (is_deferred(reason)) {
-    private$parent_resolve <- def__make_parent_resolve(NULL)
-    private$parent_reject <- def__make_parent_reject(NULL)
-    reason$then(self)
+  ## 'reason' cannot be a deferred here
 
-  } else {
-    "!DEBUG !!! REJECT `self$get_id()`"
-    private$state <- "rejected"
-    private$value <- private$make_error_object(reason)
-    if (inherits(private$value, "async_cancelled")) {
-      private$cancelled <- TRUE
-    }
-    if (!is.null(private$cancel_callback)) {
-      private$cancel_callback(conditionMessage(private$value))
-    }
-    for (child in private$children) {
-      def__call_then("parent_reject", child, private$value, self$get_id())
-    }
-    private$maybe_cancel_parents(private$value)
-    private$parents <- NULL
+  "!DEBUG !!! REJECT `self$get_id()`"
+  private$state <- "rejected"
+  private$value <- private$make_error_object(reason)
+  if (inherits(private$value, "async_cancelled")) {
+    private$cancelled <- TRUE
   }
+  if (!is.null(private$cancel_callback)) {
+    private$cancel_callback(conditionMessage(private$value))
+  }
+  for (child in private$children) {
+    def__call_then("parent_reject", child, private$value, self$get_id())
+  }
+  private$maybe_cancel_parents(private$value)
+  private$parents <- NULL
 }
 
 def__maybe_cancel_parents <- function(self, private, reason) {
