@@ -20,6 +20,7 @@ Suggests:
     jsonlite,
     knitr,
     mockery,
+    pingr,
     rmarkdown,
     testthat
 VignetteBuilder: knitr
