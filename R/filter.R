@@ -19,21 +19,8 @@
 #' synchronise(afun(urls))
 
 async_filter <- function(.x, .p, ...) {
-  defs <- lapply(.x, async(.p), ...)
-  nx <- length(defs)
-  ids <- viapply(defs, function(x) x$get_id())
-  keep <- structure(rep(FALSE, length(ids)), names = as.character(ids))
-
-  deferred$new(
-    type = "async_filter",
-    parents = defs,
-    action = function(resolve) if (nx == 0) resolve(.x),
-    parent_resolve = function(value, resolve, id) {
-      nx <<- nx - 1L
-      if  (isTRUE(value))  keep[as.character(id)] <<- TRUE
-      if (nx == 0) resolve(.x[keep])
-    }
-  )
+  when_all(.list = lapply(.x, async(.p), ...))$
+    then(function(res) .x[vlapply(res, isTRUE)])
 }
 
 async_filter <- mark_as_async(async_filter)
