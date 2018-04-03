@@ -81,6 +81,7 @@ el_add_http <- function(self, private, handle, callback, progress, file) {
       task <- private$tasks[[id]]
       private$tasks[[id]] <- NULL
       response$content <- do.call(c, as.list(content))
+      response$file <- outfile
       task$callback(NULL, response)
     },
     data = function(bytes) {

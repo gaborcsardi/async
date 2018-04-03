@@ -216,3 +216,17 @@ test_that("errors contain the response", {
   expect_s3_class(err, "async_http_418")
   expect_match(rawToChar(err$response$content), "teapot")
 })
+
+test_that("errors contain the response if 'file' arg given", {
+  skip_if_offline()
+
+  do <- function() {
+    http_get("https://httpbin.org/status/418", file = tempfile())$
+      then(http_stop_for_status)
+  }
+
+  err <- tryCatch(synchronise(do()), error = identity)
+  expect_s3_class(err, "async_rejected")
+  expect_s3_class(err, "async_http_418")
+  expect_match(rawToChar(err$response$content), "teapot")
+})
