@@ -59,7 +59,7 @@ test_that("http progress bars", {
 
   xx <- NULL
   totalx <- NULL
-  amountx <- 0
+  currentx <- 0
   tmp <- tempfile()
 
   do <- async(function() {
@@ -69,7 +69,7 @@ test_that("http progress bars", {
       file = tmp <<- tempfile(),
       on_progress = function(data) {
         if (!is.null(data$total)) totalx <<- data$total
-        if (!is.null(data$amount)) amountx <<- amountx + data$amount
+        if (!is.null(data$current)) currentx <<- data$current
       }
     )$then(function(x) xx <<- x)
   })
@@ -78,8 +78,8 @@ test_that("http progress bars", {
 
   expect_equal(xx$status_code, 200)
   expect_true(file.exists(tmp))
-  expect_equal(file.info(tmp)$size, amountx)
-  expect_equal(totalx, amountx)
+  expect_equal(file.info(tmp)$size, currentx)
+  expect_equal(totalx, currentx)
 })
 
 test_that("http progress bars & etags", {
@@ -88,7 +88,7 @@ test_that("http progress bars & etags", {
 
   xx <- NULL
   totalx <- NULL
-  amountx <- NULL
+  currentx <- NULL
   statusx <- NULL
   tmp <- tempfile()
 
@@ -100,8 +100,8 @@ test_that("http progress bars & etags", {
       headers = c("If-None-Match" = "etag"),
       on_progress = function(data) {
         if (!is.null(data$total)) totalx <<- data$total
-        amountx <<- c(amountx, data$amount)
-        statusx <<- data$status_code
+        currentx <<- c(currentx, data$current)
+        statusx <<- curl::handle_data(data$handle)$status_code
       }
     )$then(function(x) xx <<- x)
   })
@@ -125,7 +125,7 @@ test_that("progress bar for in-memory data", {
       u1, options = list(buffersize = 1100),
       on_progress = function(data) {
         called <<- called + 1L
-        if (length(data$amount)) bytes <<- bytes + data$amount
+        if (length(data$current)) bytes <<- data$current
       }
     )
   })

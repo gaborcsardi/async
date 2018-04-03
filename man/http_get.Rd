@@ -32,22 +32,17 @@ via a deferred.
 
 
 \code{http_get} can report on the progress of the download, via the
-\code{on_progress} argument. This is called with a list, that describes an
-event that happened to the HTTP request. The list will always have an
-\code{event} entry, which is set to the string \code{"data"} or \code{"done"}.
-The former means that some data was received, that latter means that
-the request is done. Additional list entries:
+\code{on_progress} argument. This is called with a list, with entries:
 \itemize{
-\item \code{status_code}: the HTTP status code.
-\item \code{total}: the total number of bytes.
-\item \code{amount}: the number of bytes received so far.
-\item \code{ratio}: the ratio of the bytes already received. This is \code{NULL} if
-the size of the response is unknown.
+\item \code{url}: the specified url to download
+\item \code{handle}: the curl handle of the request. This can be queried using
+\code{\link[curl:handle_data]{curl::handle_data()}} to get the response status_code, the final
+URL (after redirections), timings, etc.
+\item \code{file}: the \code{file} argument.
+\item \code{total}: total bytes of the response. If this is unknown, it is set
+to zero.
+\item \code{current}: already received bytes of the response.
 }
-
-Note that \code{on_progress} is currently only used for downloads that write
-to the disk. This will be fixed in the future:
-\url{https://github.com/r-lib/async/issues/40}
 }
 
 \examples{
