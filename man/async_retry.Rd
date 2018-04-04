@@ -34,7 +34,8 @@ synchronise(afun())
 \seealso{
 Other async control flow: \code{\link{async_reflect}},
   \code{\link{async_retryable}},
-  \code{\link{async_sequence}}, \code{\link{async_until}},
+  \code{\link{async_sequence}},
+  \code{\link{async_try_each}}, \code{\link{async_until}},
   \code{\link{async_whilst}}
 }
 \concept{async control flow}
