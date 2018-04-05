@@ -26,3 +26,11 @@ is_time_interval <- function(x) {
 on_failure(is_time_interval) <- function(call, env) {
   paste0(deparse(call$x), " is not a valid time interval")
 }
+
+is_count <- function(x) {
+  is.numeric(x) && length(x) == 1 && !is.na(x) && as.integer(x) == x
+}
+
+on_failure(is_count) <- function(call, env) {
+  paste0(deparse(call$x), " is not a count (non-negative integer)")
+}
