@@ -34,15 +34,18 @@ async_detect_nolimit <- function(.x, .p, ...) {
   defs <- lapply(.x, async(.p), ...)
   nx <- length(defs)
   done <- FALSE
+  ids <- NULL
 
   deferred$new(
     type = "async_detect",
     parents = defs,
-    action = function(resolve) if (nx == 0) resolve(NULL),
+    action = function(resolve) {
+      ids <<- viapply(defs, function(x) x$get_id())
+      if (nx == 0) resolve(NULL)
+    },
     parent_resolve = function(value, resolve, id) {
       if (!done && isTRUE(value)) {
         done <<- TRUE
-        ids <- viapply(defs, function(x) x$get_id())
         resolve(.x[[match(id, ids)]])
       } else if (!done) {
         nx <<- nx - 1L
