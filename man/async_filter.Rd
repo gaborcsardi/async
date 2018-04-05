@@ -2,9 +2,12 @@
 % Please edit documentation in R/filter.R
 \name{async_filter}
 \alias{async_filter}
-\title{Keep element using an asyncronous predicate function}
+\alias{async_reject}
+\title{Keep or drop elements using an asyncronous predicate function}
 \usage{
 async_filter(.x, .p, ...)
+
+async_reject(.x, .p, ...)
 }
 \arguments{
 \item{.x}{A list or atomic vector.}
@@ -17,7 +20,8 @@ async_filter(.x, .p, ...)
 A deferred value for the result.
 }
 \description{
-Keep element using an asyncronous predicate function
+\code{async_filter} keep the elements for which \code{.p} is true. (Tested
+via \code{isTRUE()}. \code{async_reject} is the opposite, it drops them.
 }
 \examples{
 ## Filter out non-working URLs

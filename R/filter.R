@@ -1,5 +1,8 @@
 
-#' Keep element using an asyncronous predicate function
+#' Keep or drop elements using an asyncronous predicate function
+#'
+#' `async_filter` keep the elements for which `.p` is true. (Tested
+#' via `isTRUE()`. `async_reject` is the opposite, it drops them.
 #'
 #' @param .x A list or atomic vector.
 #' @param .p An asynchronous predicate function.
@@ -24,3 +27,13 @@ async_filter <- function(.x, .p, ...) {
 }
 
 async_filter <- mark_as_async(async_filter)
+
+#' @rdname async_filter
+#' @export
+
+async_reject <- function(.x, .p, ...) {
+  when_all(.list = lapply(.x, async(.p), ...))$
+    then(function(res) .x[! vlapply(res, isTRUE)])
+}
+
+async_reject <- mark_as_async(async_reject)
