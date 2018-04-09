@@ -78,8 +78,8 @@ deferred <- R6Class(
       def_get_value(self, private),
     then = function(on_fulfilled = NULL, on_rejected = NULL)
       def_then(self, private, on_fulfilled, on_rejected),
-    catch = function(on_rejected)
-      def_catch(self, private, on_rejected),
+    catch = function(error, on_rejected)
+      def_catch(self, private, error, on_rejected),
     finally = function(on_finally)
       def_finally(self, private, on_finally),
     cancel = function(reason = NULL)
@@ -213,7 +213,8 @@ def_then <- function(self, private, on_fulfilled, on_rejected) {
   })
 }
 
-def_catch <- function(self, private, on_rejected) {
+def_catch <- function(self, private, error, on_rejected) {
+  if (missing(on_rejected)) on_rejected <- error
   force(on_rejected)
   self$then(on_rejected = on_rejected)
 }
