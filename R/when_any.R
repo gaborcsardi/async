@@ -80,7 +80,7 @@ when_some <- mark_as_async(when_some)
 #' @rdname when_some
 
 when_any <- function(..., .list = list()) {
-  when_some(1, ..., .list = .list)$then(~ .[[1]])
+  when_some(1, ..., .list = .list)$then(function(x) x[[1]])
 }
 
 when_any <- mark_as_async(when_any)
