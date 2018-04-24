@@ -33,7 +33,7 @@
 #' @examples
 #' afun <- async(function() {
 #'   http_get("https://eu.httpbin.org/status/200")$
-#'     then(~ .$status_code)
+#'     then(function(x) x$status_code)
 #' })
 #' synchronise(afun())
 
@@ -83,14 +83,14 @@ http_get <- mark_as_async(http_get)
 #' @examples
 #' afun <- async(function() {
 #'   dx <- http_head("https://eu.httpbin.org/status/200")$
-#'     then(~ .$status_code)
+#'     then(function(x) x$status_code)
 #' })
 #' synchronise(afun())
 #'
 #' # Check a list of URLs in parallel
 #' afun <- function(urls) {
 #'   when_all(.list = lapply(urls, http_head))$
-#'     then(~ lapply(., "[[", "status_code"))
+#'     then(function(x) lapply(x, "[[", "status_code"))
 #' }
 #' urls <- c("https://httpbin.org", "https://eu.httpbin.org")
 #' synchronise(afun(urls))

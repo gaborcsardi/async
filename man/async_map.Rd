@@ -27,7 +27,7 @@ Apply an asynchronous function to each element of a vector
 \examples{
 synchronise(async_map(
   seq(10, 100, by = 10) / 100,
-  function(wait) delay(wait)$then(~ "OK")
+  function(wait) delay(wait)$then(function() "OK")
 ))
 }
 \seealso{

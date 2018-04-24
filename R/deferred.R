@@ -91,9 +91,6 @@
 #' * A function with one argument: this function is called with the value
 #'   of the parent as the argument, and the deferred is resolved to its
 #'   return value.
-#' * A function in the `~` formula notation (see [rlang::as_function()].
-#'   This function is called with the value of the parent as the argument,
-#'   and the deferred is resolved to its  return value.
 #' * A function with arguments `value` and `resolve`. This function is
 #'   called with the value of the parent, and the resolve callback of the
 #'   deferred.
@@ -118,9 +115,6 @@
 #' * A function with one argument: this function is called with the value
 #'   of the parent as the argument, and the deferred is resolved to its
 #'   return value.
-#' * A function in the `~` notation (see [rlang::as_function()]. This
-#'   function is called with the value of the parent as the argument, and
-#'   the deferred is resolved to its return value.
 #' * A function with arguments `value` and `resolve`. This function is
 #'   called with the value of the parent, and the resolve callback of the
 #'   deferred.
@@ -182,9 +176,7 @@
 #'
 #' `on_fulfilled` is a function with zero or one formal arguments.
 #' It will be called once the result of the deferred is known, with its
-#' result. (The result is omitted if it has no arguments). It can also
-#' be a function specified with the `~` formula notation, see
-#' [rlang::as_function()].
+#' result. (The result is omitted if it has no arguments).
 #'
 #' `$then()` creates another deferred value, that will resolve to the
 #' result of the `on_fulfilled` callback. Should this callback return
@@ -298,10 +290,10 @@
 #'
 #' ```
 #' do <- function() {
-#'   d1 <- delay(1/100)$then(~ print("d1"))
-#'   d2 <- d1$then(~ print("d2"))
-#'   d3 <- delay(1/100)$then(~ print("d3"))
-#'   d4 <- d3$then(~ print("d4"))
+#'   d1 <- delay(1/100)$then(function() print("d1"))
+#'   d2 <- d1$then(function() print("d2"))
+#'   d3 <- delay(1/100)$then(function() print("d3"))
+#'   d4 <- d3$then(function() print("d4"))
 #'   d4
 #' }
 #' invisible(synchronise(do()))

@@ -182,15 +182,15 @@ in its ancestors (except for the errors the ancestors already handle).
 response_time <- async(function(url) {
   http_head(url)$
     then(http_stop_for_status)$
-    then(~ setNames(.[["times"]][["total"]], url))$
-    catch(error = ~ setNames(Inf, url))
+    then(function(x) setNames(x[["times"]][["total"]], url))$
+    catch(error = function(...) setNames(Inf, url))
 })
 synchronise(response_time("https://google.com"))
 ```
 
 ```
 #> https://google.com 
-#>           0.952807
+#>           0.294939
 ```
 
 ```r
@@ -213,7 +213,7 @@ When the `$then()` method of a deferred value is called to create another
 deferred value:
 
 ```r
-d2 <- d1$then(~ ...)
+d2 <- d1$then(function(x) ...)
 ```
 
 then we say that `d2` owns `d1`. We also say that `d2` is the child of `d1`,
@@ -229,8 +229,8 @@ on the same deferred value, i.e. the following generates an error:
 ```r
 do <- function() {
   d <- delay(1/100)
-  d$then(~ print("foo"))
-  d$then(~ print("bar"))
+  d$then(function() print("foo"))
+  d$then(function() print("bar"))
 }
 synchronise(do())
 ```
@@ -271,10 +271,10 @@ part of the async DAG, so they are never evaluated.
 
 ```r
 do <- function() {
-  d1 <- delay(1/100)$then(~ print("d1"))
-  d2 <- d1$then(~ print("d2"))
-  d3 <- delay(1/100)$then(~ print("d3"))
-  d4 <- d3$then(~ print("d4"))
+  d1 <- delay(1/100)$then(function() print("d1"))
+  d2 <- d1$then(function() print("d2"))
+  d3 <- delay(1/100)$then(function() print("d3"))
+  d4 <- d3$then(function() print("d4"))
   d4
 }
 invisible(synchronise(do()))
@@ -367,14 +367,14 @@ revdep_authors <- function() {
   get_author <- function(package) {
     url <- paste0("https://crandb.r-pkg.org/", package)
     http_get(url)$
-      then(~ fromJSON(rawToChar(.$content)))$
-      then(~ .$Author)
+      then(function(x) fromJSON(rawToChar(x$content)))$
+      then(function(x) x$Author)
   }
 
   http_get("https://crandb.r-pkg.org/-/topdeps/devel")$
-    then(~ fromJSON(rawToChar(.$content)))$
-    then(~ names(unlist(.)))$
-    then(~ async_map(., get_author))
+    then(function(x) fromJSON(rawToChar(x$content)))$
+    then(function(x) names(unlist(x)))$
+    then(function(x) async_map(x, get_author))
 }
 synchronise(revdep_authors())[1:3]
 ```
@@ -400,14 +400,14 @@ response time.
 response_time <- async(function(url) {
   http_head(url)$
     then(http_stop_for_status)$
-    then(~ setNames(.[["times"]][["total"]], url))$
-    catch(error = ~ setNames(Inf, url))
+    then(function(x) setNames(x[["times"]][["total"]], url))$
+    catch(error = function() setNames(Inf, url))
 })
 
 fastest_urls <- async(function(urls, n = 2) {
   reqs <- lapply(urls, response_time)
   when_some(n, .list = reqs)$
-    then(~ sort(unlist(.)))
+    then(function(x) sort(unlist(x)))
 })
 
 urls <- c("https://cran.rstudio.com", "https://cran.r-project.org",
@@ -417,8 +417,8 @@ synchronise(fastest_urls(urls))
 ```
 
 ```
-#>   https://cran.rstudio.com https://cran.r-project.org 
-#>                   0.216551                   0.294147
+#> https://www.stats.bris.ac.uk/R/        https://cran.rstudio.com 
+#>                        0.286572                        0.347319
 ```
 
 See the package vignettes for more examples.

@@ -17,7 +17,7 @@
 #'   async_retry(
 #'     function() http_get("https://eu.httpbin.org"),
 #'     times = 5
-#'   )$then(~ .$status_code)
+#'   )$then(function(x) x$status_code)
 #' })
 #'
 #' synchronise(afun())
@@ -56,7 +56,7 @@ async_retry <- mark_as_async(async_retry)
 #' http_get_5 <- async_retryable(http_get, times = 5)
 #' ret <- synchronise(
 #'   http_get_5("https://eu.httpbin.org/get?q=1")$
-#'     then(~ rawToChar(.$content))
+#'     then(function(x) rawToChar(x$content))
 #' )
 #' cat(ret)
 

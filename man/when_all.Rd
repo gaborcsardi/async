@@ -30,7 +30,7 @@ afun <- async(function() {
   u1 <- http_get("https://eu.httpbin.org")
   u2 <- http_get("https://eu.httpbin.org/get")
   when_all(u1, u2)$
-    then(~ identical(.[[1]]$content, .[[2]]$content))
+    then(function(x) identical(x[[1]]$content, x[[2]]$content))
 })
 synchronise(afun())
 }

@@ -22,7 +22,7 @@ Make an asynchronous funcion retryable
 http_get_5 <- async_retryable(http_get, times = 5)
 ret <- synchronise(
   http_get_5("https://eu.httpbin.org/get?q=1")$
-    then(~ rawToChar(.$content))
+    then(function(x) rawToChar(x$content))
 )
 cat(ret)
 }

@@ -14,7 +14,7 @@
 #' # and by then its value might change.
 #' is_odd <- async(function(x) {
 #'   force(x)
-#'   delay(1/1000)$then(~ as.logical(x %% 2))
+#'   delay(1/1000)$then(function() as.logical(x %% 2))
 #' })
 #' synchronise(async_every(c(1,3,5,7,10,11), is_odd))
 #' synchronise(async_every(c(1,3,5,7,11), is_odd))

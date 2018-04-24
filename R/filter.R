@@ -14,7 +14,8 @@
 #' @examples
 #' ## Filter out non-working URLs
 #' afun <- async(function(urls) {
-#'   test_url <- async_sequence(http_head, ~ identical(.$status_code, 200L))
+#'   test_url <- async_sequence(
+#'      http_head, function(x) identical(x$status_code, 200L))
 #'   async_filter(urls, test_url)
 #' })
 #' urls <- c("https://eu.httpbin.org/get",

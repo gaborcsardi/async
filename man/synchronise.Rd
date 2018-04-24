@@ -26,7 +26,7 @@ error.
 \examples{
 http_status <- function(url, ...) {
   http_get(url, ...)$
-    then(~ .$status_code)
+    then(function(x) x$status_code)
 }
 
 synchronise(http_status("https://httpbin.org/status/418"))

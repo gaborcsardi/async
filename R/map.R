@@ -14,7 +14,7 @@
 #' @examples
 #' synchronise(async_map(
 #'   seq(10, 100, by = 10) / 100,
-#'   function(wait) delay(wait)$then(~ "OK")
+#'   function(wait) delay(wait)$then(function() "OK")
 #' ))
 
 async_map <- function(.x, .f, ..., .args = list(), .limit = Inf) {

@@ -30,14 +30,14 @@ Asynchronous HTTP HEAD request
 \examples{
 afun <- async(function() {
   dx <- http_head("https://eu.httpbin.org/status/200")$
-    then(~ .$status_code)
+    then(function(x) x$status_code)
 })
 synchronise(afun())
 
 # Check a list of URLs in parallel
 afun <- function(urls) {
   when_all(.list = lapply(urls, http_head))$
-    then(~ lapply(., "[[", "status_code"))
+    then(function(x) lapply(x, "[[", "status_code"))
 }
 urls <- c("https://httpbin.org", "https://eu.httpbin.org")
 synchronise(afun(urls))

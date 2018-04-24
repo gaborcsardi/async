@@ -26,7 +26,7 @@ afun <- async(function() {
   async_retry(
     function() http_get("https://eu.httpbin.org"),
     times = 5
-  )$then(~ .$status_code)
+  )$then(function(x) x$status_code)
 })
 
 synchronise(afun())

@@ -43,7 +43,7 @@ are returned in the \code{errors} member of the error object thrown by
 afun <- function() {
   u1 <- http_get("https://eu.httpbin.org")
   u2 <- http_get("https://eu.httpbin.org/get")
-  when_any(u1, u2)$then(~ .$url)
+  when_any(u1, u2)$then(function(x) x$url)
 }
 synchronise(afun())
 }

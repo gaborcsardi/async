@@ -24,15 +24,15 @@ If the deferred value is not resolved before the timeout expires,
 \examples{
 ## You can catch the error, asynchronously
 synchronise(
-  async_timeout(function() delay(1/10)$then(~ "OK"), 1/1000)$
-    catch(async_timeout = ~ "Timed out",
-          error = ~ "Other error")
+  async_timeout(function() delay(1/10)$then(function() "OK"), 1/1000)$
+    catch(async_timeout = function(e) "Timed out",
+          error = function(e) "Other error")
 )
 
 ## Or synchronously
 tryCatch(
   synchronise(
-    async_timeout(function() delay(1/10)$then(~ "OK"), 1/1000)
+    async_timeout(function() delay(1/10)$then(function() "OK"), 1/1000)
   ),
   async_timeout = function(e) "Timed out. :(",
   error = function(e) paste("Other error:", e$message)

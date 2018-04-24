@@ -48,7 +48,7 @@ to zero.
 \examples{
 afun <- async(function() {
   http_get("https://eu.httpbin.org/status/200")$
-    then(~ .$status_code)
+    then(function(x) x$status_code)
 })
 synchronise(afun())
 }

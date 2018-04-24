@@ -13,7 +13,8 @@
 #' @family async control flow
 #' @export
 #' @examples
-#' check_url <- async_sequence(http_head, ~ identical(.$status_code, 200L))
+#' check_url <- async_sequence(
+#'   http_head, function(x) identical(x$status_code, 200L))
 #' synchronise(check_url("https://eu.httpbin.org/status/404"))
 #' synchronise(check_url("https://eu.httpbin.org/status/200"))
 
