@@ -1,4 +1,6 @@
 
+`%||%` <- function(l, r) if (is.null(l)) r else l
+
 vlapply <- function(X, FUN, ..., FUN.VALUE = logical(1)) {
   vapply(X, FUN, FUN.VALUE = FUN.VALUE, ...)
 }
@@ -42,7 +44,10 @@ call_with_callback <- function(func, callback) {
     withCallingHandlers(
       result <- func(),
       error = function(e) {
-        recerror <<- e;
+        recerror <<- e
+        recerror$calls <<- recerror$calls %||% sys.calls()
+        recerror$parents <<- recerror$parents %||% sys.parents()
+        .GlobalEnv$err <- c(.GlobalEnv$err, list(recerror))
         handler <- getOption("async.error")
         if (is.function(handler)) handler()
       }
