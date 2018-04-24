@@ -45,7 +45,7 @@ async <- function(fun) {
 }
 
 mark_as_async <- function(fun) {
-  attr(fun, "async")$async <- TRUE
+  attr(body(fun), "async")$async <- TRUE
   fun
 }
 
@@ -71,5 +71,5 @@ mark_as_async <- function(fun) {
 
 is_async <- function(fun) {
   assert_that(is.function(fun))
-  is.list(a <- attr(fun, "async")) && identical(a$async, TRUE)
+  is.list(a <- attr(body(fun), "async")) && identical(a$async, TRUE)
 }
