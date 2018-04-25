@@ -44,7 +44,7 @@ async_map_limit <- function(.x, .f, ..., .args = list(), .limit = Inf) {
   )
 
   self <- deferred$new(
-    type = "async_map (limit)",
+    type = "async_map (limit)", call = sys.call(),
     parents = firsts,
     action = function(resolve) if (nx == 0) resolve(result),
     parent_resolve = function(value, resolve, id) {

@@ -37,7 +37,7 @@ async_detect_nolimit <- function(.x, .p, ...) {
   ids <- NULL
 
   deferred$new(
-    type = "async_detect",
+    type = "async_detect", call = sys.call(),
     parents = defs,
     action = function(resolve) {
       ids <<- viapply(defs, function(x) x$get_id())
@@ -67,7 +67,7 @@ async_detect_limit <- function(.x, .p, ..., .limit = .limit) {
   ids <- viapply(firsts, function(x) x$get_id())
 
   self <- deferred$new(
-    type = "async_detect (limit)",
+    type = "async_detect (limit)", call = sys.call(),
     parents = firsts,
     action = function(resolve) if (nx == 0) resolve(NULL),
     parent_resolve = function(value, resolve, id) {

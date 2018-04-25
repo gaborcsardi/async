@@ -26,7 +26,7 @@ async_until <- function(test, task, ...) {
   task <- async(task)
 
   self <- deferred$new(
-    type = "async_until",
+    type = "async_until", call = sys.call(),
     parents = list(task(...)),
     parent_resolve = function(value, resolve) {
       if (test()) {

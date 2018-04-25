@@ -48,7 +48,7 @@ async_replicate_limit  <- function(n, task, ..., .limit = .limit) {
   defs <- ids <- nextone <- result <- NULL
 
   self <- deferred$new(
-    type = "async_replicate",
+    type = "async_replicate", call = sys.call(),
     action = function(resolve) {
       defs <<- lapply(seq_len(n), function(i) task(...))
       ids <<- viapply(defs, function(x) x$get_id())

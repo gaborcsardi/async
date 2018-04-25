@@ -120,7 +120,7 @@ make_deferred_http <- function(cb, file, on_progress) {
   cb; file; on_progress
   id <- NULL
   deferred$new(
-    type = "http",
+    type = "http", call = sys.call(),
     action = function(resolve, progress) {
       resolve; progress
       ## This is a temporary hack until we have proper pollables

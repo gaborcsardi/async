@@ -32,7 +32,7 @@ when_all <- function(..., .list = list()) {
   nx <- sum(isdef)
 
   deferred$new(
-    type = "when_all",
+    type = "when_all", call = sys.call(),
     parents = defs[isdef],
     action = function(resolve) if (nx == 0) resolve(defs),
     parent_resolve = function(value, resolve) {

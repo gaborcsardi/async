@@ -46,7 +46,7 @@ when_some <- function(count, ..., .list = list()) {
   cancel_all <- function() lapply(defs[ifdef], function(x) x$cancel())
 
   deferred$new(
-    type = "when_some",
+    type = "when_some", call = sys.call(),
     parents = defs[ifdef],
     action = function(resolve) {
       if (num_defs < count) {

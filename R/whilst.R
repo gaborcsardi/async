@@ -26,7 +26,7 @@ async_whilst <- function(test, task, ...) {
   task <- async(task)
 
   self <- deferred$new(
-    type = "async_whilst",
+    type = "async_whilst", call = sys.call(),
     action = function(resolve)  {
       if (!test()) {
         resolve(NULL)

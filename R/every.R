@@ -25,7 +25,7 @@ async_every <- function(.x, .p, ...) {
   done <- FALSE
 
   deferred$new(
-    type = "async_every",
+    type = "async_every", call = sys.call(),
     parents = defs,
     action = function(resolve) if (nx == 0) resolve(TRUE),
     parent_resolve = function(value, resolve) {
