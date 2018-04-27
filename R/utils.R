@@ -53,7 +53,6 @@ call_with_callback <- function(func, callback) {
         recerror$aframe <<- recerror$aframe %||% find_async_data_frame()
         recerror$calls <<- recerror$calls %||% sys.calls()
         recerror$parents <<- recerror$parents %||% sys.parents()
-        .GlobalEnv$err <- c(.GlobalEnv$err, list(recerror))
         handler <- getOption("async.error")
         if (is.function(handler)) handler()
       }
