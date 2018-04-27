@@ -8,4 +8,21 @@
   if (requireNamespace("debugme", quietly = TRUE)) debugme::debugme()
 }
 
+#' @export
+#' @rdname async_debug
+
+async_debug_shortcuts <- function() {
+  as <- function(name, fun) {
+    makeActiveBinding(name, fun, .GlobalEnv)
+  }
+  as(".an", async_next)
+  as(".as", async_step)
+  as(".asb", async_step_back)
+  as(".al", async_list)
+  as(".at", async_tree)
+  as(".ael", async_event_loop_info)
+  as(".aw", async_where)
+  as(".ah", async_help)
+}
+
 ## nocov end
