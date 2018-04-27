@@ -14,6 +14,7 @@ URL: https://github.com/r-lib/async#readme
 BugReports: https://github.com/r-lib/async/issues
 RoxygenNote: 6.0.1.9000
 Suggests:
+    cli,
     covr,
     debugme,
     desc,
@@ -31,6 +32,7 @@ Imports:
     curl (>= 3.2),
     R6,
     rlang,
+    utils,
     uuid
 Roxygen: list(markdown = TRUE)
 KeepSource: yes

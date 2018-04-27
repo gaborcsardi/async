@@ -8,7 +8,7 @@ async_some <- function(.x, .p, ...) {
   done <- FALSE
 
   deferred$new(
-    type = "async_some",
+    type = "async_some", call = sys.call(),
     parents = defs,
     action = function(resolve) if (nx == 0) resolve(FALSE),
     parent_resolve = function(value, resolve) {

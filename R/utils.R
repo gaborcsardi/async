@@ -9,6 +9,10 @@ viapply <- function(X, FUN, ..., FUN.VALUE = integer(1)) {
   vapply(X, FUN, FUN.VALUE = FUN.VALUE, ...)
 }
 
+vcapply <- function(X, FUN, ..., FUN.VALUE = character(1)) {
+  vapply(X, FUN, FUN.VALUE = FUN.VALUE, ...)
+}
+
 make_error <- function(message, class = "simpleError", call = NULL) {
   class <- c(class, "error", "condition")
   structure(
@@ -45,6 +49,8 @@ call_with_callback <- function(func, callback) {
       result <- func(),
       error = function(e) {
         recerror <<- e
+        ## TODO: somehow save the async frame, and srcref as well
+        recerror$aframe <<- recerror$aframe %||% find_async_data_frame()
         recerror$calls <<- recerror$calls %||% sys.calls()
         recerror$parents <<- recerror$parents %||% sys.parents()
         .GlobalEnv$err <- c(.GlobalEnv$err, list(recerror))
@@ -67,4 +73,21 @@ get_id <- local({
 
 lapply_args <- function(X, FUN, ..., .args = list()) {
   do.call("lapply", c(list(X = X, FUN = FUN), list(...), .args))
+}
+
+drop_nulls <- function(x) {
+  x[!vlapply(x, is.null)]
+}
+
+#' @importFrom utils getSrcDirectory getSrcFilename getSrcLocation
+
+get_source_position <- function(call) {
+  list(
+    filename = file.path(
+      c(getSrcDirectory(call), "?")[1],
+      c(getSrcFilename(call), "?")[1]),
+    position = paste0(
+      getSrcLocation(call, "line", TRUE) %||% "?", ":",
+      getSrcLocation(call, "column", TRUE) %||% "?")
+  )
 }

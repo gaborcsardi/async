@@ -28,10 +28,12 @@ synchronise <- function(expr) {
   new_el <- push_event_loop()
   on.exit({ new_el$cancel_all(); pop_event_loop() }, add = TRUE)
 
+  ## Mark this frame, and a synchronization point, for debugging
+  `__async_synchronise_frame__` <- TRUE
+
   res <- expr
 
   if (!is_deferred(res)) return(res)
-
 
   priv <- get_private(res)
   if (! identical(priv$event_loop, new_el)) {
@@ -44,9 +46,59 @@ synchronise <- function(expr) {
   priv$null()
   priv$run_action()
 
+  if (isTRUE(getOption("async_debug"))) browser()
   while (priv$state == "pending") new_el$run("once")
 
-  new_el$cancel_all()
-
   if (priv$state == "fulfilled") priv$value else stop(priv$value)
+}
+
+distill_error <- function(err) {
+  if (is.null(err$aframe)) return(err)
+  err$aframe <- list(
+    frame = err$aframe$frame,
+    deferred = err$aframe$data[[1]],
+    type = err$aframe$data[[2]],
+    call = get_private(err$aframe$data[[3]])$mycall
+  )
+  err
+}
+
+#' @export
+
+print.async_rejected <- function(x, ...) {
+  cat(format(x, ...))
+  invisible(x)
+}
+
+#' @export
+
+format.async_rejected <- function(x, ...) {
+  x <- distill_error(x)
+  src <- get_source_position(x$aframe$call)
+  paste0(
+    "<async error: ", x$message, "\n",
+    " in *", x$aframe$type, "* callback of `",
+    expr_name(x$aframe$call %||% ""),
+    "` at ", src$filename, ":", src$position, ">"
+  )
+}
+
+#' @export
+
+summary.async_rejected <- function(object, ...) {
+  x <- distill_error(object)
+  fmt_out <- format(x, ...)
+  stack <- async_where(calls = x$calls, parents = x$parents,
+                       frm = list(x$aframe))
+  stack_out <- format(stack)
+  structure(
+    paste0(fmt_out, "\n\n", stack_out),
+    class = "async_rejected_summary")
+}
+
+#' @export
+
+print.async_rejected_summary <- function(x, ...) {
+  cat(x)
+  invisible(x)
 }

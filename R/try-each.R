@@ -30,7 +30,7 @@ async_try_each <- function(..., .list = list()) {
   errors <- list()
 
   self <- deferred$new(
-    type = "async_try_each",
+    type = "async_try_each", call = sys.call(),
     action = function(resolve) {
       nx <<- length(defs)
       if (nx == 0) resolve(NULL)

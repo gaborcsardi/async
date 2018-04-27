@@ -395,9 +395,10 @@ deferred <- R6Class(
   public = list(
     initialize = function(action = NULL, on_progress = NULL, on_cancel = NULL,
                           parents = NULL, parent_resolve = NULL,
-                          parent_reject = NULL, type = NULL)
+                          parent_reject = NULL, type = NULL,
+                          call = sys.call(-1))
       async_def_init(self, private, action, on_progress, on_cancel,
-                     parents, parent_resolve, parent_reject, type),
+                     parents, parent_resolve, parent_reject, type, call),
     then = function(on_fulfilled)
       def_then(self, private, on_fulfilled),
     catch = function(...)
@@ -427,6 +428,7 @@ deferred <- R6Class(
     parent_resolve = NULL,
     parent_reject = NULL,
     shared = FALSE,
+    mycall = NULL,
 
     run_action = function()
       def__run_action(self, private),
@@ -447,19 +449,23 @@ deferred <- R6Class(
     maybe_cancel_parents = function(reason)
       def__maybe_cancel_parents(self, private, reason),
     add_as_parent = function(child)
-      def__add_as_parent(self, private, child)
+      def__add_as_parent(self, private, child),
+
+    get_info = function()
+      def__get_info(self, private)
   )
 )
 
 async_def_init <- function(self, private, action, on_progress,
                            on_cancel, parents, parent_resolve,
-                           parent_reject, type) {
+                           parent_reject, type, call) {
 
   private$type <- type
   private$id <- get_id()
   private$event_loop <- get_default_event_loop()
   private$parents <- parents
   private$action <- action
+  private$mycall <- call
 
   "!DEBUG NEW `private$id` (`type`)"
 
@@ -502,7 +508,10 @@ def__run_action <- function(self, private) {
     }
 
     private$event_loop$add_next_tick(
-      function() do.call(action, args),
+      function() {
+        if (isTRUE(getOption("async_debug_steps", FALSE))) debug1(action)
+        `__async_data__` <- list(private$id, "action", self, skip = 2L)
+        do.call(action, args) },
       function(err, res) if (!is.null(err)) private$reject(err))
   }
 
@@ -535,9 +544,11 @@ def_then <- function(self, private, on_fulfilled = NULL,
     parent_resolve <- def__make_parent_resolve(on_fulfilled)
     parent_reject <- def__make_parent_reject(on_rejected)
 
-    deferred$new(parents = list(self), type = paste0("then-", private$id),
+    deferred$new(parents = list(self),
+                 type = paste0("then-", private$id),
                  parent_resolve = parent_resolve,
-                 parent_reject = parent_reject)
+                 parent_reject = parent_reject,
+                 call = sys.call(-1))
 
   } else {
     private$add_as_parent(on_fulfilled)
@@ -726,7 +737,13 @@ def__call_then <- function(which, x, value, id)  {
 
   cb <- private[[which]]
   private$event_loop$add_next_tick(
-    function() private[[which]](value, private$resolve, id),
+    function() {
+      if (isTRUE(getOption("async_debug_steps", FALSE))) {
+        debug1(private[[which]])
+      }
+      `__async_data__` <- list(private$id, "parent", x)
+      private[[which]](value, private$resolve, id)
+    },
     function(err, res) if (!is.null(err)) private$reject(err))
 }
 
@@ -761,6 +778,33 @@ def__progress <- function(self, private, data) {
   if (private$state != "pending") return()
   if (is.null(private$progress_callback)) return()
   private$progress_callback(data)
+}
+
+def__get_info <- function(self, private) {
+  res <- data.frame(
+    stringsAsFactors = FALSE,
+    id = private$id,
+    parents = I(list(viapply(private$parents, function(x) x$get_id()))),
+    label = as.character(private$id),
+    call = I(list(private$mycall)),
+    children = I(list(viapply(private$children, function(x) x$get_id()))),
+    type = private$type %||%  "unknown",
+    running = private$running,
+    state = private$state,
+    cancelled = private$cancelled,
+    shared = private$shared
+  )
+  src <- get_source_position(private$mycall)
+  res$filename <- src$filename
+  res$position <- src$position
+  res$label <- paste0(
+    res$id, " ",
+    if (private$state == "fulfilled") paste0(cli::symbol$tick, " "),
+    if (private$state == "rejected")  paste0(cli::symbol$cross, "  "),
+    deparse(private$mycall)[1], " @ ",
+    res$filename, ":", res$position)
+
+  res
 }
 
 #' Is object a deferred value?

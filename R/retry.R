@@ -28,7 +28,7 @@ async_retry <- function(task, times, ...) {
   force(list(...))
 
   self <- deferred$new(
-    type = "retry",
+    type = "retry", call = sys.call(),
     parents = list(task(...)),
     parent_reject = function(value, resolve) {
       times <<- times - 1L

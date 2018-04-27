@@ -26,7 +26,7 @@ delay <- function(delay) {
   force(delay)
   id <- NULL
   deferred$new(
-    type = "delay",
+    type = "delay", call = sys.call(),
     action = function(resolve) {
       assert_that(is_time_interval(delay))
       force(resolve)
