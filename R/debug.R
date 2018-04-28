@@ -106,6 +106,8 @@ async_next <- function(el = NULL) {
   if (! el$run("once")) message("[ASYNC] async phase complete")
 }
 
+# nocov start
+
 #' Step into the next async event loop event
 #'
 #' @export
@@ -131,6 +133,8 @@ async_step_back <- function() {
   options(async_debug_steps = FALSE)
   message("[ASYNC] step back, you still need to 'c'ontinue")
 }
+
+# nocov end
 
 #' @export
 #' @aliases .al
@@ -257,12 +261,16 @@ async_where <- function(calls = sys.calls(), parents = sys.parents(),
   res
 }
 
+# nocov start
+
 #' @export
 
 print.async_where <- function(x, ...) {
   cat(format(x, ...))
   invisible(x)
 }
+
+# nocov end
 
 #' @export
 
@@ -317,9 +325,13 @@ find_deferred <- function(id, def = NULL) {
   search_parents(def)
 }
 
+# nocov start
+
 debug1 <- function(fun) {
   debugonce(fun)
 }
+
+# nocov end
 
 debug_all <- function(fun) {
   debug(fun)

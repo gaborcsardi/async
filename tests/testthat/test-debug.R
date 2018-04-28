@@ -108,6 +108,19 @@ test_that("async_debug", {
   async_debug(p2$get_id())
   expect_true(isdebugged(get_private(p2)$parent_resolve))
   expect_true(isdebugged(get_private(p2)$parent_reject))
+
+  async_wait_for(p1$get_id())
+  expect_message(async_debug(p1$get_id()), "already resolved")
+
+  res <- deferred$new()
+  priv <- get_private(res)
+  priv$null()
+  expect_message(async_debug(res$get_id()), "has no action")
+
+  res <- deferred$new(action = function() { })
+  priv <-  get_private(res)
+  priv$null()
+  expect_message(async_debug(res$get_id()), "debugging action")
 })
 
 test_that("async_wait_for", {
