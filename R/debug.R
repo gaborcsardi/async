@@ -192,7 +192,7 @@ async_debug <- function(id, action = TRUE, parent = TRUE) {
     ## TODO: make copies?
     debug_all(prv$parent_resolve)
     debug_all(prv$parent_reject)
-    what <- "parent callbacks"
+    what <- c(what, "parent callbacks")
   }
 
   if (length(what) == 1) {
