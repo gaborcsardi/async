@@ -147,7 +147,7 @@ el_cancel_all <- function(self, private) {
   invisible(self)
 }
 
-#' @importFrom curl multi_run multi_list
+#' @importFrom curl multi_run multi_list multi_fdset
 
 el_run <- function(self, private, mode) {
 
@@ -165,11 +165,22 @@ el_run <- function(self, private, mode) {
 
     num_poll <- length(multi_list(pool = private$pool))
     timeout <- 0
+
     if (mode == "once" && !ran_pending || mode == "default") {
       timeout <- private$get_poll_timeout()
     }
+
     if (num_poll) {
-      multi_run(timeout = timeout, poll = TRUE, pool = private$pool)
+      fds <- multi_fdset(pool = private$pool)
+      if (length(fds$reads) && fds$timeout < timeout * 1000) {
+        timeout_int <- as.integer(fds$timeout)
+      } else {
+        timeout_int <- if (timeout == Inf) -1L else as.integer(timeout * 1000)
+      }
+
+      ready <- .Call(c_async_poll, as.integer(fds$reads), timeout_int)
+      multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
+
     } else if (length(private$timers)) {
       Sys.sleep(timeout)
     }
