@@ -116,7 +116,7 @@ test_that("progress bar for in-memory data", {
 
   skip_if_offline()
 
-  u1 <- "http://httpbin.org/stream-bytes/2048?chunk_size=1024"
+  u1 <- "http://eu.httpbin.org/stream-bytes/2048?chunk_size=1024"
 
   called <- 0L
   bytes <- 0L
@@ -152,9 +152,9 @@ test_that("automatic cancellation", {
 
   called <- 0L
   do <- function() {
-    r1 <- http_get("https://httpbin.org/delay/5")$
+    r1 <- http_get("https://eu.httpbin.org/delay/5")$
       then(function() called <<- called + 1L)
-    r2 <- http_get("https://httpbin.org/get")$
+    r2 <- http_get("https://eu.httpbin.org/get")$
       then(function() called <<- called + 1L)
     when_any(r1, r2)
   }
@@ -179,7 +179,7 @@ test_that("timeout, failed request", {
   skip_if_offline()
 
   do <- function() {
-    http_get("https://httpbin.org/delay/5", options = list(timeout = 1))
+    http_get("https://eu.httpbin.org/delay/5", options = list(timeout = 1))
   }
 
   tic <- Sys.time()
@@ -207,7 +207,7 @@ test_that("errors contain the response", {
   skip_if_offline()
 
   do <- function() {
-    http_get("https://httpbin.org/status/418")$
+    http_get("https://eu.httpbin.org/status/418")$
       then(http_stop_for_status)
   }
 
@@ -221,7 +221,7 @@ test_that("errors contain the response if 'file' arg given", {
   skip_if_offline()
 
   do <- function() {
-    http_get("https://httpbin.org/status/418", file = tempfile())$
+    http_get("https://eu.httpbin.org/status/418", file = tempfile())$
       then(http_stop_for_status)
   }
 
