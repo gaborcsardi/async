@@ -187,3 +187,32 @@ test_that("synchronization barriers, leaked deferred", {
     synchronise(leak),
     class = "async_synchronization_barrier_error")
 })
+
+test_that("printing async_rejected", {
+  do  <- function() {
+    delay(1/1000)$then(function() stop("oops"))
+  }
+
+  res <- tryCatch(synchronise(do()), error = function(e) e)
+  expect_match(
+    format(res),
+    paste0("<async error: oops\n in *parent* callback of ",
+           "`delay(1/1000)$then(function() stop(\"oops\"))` at "),
+    fixed = TRUE
+  )
+})
+
+test_that("summary.async_rejected", {
+  id <- NULL
+  do  <- function() {
+    p <- delay(1/1000)$then(function() stop("oops"))
+    id <<- p$get_id()
+    p
+  }
+
+  res <- tryCatch(synchronise(do()), error = function(e) e)
+  sm <- summary(res)
+  fmt <-  format(sm)
+  expect_match(fmt, format(res), fixed = TRUE)
+  expect_match(fmt, paste0(id, " parent .*stop[(]\"oops\"[)]"))
+})

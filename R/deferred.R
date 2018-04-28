@@ -739,7 +739,7 @@ def__call_then <- function(which, x, value, id)  {
   private$event_loop$add_next_tick(
     function() {
       if (isTRUE(getOption("async_debug_steps", FALSE))) {
-        debug1(private[[which]])
+        debug1(private[[which]])        # nocov
       }
       `__async_data__` <- list(private$id, "parent", x)
       private[[which]](value, private$resolve, id)

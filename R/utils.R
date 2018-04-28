@@ -49,7 +49,6 @@ call_with_callback <- function(func, callback) {
       result <- func(),
       error = function(e) {
         recerror <<- e
-        ## TODO: somehow save the async frame, and srcref as well
         recerror$aframe <<- recerror$aframe %||% find_async_data_frame()
         recerror$calls <<- recerror$calls %||% sys.calls()
         recerror$parents <<- recerror$parents %||% sys.parents()

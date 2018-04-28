@@ -63,12 +63,15 @@ distill_error <- function(err) {
   err
 }
 
+# nocov start
 #' @export
 
 print.async_rejected <- function(x, ...) {
   cat(format(x, ...))
   invisible(x)
 }
+
+# nocov end
 
 #' @export
 
@@ -96,9 +99,13 @@ summary.async_rejected <- function(object, ...) {
     class = "async_rejected_summary")
 }
 
+# nocov start
+
 #' @export
 
 print.async_rejected_summary <- function(x, ...) {
   cat(x)
   invisible(x)
 }
+
+# nocov end
