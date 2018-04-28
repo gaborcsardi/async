@@ -161,13 +161,6 @@ async_tree <- function(def = NULL) {
   cli::tree(data, root = root)
 }
 
-async_event_loop_info <- function(el = NULL) {
-  el <- el %||% find_sync_frame()$new_al
-  if (is.null(el)) stop("No async context")
-  stop("Event loop info is not implemented yet")
-  ## TODO
-}
-
 #' Add debugging to a deferred value
 #' @export
 #' @rdname async_debug
@@ -283,11 +276,6 @@ format.async_where <- function(x, ...) {
                    x$def_call, " ", x$def_filename, ":", x$def_position)),
     collapse = "\n"
   ), "\n")
-}
-
-async_help <- function()  {
-  ## TODO
-  stop("Not implemented yet")
 }
 
 get_async_frames <- function() {
