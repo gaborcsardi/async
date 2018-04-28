@@ -29,5 +29,5 @@ http_status <- function(url, ...) {
     then(function(x) x$status_code)
 }
 
-synchronise(http_status("https://httpbin.org/status/418"))
+synchronise(http_status("https://eu.httpbin.org/status/418"))
 }

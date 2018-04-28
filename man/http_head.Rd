@@ -39,7 +39,7 @@ afun <- function(urls) {
   when_all(.list = lapply(urls, http_head))$
     then(function(x) lapply(x, "[[", "status_code"))
 }
-urls <- c("https://httpbin.org", "https://eu.httpbin.org")
+urls <- c("https://google.com", "https://eu.httpbin.org")
 synchronise(afun(urls))
 }
 \seealso{

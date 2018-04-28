@@ -92,7 +92,7 @@ http_get <- mark_as_async(http_get)
 #'   when_all(.list = lapply(urls, http_head))$
 #'     then(function(x) lapply(x, "[[", "status_code"))
 #' }
-#' urls <- c("https://httpbin.org", "https://eu.httpbin.org")
+#' urls <- c("https://google.com", "https://eu.httpbin.org")
 #' synchronise(afun(urls))
 
 http_head <- function(url, headers = character(), file = NULL,

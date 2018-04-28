@@ -279,9 +279,9 @@ three HTTP requests in parallel:\preformatted{http_status3 <- function() {
   http_status <- function(url) {
     http_get(url)$then(function(response) response$status_code)
   }
-  r1 <- http_status("https://httpbin.org/status/403")
-  r2 <- http_status("https://httpbin.org/status/404")
-  r3 <- http_status("https://httpbin.org/status/200")
+  r1 <- http_status("https://eu.httpbin.org/status/403")
+  r2 <- http_status("https://eu.httpbin.org/status/404")
+  r3 <- http_status("https://eu.httpbin.org/status/200")
   when_all(r1, r2, r3)
 }
 synchronise(http_status3())
