@@ -91,10 +91,6 @@
 #' @name async_debug
 NULL
 
-#' Run one tick of the async event loop
-#'
-#' It always ensures that at least one event happens.
-#'
 #' @export
 #' @aliases .an
 #' @rdname async_debug
@@ -108,8 +104,6 @@ async_next <- function(el = NULL) {
 
 # nocov start
 
-#' Step into the next async event loop event
-#'
 #' @export
 #' @aliases .as
 #' @rdname async_debug
@@ -165,7 +159,6 @@ async_tree <- function(def = NULL) {
   cli::tree(data, root = root)
 }
 
-#' Add debugging to a deferred value
 #' @export
 #' @rdname async_debug
 
@@ -209,8 +202,6 @@ async_debug <- function(id, action = TRUE, parent = TRUE) {
   invisible(def)
 }
 
-#' Run until a deferred value is resolved or rejected
-#'
 #' @export
 #' @rdname async_debug
 

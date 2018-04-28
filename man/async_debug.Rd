@@ -61,14 +61,6 @@ frame in the stack.}
 }
 \description{
 Helper function to help with the non-trivial debugging of async code.
-
-It always ensures that at least one event happens.
-
-Step into the next async event loop event
-
-Add debugging to a deferred value
-
-Run until a deferred value is resolved or rejected
 }
 \details{
 Async debugging can be turned on by setting the \code{async_debug} global
