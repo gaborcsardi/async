@@ -20,9 +20,7 @@ async_debug_shortcuts <- function() {
   as(".asb", async_step_back)
   as(".al", async_list)
   as(".at", async_tree)
-  as(".ael", async_event_loop_info)
   as(".aw", async_where)
-  as(".ah", async_help)
 }
 
 ## nocov end
