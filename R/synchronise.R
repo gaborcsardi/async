@@ -87,7 +87,7 @@ format.async_rejected <- function(x, ...) {
 
 summary.async_rejected <- function(object, ...) {
   x <- distill_error(object)
-  fmt_out <- format(x, ...)
+  fmt_out <- format(object, ...)
   stack <- async_where(calls = x$calls, parents = x$parents,
                        frm = list(x$aframe))
   stack_out <- format(stack)
