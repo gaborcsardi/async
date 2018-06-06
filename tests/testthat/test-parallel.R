@@ -12,8 +12,8 @@ test_that("parallel", {
       then( ~ rawToChar(.$content))
 
     when_all(
-      dx1$then(~ expect_match(., "\"q\": \"foo\"", fixed = TRUE)),
-      dx2$then(~ expect_match(., "\"q\": \"bar\"", fixed = TRUE))
+      dx1$then(~ expect_match(., "\"q\":[ ]*\"foo\"")),
+      dx2$then(~ expect_match(., "\"q\":[ ]*\"bar\""))
     )
   })
   synchronise(do())
