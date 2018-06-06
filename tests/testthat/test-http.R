@@ -8,7 +8,7 @@ test_that("GET", {
   do <- async(function() {
     http_get("https://eu.httpbin.org/get?q=42")$
       then(~ rawToChar(.$content))$
-      then(~ expect_match(., "\"q\": \"42\"", fixed = TRUE))
+      then(~ expect_match(., "\"q\":[ ]*\"42\""))
   })
   synchronise(do())
 })
