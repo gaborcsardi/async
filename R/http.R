@@ -52,7 +52,7 @@ http_get <- function(url, headers = character(), file = NULL,
 
       if (!is.null(on_progress)) {
         options$noprogress <- FALSE
-        options$progressfunction <- function(down, up) {
+        fun <- options$progressfunction <- function(down, up) {
           on_progress(list(
             url = url,
             handle = handle,
@@ -62,6 +62,9 @@ http_get <- function(url, headers = character(), file = NULL,
           ))
           TRUE
         }
+        ## This is a workaround for curl not PROTECT-ing the progress
+        ## callback function
+        reg.finalizer(handle, function(...) fun, onexit = TRUE)
       }
 
       handle_setopt(handle, .list = options)
