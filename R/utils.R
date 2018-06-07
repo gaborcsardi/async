@@ -91,3 +91,14 @@ get_source_position <- function(call) {
       getSrcLocation(call, "column", TRUE) %||% "?")
   )
 }
+
+file_size <- function(...) {
+  file.info(..., extra_cols = FALSE)$size
+}
+
+read_all <- function(filename, encoding) {
+  r <- readBin(filename, what = raw(0), n = file.size(filename))
+  s <- rawToChar(r)
+  Encoding(s) <- encoding
+  s
+}

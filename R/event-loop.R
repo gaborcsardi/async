@@ -10,6 +10,8 @@ event_loop <- R6Class(
     add_http = function(handle, callback, file = NULL, progress = NULL,
                         data = NULL)
       el_add_http(self, private, handle, callback, file, progress, data),
+    add_process = function(conns, callback, data)
+      el_add_process(self, private, conns, callback, data),
     add_delayed = function(delay, func, callback, rep = FALSE)
       el_add_delayed(self, private, delay, func, callback, rep),
     add_next_tick = function(func, callback, data = NULL)
@@ -105,6 +107,12 @@ el_add_http <- function(self, private, handle, callback, progress, file,
   id
 }
 
+el_add_process <-  function(self, private, conns, callback, data) {
+  self; private; conns; callback; data
+  data$conns <- conns
+  private$create_task(callback, data, type = "process")
+}
+
 el_add_delayed <- function(self, private, delay, func, callback, rep) {
   force(self); force(private); force(delay); force(func); force(callback)
   force(rep)
@@ -131,6 +139,9 @@ el_cancel <- function(self, private, id) {
   private$timers  <- private$timers[setdiff(names(private$timers), id)]
   if (id %in% names(private$tasks) && private$tasks[[id]]$type == "http") {
     multi_cancel(private$tasks[[id]]$data$handle)
+  } else if (id %in% names(private$tasks) &&
+             private$tasks[[id]]$type == "process") {
+    private$tasks[[id]]$data$process$kill()
   }
   private$tasks[[id]] <- NULL
   invisible(self)
@@ -148,6 +159,7 @@ el_cancel_all <- function(self, private) {
 }
 
 #' @importFrom curl multi_run multi_list multi_fdset
+#' @importFrom processx conn_get_fileno
 
 el_run <- function(self, private, mode) {
 
@@ -163,7 +175,11 @@ el_run <- function(self, private, mode) {
     ## private$run_idle()
     ## private$run_prepare()
 
-    num_poll <- length(multi_list(pool = private$pool))
+    num_http <- length(multi_list(pool = private$pool))
+    types <- vcapply(private$tasks, "[[", "type")
+    num_proc <- sum(types == "process")
+    num_poll <- num_http + num_proc
+
     timeout <- 0
 
     if (mode == "once" && !ran_pending || mode == "default") {
@@ -171,15 +187,61 @@ el_run <- function(self, private, mode) {
     }
 
     if (num_poll) {
-      fds <- multi_fdset(pool = private$pool)
-      if (length(fds$reads) && fds$timeout < timeout * 1000) {
-        timeout_int <- as.integer(fds$timeout)
-      } else {
-        timeout_int <- if (timeout == Inf) -1L else as.integer(timeout * 1000)
+
+      fds <- fds_http <- fds_proc <- integer()
+
+      ## File desciptors to poll for HTTP
+      if (num_http) {
+        fds_http <- multi_fdset(pool = private$pool)
+        fds <- c(fds, as.integer(fds_http$reads))
+        if (length(fds_http$reads) && fds_http$timeout < timeout * 1000) {
+          timeout <- fds_http$timeout / 1000.0
+        }
       }
 
-      ready <- .Call(c_async_poll, as.integer(fds$reads), timeout_int)
-      multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
+      ## File descriptors to poll for processes
+      if (num_proc) {
+        procs <- private$tasks[types == "process"]
+        fds_proc <-
+          lapply(procs, function(t) lapply(t$data$conns, conn_get_fileno))
+        fds <- c(fds, unlist(fds_proc))
+      }
+
+      timeout <- if (is.finite(timeout)) timeout * 1000 else -1L
+
+      ## Poll
+      ready <- .Call(c_async_poll, fds, as.integer(timeout))
+
+      if (num_http) {
+        multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
+      }
+
+      ## Processes ready
+      if (num_proc) {
+        ready_proc_fds <- fds[ready & fds %in% unlist(fds_proc)]
+        ready_proc <- procs[vlapply(fds_proc, function(x) any(x %in% ready_proc_fds))]
+        for (p in ready_proc)  {
+          private$tasks[[p$id]] <- NULL
+          p$data$process$wait(1000)
+          p$data$process$kill()
+          res <- list(
+            status = p$data$process$get_exit_status(),
+            stdout = read_all(p$data$stdout, p$data$encoding),
+            stderr = read_all(p$data$stderr, p$data$encoding),
+            timeout = FALSE
+          )
+          unlink(c(p$data$stdout, p$data$stderr))
+
+          if (p$data$error_on_status && res$status != 0) {
+            err <- make_error("process exited with non-zero status")
+            err$data <- res
+            res <- NULL
+          } else {
+            err <- NULL
+          }
+          p$callback(err, res)
+        }
+      }
 
     } else if (length(private$timers)) {
       Sys.sleep(timeout)
