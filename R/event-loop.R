@@ -12,6 +12,8 @@ event_loop <- R6Class(
       el_add_http(self, private, handle, callback, file, progress, data),
     add_process = function(conns, callback, data)
       el_add_process(self, private, conns, callback, data),
+    add_r_process = function(conns, callback, data)
+      el_add_r_process(self, private, conns, callback, data),
     add_delayed = function(delay, func, callback, rep = FALSE)
       el_add_delayed(self, private, delay, func, callback, rep),
     add_next_tick = function(func, callback, data = NULL)
@@ -107,10 +109,16 @@ el_add_http <- function(self, private, handle, callback, progress, file,
   id
 }
 
-el_add_process <-  function(self, private, conns, callback, data) {
+el_add_process <- function(self, private, conns, callback, data) {
   self; private; conns; callback; data
   data$conns <- conns
   private$create_task(callback, data, type = "process")
+}
+
+el_add_r_process <- function(self, private, conns, callback, data) {
+  self; private; conns; callback; data
+  data$conns <- conns
+  private$create_task(callback, data, type = "r-process")
 }
 
 el_add_delayed <- function(self, private, delay, func, callback, rep) {
@@ -140,7 +148,7 @@ el_cancel <- function(self, private, id) {
   if (id %in% names(private$tasks) && private$tasks[[id]]$type == "http") {
     multi_cancel(private$tasks[[id]]$data$handle)
   } else if (id %in% names(private$tasks) &&
-             private$tasks[[id]]$type == "process") {
+             private$tasks[[id]]$type %in% c("process", "r-process")) {
     private$tasks[[id]]$data$process$kill()
   }
   private$tasks[[id]] <- NULL
@@ -177,7 +185,7 @@ el_run <- function(self, private, mode) {
 
     num_http <- length(multi_list(pool = private$pool))
     types <- vcapply(private$tasks, "[[", "type")
-    num_proc <- sum(types == "process")
+    num_proc <- sum(types %in% c("process", "r-process"))
     num_poll <- num_http + num_proc
 
     timeout <- 0
@@ -201,7 +209,7 @@ el_run <- function(self, private, mode) {
 
       ## File descriptors to poll for processes
       if (num_proc) {
-        procs <- private$tasks[types == "process"]
+        procs <- private$tasks[types %in% c("process", "r-process")]
         fds_proc <-
           lapply(procs, function(t) lapply(t$data$conns, conn_get_fileno))
         fds <- c(fds, unlist(fds_proc))
@@ -230,6 +238,11 @@ el_run <- function(self, private, mode) {
             stderr = read_all(p$data$stderr, p$data$encoding),
             timeout = FALSE
           )
+
+          if (p$type == "r-process") {
+            res$result = p$data$process$get_result()
+          }
+
           unlink(c(p$data$stdout, p$data$stderr))
 
           if (p$data$error_on_status && res$status != 0) {
