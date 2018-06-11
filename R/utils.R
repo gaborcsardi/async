@@ -71,6 +71,14 @@ get_id <- local({
   }
 })
 
+new_event_loop_id <- local({
+  id <- 0L
+  function() {
+    id <<- id + 1L
+    id
+  }
+})
+
 lapply_args <- function(X, FUN, ..., .args = list()) {
   do.call("lapply", c(list(X = X, FUN = FUN), list(...), .args))
 }

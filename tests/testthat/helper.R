@@ -20,3 +20,5 @@ skip_if_offline <- function() {
   skip_on_cran()
   if (is_offline()) skip("Offline")
 }
+
+get_private <- function(x) x$.__enclos_env__$private

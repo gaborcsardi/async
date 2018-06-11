@@ -23,7 +23,8 @@ Suggests:
     mockery,
     pingr,
     rmarkdown,
-    testthat
+    testthat,
+    withr
 VignetteBuilder: knitr
 Encoding: UTF-8
 Imports:
@@ -37,7 +38,7 @@ Imports:
     utils,
     uuid
 Remotes:
-    r-lib/callr,
+    r-lib/callr@feature/session-improvements,
     r-lib/processx
 Roxygen: list(markdown = TRUE)
 KeepSource: yes

@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <poll.h>
 
-#define ASYNC_INTERRUPT_INTERVAL 200
+#define ASYNC_INTERRUPT_INTERVAL 100
 
 /* Various OSes and OS versions return various poll codes when the
    child's end of the pipe is closed, so we cannot provide a more
@@ -25,7 +25,7 @@
 #define PXSILENT  5		/* still open, but no data or EOF for now. No timeout, either */
                                 /* but there were events on other fds */
 
-int processx__poll_decode(short code) {
+int async__poll_decode(short code) {
   if (code & POLLNVAL) return PXCLOSED;
   if (code & POLLIN || code & POLLHUP) return PXREADY;
   return PXSILENT;
@@ -64,8 +64,12 @@ SEXP async_poll(SEXP fds, SEXP timeout) {
   int i, num_fds = LENGTH(fds);
   struct pollfd *pollfds;
   int ret;
+  SEXP result = PROTECT(allocVector(INTSXP, num_fds));
 
-  if (num_fds == 0) return(ScalarLogical(0));
+  if (num_fds == 0) {
+    UNPROTECT(1);
+    return(result);
+  }
 
   pollfds = (struct pollfd*) R_alloc(num_fds, sizeof(struct pollfd));
   for (i = 0; i < num_fds; i++) {
@@ -78,8 +82,12 @@ SEXP async_poll(SEXP fds, SEXP timeout) {
 
   if (ret == -1) {
     error("async poll error: %s", strerror(errno));
-
   }
 
-  return(ScalarLogical(ret != 0));
+  for (i = 0; i < num_fds; i++) {
+    INTEGER(result)[i] = async__poll_decode(pollfds[i].revents);
+  }
+
+  UNPROTECT(1);
+  return result;
 }

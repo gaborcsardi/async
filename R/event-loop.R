@@ -14,6 +14,8 @@ event_loop <- R6Class(
       el_add_process(self, private, conns, callback, data),
     add_r_process = function(conns, callback, data)
       el_add_r_process(self, private, conns, callback, data),
+    add_pool_task = function(callback, data)
+      el_add_pool_task(self, private, callback, data),
     add_delayed = function(delay, func, callback, rep = FALSE)
       el_add_delayed(self, private, delay, func, callback, rep),
     add_next_tick = function(func, callback, data = NULL)
@@ -44,16 +46,19 @@ event_loop <- R6Class(
     update_time = function()
       el__update_time(self, private),
 
+    id = NULL,
     time = Sys.time(),
     stop_flag = FALSE,
     tasks = list(),
     timers = Sys.time()[numeric()],
     pool = NULL,
-    next_ticks = character()
+    next_ticks = character(),
+    worker_pool = NULL
   )
 )
 
 el_init <- function(self, private) {
+  private$id <- new_event_loop_id()
   invisible(self)
 }
 
@@ -121,6 +126,16 @@ el_add_r_process <- function(self, private, conns, callback, data) {
   private$create_task(callback, data, type = "r-process")
 }
 
+el_add_pool_task <- function(self, private, callback, data) {
+  self; private; callback; data
+  id <- private$create_task(callback, data, type = "pool-task")
+  if (is.null(async_env$worker_pool)) {
+    async_env$worker_pool <- worker_pool$new()
+  }
+  async_env$worker_pool$add_task(data$func, data$args, id, private$id)
+  id
+}
+
 el_add_delayed <- function(self, private, delay, func, callback, rep) {
   force(self); force(private); force(delay); force(func); force(callback)
   force(rep)
@@ -150,6 +165,9 @@ el_cancel <- function(self, private, id) {
   } else if (id %in% names(private$tasks) &&
              private$tasks[[id]]$type %in% c("process", "r-process")) {
     private$tasks[[id]]$data$process$kill()
+  } else if (id %in% names(private$tasks) &&
+             private$tasks[[id]]$type == "pool-task") {
+    async_env$worker_pool$cancel_task(id)
   }
   private$tasks[[id]] <- NULL
   invisible(self)
@@ -186,7 +204,7 @@ el_run <- function(self, private, mode) {
     num_http <- length(multi_list(pool = private$pool))
     types <- vcapply(private$tasks, "[[", "type")
     num_proc <- sum(types %in% c("process", "r-process"))
-    num_poll <- num_http + num_proc
+    num_poll <- num_http + num_proc + !is.null(async_env$worker_pool)
 
     timeout <- 0
 
@@ -196,7 +214,7 @@ el_run <- function(self, private, mode) {
 
     if (num_poll) {
 
-      fds <- fds_http <- fds_proc <- integer()
+      fds <- fds_http <- fds_proc <- fds_pool <- integer()
 
       ## File desciptors to poll for HTTP
       if (num_http) {
@@ -213,6 +231,12 @@ el_run <- function(self, private, mode) {
         fds_proc <-
           lapply(procs, function(t) lapply(t$data$conns, conn_get_fileno))
         fds <- c(fds, unlist(fds_proc))
+      }
+
+      ## Worker pool
+      if (!is.null(async_env$worker_pool)) {
+        fds_pool <- async_env$worker_pool$get_fds()
+        fds <- c(fds, fds_pool)
       }
 
       timeout <- if (is.finite(timeout)) timeout * 1000 else -1L
@@ -253,6 +277,24 @@ el_run <- function(self, private, mode) {
             err <- NULL
           }
           p$callback(err, res)
+        }
+      }
+
+      ## Workers ready
+      if (length(fds_pool)) {
+        pool <- async_env$worker_pool
+        read_pool_fds <- fds[ready & fds %in% fds_pool]
+        done  <- pool$notify_event(fds, event_loop = private$id)
+
+        mine <- intersect(done, names(private$tasks))
+        if (length(mine) < length(done)) warning("TODO bg task finished!")
+        for (tid in mine) {
+          task <- private$tasks[[tid]]
+          private$tasks[[tid]] <- NULL
+          res <-  pool$get_result(tid)
+          err <- res$error
+          res <- res[c("result", "stdout", "stderr")]
+          task$callback(err, res)
         }
       }
 

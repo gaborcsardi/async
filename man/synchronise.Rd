@@ -20,7 +20,7 @@ resolved, and returns its resolved value.
 If an error is not handled in the async phase, \code{synchronise()} will
 re-throw that error.
 
-\code{synchronise()} cancels all async processes on interrupt or extrenal
+\code{synchronise()} cancels all async processes on interrupt or external
 error.
 }
 \examples{
