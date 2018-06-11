@@ -218,7 +218,7 @@ el_run <- function(self, private, mode) {
       timeout <- if (is.finite(timeout)) timeout * 1000 else -1L
 
       ## Poll
-      ready <- .Call(c_async_poll, fds, as.integer(timeout))
+      ready <- .Call(c_async_poll, fds, as.integer(timeout)) == 2
 
       if (num_http) {
         multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
