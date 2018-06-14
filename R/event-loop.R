@@ -27,7 +27,12 @@ event_loop <- R6Class(
       el_cancel_all(self, private),
 
     run = function(mode = c("default", "nowait", "once"))
-      el_run(self, private, mode = match.arg(mode))
+      el_run(self, private, mode = match.arg(mode)),
+
+    suspend = function()
+      el_suspend(self, private),
+    wakeup = function()
+      el_wakeup(self, private)
   ),
 
   private = list(
@@ -287,11 +292,11 @@ el_run <- function(self, private, mode) {
         done  <- pool$notify_event(fds, event_loop = private$id)
 
         mine <- intersect(done, names(private$tasks))
-        if (length(mine) < length(done)) warning("TODO bg task finished!")
+        if (length(mine) < length(done)) { stop("TODO bg task finished!") }
         for (tid in mine) {
           task <- private$tasks[[tid]]
           private$tasks[[tid]] <- NULL
-          res <-  pool$get_result(tid)
+          res <- pool$get_result(tid)
           err <- res$error
           res <- res[c("result", "stdout", "stderr")]
           task$callback(err, res)
@@ -317,6 +322,14 @@ el_run <- function(self, private, mode) {
   private$stop_flag <- FALSE
 
   alive
+}
+
+el_suspend <- function(self, private) {
+  ## TODO
+}
+
+el_wakeup <- function(self, private) {
+  ## TODO
 }
 
 el__run_pending <- function(self, private) {

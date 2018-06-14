@@ -110,3 +110,7 @@ read_all <- function(filename, encoding) {
   Encoding(s) <- encoding
   s
 }
+
+crash <- function () {
+  get("attach")(structure(list(), class = "UserDefinedDatabase"))
+}

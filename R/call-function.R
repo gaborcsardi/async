@@ -32,3 +32,5 @@ call_function <- function(func, args = list()) {
     }
   )
 }
+
+call_function <- mark_as_async(call_function)

@@ -106,12 +106,13 @@ wp_notify_event <- function(self, private, fds, event_loop) {
   }
 
   done <- NULL
+  dead <- integer()
   wh <- match(fds, wfds)
   for (w in wh) {
     msg <- private$workers$session[[w]]$read()
-    ## TODO: handle worker crashes, need to start a new worker as well
     if (is.null(msg)) next
-    if (msg$code == 200)  {
+    if (msg$code == 200 || (msg$code >= 500 && msg$code < 600)) {
+      if (msg$code >= 500 && msg$code < 600) dead <- c(dead, w)
       wt <- match(private$workers$task[[w]], private$tasks$id)
       if (is.na(wt)) stop("Internal error, no such task")
       private$tasks$result[[wt]] <- msg
@@ -119,6 +120,10 @@ wp_notify_event <- function(self, private, fds, event_loop) {
       private$workers$task[[w]] <- NA_character_
       done <- c(done, private$tasks$id[[wt]])
     }
+  }
+  if (length(dead)) {
+    private$workers <- private$workers[-dead,]
+    self$start_workers()
   }
 
   private$try_start(event_loop)

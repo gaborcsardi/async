@@ -56,3 +56,17 @@ test_that("repeated delay", {
   expect_true(end - start >= as.difftime(1, units = "secs"))
   expect_true(end - start <= as.difftime(2, units = "secs"))
 })
+
+test_that("nested event loops", {
+  ## Create a function that finishes while its event loop is inactive
+  afun1 <- function(x) { x; async_constant(x) }
+  afun2 <- function(x1, x2) {
+    x1; x2
+    p1 <- afun1(x1)
+    p2 <- delay(0)$then(function() synchronise(afun1(x2)))
+    when_all(p1, p2)
+  }
+
+  res <- synchronise(afun2(1, 2))
+  expect_equal(res,  list(1, 2))
+})
