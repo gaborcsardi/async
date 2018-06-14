@@ -114,3 +114,7 @@ read_all <- function(filename, encoding) {
 crash <- function () {
   get("attach")(structure(list(), class = "UserDefinedDatabase"))
 }
+
+str_trim <- function(x) {
+  sub("\\s+$", "", sub("^\\s+", "", x))
+}
