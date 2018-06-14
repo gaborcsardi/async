@@ -105,7 +105,7 @@ file_size <- function(...) {
 }
 
 read_all <- function(filename, encoding) {
-  r <- readBin(filename, what = raw(0), n = file.size(filename))
+  r <- readBin(filename, what = raw(0), n = file_size(filename))
   s <- rawToChar(r)
   Encoding(s) <- encoding
   s
