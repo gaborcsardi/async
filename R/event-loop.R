@@ -209,7 +209,12 @@ el_run <- function(self, private, mode) {
     num_http <- length(multi_list(pool = private$pool))
     types <- vcapply(private$tasks, "[[", "type")
     num_proc <- sum(types %in% c("process", "r-process"))
-    num_poll <- num_http + num_proc + !is.null(async_env$worker_pool)
+
+    fds_pool <- if (!is.null(async_env$worker_pool)) {
+      async_env$worker_pool$get_fds()
+    }
+
+    num_poll <- num_http + num_proc + length(fds_pool)
 
     timeout <- 0
 
@@ -219,7 +224,7 @@ el_run <- function(self, private, mode) {
 
     if (num_poll) {
 
-      fds <- fds_http <- fds_proc <- fds_pool <- integer()
+      fds <- fds_http <- fds_proc <- integer()
 
       ## File desciptors to poll for HTTP
       if (num_http) {
@@ -240,7 +245,6 @@ el_run <- function(self, private, mode) {
 
       ## Worker pool
       if (!is.null(async_env$worker_pool)) {
-        fds_pool <- async_env$worker_pool$get_fds()
         fds <- c(fds, fds_pool)
       }
 
