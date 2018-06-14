@@ -289,7 +289,7 @@ el_run <- function(self, private, mode) {
       if (length(fds_pool)) {
         pool <- async_env$worker_pool
         read_pool_fds <- fds[ready & fds %in% fds_pool]
-        done  <- pool$notify_event(fds, event_loop = private$id)
+        done  <- pool$notify_event(read_pool_fds, event_loop = private$id)
 
         mine <- intersect(done, names(private$tasks))
         if (length(mine) < length(done)) { stop("TODO bg task finished!") }
