@@ -38,7 +38,7 @@ Imports:
     utils,
     uuid
 Remotes:
-    r-lib/callr@feature/session-improvements,
+    r-lib/callr@feature/session-crash,
     r-lib/processx
 Roxygen: list(markdown = TRUE)
 KeepSource: yes
