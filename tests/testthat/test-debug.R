@@ -7,7 +7,7 @@ test_that("async_next", {
   on.exit({ new_el$cancel_all(); pop_event_loop() }, add = TRUE)
   `__async_synchronise_frame__` <- TRUE
 
-  eps <- 1/100000
+  eps <- 0
   res <- delay(eps)$
     then(function() delay(eps))$
     then(function() delay(eps))
