@@ -34,3 +34,4 @@ synchronise(async_map(
 Other async iterators: \code{\link{async_detect}},
   \code{\link{async_every}}, \code{\link{async_filter}}
 }
+\concept{async iterators}

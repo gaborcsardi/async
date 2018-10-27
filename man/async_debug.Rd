@@ -12,7 +12,6 @@
 \alias{.al}
 \alias{async_tree}
 \alias{.at}
-\alias{async_debug}
 \alias{async_wait_for}
 \alias{async_where}
 \alias{.aw}

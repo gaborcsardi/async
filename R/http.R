@@ -116,6 +116,16 @@ http_head <- function(url, headers = character(), file = NULL,
 
 http_head <- mark_as_async(http_head)
 
+#' Make a deferred object for an HTTP query
+#'
+#' @param cb Callback function that should return a handle that can be
+#'   passed to [curl::multi_add()].
+#' @param file Deprecated and should be `NULL`.
+#' @param on_progress Deprecated and should be `NULL`.
+#' @return A deferred object.
+#'
+#' @export
+
 make_deferred_http <- function(cb, file, on_progress) {
   cb; file; on_progress
   id <- NULL
