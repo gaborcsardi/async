@@ -46,6 +46,11 @@ async <- function(fun) {
 
 mark_as_async <- function(fun) {
   attr(body(fun), "async")$async <- TRUE
+
+  ## These are not valid any more, anyway
+  attr(fun, "srcref") <- NULL
+  attr(body(fun), "srcref") <- NULL
+
   fun
 }
 
