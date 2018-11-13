@@ -181,7 +181,7 @@ http_error <- function(resp, call = sys.call(-1)) {
   reason <- http_status(status)$reason
   message <- sprintf("%s (HTTP %d).", reason, status)
   status_type <- (status %/% 100) * 100
-  if (is.null(resp$content) && !is.null(resp$file) &&
+  if (length(resp[["content"]]) == 0 && !is.null(resp$file) &&
               file.exists(resp$file)) {
     tryCatch({
       n <- file.info(resp$file, extra_cols = FALSE)$size

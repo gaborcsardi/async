@@ -108,8 +108,9 @@ test_that("http progress bars & etags", {
   synchronise(do())
   expect_equal(xx$status_code, 304)
   expect_equal(statusx, 304)
-  expect_equal(length(xx$content), 0)
-  expect_false(file.exists(tmp))
+  expect_equal(length(xx[["content"]]), 0)
+  expect_true(file.exists(tmp))
+  expect_equal(file.info(tmp)$size, 0)
 })
 
 test_that("progress bar for in-memory data", {
@@ -220,13 +221,14 @@ test_that("errors contain the response", {
 test_that("errors contain the response if 'file' arg given", {
   skip_if_offline()
 
+  tmp <- tempfile()
   do <- function() {
-    http_get("https://eu.httpbin.org/status/418", file = tempfile())$
+    http_get("https://eu.httpbin.org/status/418", file = tmp)$
       then(http_stop_for_status)
   }
 
   err <- tryCatch(synchronise(do()), error = identity)
   expect_s3_class(err, "async_rejected")
   expect_s3_class(err, "async_http_418")
-  expect_match(rawToChar(err$response$content), "teapot")
+  expect_true(any(grepl("teapot", readLines(tmp))))
 })
