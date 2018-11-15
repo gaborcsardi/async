@@ -124,7 +124,7 @@ el_add_next_tick <- function(self, private, func, callback) {
 
 el_cancel <- function(self, private, id) {
   private$next_ticks <- setdiff(private$next_ticks, id)
-  private$timers  <- private$timers[setdiff(names(private$times), id)]
+  private$timers  <- private$timers[setdiff(names(private$timers), id)]
   if (id %in% names(private$tasks) && private$tasks[[id]]$type == "http") {
     multi_cancel(private$tasks[[id]]$data$handle)
   }
