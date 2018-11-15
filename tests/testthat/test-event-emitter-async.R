@@ -286,3 +286,62 @@ test_that("remove all listeners", {
   expect_silent(run_event_loop(do()))
   expect_false(called)
 })
+
+test_that("error callback is called on error", {
+  err <- NULL
+  do <- function() {
+    x <- event_emitter$new(async = TRUE)
+    x$listen_on("foo", function() stop("foobar"))
+    x$listen_on("error", function(e) err <<- e)
+    x$emit("foo")
+  }
+
+  expect_silent(run_event_loop(do()))
+  expect_false(is.null(err))
+  expect_s3_class(err, "error")
+  expect_equal(conditionMessage(err), "foobar")
+})
+
+test_that("fail stage if no error callback", {
+  do <- function() {
+    x <- event_emitter$new(async = TRUE)
+    x$listen_on("foo", function() stop("foobar"))
+    x$emit("foo")
+  }
+
+  expect_error(run_event_loop(do()), "foobar")
+})
+
+test_that("all error callbacks are called", {
+  err1 <- err2 <- NULL
+  do <- function() {
+    x <- event_emitter$new(async = TRUE)
+    x$listen_on("foo", function() stop("foobar"))
+    x$listen_on("error", function(e) err1 <<- e)
+    x$listen_on("error", function(e) err2 <<- e)
+    x$emit("foo")
+  }
+
+  expect_silent(run_event_loop(do()))
+  expect_false(is.null(err1))
+  expect_false(is.null(err2))
+  expect_s3_class(err1, "error")
+  expect_equal(conditionMessage(err1), "foobar")
+  expect_s3_class(err2, "error")
+  expect_equal(conditionMessage(err2), "foobar")
+})
+
+test_that("error within error callback", {
+  err <- NULL
+  do <- function() {
+    x <- event_emitter$new(async = TRUE)
+    x$listen_on("foo", function() stop("foobar"))
+    x$listen_on("error", function(e) { err <<- e; stop("baz")  })
+    x$emit("foo")
+  }
+
+  expect_error(run_event_loop(do()), "baz")
+  expect_false(is.null(err))
+  expect_s3_class(err, "error")
+  expect_equal(conditionMessage(err), "foobar")
+})

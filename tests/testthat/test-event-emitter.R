@@ -5,7 +5,7 @@ test_that("can create event emitter", {
   do <- function() {
     x <- event_emitter$new(async = FALSE)
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
 })
 
 test_that("can add a listener", {
@@ -13,7 +13,7 @@ test_that("can add a listener", {
     x <- event_emitter$new(async = FALSE)
     x$listen_on("foo", function() {  })
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
 })
 
 test_that("can add a one-shot listener", {
@@ -21,7 +21,7 @@ test_that("can add a one-shot listener", {
     x <- event_emitter$new()
     x$listen_once("foo", function() {  })
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
 })
 
 test_that("no listeners", {
@@ -29,7 +29,7 @@ test_that("no listeners", {
     x <- event_emitter$new(async = FALSE)
     x$emit("foo")
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
 })
 
 test_that("listener is called on event", {
@@ -39,7 +39,7 @@ test_that("listener is called on event", {
     x$listen_on("foo", function() { called <<- TRUE })
     x$emit("foo")
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_true(called)
 })
 
@@ -52,7 +52,7 @@ test_that("listener called multiple times", {
     x$emit("foo")
     x$emit("foo")
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_equal(called, 3L)
 })
 
@@ -66,7 +66,7 @@ test_that("listener gets arguments", {
     })
     x$emit("foo", 1, 2)
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_equal(arg1, 1)
   expect_equal(arg2, 2)
 })
@@ -82,7 +82,7 @@ test_that("named arguments to listeners", {
     })
     x$emit("foo", a3 = 3, a2 = 2, 1)
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_equal(arg1, 1)
   expect_equal(arg2, 2)
   expect_equal(arg3, 3)
@@ -105,7 +105,7 @@ test_that("all listeners are called", {
     })
     x$emit("foo", a3 = 3, a2 = 2, 1)
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_equal(arg1, 1)
   expect_equal(arg2, 2)
   expect_equal(arg3, 3)
@@ -124,7 +124,7 @@ test_that("one shot listener is only called once", {
     x$emit("foo")
     x$emit("foo")
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_equal(called, 3L)
   expect_equal(called1, 1L)
 })
@@ -145,7 +145,7 @@ test_that("can remove listener", {
     x$emit("foo")
   }
 
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_equal(called, 3L)
   expect_equal(called2, 1L)
 })
@@ -165,7 +165,7 @@ test_that("only removes one listener instance", {
     x$emit("foo")                       # + 0
   }
 
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_equal(called, 4L)
 })
 
@@ -178,7 +178,7 @@ test_that("multiple events", {
     x$emit("foo")
     x$emit("bar")
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_true(foo)
   expect_true(bar)
 })
@@ -199,7 +199,7 @@ test_that("list event names", {
     x$listen_off("bar", cb2)
     n5 <<- x$get_event_names()
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_equal(n1, character())
   expect_equal(n2, "foo")
   expect_equal(n3, c("foo", "bar"))
@@ -222,7 +222,7 @@ test_that("get listener count for event", {
     x$listen_off("foo", cb)
     n5 <<- x$get_listener_count("foo")
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_equal(n1, 0L)
   expect_equal(n2, 1L)
   expect_equal(n3, 2L)
@@ -243,6 +243,65 @@ test_that("remove all listeners", {
     x$emit("foo")
     x$emit("foo")
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_false(called)
+})
+
+test_that("error callback is called on error", {
+  err <- NULL
+  do <- function() {
+    x <- event_emitter$new(async = FALSE)
+    x$listen_on("foo", function() stop("foobar"))
+    x$listen_on("error", function(e) err <<- e)
+    x$emit("foo")
+  }
+
+  expect_silent(run_event_loop(do()))
+  expect_false(is.null(err))
+  expect_s3_class(err, "error")
+  expect_equal(conditionMessage(err), "foobar")
+})
+
+test_that("fail stage if no error callback", {
+  do <- function() {
+    x <- event_emitter$new(async = FALSE)
+    x$listen_on("foo", function() stop("foobar"))
+    x$emit("foo")
+  }
+
+  expect_error(run_event_loop(do()), "foobar")
+})
+
+test_that("all error callbacks are called", {
+  err1 <- err2 <- NULL
+  do <- function() {
+    x <- event_emitter$new(async = FALSE)
+    x$listen_on("foo", function() stop("foobar"))
+    x$listen_on("error", function(e) err1 <<- e)
+    x$listen_on("error", function(e) err2 <<- e)
+    x$emit("foo")
+  }
+
+  expect_silent(run_event_loop(do()))
+  expect_false(is.null(err1))
+  expect_false(is.null(err2))
+  expect_s3_class(err1, "error")
+  expect_equal(conditionMessage(err1), "foobar")
+  expect_s3_class(err2, "error")
+  expect_equal(conditionMessage(err2), "foobar")
+})
+
+test_that("error within error callback", {
+  err <- NULL
+  do <- function() {
+    x <- event_emitter$new(async = FALSE)
+    x$listen_on("foo", function() stop("foobar"))
+    x$listen_on("error", function(e) { err <<- e; stop("baz")  })
+    x$emit("foo")
+  }
+
+  expect_error(run_event_loop(do()), "baz")
+  expect_false(is.null(err))
+  expect_s3_class(err, "error")
+  expect_equal(conditionMessage(err), "foobar")
 })
