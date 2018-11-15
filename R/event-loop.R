@@ -9,8 +9,8 @@ event_loop <- R6Class(
 
     add_http = function(handle, callback, file = NULL, progress = NULL)
       el_add_http(self, private, handle, callback, file, progress),
-    add_delayed = function(delay, func, callback)
-      el_add_delayed(self, private, delay, func, callback),
+    add_delayed = function(delay, func, callback, rep = FALSE)
+      el_add_delayed(self, private, delay, func, callback, rep),
     add_next_tick = function(func, callback)
       el_add_next_tick(self, private, func, callback),
 
@@ -102,11 +102,12 @@ el_add_http <- function(self, private, handle, callback, progress, file) {
   id
 }
 
-el_add_delayed <- function(self, private, delay, func, callback) {
+el_add_delayed <- function(self, private, delay, func, callback, rep) {
   force(self); force(private); force(delay); force(func); force(callback)
+  force(rep)
   id <- private$create_task(
     callback,
-    data = list(delay = delay, func = func),
+    data = list(delay = delay, func = func, rep = rep),
     type = "delayed"
   )
   private$timers[id] <- Sys.time() + as.difftime(delay, units = "secs")
@@ -234,8 +235,15 @@ el__run_timers <- function(self, private) {
   expired <- expired[order(private$timers[expired])]
   for (id in expired) {
     task <- private$tasks[[id]]
-    private$tasks[[id]] <- NULL
-    private$timers <- private$timers[setdiff(names(private$timers), id)]
+    if (private$tasks[[id]]$data$rep) {
+      ## If it is repeated, then re-init
+      private$timers[id] <-
+        private$time + as.difftime(task$data$delay, units = "secs")
+    } else {
+      ## Otherwise remove
+      private$tasks[[id]] <- NULL
+      private$timers <- private$timers[setdiff(names(private$timers), id)]
+    }
     call_with_callback(task$data$func, task$callback)
   }
 }
