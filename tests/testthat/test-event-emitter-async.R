@@ -15,7 +15,7 @@ test_that("can create event emitter", {
   do <- function() {
     x <- event_emitter$new(async = TRUE)
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
 })
 
 test_that("can add a listener", {
@@ -23,7 +23,7 @@ test_that("can add a listener", {
     x <- event_emitter$new(async = TRUE)
     x$listen_on("foo", function() {  })
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
 })
 
 test_that("can add a one-shot listener", {
@@ -31,7 +31,7 @@ test_that("can add a one-shot listener", {
     x <- event_emitter$new()
     x$listen_once("foo", function() {  })
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
 })
 
 test_that("no listeners", {
@@ -39,25 +39,18 @@ test_that("no listeners", {
     x <- event_emitter$new(async = TRUE)
     x$emit("foo")
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
 })
 
 test_that("listener is called on event", {
   called <- FALSE
   deadline <- Sys.time() + as.difftime(2, units = "secs")
-  chk <- function() {
-    delay(1/100)$
-      then(function() {
-        if (Sys.time() > deadline || called) "OK" else chk()
-      })
-  }
   do <- function() {
     x <- event_emitter$new(async = TRUE)
     x$listen_on("foo", function() { called <<- TRUE })
     x$emit("foo")
-    chk()
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_true(Sys.time() < deadline)
   expect_true(called)
 })
@@ -65,21 +58,14 @@ test_that("listener is called on event", {
 test_that("listener called multiple times", {
   called <- 0L
   deadline <- Sys.time() + as.difftime(2, units = "secs")
-  chk <- function() {
-    delay(1/100)$
-      then(function() {
-        if (Sys.time() > deadline || called == 3L) "OK" else chk()
-      })
-  }
   do <- function() {
     x <- event_emitter$new(async = TRUE)
     x$listen_on("foo", function() { called <<- called + 1L })
     x$emit("foo")
     x$emit("foo")
     x$emit("foo")
-    chk()
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_true(Sys.time() < deadline)
   expect_equal(called, 3L)
 })
@@ -87,12 +73,6 @@ test_that("listener called multiple times", {
 test_that("listener gets arguments", {
   arg1 <- arg2 <- NULL
   deadline <- Sys.time() + as.difftime(2, units = "secs")
-  chk <- function() {
-    delay(1/100)$
-      then(function() {
-        if (Sys.time() > deadline || !is.null(arg1)) "OK" else chk()
-      })
-  }
   do <- function() {
     x <- event_emitter$new(async = TRUE)
     x$listen_on("foo", function(a1, a2) {
@@ -100,9 +80,8 @@ test_that("listener gets arguments", {
       arg2 <<- a2
     })
     x$emit("foo", 1, 2)
-    chk()
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_true(Sys.time() < deadline)
   expect_equal(arg1, 1)
   expect_equal(arg2, 2)
@@ -112,12 +91,6 @@ test_that("named arguments to listeners", {
   arg1 <- arg2 <- arg3 <- NULL
 
   deadline <- Sys.time() + as.difftime(2, units = "secs")
-  chk <- function() {
-    delay(1/100)$
-      then(function() {
-        if (Sys.time() > deadline || !is.null(arg1)) "OK" else chk()
-      })
-  }
 
   do <- function() {
     x <- event_emitter$new(async = TRUE)
@@ -127,9 +100,8 @@ test_that("named arguments to listeners", {
       arg3 <<- a3
     })
     x$emit("foo", a3 = 3, a2 = 2, 1)
-    chk()
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_true(Sys.time() < deadline)
   expect_equal(arg1, 1)
   expect_equal(arg2, 2)
@@ -141,12 +113,6 @@ test_that("all listeners are called", {
   arg11 <- arg21 <- arg31 <- NULL
 
   deadline <- Sys.time() + as.difftime(2, units = "secs")
-  chk <- function() {
-    delay(1/100)$
-      then(function() {
-        if (Sys.time() > deadline || !is.null(arg11)) "OK" else chk()
-      })
-  }
   
   do <- function() {
     x <- event_emitter$new(async = TRUE)
@@ -161,9 +127,8 @@ test_that("all listeners are called", {
       arg13 <<- a3
     })
     x$emit("foo", a3 = 3, a2 = 2, 1)
-    chk()
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_true(Sys.time() < deadline)
   expect_equal(arg1, 1)
   expect_equal(arg2, 2)
@@ -177,12 +142,6 @@ test_that("one shot listener is only called once", {
   called <- called1 <- 0L
 
   deadline <- Sys.time() + as.difftime(2, units = "secs")
-  chk <- function() {
-    delay(1/100)$
-      then(function() {
-        if (Sys.time() > deadline || called == 3L) "OK" else chk()
-      })
-  }
   
   do <- function() {
     x <- event_emitter$new(async = TRUE)
@@ -191,9 +150,8 @@ test_that("one shot listener is only called once", {
     x$emit("foo")
     x$emit("foo")
     x$emit("foo")
-    chk()
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_true(Sys.time() < deadline)
   expect_equal(called, 3L)
   expect_equal(called1, 1L)
@@ -203,12 +161,6 @@ test_that("can remove listener", {
   called <- called2 <- 0L
 
   deadline <- Sys.time() + as.difftime(2, units = "secs")
-  chk <- function() {
-    delay(1/100)$
-      then(function() {
-        if (Sys.time() > deadline || called == 3L) "OK" else chk()
-      })
-  }
   
   cb1 <- function() { called <<- called + 1L }
   cb2 <- function(x = 1) { called2 <<- called2 + 1L }
@@ -222,10 +174,9 @@ test_that("can remove listener", {
     x$emit("foo")
     x$listen_off("foo", cb1)
     x$emit("foo")
-    chk()
   }
 
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_true(Sys.time() < deadline)
   expect_equal(called, 3L)
   expect_equal(called2, 1L)
@@ -235,12 +186,6 @@ test_that("only removes one listener instance", {
   called <- 0L
 
   deadline <- Sys.time() + as.difftime(2, units = "secs")
-  chk <- function() {
-    delay(1/100)$
-      then(function() {
-        if (Sys.time() > deadline || called == 4L) "OK" else chk()
-      })
-  }
 
   cb <- function() { called <<- called + 1L }
   do <- function() {
@@ -253,10 +198,9 @@ test_that("only removes one listener instance", {
     x$emit("foo")                       # + 1
     x$listen_off("foo", cb)
     x$emit("foo")                       # + 0
-    chk()
   }
 
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_true(Sys.time() < deadline)
   expect_equal(called, 4L)
 })
@@ -265,12 +209,6 @@ test_that("multiple events", {
   foo <- bar <- FALSE
 
   deadline <- Sys.time() + as.difftime(2, units = "secs")
-  chk <- function() {
-    delay(1/100)$
-      then(function() {
-        if (Sys.time() > deadline || bar) "OK" else chk()
-      })
-  }
 
   do <- function() {
     x <- event_emitter$new(async = TRUE)
@@ -278,9 +216,8 @@ test_that("multiple events", {
     x$listen_on("bar", function() { bar <<- TRUE })
     x$emit("foo")
     x$emit("bar")
-    chk()
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_true(Sys.time() < deadline)
   expect_true(foo)
   expect_true(bar)
@@ -302,7 +239,7 @@ test_that("list event names", {
     x$listen_off("bar", cb2)
     n5 <<- x$get_event_names()
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_equal(n1, character())
   expect_equal(n2, "foo")
   expect_equal(n3, c("foo", "bar"))
@@ -325,7 +262,7 @@ test_that("get listener count for event", {
     x$listen_off("foo", cb)
     n5 <<- x$get_listener_count("foo")
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_equal(n1, 0L)
   expect_equal(n2, 1L)
   expect_equal(n3, 2L)
@@ -346,6 +283,6 @@ test_that("remove all listeners", {
     x$emit("foo")
     x$emit("foo")
   }
-  expect_silent(synchronise(do()))
+  expect_silent(run_event_loop(do()))
   expect_false(called)
 })

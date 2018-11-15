@@ -11,7 +11,7 @@
 #'
 #' `synchronise()` cancels all async processes on interrupt or extrenal
 #' error.
-#' 
+#'
 #' @param expr Async function call expression. If it does not evaluate
 #' to a deferred value, then it is just returned.
 #'
@@ -28,7 +28,7 @@ synchronise <- function(expr) {
   new_el <- push_event_loop()
   on.exit({ new_el$cancel_all(); pop_event_loop() }, add = TRUE)
 
-  ## Mark this frame, and a synchronization point, for debugging
+  ## Mark this frame as a synchronization point, for debugging
   `__async_synchronise_frame__` <- TRUE
 
   res <- expr
@@ -50,6 +50,21 @@ synchronise <- function(expr) {
   while (priv$state == "pending") new_el$run("once")
 
   if (priv$state == "fulfilled") priv$value else stop(priv$value)
+}
+
+#' @export
+
+run_event_loop <- function(expr) {
+  new_el <- push_event_loop()
+  on.exit({ new_el$cancel_all(); pop_event_loop() }, add = TRUE)
+
+  ## Mark this frame as a synchronization point, for debugging
+  `__async_synchronise_frame__` <- TRUE
+
+  expr
+  new_el$run()
+
+  invisible()
 }
 
 distill_error <- function(err) {

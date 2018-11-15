@@ -1,4 +1,9 @@
 
+#' Generic Event Emitter
+#'
+#' TODO
+#'
+#' @export
 #' @importFrom R6 R6Class
 
 event_emitter <- R6Class(
@@ -6,7 +11,7 @@ event_emitter <- R6Class(
   public = list(
     initialize = function(async = TRUE)
       ee_init(self, private, async),
-    
+
     listen_on = function(event, callback)
       ee_listen_on(self, private, event, callback),
 
@@ -15,7 +20,7 @@ event_emitter <- R6Class(
 
     listen_once = function(event, callback)
       ee_listen_once(self, private, event, callback),
-    
+
     emit = function(event, ...)
       ee_emit(self, private, event, ...),
 
@@ -32,7 +37,7 @@ event_emitter <- R6Class(
   private = list(
     lsts = NULL,
     async = NULL,
-    
+
     cleanup_events = function()
       ee__cleanup_events(self, private),
     error_callback = function(err, res)
@@ -71,7 +76,7 @@ ee_listen_once <- function(self, private, event, callback) {
     c(private$lsts[[event]], list(list(cb = callback, once = TRUE)))
   invisible(self)
 }
-    
+
 ee_emit <- function(self, private, event, ...) {
   assert_that(is_string(event))
   list(...)
