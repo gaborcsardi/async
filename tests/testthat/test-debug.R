@@ -95,7 +95,7 @@ test_that("async_debug", {
   on.exit({ new_el$cancel_all(); pop_event_loop() }, add = TRUE)
   `__async_synchronise_frame__` <- TRUE
 
-  eps <- 1/100000
+  eps <- 0
   p1 <- delay(eps)
   tf  <- function() "foo"
   p2 <- p1$then(tf)
