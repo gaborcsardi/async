@@ -9,10 +9,10 @@ event_loop <- R6Class(
 
     add_http = function(handle, callback, file = NULL, progress = NULL)
       el_add_http(self, private, handle, callback, file, progress),
-    add_delayed = function(delay, func, callback)
-      el_add_delayed(self, private, delay, func, callback),
-    add_next_tick = function(func, callback)
-      el_add_next_tick(self, private, func, callback),
+    add_delayed = function(delay, func, callback, rep = FALSE)
+      el_add_delayed(self, private, delay, func, callback, rep),
+    add_next_tick = function(func, callback, data = NULL)
+      el_add_next_tick(self, private, func, callback, data),
 
     cancel = function(id)
       el_cancel(self, private, id),
@@ -102,21 +102,22 @@ el_add_http <- function(self, private, handle, callback, progress, file) {
   id
 }
 
-el_add_delayed <- function(self, private, delay, func, callback) {
+el_add_delayed <- function(self, private, delay, func, callback, rep) {
   force(self); force(private); force(delay); force(func); force(callback)
+  force(rep)
   id <- private$create_task(
     callback,
-    data = list(delay = delay, func = func),
+    data = list(delay = delay, func = func, rep = rep),
     type = "delayed"
   )
   private$timers[id] <- Sys.time() + as.difftime(delay, units = "secs")
   id
 }
 
-el_add_next_tick <- function(self, private, func, callback) {
-  force(self) ; force(private) ; force(callback)
-  id <- private$create_task(callback, data = list(func = func),
-                            type = "nexttick")
+el_add_next_tick <- function(self, private, func, callback, data) {
+  force(self) ; force(private) ; force(callback); force(data)
+  data$func <- func
+  id <- private$create_task(callback, data = data, type = "nexttick")
   private$next_ticks <- c(private$next_ticks, id)
 }
 
@@ -124,7 +125,7 @@ el_add_next_tick <- function(self, private, func, callback) {
 
 el_cancel <- function(self, private, id) {
   private$next_ticks <- setdiff(private$next_ticks, id)
-  private$timers  <- private$timers[setdiff(names(private$times), id)]
+  private$timers  <- private$timers[setdiff(names(private$timers), id)]
   if (id %in% names(private$tasks) && private$tasks[[id]]$type == "http") {
     multi_cancel(private$tasks[[id]]$data$handle)
   }
@@ -193,7 +194,8 @@ el__run_pending <- function(self, private) {
   for (id in next_ticks) {
     task <- private$tasks[[id]]
     private$tasks[[id]] <- NULL
-    call_with_callback(task$data$func, task$callback)
+    call_with_callback(task$data$func, task$callback,
+                       info = task$data$error_info)
   }
 
   length(next_ticks) > 0
@@ -234,8 +236,15 @@ el__run_timers <- function(self, private) {
   expired <- expired[order(private$timers[expired])]
   for (id in expired) {
     task <- private$tasks[[id]]
-    private$tasks[[id]] <- NULL
-    private$timers <- private$timers[setdiff(names(private$timers), id)]
+    if (private$tasks[[id]]$data$rep) {
+      ## If it is repeated, then re-init
+      private$timers[id] <-
+        private$time + as.difftime(task$data$delay, units = "secs")
+    } else {
+      ## Otherwise remove
+      private$tasks[[id]] <- NULL
+      private$timers <- private$timers[setdiff(names(private$timers), id)]
+    }
     call_with_callback(task$data$func, task$callback)
   }
 }

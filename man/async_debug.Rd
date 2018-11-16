@@ -16,6 +16,7 @@
 \alias{async_where}
 \alias{.aw}
 \alias{async_debug_shortcuts}
+\alias{async_debug_remove_shortcuts}
 \title{Async debugging utilities}
 \usage{
 async_next(el = NULL)
@@ -36,6 +37,8 @@ async_where(calls = sys.calls(), parents = sys.parents(),
   frm = get_async_frames())
 
 async_debug_shortcuts()
+
+async_debug_remove_shortcuts()
 }
 \arguments{
 \item{el}{Event loop, defaults to the current event loop.}
@@ -78,6 +81,9 @@ extra commands to help async debugging. The extra commands:
 functions. E.g. \code{async_next()} can be invoked as \code{.an} (without the
 parens). You only need to run it once per R session. Note that it adds
 the shortcuts to the global environment.
+
+\code{async_debug_remove_shortcuts()} removes the shortcuts from the global
+environment.
 
 \code{.an} (or \code{async_next()}) runs the next iteration of the event loop.
 Note that it does not return until \emph{something} happens in the event loop:
@@ -123,7 +129,7 @@ string. Only present if this code was parsed with source references
 enabled.
 }
 
-\code{.at} (or \code{async_tree()}) printf the DAG of the deferred values.
+\code{.at} (or \code{async_tree()}) prints the DAG of the deferred values.
 
 \code{async_debug()} can be used to debug the action and/or parent callbacks
 of the specified deferred value.

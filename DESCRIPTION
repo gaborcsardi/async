@@ -12,7 +12,7 @@ License: MIT + file LICENSE
 LazyData: true
 URL: https://github.com/r-lib/async#readme
 BugReports: https://github.com/r-lib/async/issues
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Suggests:
     cli,
     covr,
@@ -28,7 +28,6 @@ VignetteBuilder: knitr
 Encoding: UTF-8
 Imports:
     assertthat,
-    backports,
     curl (>= 3.2.9000),
     R6,
     rlang,
@@ -38,3 +37,34 @@ Remotes:
     jeroen/curl
 Roxygen: list(markdown = TRUE)
 KeepSource: yes
+Collate: 
+    'aaa-async.R'
+    'assertions.R'
+    'constant.R'
+    'context.R'
+    'debug.R'
+    'deferred.R'
+    'delay.R'
+    'detect.R'
+    'event-loop.R'
+    'events.R'
+    'every.R'
+    'filter.R'
+    'http.R'
+    'map.R'
+    'onload.R'
+    'package.R'
+    'reflect.R'
+    'replicate.R'
+    'retry.R'
+    'sequence.R'
+    'some.R'
+    'synchronise.R'
+    'timeout.R'
+    'timer.R'
+    'try-each.R'
+    'until.R'
+    'utils.R'
+    'when_all.R'
+    'when_any.R'
+    'whilst.R'

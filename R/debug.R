@@ -21,6 +21,9 @@
 #' parens). You only need to run it once per R session. Note that it adds
 #' the shortcuts to the global environment.
 #'
+#' `async_debug_remove_shortcuts()` removes the shortcuts from the global
+#' environment.
+#'
 #' `.an` (or `async_next()`) runs the next iteration of the event loop.
 #' Note that it does not return until _something_ happens in the event loop:
 #' an action or a parent callback is executed, or HTTP or other I/O is
@@ -64,7 +67,7 @@
 #'    string. Only present if this code was parsed with source references
 #'    enabled.
 #'
-#' `.at` (or `async_tree()`) printf the DAG of the deferred values.
+#' `.at` (or `async_tree()`) prints the DAG of the deferred values.
 #'
 #' `async_debug()` can be used to debug the action and/or parent callbacks
 #' of the specified deferred value.
@@ -320,6 +323,31 @@ find_deferred <- function(id, def = NULL) {
 
 debug1 <- function(fun) {
   debugonce(fun)
+}
+
+#' @export
+#' @rdname async_debug
+
+async_debug_shortcuts <- function() {
+  as <- function(name, fun) {
+    makeActiveBinding(name, fun, .GlobalEnv)
+  }
+  as(".an", async_next)
+  as(".as", async_step)
+  as(".asb", async_step_back)
+  as(".al", async_list)
+  as(".at", async_tree)
+  as(".aw", async_where)
+}
+
+#' @export
+#' @rdname async_debug
+
+async_debug_remove_shortcuts <- function() {
+  tryCatch(
+    rm(list = c(".an", ".as", ".asb", ".al", ".at", ".aw"),
+       envir = .GlobalEnv),
+    error = function(x) x)
 }
 
 # nocov end

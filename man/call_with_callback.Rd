@@ -4,13 +4,15 @@
 \alias{call_with_callback}
 \title{Call \code{func} and then call \code{callback} with the result}
 \usage{
-call_with_callback(func, callback)
+call_with_callback(func, callback, info = NULL)
 }
 \arguments{
 \item{func}{Function to call.}
 
 \item{callback}{Callback to call with the result of \code{func()},
 or the error thrown.}
+
+\item{info}{Extra info to add to the error object. Must be a named list.}
 }
 \description{
 \code{callback} will be called with two arguments, the first one will the
