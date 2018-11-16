@@ -15,6 +15,7 @@ install:
 environment:
   NOT_CRAN: true
   USE_RTOOLS: true
+  R_REMOTES_STANDALONE: true
 
 build_script:
   - travis-tool.sh install_deps
