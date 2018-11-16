@@ -44,7 +44,6 @@
 #' the timing of the timer events.
 #'
 #' @importFrom R6 R6Class
-#' @include events.R
 #' @export
 #' @examples
 #' ## Call 10 times a second, cancel with 1/10 probability
