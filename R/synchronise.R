@@ -46,10 +46,27 @@ synchronise <- function(expr) {
   priv$null()
   priv$run_action()
 
-  if (isTRUE(getOption("async_debug"))) browser()
+  if (isTRUE(getOption("async_debug"))) start_browser()
   while (priv$state == "pending") new_el$run("once")
 
   if (priv$state == "fulfilled") priv$value else stop(priv$value)
+}
+
+start_browser <- function() {
+  async_debug_shortcuts()
+  on.exit(async_debug_remove_shortcuts(), add = TRUE)
+  cat("This is a standard `browser()` call, but you can also use the\n")
+  cat("following extra commands:\n")
+  cat("- .an / async_next(): next event loop iteration.\n")
+  cat("- .as / async_step(): next event loop, debug next action or parent callback.\n")
+  cat("- .asb / async_step_back(): stop debugging of callbacks.\n")
+  cat("- .al / async_list(): deferred values in the current async phase.\n")
+  cat("- .at / async_tree(): DAG of the deferred values.\n")
+  cat("- .aw / async_where(): print call stack, mark async callback.\n")
+  cat("- async_wait_for(): run until deferred is resolved.\n")
+  cat("- async_debug(): debug action and/or parent callbacks of deferred.\n")
+  cat("\n")
+  browser(skipCalls = 1)
 }
 
 #' Run event loop to completion
