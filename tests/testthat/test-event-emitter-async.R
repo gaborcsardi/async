@@ -299,6 +299,7 @@ test_that("error callback is called on error", {
   expect_silent(run_event_loop(do()))
   expect_false(is.null(err))
   expect_s3_class(err, "error")
+  expect_equal(err$event, "foo")
   expect_equal(conditionMessage(err), "foobar")
 })
 
@@ -326,8 +327,10 @@ test_that("all error callbacks are called", {
   expect_false(is.null(err1))
   expect_false(is.null(err2))
   expect_s3_class(err1, "error")
+  expect_equal(err1$event, "foo")
   expect_equal(conditionMessage(err1), "foobar")
   expect_s3_class(err2, "error")
+  expect_equal(err2$event, "foo")
   expect_equal(conditionMessage(err2), "foobar")
 })
 

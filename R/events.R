@@ -33,24 +33,24 @@
 #' `ee$listen_on()` adds `callback` as a new listener for `event`. It is
 #' always added to the end of the listener list. Listeners will be called in
 #' the order they were added. It returns a reference to the `event_emitter`
-#' object, so calls can be chained. 
+#' object, so calls can be chained.
 #'
 #' `ee$listen_off()` removes the first instance of `callback` from the
 #' listener list of `event`. It uses [base::identical()] to find the
 #' listener to remove. If `callback` is not among the listeners, nothing
 #' happens. Note that if you call this method from an event handler, that
 #' does not affect the already emitted events. It returns a reference to
-#' the `event_emitter` object, so calls can be chained. 
+#' the `event_emitter` object, so calls can be chained.
 #'
 #' `ee$listen_once` is similar to `ee$listen_on()`, but the callback will
 #' be only called for a single event, and then it will be removed.
 #' (Technically, the listener is removed before the callback is called.)
 #' It returns a reference to the `event_emitter` object, so calls can be
-#' chained. 
+#' chained.
 #'
 #' `ee$emit()` emits an event. All listeners in its listener list will be
 #' called, in the order they were added. The arguments are passed to the
-#' listeners, so they have to be compatible with them.  
+#' listeners, so they have to be compatible with them.
 #'
 #' `ee$get_event_names()` returns the names of the active events,
 #' in a character vector. An event is active if it has at least one
@@ -59,7 +59,7 @@
 #' `ee$get_listener_count()` returns the number of listeners for an event.
 #'
 #' `ee$remove_all_listener()`  removes all listeners for an an event.
-#' 
+#'
 #' @section Error handling:
 #' Errors are handled by special `error` events. If a listener errors,
 #' and the event emitter has an active `error` event (i.e. some listeners
@@ -166,12 +166,14 @@ ee_emit <- function(self, private, event, ...) {
     if (private$async) {
       get_default_event_loop()$add_next_tick(
         function() lst$cb(...),
-        private$error_callback)
+        private$error_callback,
+        data = list(error_info = list(event = event)))
 
     } else {
       call_with_callback(
         function() lst$cb(...),
-        private$error_callback)
+        private$error_callback,
+        info = list(event = event))
     }
   })
 

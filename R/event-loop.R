@@ -11,8 +11,8 @@ event_loop <- R6Class(
       el_add_http(self, private, handle, callback, file, progress),
     add_delayed = function(delay, func, callback, rep = FALSE)
       el_add_delayed(self, private, delay, func, callback, rep),
-    add_next_tick = function(func, callback)
-      el_add_next_tick(self, private, func, callback),
+    add_next_tick = function(func, callback, data = NULL)
+      el_add_next_tick(self, private, func, callback, data),
 
     cancel = function(id)
       el_cancel(self, private, id),
@@ -114,10 +114,10 @@ el_add_delayed <- function(self, private, delay, func, callback, rep) {
   id
 }
 
-el_add_next_tick <- function(self, private, func, callback) {
-  force(self) ; force(private) ; force(callback)
-  id <- private$create_task(callback, data = list(func = func),
-                            type = "nexttick")
+el_add_next_tick <- function(self, private, func, callback, data) {
+  force(self) ; force(private) ; force(callback); force(data)
+  data$func <- func
+  id <- private$create_task(callback, data = data, type = "nexttick")
   private$next_ticks <- c(private$next_ticks, id)
 }
 
@@ -194,7 +194,8 @@ el__run_pending <- function(self, private) {
   for (id in next_ticks) {
     task <- private$tasks[[id]]
     private$tasks[[id]] <- NULL
-    call_with_callback(task$data$func, task$callback)
+    call_with_callback(task$data$func, task$callback,
+                       info = task$data$error_info)
   }
 
   length(next_ticks) > 0

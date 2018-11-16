@@ -38,10 +38,11 @@ get_private <- function(x) {
 #' @param func Function to call.
 #' @param callback Callback to call with the result of `func()`,
 #'   or the error thrown.
+#' @param info Extra info to add to the error object. Must be a named list.
 #'
 #' @keywords internal
 
-call_with_callback <- function(func, callback) {
+call_with_callback <- function(func, callback, info = NULL) {
   recerror <- NULL
   result <- NULL
   tryCatch(
@@ -52,6 +53,7 @@ call_with_callback <- function(func, callback) {
         recerror$aframe <<- recerror$aframe %||% find_async_data_frame()
         recerror$calls <<- recerror$calls %||% sys.calls()
         recerror$parents <<- recerror$parents %||% sys.parents()
+        recerror[names(info)] <<- info
         handler <- getOption("async.error")
         if (is.function(handler)) handler()
       }
