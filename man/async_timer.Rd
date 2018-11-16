@@ -9,6 +9,105 @@
 async_timer
 }
 \description{
-TODO
+The supplied callback function will be called by the event loop
+every \code{delay} seconds.
+}
+\section{Usage}{
+\preformatted{t <- async_timer$new(delay, callback)
+t$cancel()
+}
+}
+
+\section{Arguments}{
+
+\itemize{
+\item \code{delay}: Time interval in seconds, the amount of time to delay
+to delay the execution. It can be a fraction of a second.
+\item \code{callback}: Callback function without arguments. It will be called
+from the event loop every \code{delay} seconds.
+}
+}
+
+\section{Details}{
+
+
+An \code{async_timer} is an \code{[event_emitter]} object with a \code{timeout} event.
+It is possible to add multiple listeners to this event, once the timer
+is created. Note, however, that removing all listeners does not cancel
+the timer, \code{timeout} events will be still emitted as usual.
+For proper cancellation you'll need to call the \code{cancel()} method.
+
+It is only possible to create \code{async_timer} objects in an asynchronous
+context, i.e. within a \code{synchronise()} or \code{run_event_loop()} call.
+A \code{synchronise()} call finishes as soon as its returned deferred value
+is resolved (or rejected), even if some timers are still active. The
+active timers will be automatically cancelled in this case.
+}
+
+\section{Errors}{
+
+Errors are handled the same way as for generic event emitters. I.e. to
+catch errors thrown in the \code{callback} function, you need to add a
+listener to the \code{error} event, see the example below.
+}
+
+\section{Congestion}{
+
+\code{async_timer} is \emph{not} a real-time timer. In particular, if \code{callback}
+does not return in time, before the next timer event, then all future
+timer events will be delayed. Even if \code{callback} returns promptly, the
+event loop might be busy with other events, and then the next timer
+event is not emitted in time. In general there is no guarantee about
+the timing of the timer events.
+}
+
+\examples{
+## Call 10 times a second, cancel with 1/10 probability
+counter <- 0L
+do <- function() {
+  cb <- function() {
+    cat("called\\n")
+    counter <<- counter + 1L
+    if (runif(1) < 0.1) t$cancel()
+  }
+  t <- async_timer$new(1/10, cb)
+}
+
+run_event_loop(do())
+counter
+
+## Error handling
+counter <- 0L
+do <- function() {
+  cb <- function() {
+    cat("called\\n")
+    counter <<- counter + 1L
+    if (counter == 2L) stop("foobar")
+    if (counter == 3L) t$cancel()
+  }
+  t <- async_timer$new(1/10, cb)
+  handler <- function(err) {
+    cat("Got error:", sQuote(conditionMessage(err)), ", handled\\n")
+  }
+  t$listen_on("error", handler)
+}
+
+run_event_loop(do())
+counter
+
+## Error handling at the synchonization point
+counter <- 0L
+do <- function() {
+  cb <- function() {
+    cat("called\\n")
+    counter <<- counter + 1L
+    if (counter == 2L) stop("foobar")
+    if (counter == 3L) t$cancel()
+  }
+  t <- async_timer$new(1/10, cb)
+}
+
+tryCatch(run_event_loop(do()), error = function(x) x)
+counter
 }
 \keyword{datasets}
