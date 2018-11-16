@@ -52,7 +52,35 @@ synchronise <- function(expr) {
   if (priv$state == "fulfilled") priv$value else stop(priv$value)
 }
 
+#' Run event loop to completion
+#'
+#' Creates a new event loop, evaluates `expr` in it, and then runs the
+#' event loop to completion. It stops when the event loop does not have
+#' any tasks.
+#'
+#' The expression typically creates event loop tasks. It should not create
+#' deferred values, though, because those will never be evaluated.
+#'
+#' Unhandled errors propagate to the `run_event_loop()` call, which fails.
+#'
+#' In case of an (unhandled) error, all event loop tasks will be cancelled.
+#'
+#' @param expr Expression to run after creating a new event loop.
+#' @return `NULL`, always. If the event loop is to return some value,
+#' you can use lexical scoping, see the example below.
+#'
 #' @export
+#' @examples
+#' counter <- 0L
+#' do <- function() {
+#'   callback <- function() {
+#'     counter <<- counter + 1L
+#'     if (runif(1) < 1/10) t$cancel()
+#'   }
+#'   t <- async_timer$new(1/1000, callback)
+#' }
+#' run_event_loop(do())
+#' counter
 
 run_event_loop <- function(expr) {
   new_el <- push_event_loop()

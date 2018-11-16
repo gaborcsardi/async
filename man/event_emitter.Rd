@@ -9,6 +9,89 @@
 event_emitter
 }
 \description{
-TODO
+This is a generic class that can be used to create event emitters.
+It is mostly modelled after the 'node.js' \code{EventEmitter} class
 }
+\section{Usage}{
+\preformatted{ee <- event_emitter$new(async = TRUE)
+ee$listen_on(event, callback)
+ee$listen_off(event, callback)
+ee$listen_once(event, callback)
+ee$emit(event, ...)
+ee$get_event_names()
+ee$get_listener_count(event)
+ee$remove_all_listeners(event)
+}
+}
+
+\section{Arguments}{
+
+\itemize{
+\item \code{async}: Whether to call listeners asynchronously, i.e. in the next
+tick of the event loop.
+\item \code{event}: String, name of the event.
+\item \code{callback}: Function, listener to call when the event is emitted.
+Its arguments must match the arguments passed to the \code{$emit()}
+method. It is possible to add the same callback function multiple
+times as a listener. It will be called as many times, as many times
+it was added.
+\item \code{...}: Arguments to pass to the listeners. They can be named or
+unnnamed.
+}
+}
+
+\section{Details}{
+
+
+\code{ee$listen_on()} adds \code{callback} as a new listener for \code{event}. It is
+always added to the end of the listener list. Listeners will be called in
+the order they were added. It returns a reference to the \code{event_emitter}
+object, so calls can be chained.
+
+\code{ee$listen_off()} removes the first instance of \code{callback} from the
+listener list of \code{event}. It uses \code{\link[base:identical]{base::identical()}} to find the
+listener to remove. If \code{callback} is not among the listeners, nothing
+happens. Note that if you call this method from an event handler, that
+does not affect the already emitted events. It returns a reference to
+the \code{event_emitter} object, so calls can be chained.
+
+\code{ee$listen_once} is similar to \code{ee$listen_on()}, but the callback will
+be only called for a single event, and then it will be removed.
+(Technically, the listener is removed before the callback is called.)
+It returns a reference to the \code{event_emitter} object, so calls can be
+chained.
+
+\code{ee$emit()} emits an event. All listeners in its listener list will be
+called, in the order they were added. The arguments are passed to the
+listeners, so they have to be compatible with them.
+
+\code{ee$get_event_names()} returns the names of the active events,
+in a character vector. An event is active if it has at least one
+listener.
+
+\code{ee$get_listener_count()} returns the number of listeners for an event.
+
+\code{ee$remove_all_listener()}  removes all listeners for an an event.
+}
+
+\section{Error handling}{
+
+Errors are handled by special \code{error} events. If a listener errors,
+and the event emitter has an active \code{error} event (i.e. some listeners
+exist for \code{error}, then \emph{all} listeners are called, in the order they
+were specified. They receive the originally thrown error object as the
+single argument. The error object has an \code{event} entry, which contains
+the event name the failed listener was called on.
+
+If the event emitter does not have any listeners for the \code{error} event,
+then it throws an error. This error propagates to the next
+synchronization barrier, i.e. the last \code{synchronise()} or
+\code{run_event_loop()} call, which fails.
+
+In an error happen within an \code{error} listener, then the same happens,
+the last \code{synchronise()} or \code{run_event_loop()} call fails. You can
+want to wrap the body of the error listeners in a \code{tryCatch()} call,
+if you want to avoid this.
+}
+
 \keyword{datasets}
