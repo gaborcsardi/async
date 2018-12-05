@@ -17,5 +17,6 @@ is_offline <- (function() {
 })()
 
 skip_if_offline <- function() {
+  skip_on_cran()
   if (is_offline()) skip("Offline")
 }
