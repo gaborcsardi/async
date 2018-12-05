@@ -26,10 +26,12 @@ Similar to \code{\link[base:replicate]{base::replicate()}}, with some difference
 }
 }
 \examples{
+\donttest{
 ## perform an HTTP request three times, and list the reponse times
 do <- function() {
   async_replicate(3,
     function() http_get("https://eu.httpbin.org")$then(function(x) x$times))
 }
 synchronise(do())
+}
 }

@@ -12,6 +12,7 @@
 #' @family async control flow
 #' @export
 #' @examples
+#' \donttest{
 #' ## Try a download at most 5 times
 #' afun <- async(function() {
 #'   async_retry(
@@ -21,6 +22,7 @@
 #' })
 #'
 #' synchronise(afun())
+#' }
 
 async_retry <- function(task, times, ...) {
   task <- async(task)
@@ -52,6 +54,7 @@ async_retry <- mark_as_async(async_retry)
 #' @family async control flow
 #' @export
 #' @examples
+#' \donttest{
 #' ## Create a downloader that retries five times
 #' http_get_5 <- async_retryable(http_get, times = 5)
 #' ret <- synchronise(
@@ -59,6 +62,7 @@ async_retry <- mark_as_async(async_retry)
 #'     then(function(x) rawToChar(x$content))
 #' )
 #' cat(ret)
+#' }
 
 async_retryable <- function(task, times) {
   task <- async(task)

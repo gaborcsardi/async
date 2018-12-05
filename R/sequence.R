@@ -13,10 +13,12 @@
 #' @family async control flow
 #' @export
 #' @examples
+#' \donttest{
 #' check_url <- async_sequence(
 #'   http_head, function(x) identical(x$status_code, 200L))
 #' synchronise(check_url("https://eu.httpbin.org/status/404"))
 #' synchronise(check_url("https://eu.httpbin.org/status/200"))
+#' }
 
 async_sequence <- function(..., .list = NULL) {
   funcs <- c(list(...), .list)

@@ -24,10 +24,12 @@ re-throw that error.
 error.
 }
 \examples{
+\donttest{
 http_status <- function(url, ...) {
   http_get(url, ...)$
     then(function(x) x$status_code)
 }
 
 synchronise(http_status("https://eu.httpbin.org/status/418"))
+}
 }

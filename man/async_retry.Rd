@@ -21,6 +21,7 @@ Keeps trying until the function's deferred value resolves without
 error, or \code{times} tries have been performed.
 }
 \examples{
+\donttest{
 ## Try a download at most 5 times
 afun <- async(function() {
   async_retry(
@@ -30,6 +31,7 @@ afun <- async(function() {
 })
 
 synchronise(afun())
+}
 }
 \seealso{
 Other async control flow: \code{\link{async_reflect}},

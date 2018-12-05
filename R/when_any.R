@@ -26,6 +26,7 @@
 #' @seealso [when_all()]
 #' @export
 #' @examples
+#' \donttest{
 #' ## Use the URL that returns first
 #' afun <- function() {
 #'   u1 <- http_get("https://eu.httpbin.org")
@@ -33,6 +34,7 @@
 #'   when_any(u1, u2)$then(function(x) x$url)
 #' }
 #' synchronise(afun())
+#' }
 
 when_some <- function(count, ..., .list = list()) {
   force(count)

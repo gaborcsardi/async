@@ -16,6 +16,7 @@
 #' @seealso [when_any()], [when_some()]
 #' @export
 #' @examples
+#' \donttest{
 #' ## Check that the contents of two URLs are the same
 #' afun <- async(function() {
 #'   u1 <- http_get("https://eu.httpbin.org")
@@ -24,6 +25,7 @@
 #'     then(function(x) identical(x[[1]]$content, x[[2]]$content))
 #' })
 #' synchronise(afun())
+#' }
 
 when_all <- function(..., .list = list()) {
 

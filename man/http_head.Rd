@@ -28,6 +28,7 @@ Deferred object.
 Asynchronous HTTP HEAD request
 }
 \examples{
+\donttest{
 afun <- async(function() {
   dx <- http_head("https://eu.httpbin.org/status/200")$
     then(function(x) x$status_code)
@@ -41,6 +42,7 @@ afun <- function(urls) {
 }
 urls <- c("https://google.com", "https://eu.httpbin.org")
 synchronise(afun(urls))
+}
 }
 \seealso{
 Other asyncronous HTTP calls: \code{\link{http_get}}

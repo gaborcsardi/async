@@ -12,6 +12,7 @@
 #' @family async iterators
 #' @export
 #' @examples
+#' \donttest{
 #' ## Filter out non-working URLs
 #' afun <- async(function(urls) {
 #'   test_url <- async_sequence(
@@ -21,6 +22,7 @@
 #' urls <- c("https://eu.httpbin.org/get",
 #'           "https://eu.httpbin.org/status/404")
 #' synchronise(afun(urls))
+#' }
 
 async_filter <- function(.x, .p, ...) {
   when_all(.list = lapply(.x, async(.p), ...))$

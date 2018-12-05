@@ -17,12 +17,14 @@
 #'
 #' @export
 #' @examples
+#' \donttest{
 #' http_status <- function(url, ...) {
 #'   http_get(url, ...)$
 #'     then(function(x) x$status_code)
 #' }
 #'
 #' synchronise(http_status("https://eu.httpbin.org/status/418"))
+#' }
 
 synchronise <- function(expr) {
   new_el <- push_event_loop()

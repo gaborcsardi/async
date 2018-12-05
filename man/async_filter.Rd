@@ -24,6 +24,7 @@ A deferred value for the result.
 via \code{isTRUE()}. \code{async_reject} is the opposite, it drops them.
 }
 \examples{
+\donttest{
 ## Filter out non-working URLs
 afun <- async(function(urls) {
   test_url <- async_sequence(
@@ -33,6 +34,7 @@ afun <- async(function(urls) {
 urls <- c("https://eu.httpbin.org/get",
           "https://eu.httpbin.org/status/404")
 synchronise(afun(urls))
+}
 }
 \seealso{
 Other async iterators: \code{\link{async_detect}},

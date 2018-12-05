@@ -10,6 +10,7 @@
 #'
 #' @export
 #' @examples
+#' \donttest{
 #' ## Two HEAD requests with 1/2 sec delay between them
 #' resp <- list()
 #' afun <- async(function() {
@@ -21,6 +22,7 @@
 #' })
 #' synchronise(afun())
 #' resp
+#' }
 
 delay <- function(delay) {
   force(delay)

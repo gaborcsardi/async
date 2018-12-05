@@ -46,11 +46,13 @@ to zero.
 }
 
 \examples{
+\donttest{
 afun <- async(function() {
   http_get("https://eu.httpbin.org/status/200")$
     then(function(x) x$status_code)
 })
 synchronise(afun())
+}
 }
 \seealso{
 Other asyncronous HTTP calls: \code{\link{http_head}}

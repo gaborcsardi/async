@@ -21,10 +21,12 @@ This is equivalent to using the \code{$then()} method of a deferred, but
 it is easier to use programmatically.
 }
 \examples{
+\donttest{
 check_url <- async_sequence(
   http_head, function(x) identical(x$status_code, 200L))
 synchronise(check_url("https://eu.httpbin.org/status/404"))
 synchronise(check_url("https://eu.httpbin.org/status/200"))
+}
 }
 \seealso{
 Other async control flow: \code{\link{async_reflect}},

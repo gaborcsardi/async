@@ -31,11 +31,13 @@
 #' @export
 #' @importFrom curl new_handle handle_setheaders
 #' @examples
+#' \donttest{
 #' afun <- async(function() {
 #'   http_get("https://eu.httpbin.org/status/200")$
 #'     then(function(x) x$status_code)
 #' })
 #' synchronise(afun())
+#' }
 
 http_get <- function(url, headers = character(), file = NULL,
                      options = list(timeout = 600), on_progress = NULL) {
@@ -81,6 +83,7 @@ http_get <- mark_as_async(http_get)
 #' @export
 #' @importFrom curl handle_setopt
 #' @examples
+#' \donttest{
 #' afun <- async(function() {
 #'   dx <- http_head("https://eu.httpbin.org/status/200")$
 #'     then(function(x) x$status_code)
@@ -94,6 +97,7 @@ http_get <- mark_as_async(http_get)
 #' }
 #' urls <- c("https://google.com", "https://eu.httpbin.org")
 #' synchronise(afun(urls))
+#' }
 
 http_head <- function(url, headers = character(), file = NULL,
                       options = list(timeout = 600), on_progress = NULL) {
@@ -163,12 +167,14 @@ make_deferred_http <- function(cb, file, on_progress) {
 #'
 #' @export
 #' @examples
+#' \donttest{
 #' afun <- async(function() {
 #'   http_get("https://eu.httpbin.org/status/404")$
 #'     then(http_stop_for_status)
 #' })
 #'
 #' tryCatch(synchronise(afun()), error = function(e) e)
+#' }
 
 http_stop_for_status <- function(resp) {
   if (!is.integer(resp$status_code)) stop("Not an HTTP response")

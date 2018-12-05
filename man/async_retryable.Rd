@@ -18,6 +18,7 @@ Asynchronous retryable function.
 Make an asynchronous funcion retryable
 }
 \examples{
+\donttest{
 ## Create a downloader that retries five times
 http_get_5 <- async_retryable(http_get, times = 5)
 ret <- synchronise(
@@ -25,6 +26,7 @@ ret <- synchronise(
     then(function(x) rawToChar(x$content))
 )
 cat(ret)
+}
 }
 \seealso{
 Other async control flow: \code{\link{async_reflect}},

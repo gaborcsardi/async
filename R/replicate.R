@@ -13,12 +13,14 @@
 #'
 #' @export
 #' @examples
+#' \donttest{
 #' ## perform an HTTP request three times, and list the reponse times
 #' do <- function() {
 #'   async_replicate(3,
 #'     function() http_get("https://eu.httpbin.org")$then(function(x) x$times))
 #' }
 #' synchronise(do())
+#' }
 
 async_replicate <- function(n, task, ...,  .limit = Inf) {
   assert_that(
