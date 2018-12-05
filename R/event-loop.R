@@ -59,7 +59,7 @@ el_add_http <- function(self, private, handle, callback, progress, file) {
 
   id  <- private$create_task(callback, list(handle = handle), type = "http")
   private$ensure_pool()
-  if (!is.null(outfile) && file.exists(outfile)) unlink(outfile)
+  if (!is.null(outfile)) cat("", file = outfile)
 
   content <- NULL
 
