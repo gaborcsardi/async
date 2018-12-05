@@ -28,13 +28,11 @@ VignetteBuilder: knitr
 Encoding: UTF-8
 Imports:
     assertthat,
-    curl (>= 3.2.9000),
+    curl (>= 3.2),
     R6,
     rlang,
     utils,
     uuid
-Remotes:
-    jeroen/curl
 Roxygen: list(markdown = TRUE)
 KeepSource: yes
 Collate: 

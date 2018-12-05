@@ -82,6 +82,39 @@ test_that("http progress bars", {
   expect_equal(totalx, currentx)
 })
 
+test_that("http progress bar, remove callback", {
+  skip_if_offline()
+
+  xx <- NULL
+  totalx <- NULL
+  currentx <- 0
+  tmp <- tempfile()
+  on.exit(unlink(tmp, recursive = TRUE), add = TRUE)
+
+  do <- async(function() {
+    progress_callback <- function(data) {
+      if (!is.null(data$total)) totalx <<- data$total
+      if (!is.null(data$current)) currentx <<- data$current
+    }
+    hx <- http_get(
+      "https://eu.httpbin.org/image/jpeg",
+      file = tmp <<- tempfile(),
+      on_progress = progress_callback)
+
+    rm(progress_callback)
+    gc(); gc()
+
+    hx$then(function(x) xx <<- x)
+  })
+
+  synchronise(do())
+
+  expect_equal(xx$status_code, 200)
+  expect_true(file.exists(tmp))
+  expect_equal(file.info(tmp)$size, currentx)
+  expect_equal(totalx, currentx)
+})
+
 test_that("http progress bars & etags", {
 
   skip_if_offline()
