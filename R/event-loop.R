@@ -7,8 +7,9 @@ event_loop <- R6Class(
     initialize = function()
       el_init(self, private),
 
-    add_http = function(handle, callback, file = NULL, progress = NULL)
-      el_add_http(self, private, handle, callback, file, progress),
+    add_http = function(handle, callback, file = NULL, progress = NULL,
+                        data = NULL)
+      el_add_http(self, private, handle, callback, file, progress, data),
     add_delayed = function(delay, func, callback, rep = FALSE)
       el_add_delayed(self, private, delay, func, callback, rep),
     add_next_tick = function(func, callback, data = NULL)
@@ -54,10 +55,12 @@ el_init <- function(self, private) {
 
 #' @importFrom curl multi_add parse_headers_list handle_data
 
-el_add_http <- function(self, private, handle, callback, progress, file) {
-  self; private; handle; callback; progress; outfile <- file
+el_add_http <- function(self, private, handle, callback, progress, file,
+                        data) {
+  self; private; handle; callback; progress; outfile <- file; data
 
-  id  <- private$create_task(callback, list(handle = handle), type = "http")
+  id  <- private$create_task(callback, list(handle = handle, data = data),
+                             type = "http")
   private$ensure_pool()
   if (!is.null(outfile)) cat("", file = outfile)
 

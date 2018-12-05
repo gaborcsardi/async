@@ -65,10 +65,9 @@ http_get <- function(url, headers = character(), file = NULL,
       }
 
       handle_setopt(handle, .list = options)
-      handle
+      list(handle = handle, options = options)
     },
-    file,
-    on_progress
+    file
   )
 }
 
@@ -111,27 +110,16 @@ http_head <- function(url, headers = character(), file = NULL,
       handle_setheaders(handle, .list = headers)
       handle_setopt(handle, customrequest = "HEAD", nobody = TRUE,
                     .list = options)
-      handle
+      list(handle = handle, options = options)
     },
-    file,
-    on_progress
+    file
   )
 }
 
 http_head <- mark_as_async(http_head)
 
-#' Make a deferred object for an HTTP query
-#'
-#' @param cb Callback function that should return a handle that can be
-#'   passed to [curl::multi_add()].
-#' @param file Deprecated and should be `NULL`.
-#' @param on_progress Deprecated and should be `NULL`.
-#' @return A deferred object.
-#'
-#' @export
-
-make_deferred_http <- function(cb, file, on_progress) {
-  cb; file; on_progress
+make_deferred_http <- function(cb, file) {
+  cb; file
   id <- NULL
   deferred$new(
     type = "http", call = sys.call(),
@@ -141,14 +129,14 @@ make_deferred_http <- function(cb, file, on_progress) {
       ## Then the deferred will have a "work" callback, which will
       ## be able to throw.
       reject <- environment(resolve)$private$reject
-      handle <- cb()
+      ho <- cb()
       id <<- get_default_event_loop()$add_http(
-        handle,
+        ho$handle,
         function(err, res) if (is.null(err)) resolve(res) else reject(err),
         progress,
-        file)
+        file,
+        data = ho$options)
     },
-    on_progress = on_progress,
     on_cancel = function(reason) {
       if (!is.null(id)) get_default_event_loop()$cancel(id)
     }
