@@ -46,9 +46,11 @@ implemented.*
 
 ## Installation
 
+Once on CRAN, install the package as usual:
+
 
 ```r
-devtools::install_github("r-lib/async")
+install.packages("async")
 ```
 
 ## Introduction
