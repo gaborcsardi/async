@@ -37,9 +37,6 @@ Imports:
     rlang,
     utils,
     uuid
-Remotes:
-    r-lib/callr@feature/session-crash,
-    r-lib/processx
 Roxygen: list(markdown = TRUE)
 KeepSource: yes
 Collate: 
