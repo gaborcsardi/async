@@ -52,7 +52,7 @@ test_that("calls that crash", {
       call_function(function() Sys.getpid()),
       call_function(function() Sys.getpid()),
       call_function(function() Sys.getpid()),
-      call_function(function() utils::getFromNamespace("crash", "async")())
+      call_function(function() asNamespace("callr")$crash())
     )
   })
 
@@ -60,10 +60,10 @@ test_that("calls that crash", {
 
   afun <- async(function(x) {
     when_all(
-      call_function(function() utils::getFromNamespace("crash", "async")()),
-      call_function(function() utils::getFromNamespace("crash", "async")()),
-      call_function(function() utils::getFromNamespace("crash", "async")()),
-      call_function(function() utils::getFromNamespace("crash", "async")())
+      call_function(function() asNamespace("callr")$crash()),
+      call_function(function() asNamespace("callr")$crash()),
+      call_function(function() asNamespace("callr")$crash()),
+      call_function(function() asNamespace("callr")$crash())
     )
   })
 
