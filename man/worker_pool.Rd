@@ -7,4 +7,5 @@
 The worker pool functions are independent of the event loop, to allow
 independent testing.
 }
+\concept{worker pool functions}
 \keyword{internal}
