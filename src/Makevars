@@ -1,0 +1,9 @@
+
+OBJECTS = init.o poll.o
+
+.PHONY: all clean
+
+all: $(SHLIB)
+
+clean:
+	rm -rd $(SHLIB) $(OBJECTS)
