@@ -224,12 +224,11 @@ el_run <- function(self, private, mode) {
 
     if (num_poll) {
 
-      fds <- fds_http <- fds_proc <- integer()
+      fds_http <- fds_px <- integer()
 
       ## File desciptors to poll for HTTP
       if (num_http) {
         fds_http <- multi_fdset(pool = private$pool)
-        fds <- c(fds, as.integer(fds_http$reads))
         if (length(fds_http$reads) && fds_http$timeout < timeout * 1000) {
           timeout <- fds_http$timeout / 1000.0
         }
@@ -240,18 +239,17 @@ el_run <- function(self, private, mode) {
         procs <- private$tasks[types %in% c("process", "r-process")]
         fds_proc <-
           lapply(procs, function(t) lapply(t$data$conns, conn_get_fileno))
-        fds <- c(fds, unlist(fds_proc))
+        fds_px <- unlist(fds_proc)
       }
 
       ## Worker pool
       if (!is.null(async_env$worker_pool)) {
-        fds <- c(fds, fds_pool)
+        fds_px <- c(fds_px, fds_pool)
       }
-
       timeout <- if (is.finite(timeout)) timeout * 1000 else -1L
 
       ## Poll
-      ready <- .Call(c_async_poll, fds, as.integer(timeout)) == 2
+      ready <- .Call(c_async_poll, fds_http$reads, fds_px, as.integer(timeout)) == 2
 
       if (num_http) {
         multi_run(timeout = 0L, poll = TRUE, pool = private$pool)

@@ -5,8 +5,6 @@
 #include <stdio.h>
 #include <poll.h>
 
-#define ASYNC_INTERRUPT_INTERVAL 100
-
 /* Various OSes and OS versions return various poll codes when the
    child's end of the pipe is closed, so we cannot provide a more
    elaborate API. See e.g. http://www.greenend.org.uk/rjk/tech/poll.html
@@ -17,13 +15,6 @@
 
    So for us, we just have:
 */
-
-#define PXNOPIPE  1		/* we never captured this output */
-#define PXREADY   2		/* one fd is ready, or got EOF */
-#define PXTIMEOUT 3		/* no fd is ready before the timeout */
-#define PXCLOSED  4		/* fd was already closed when started polling */
-#define PXSILENT  5		/* still open, but no data or EOF for now. No timeout, either */
-                                /* but there were events on other fds */
 
 int async__poll_decode(short code) {
   if (code & POLLNVAL) return PXCLOSED;
@@ -58,10 +49,13 @@ int async__interruptible_poll(struct pollfd fds[],
   return ret;
 }
 
-SEXP async_poll(SEXP fds, SEXP timeout) {
-  int *c_fds = INTEGER(fds);
+SEXP async_poll(SEXP curl_fds, SEXP processx_handles, SEXP timeout) {
+  int *c_curl_fds = INTEGER(curl_fds);
+  int *c_px_fds = INTEGER(processx_handles);
   int c_timeout = INTEGER(timeout)[0];
-  int i, num_fds = LENGTH(fds);
+  int num_curl_fds = LENGTH(curl_fds);
+  int num_px_fds = LENGTH(processx_handles);
+  int i, num_fds = num_curl_fds + num_px_fds;
   struct pollfd *pollfds;
   int ret;
   SEXP result = PROTECT(allocVector(INTSXP, num_fds));
@@ -72,8 +66,13 @@ SEXP async_poll(SEXP fds, SEXP timeout) {
   }
 
   pollfds = (struct pollfd*) R_alloc(num_fds, sizeof(struct pollfd));
-  for (i = 0; i < num_fds; i++) {
-    pollfds[i].fd = c_fds[i];
+  for (i = 0; i < num_curl_fds; i++) {
+    pollfds[i].fd = c_curl_fds[i];
+    pollfds[i].events = POLLIN;
+    pollfds[i].revents = 0;
+  }
+  for(i = num_curl_fds; i < num_fds; i++) {
+    pollfds[i].fd = c_px_fds[i];
     pollfds[i].events = POLLIN;
     pollfds[i].revents = 0;
   }

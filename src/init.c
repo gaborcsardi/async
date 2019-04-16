@@ -2,7 +2,7 @@
 #include "async.h"
 
 static const R_CallMethodDef callMethods[]  = {
-  { "async_poll", (DL_FUNC) &async_poll, 2 },
+  { "async_poll", (DL_FUNC) &async_poll, 3 },
   { NULL, NULL, 0 }
 };
 
