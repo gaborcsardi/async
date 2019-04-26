@@ -210,11 +210,11 @@ el_run <- function(self, private, mode) {
     types <- vcapply(private$tasks, "[[", "type")
     num_proc <- sum(types %in% c("process", "r-process"))
 
-    fds_pool <- if (!is.null(async_env$worker_pool)) {
-      async_env$worker_pool$get_fds()
+    px_pool <- if (!is.null(async_env$worker_pool)) {
+      async_env$worker_pool$get_poll_connections()
     }
 
-    num_poll <- num_http + num_proc + length(fds_pool)
+    num_poll <- num_http + num_proc + length(px_pool)
 
     timeout <- 0
 
@@ -224,75 +224,85 @@ el_run <- function(self, private, mode) {
 
     if (num_poll) {
 
-      fds_http <- fds_px <- integer()
+      curl_fds <- NULL
+      px_proc <- list()
+      pollables <- list()
 
       ## File desciptors to poll for HTTP
       if (num_http) {
-        fds_http <- multi_fdset(pool = private$pool)
-        if (length(fds_http$reads) && fds_http$timeout < timeout * 1000) {
-          timeout <- fds_http$timeout / 1000.0
+        fdset <- multi_fdset(pool = private$pool)
+        curl_fds <- processx::curl_fds(fdset)
+        pollables <- list(curl_fds)
+        if (fdsset$timeout < timeout * 1000) {
+          timeout <- fdset$timeout / 1000.0
         }
       }
 
-      ## File descriptors to poll for processes
+      ## Poll connections to poll for processes
       if (num_proc) {
         procs <- private$tasks[types %in% c("process", "r-process")]
-        fds_proc <-
-          lapply(procs, function(t) lapply(t$data$conns, conn_get_fileno))
-        fds_px <- unlist(fds_proc)
+        px_proc <- lapply(procs, function(t) t$data$conns)
+        px_proc <- unlist(px_proc, recursive = FALSE)
+        pollables <- c(pollables, px_proc)
       }
 
-      ## Worker pool
-      if (!is.null(async_env$worker_pool)) {
-        fds_px <- c(fds_px, fds_pool)
+      ## Poll connections to poll for the pool
+      if (length(px_pool)) {
+        names(px_pool) <- paste0("pool-", seq_along(px_pool))
+        pollables <- c(pollables, px_pool)
       }
+
       timeout <- if (is.finite(timeout)) timeout * 1000 else -1L
 
       ## Poll
-      ready <- .Call(c_async_poll, fds_http$reads, fds_px, as.integer(timeout)) == 2
+      ready <- processx::poll(pollables, as.integer(timeout))
 
-      if (num_http) {
+      ready_http <- any(vlapply(ready, function(x) "event" %in% x))
+
+      ## HTTP ready?
+      if (ready_http) {
         multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
       }
 
-      ## Processes ready
-      if (num_proc) {
-        ready_proc_fds <- fds[ready & fds %in% unlist(fds_proc)]
-        ready_proc <- procs[vlapply(fds_proc, function(x) any(x %in% ready_proc_fds))]
-        for (p in ready_proc)  {
-          private$tasks[[p$id]] <- NULL
-          p$data$process$wait(1000)
-          p$data$process$kill()
-          res <- list(
-            status = p$data$process$get_exit_status(),
-            stdout = read_all(p$data$stdout, p$data$encoding),
-            stderr = read_all(p$data$stderr, p$data$encoding),
-            timeout = FALSE
-          )
+      ready_ids <- names(which(vlapply(ready, function(x) "ready" %in% x)))
+      lready_pool <- substr(ready_ids, 1, 5) == "pool-"
+      ready_pool <- ready_ids[lready_pool]
+      ready_proc <- ready_ids[!lready_pool]
 
-          if (p$type == "r-process") {
-            res$result = p$data$process$get_result()
-          }
+      ## Processes ready?
+      for (id in ready_proc)  {
+        p <- private$tasks[[id]]
+        private$tasks[[id]] <- NULL
+        p$data$process$wait(1000)
+        p$data$process$kill()
+        res <- list(
+          status = p$data$process$get_exit_status(),
+          stdout = read_all(p$data$stdout, p$data$encoding),
+          stderr = read_all(p$data$stderr, p$data$encoding),
+          timeout = FALSE
+        )
 
-          unlink(c(p$data$stdout, p$data$stderr))
-
-          if (p$data$error_on_status && res$status != 0) {
-            err <- make_error("process exited with non-zero status")
-            err$data <- res
-            res <- NULL
-          } else {
-            err <- NULL
-          }
-          p$callback(err, res)
+        if (p$type == "r-process") {
+          res$result = p$data$process$get_result()
         }
+
+        unlink(c(p$data$stdout, p$data$stderr))
+
+        if (p$data$error_on_status && res$status != 0) {
+          err <- make_error("process exited with non-zero status")
+          err$data <- res
+          res <- NULL
+        } else {
+          err <- NULL
+        }
+        p$callback(err, res)
       }
 
-      ## Workers ready
-      if (length(fds_pool)) {
+      ## Worker pool ready?
+      if (length(ready_pool)) {
         pool <- async_env$worker_pool
-        read_pool_fds <- fds[ready & fds %in% fds_pool]
-        done  <- pool$notify_event(read_pool_fds, event_loop = private$id)
-
+        which <- as.integer(sub("^pool-", "", ready_pool))
+        done <- pool$notify_event(which, event_loop = private$id)
         mine <- intersect(done, names(private$tasks))
         if (length(mine) < length(done)) { stop("TODO bg task finished!") }
         for (tid in mine) {

@@ -32,10 +32,12 @@ Imports:
     backports,
     callr (>= 2.0.4.9000),
     curl (>= 3.2),
-    processx (>= 3.1.0.9005),
+    processx (>= 3.3.0.9001),
     R6,
     rlang,
     utils,
     uuid
+Remotes:
+    r-lib/processx@features/extra-fd-poll
 Roxygen: list(markdown = TRUE)
 KeepSource: yes

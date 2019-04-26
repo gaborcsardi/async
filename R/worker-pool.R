@@ -18,8 +18,10 @@ worker_pool <- R6Class(
       wp_add_task(self, private, func, args, id, event_loop),
     get_fds = function()
       wp_get_fds(self, private),
-    notify_event = function(fds, event_loop)
-      wp_notify_event(self, private, fds, event_loop),
+    get_poll_connections = function()
+      wp_get_poll_connections(self, private),
+    notify_event = function(which, event_loop)
+      wp_notify_event(self, private, which, event_loop),
     start_workers = function()
       wp_start_workers(self, private),
     kill_workers = function()
@@ -98,17 +100,17 @@ wp_get_fds <- function(self, private) {
   private$workers$fd[sts %in% c("starting", "busy")]
 }
 
-wp_notify_event <- function(self, private, fds, event_loop) {
-  wfds <- private$workers$fd
-  if (any(! fds %in% wfds)) {
-    warning("Internal error, unknown worker fds ignored")
-    fds <- intersect(wfds, fds)
-  }
+wp_get_poll_connections <- function(self, private) {
+  sts <- vcapply(private$workers$session, function(x) x$get_state())
+  busy <- sts %in% c("starting", "busy")
+  lapply(private$workers$session[busy],
+         function(x) x$get_poll_connection())
+}
 
+wp_notify_event <- function(self, private, which, event_loop) {
   done <- NULL
   dead <- integer()
-  wh <- match(fds, wfds)
-  for (w in wh) {
+  for (w in which) {
     msg <- private$workers$session[[w]]$read()
     if (is.null(msg)) next
     if (msg$code == 200 || (msg$code >= 500 && msg$code < 600)) {

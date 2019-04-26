@@ -33,6 +33,8 @@ test_that("successful calls", {
   expect_true(is.integer(viapply(res, "[[", "result")))
 })
 
+return()
+
 test_that("calls that error", {
   afun <- async(function(x) {
     when_all(
