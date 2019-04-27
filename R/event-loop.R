@@ -224,32 +224,36 @@ el_run <- function(self, private, mode) {
 
     if (num_poll) {
 
-      curl_fds <- NULL
-      px_proc <- list()
       pollables <- list()
+      pollable_types <- character()
+      http_timeout <- FALSE
 
       ## File desciptors to poll for HTTP
       if (num_http) {
         fdset <- multi_fdset(pool = private$pool)
         curl_fds <- processx::curl_fds(fdset)
         pollables <- list(curl_fds)
-        if (fdsset$timeout < timeout * 1000) {
+        pollable_types <- "curl"
+        if (fdset$timeout < timeout * 1000) {
+          http_timeout <- TRUE
           timeout <- fdset$timeout / 1000.0
         }
       }
 
       ## Poll connections to poll for processes
       if (num_proc) {
-        procs <- private$tasks[types %in% c("process", "r-process")]
+        proc_types <- types %in% c("process", "r-process")
+        procs <- private$tasks[proc_types]
         px_proc <- lapply(procs, function(t) t$data$conns)
         px_proc <- unlist(px_proc, recursive = FALSE)
         pollables <- c(pollables, px_proc)
+        pollable_types <- c(pollable_types, types[proc_types])
       }
 
       ## Poll connections to poll for the pool
       if (length(px_pool)) {
-        names(px_pool) <- paste0("pool-", seq_along(px_pool))
         pollables <- c(pollables, px_pool)
+        pollable_types <- c(pollable_types, rep("pool", length(px_pool)))
       }
 
       timeout <- if (is.finite(timeout)) timeout * 1000 else -1L
@@ -257,17 +261,24 @@ el_run <- function(self, private, mode) {
       ## Poll
       ready <- processx::poll(pollables, as.integer(timeout))
 
-      ready_http <- any(vlapply(ready, function(x) "event" %in% x))
-
       ## HTTP ready?
-      if (ready_http) {
-        multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
+      ## We cannot poll for the DNS resolver, and we need to call back to
+      ## curl even if there is no event, but some handles haven't been
+      ## resolved yet.
+      ## We also need to call libcurl if it has requested a call via
+      ## its timeout value in the fdset return. E.g. this is needed to
+      ## enforce HTTP timeouts.
+      if (num_http > 0) {
+        if (http_timeout ||
+            "event" %in% unlist(ready[pollable_types == "curl"]) ||
+            length(unique(unlist(curl_fds))) < num_http) {
+          multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
+        }
       }
 
-      ready_ids <- names(which(vlapply(ready, function(x) "ready" %in% x)))
-      lready_pool <- substr(ready_ids, 1, 5) == "pool-"
-      ready_pool <- ready_ids[lready_pool]
-      ready_proc <- ready_ids[!lready_pool]
+      ready_proc <-
+        names(which(vlapply(ready[pollable_types %in% c("process", "r-process")],
+                            function(x) "ready" %in% x)))
 
       ## Processes ready?
       for (id in ready_proc)  {
@@ -299,10 +310,12 @@ el_run <- function(self, private, mode) {
       }
 
       ## Worker pool ready?
+      ready_pool <- names(which(vlapply(ready[pollable_types == "pool"],
+                                        function(x) "ready" %in% x)))
       if (length(ready_pool)) {
         pool <- async_env$worker_pool
-        which <- as.integer(sub("^pool-", "", ready_pool))
-        done <- pool$notify_event(which, event_loop = private$id)
+        done <- pool$notify_event(as.integer(ready_pool),
+                                  event_loop = private$id)
         mine <- intersect(done, names(private$tasks))
         if (length(mine) < length(done)) { stop("TODO bg task finished!") }
         for (tid in mine) {

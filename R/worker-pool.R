@@ -18,10 +18,12 @@ worker_pool <- R6Class(
       wp_add_task(self, private, func, args, id, event_loop),
     get_fds = function()
       wp_get_fds(self, private),
+    get_pids = function()
+      wp_get_pids(self, private),
     get_poll_connections = function()
       wp_get_poll_connections(self, private),
-    notify_event = function(which, event_loop)
-      wp_notify_event(self, private, which, event_loop),
+    notify_event = function(pids, event_loop)
+      wp_notify_event(self, private, pids, event_loop),
     start_workers = function()
       wp_start_workers(self, private),
     kill_workers = function()
@@ -100,16 +102,24 @@ wp_get_fds <- function(self, private) {
   private$workers$fd[sts %in% c("starting", "busy")]
 }
 
+wp_get_pids <- function(self, private) {
+  sts <- vcapply(private$workers$session, function(x) x$get_state())
+  private$workers$pid[sts %in% c("starting", "busy")]
+}
+
 wp_get_poll_connections <- function(self, private) {
   sts <- vcapply(private$workers$session, function(x) x$get_state())
   busy <- sts %in% c("starting", "busy")
-  lapply(private$workers$session[busy],
-         function(x) x$get_poll_connection())
+  structure(
+    lapply(private$workers$session[busy],
+           function(x) x$get_poll_connection()),
+    names = private$workers$pid[busy])
 }
 
-wp_notify_event <- function(self, private, which, event_loop) {
+wp_notify_event <- function(self, private, pids, event_loop) {
   done <- NULL
   dead <- integer()
+  which <- match(pids, private$workers$pid)
   for (w in which) {
     msg <- private$workers$session[[w]]$read()
     if (is.null(msg)) next

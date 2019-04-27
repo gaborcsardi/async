@@ -16,32 +16,32 @@ test_that("simple CRUD", {
     }
 
     ## Wait until they have started
-    fds <- wp$get_fds()
-    expect_equal(length(fds), 4)
+    conns <- wp$get_poll_connections()
+    expect_equal(length(conns), 4)
 
     ready <- NULL
-    while (!identical(ready, rep(TRUE, 4))) {
-      ready <- .Call(c_async_poll, fds, 1000L) == 2
+    while (!identical(unlist(ready, use.names = FALSE), rep("ready", 4))) {
+      ready <- processx::poll(conns, 1000L)
     }
 
     ## Let the queue know that they have started
     ## Returns NULL because nothing has finished
-    expect_null(wp$notify_event(fds = fds, event_loop = 42))
+    expect_null(wp$notify_event(names(conns), event_loop = 42))
 
     ## Now four workers must be busy
     expect_equal(is.na(wp$list_workers()$task), rep(FALSE, 4))
 
     ## Check for result
-    fds <- wp$get_fds()
-    expect_equal(length(fds), 4)
+    pids <- wp$get_pids()
+    expect_equal(length(pids), 4)
     ready <- NULL
-    while (!identical(ready, rep(TRUE, 4))) {
-      ready <- .Call(c_async_poll, fds, 1000L) == 2
+    while (!identical(unlist(ready, use.names = FALSE), rep("ready", 4))) {
+      ready <- processx::poll(conns, 1000L)
     }
 
     ## Results are in, four more tasks should be queued
     expect_equal(
-      sort(wp$notify_event(fds = fds, event_loop = 42)),
+      sort(wp$notify_event(pids = pids, event_loop = 42)),
       as.character(1:4))
     res <- lapply(as.character(1:4), function(i) wp$get_result(i))
     pids <- viapply(res, "[[", "result")

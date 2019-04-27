@@ -19,6 +19,15 @@ test_that("nested event loops", {
   res <- synchronise(afun2(1, 2))
 })
 
+test_that("successful call", {
+  afun <- async(function(x) {
+    call_function(function() 100)$
+      then(function(x) x$result)
+  })
+  res <- synchronise(afun())
+  expect_identical(res, 100)
+})
+
 test_that("successful calls", {
   afun <- async(function(x) {
     when_all(
@@ -32,8 +41,6 @@ test_that("successful calls", {
   res <- synchronise(afun())
   expect_true(is.integer(viapply(res, "[[", "result")))
 })
-
-return()
 
 test_that("calls that error", {
   afun <- async(function(x) {
@@ -103,8 +110,9 @@ test_that("handling call errors", {
 test_that("mix calls with others", {
 
   skip_on_cran()
-  skip_on_os("windows")
   skip_if_offline()
+
+  px <- asNamespace("processx")$get_tool("px")
 
   afun <- async(function() {
     when_all(
@@ -112,7 +120,7 @@ test_that("mix calls with others", {
         then(function() 1),
       http = http_get("https://eu.httpbin.org/status/418")$
         then(function(x) x$status_code),
-      process = run_process("pwd")$
+      process = run_process(px, c("outln", "foobar"))$
         then(function(x) str_trim(x$stdout)),
       r_process = run_r_process(function() 2)$
         then(function(x) x$result),
@@ -127,7 +135,7 @@ test_that("mix calls with others", {
     res,
     list(delay = 1,
          http = 418,
-         process = getwd(),
+         process = "foobar",
          r_process = 2,
          call = 3)
   )
