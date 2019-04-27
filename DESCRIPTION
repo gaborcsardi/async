@@ -29,7 +29,6 @@ VignetteBuilder: knitr
 Encoding: UTF-8
 Imports:
     assertthat,
-    backports,
     callr (>= 2.0.4.9000),
     curl (>= 3.2),
     processx (>= 3.3.0.9001),
