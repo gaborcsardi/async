@@ -37,6 +37,6 @@ Imports:
     utils,
     uuid
 Remotes:
-    r-lib/processx@features/extra-fd-poll
+    r-lib/processx
 Roxygen: list(markdown = TRUE)
 KeepSource: yes
