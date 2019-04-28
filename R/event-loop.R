@@ -199,12 +199,32 @@ el_run <- function(self, private, mode) {
   alive <- private$is_alive()
   if (! alive) private$update_time()
 
+  ran_pending <- FALSE
+
+  ## Check for workers from the pool finished before, while another
+  ## event loop was active
+  pool <- async_env$worker_pool
+  if (!is.null(pool)) {
+    done_pool <- pool$list_tasks(event_loop = private$id, status = "done")
+    for (tid in done_pool$id) {
+      task <- private$tasks[[tid]]
+      private$tasks[[tid]] <- NULL
+      res <- pool$get_result(tid)
+      err <- res$error
+      res <- res[c("result", "stdout", "stderr")]
+      task$callback(err, res)
+      ran_pending <- TRUE
+    }
+  }
+
   while (alive && ! private$stop_flag) {
     private$update_time()
     private$run_timers()
-    ran_pending <- private$run_pending()
+    ran_pending <- private$run_pending() || ran_pending
     ## private$run_idle()
     ## private$run_prepare()
+
+    ## Now see what we need to poll
 
     num_http <- length(multi_list(pool = private$pool))
     types <- vcapply(private$tasks, "[[", "type")
@@ -309,15 +329,13 @@ el_run <- function(self, private, mode) {
         p$callback(err, res)
       }
 
-      ## Worker pool ready?
+      ## Workers finished in this poll
       ready_pool <- names(which(vlapply(ready[pollable_types == "pool"],
                                         function(x) "ready" %in% x)))
       if (length(ready_pool)) {
-        pool <- async_env$worker_pool
         done <- pool$notify_event(as.integer(ready_pool),
                                   event_loop = private$id)
         mine <- intersect(done, names(private$tasks))
-        if (length(mine) < length(done)) { stop("TODO bg task finished!") }
         for (tid in mine) {
           task <- private$tasks[[tid]]
           private$tasks[[tid]] <- NULL

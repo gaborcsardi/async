@@ -36,8 +36,8 @@ worker_pool <- R6Class(
       wp_get_result(self, private, id),
     list_workers = function()
       wp_list_workers(self, private),
-    list_tasks = function()
-      wp_list_tasks(self, private),
+    list_tasks = function(event_loop = NULL, status = NULL)
+      wp_list_tasks(self, private, event_loop, status),
     finalize = function() self$kill_workers()
   ),
 
@@ -45,8 +45,8 @@ worker_pool <- R6Class(
     workers = list(),
     tasks = list(),
 
-    try_start = function(event_loop)
-      wp__try_start(self, private, event_loop),
+    try_start = function()
+      wp__try_start(self, private),
     interrupt_worker = function(pid)
       wp__interrupt_worker(self, private, pid)
   )
@@ -75,7 +75,8 @@ wp_start_workers <- function(self, private) {
     session = I(sess),
     task = NA_character_,
     pid = viapply(sess, function(x) x$get_pid()),
-    fd = fd
+    fd = fd,
+    event_loop = NA_integer_
   )
     
   private$workers <- rbind(private$workers, new_workers)
@@ -91,7 +92,7 @@ wp_add_task <- function(self, private, func, args, id, event_loop) {
       args = I(list(args)), status = "waiting", result = I(list(NULL)))
   )
 
-  private$try_start(event_loop)
+  private$try_start()
   invisible()
 }
 
@@ -138,7 +139,7 @@ wp_notify_event <- function(self, private, pids, event_loop) {
     self$start_workers()
   }
 
-  private$try_start(event_loop)
+  private$try_start()
 
   done
 }
@@ -184,22 +185,24 @@ wp_list_workers <- function(self, private) {
   private$workers[, setdiff(colnames(private$workers), "session")]
 }
 
-wp_list_tasks <- function(self, private) {
+wp_list_tasks <- function(self, private, event_loop, status) {
   dont_show <- c("func", "args", "result")
-  private$tasks[, setdiff(colnames(private$tasks), dont_show)]
+  ret <- private$tasks
+  if (!is.null(event_loop)) ret <- ret[ret$event_loop %in% event_loop, ]
+  if (!is.null(status)) ret <- ret[ret$status %in% status, ]
+  ret[, setdiff(colnames(private$tasks), dont_show)]
 }
 
 ## Internals -------------------------------------------------------------
 
 #' @importFrom utils head
 
-wp__try_start <- function(self, private, event_loop) {
+wp__try_start <- function(self, private) {
   sts <- vcapply(private$workers$session, function(x) x$get_state())
   if (all(sts != "idle")) return()
   can_work <- sts == "idle"
 
-  can_run <- private$tasks$status == "waiting" &
-    private$tasks$event_loop == event_loop
+  can_run <- private$tasks$status == "waiting"
   num_start <- min(sum(can_work), sum(can_run))
   will_run <- head(which(can_run), num_start)
   will_work <- head(which(can_work), num_start)

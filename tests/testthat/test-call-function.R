@@ -2,21 +2,22 @@
 context("call_function")
 
 test_that("nested event loops", {
-
-  skip("fails currently")
-  skip_on_cran()
-
   ## Create a function that finishes while its event loop is inactive
   sleeper <- function(x) { Sys.sleep(x); Sys.getpid() }
   afun1 <- async(function(x) { x; call_function(sleeper, args = list(x)) })
   afun2 <- async(function(x1, x2) {
     x1; x2
     p1 <- afun1(x1)
-    p2 <- delay(0)$then(function() synchronise(afun1(x2)))
+    p2 <- delay(0)$then(function() {
+      synchronise(afun1(x2))
+    })
     when_all(p1, p2)
   })
 
   res <- synchronise(afun2(1, 2))
+  expect_equal(length(res), 2)
+  expect_true(res[[1]]$result %in% async_env$worker_pool$list_workers()$pid)
+  expect_true(res[[2]]$result %in% async_env$worker_pool$list_workers()$pid)
 })
 
 test_that("successful call", {
