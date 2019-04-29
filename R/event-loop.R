@@ -341,6 +341,7 @@ el__io_poll <- function(self, private, timeout) {
     if (private$curl_poll &&
         pollables$ready[match("curl", pollables$type)] == "event") {
       multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
+      private$curl_timer <- NULL
     }
 
     ## Any processes
