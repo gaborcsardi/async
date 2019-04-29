@@ -8,7 +8,8 @@ test_that("outside of async context errors", {
     x$emit("foo")
   }
 
-  expect_error(do(), "async context")
+  expect_error(do(), "async context",
+               class = "async_synchronization_barrier_error")
 })
 
 test_that("can create event emitter", {

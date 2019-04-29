@@ -65,7 +65,7 @@ test_that("cancel delay", {
     d1$cancel()
   }
   tic <- Sys.time()
-  expect_error(synchronise(do()), "Cancelled")
+  expect_error(synchronise(do()), "Cancelled", class = "async_cancelled")
   tac <- Sys.time()
   expect_true(tac - tic < as.difftime(30, units  =  "secs"))
 })

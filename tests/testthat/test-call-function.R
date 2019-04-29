@@ -66,7 +66,8 @@ test_that("calls that crash", {
     )
   })
 
-  expect_error(synchronise(afun()), "R session crashed with exit code")
+  expect_error(synchronise(afun()), "R session crashed with exit code",
+               class = "async_rejected")
 
   afun <- async(function(x) {
     when_all(
