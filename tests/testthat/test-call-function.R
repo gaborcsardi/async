@@ -66,8 +66,11 @@ test_that("calls that crash", {
     )
   })
 
-  expect_error(synchronise(afun()), "R session crashed with exit code",
-               class = "async_rejected")
+  ## Either might happen here
+  err <- tryCatch(synchronise(afun()), error = function(x) x)
+  expect_true(
+    grepl("R session crashed with exit code", err$message) ||
+    grepl("R session closed the process connection", err$message))
 
   afun <- async(function(x) {
     when_all(
