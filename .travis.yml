@@ -8,8 +8,9 @@ r_check_args: '--no-vignettes'
 r:
  - 3.2
  - 3.3
- - oldrel
- - release
+ - 3.4
+ - 3.5
+ - 3.6
  - devel
 
 after_success:
