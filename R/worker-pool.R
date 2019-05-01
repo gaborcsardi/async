@@ -78,7 +78,7 @@ wp_start_workers <- function(self, private) {
     fd = fd,
     event_loop = NA_integer_
   )
-    
+
   private$workers <- rbind(private$workers, new_workers)
   invisible()
 }
@@ -220,23 +220,65 @@ wp__try_start <- function(self, private) {
   invisible()
 }
 
+#' Interrupt a worker process
+#'
+#' We need to make sure that the worker is in a usable state after this.
+#'
+#' For speed, we try to interrupt with a SIGINT first, and if that does
+#' not work, then we kill the worker and start a new one.
+#'
+#' When we interrupt with a SIGINT a number of things can happen:
+#' 1. we successfully interrupted a computation, then
+#'    we'll just poll_io(), and read() and we'll get back an
+#'    interrupt error.
+#' 2. The compuration has finished, so we did not interrupt it.
+#'    In this case the background R process will apply the interrupt
+#'    to the next compuration (at least on Unix) so the bg process
+#'    needs to run a quick harmless call to absorb the interrupt.
+#'    We can use `Sys.sleep()` for this, and `write_input()` directly
+#'    for speed and simplicity.
+#' 3. The process has crashed already, in this case `interrupt()` will
+#'    return `FALSE`. `poll_io()` will return with "ready" immediately,
+#'    `read()` will return with an error, and `write_input()` throws
+#'    an error.
+#' 4. We could not interrupt the process, because it was in a
+#'    non-interruptable state. In this case we kill it, and start a
+#'    new process. `poll_io()` will not return with "ready" in this case.
+#'
+#' @param self self
+#' @param private private self
+#' @param pid pid of process
+#' @noRd
+
 wp__interrupt_worker <- function(self, private, pid) {
   ww <- match(pid, private$workers$pid)
   if (is.na(ww)) stop("Unknown task in interrupt_worker() method")
 
+  kill <- FALSE
   sess <- private$workers$session[[ww]]
-  sess$interrupt()
-  pr <- sess$poll_io(300)["process"]
+  int <- sess$interrupt()
+  pr <- sess$poll_io(100)["process"]
+
   if (pr == "ready") {
-    sess$read()
+    msg <- sess$read()
+    if (! inherits(msg, "interrupt")) {
+      tryCatch({
+        sess$write_input("base::Sys.sleep(0)\n")
+        sess$read_output()
+        sess$read_error()
+      }, error = function(e) kill <<- TRUE)
+    }
+    private$workers$task[[ww]] <- NA_character_
   } else {
-    sess$close()
+    kill <- TRUE
   }
 
-  private$workers$task[[ww]] <- NA_character_
-
-  ## Make sure that we have enough workers running
-  self$start_workers()
+  if (kill) {
+    sess$close()
+    private$workers <- private$workers[-ww, ]
+    ## Make sure that we have enough workers running
+    self$start_workers()
+  }
 
   invisible()
 }

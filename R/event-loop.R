@@ -192,6 +192,14 @@ el_cancel_all <- function(self, private) {
   lapply(http, multi_cancel)
   private$next_ticks <- character()
   private$timers <- Sys.time()[numeric()]
+
+  ## Need to cancel pool tasks, these are interrupts for the workers
+  types <- vcapply(private$tasks, "[[", "type")
+  ids <- vcapply(private$tasks, "[[", "id")
+  for (id in ids[types == "pool-task"]) {
+    self$cancel(id)
+  }
+
   private$tasks <-  list()
   invisible(self)
 }
