@@ -12,14 +12,14 @@
 
 <meta name="author" content="Gábor Csárdi" />
 
-<meta name="date" content="2018-04-02" />
+<meta name="date" content="2019-04-29" />
 
 <title>Examples for the async package</title>
 
 
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
+<style type="text/css" data-origin="pandoc">
 a.sourceLine { display: inline-block; line-height: 1.25; }
 a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
 a.sourceLine:empty { height: 1.2em; position: absolute; }
@@ -83,7 +83,29 @@ code span.st { color: #4070a0; } /* String */
 code span.va { color: #19177c; } /* Variable */
 code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
 </style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
 
 
 
@@ -280,14 +302,14 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">Examples for the async package</h1>
 <h4 class="author"><em>Gábor Csárdi</em></h4>
-<h4 class="date"><em>2018-04-02</em></h4>
+<h4 class="date"><em>2019-04-29</em></h4>
 
 
 
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(async)</a>
 <a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">library</span>(desc)</a>
 <a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw">library</span>(jsonlite)</a></code></pre></div>
-<section id="find-the-fastest-cran-mirror-in-the-us" class="level3">
+<div id="find-the-fastest-cran-mirror-in-the-us" class="section level3">
 <h3>Find the fastest CRAN mirror in the US</h3>
 <p>Get the URLs of all US CRAN mirrors, we’ll use this later.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">mirrors &lt;-<span class="st"> </span><span class="kw">getCRANmirrors</span>()</a>
@@ -298,13 +320,13 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">response_time &lt;-<span class="st"> </span><span class="kw">async</span>(<span class="cf">function</span>(url) {</a>
 <a class="sourceLine" id="cb3-2" data-line-number="2">  <span class="kw">http_head</span>(url)<span class="op">$</span></a>
 <a class="sourceLine" id="cb3-3" data-line-number="3"><span class="st">    </span><span class="kw">then</span>(http_stop_for_status)<span class="op">$</span></a>
-<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="st">    </span><span class="kw">then</span>(<span class="op">~</span><span class="st"> </span><span class="kw">setNames</span>(.[[<span class="st">&quot;times&quot;</span>]][[<span class="st">&quot;total&quot;</span>]], url))<span class="op">$</span></a>
-<a class="sourceLine" id="cb3-5" data-line-number="5"><span class="st">    </span><span class="kw">catch</span>(<span class="dt">error =</span> <span class="op">~</span><span class="st"> </span><span class="kw">setNames</span>(<span class="ot">Inf</span>, url))</a>
+<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="st">    </span><span class="kw">then</span>(<span class="cf">function</span>(x) <span class="kw">setNames</span>(x[[<span class="st">&quot;times&quot;</span>]][[<span class="st">&quot;total&quot;</span>]], url))<span class="op">$</span></a>
+<a class="sourceLine" id="cb3-5" data-line-number="5"><span class="st">    </span><span class="kw">catch</span>(<span class="dt">error =</span> <span class="cf">function</span>(e) <span class="kw">setNames</span>(<span class="ot">Inf</span>, url))</a>
 <a class="sourceLine" id="cb3-6" data-line-number="6">})</a></code></pre></div>
 <p>Let’s try it, with a real CRAN URL, and a test one that returns an HTTP 404 status code.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">synchronise</span>(<span class="kw">response_time</span>(mirror_urls[[<span class="dv">1</span>]]))</a></code></pre></div>
 <pre><code>## https://cloud.r-project.org/ 
-##                     0.248838</code></pre>
+##                     0.134403</code></pre>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">synchronise</span>(<span class="kw">response_time</span>(<span class="st">&quot;https://httpbin.org/status/404&quot;</span>))</a></code></pre></div>
 <pre><code>## https://httpbin.org/status/404 
 ##                            Inf</code></pre>
@@ -312,22 +334,22 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">fastest_urls &lt;-<span class="st"> </span><span class="kw">async</span>(<span class="cf">function</span>(urls) {</a>
 <a class="sourceLine" id="cb8-2" data-line-number="2">  reqs &lt;-<span class="st"> </span><span class="kw">lapply</span>(urls, response_time)</a>
 <a class="sourceLine" id="cb8-3" data-line-number="3">  <span class="kw">when_some</span>(<span class="dv">10</span>, <span class="dt">.list =</span> reqs)<span class="op">$</span></a>
-<a class="sourceLine" id="cb8-4" data-line-number="4"><span class="st">    </span><span class="kw">then</span>(<span class="op">~</span><span class="st"> </span><span class="kw">sort</span>(<span class="kw">unlist</span>(.)))</a>
+<a class="sourceLine" id="cb8-4" data-line-number="4"><span class="st">    </span><span class="kw">then</span>(<span class="cf">function</span>(x) <span class="kw">sort</span>(<span class="kw">unlist</span>(x)))</a>
 <a class="sourceLine" id="cb8-5" data-line-number="5">})</a></code></pre></div>
 <p>Let’s run it on the real data.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw">synchronise</span>(<span class="kw">fastest_urls</span>(mirror_urls))</a></code></pre></div>
 <pre><code>##         https://cloud.r-project.org/          http://cloud.r-project.org/ 
-##                             0.142762                             0.188444 
-##      http://lib.stat.cmu.edu/R/CRAN/      http://cran.mirrors.hoobly.com/ 
-##                             0.294629                             0.354840 
-##    http://mirrors.nics.utk.edu/cran/           http://cran.stat.ucla.edu/ 
-##                             0.432903                             0.439990 
-## http://cran.revolutionanalytics.com/  https://mirrors.sorengard.com/cran/ 
-##                             0.441316                             0.458574 
-##  http://mirror.las.iastate.edu/CRAN/                 http://cran.mtu.edu/ 
-##                             0.466993                             0.473258</code></pre>
-</section>
-<section id="resolve-packages-from-github-and-urls" class="level3">
+##                             0.148905                             0.189868 
+##      http://cran.mirrors.hoobly.com/  http://archive.linux.duke.edu/cran/ 
+##                             0.353273                             0.406243 
+## http://cran.revolutionanalytics.com/      http://ftp.osuosl.org/pub/cran/ 
+##                             0.437026                             0.442220 
+##      http://lib.stat.cmu.edu/R/CRAN/               http://cran.wustl.edu/ 
+##                             0.466993                             0.575760 
+##        http://cran.cnr.berkeley.edu/    http://mirrors.nics.utk.edu/cran/ 
+##                             0.575908                             0.584352</code></pre>
+</div>
+<div id="resolve-packages-from-github-and-urls" class="section level3">
 <h3>Resolve packages from GitHub and URLs</h3>
 <p>By <em>resolving</em> we mean 1. getting the <code>DESCRIPTION</code> file of the package to be able to look up dependencies, and other metadata, and 2. getting a download link, in case we want to download the package later.</p>
 <p>For this example we’ll implement two package types: 1. package on GitHub, and 2. package file at a URL.</p>
@@ -356,9 +378,9 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <pre><code>## Type: Package
 ## Package: curl
 ## Title: A Modern and Flexible Web Client for R
-## Version: 3.2
+## Version: 3.3.9000
 ## Authors@R (parsed):
-##     * Jeroen Ooms &lt;jeroen@berkeley.edu&gt; [aut, cre] (0000-0002-4035-0289)
+##     * Jeroen Ooms &lt;jeroen@berkeley.edu&gt; [aut, cre] (&lt;https://orcid.org/0000-0002-4035-0289&gt;)
 ##     * Hadley Wickham &lt;hadley@rstudio.com&gt; [ctb]
 ##     * RStudio [cph]
 ## Description: The curl() and curl_download() functions provide highly
@@ -384,14 +406,14 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ##     jsonlite,
 ##     rmarkdown,
 ##     magrittr,
-##     httpuv,
+##     httpuv (&gt;= 1.4.4),
 ##     webutils
 ## VignetteBuilder:
 ##     knitr
 ## Encoding: UTF-8
 ## Language: en-US
 ## LazyData: true
-## RoxygenNote: 6.0.1.9000
+## RoxygenNote: 6.1.1
 ## SystemRequirements: libcurl: libcurl-devel (rpm) or libcurl4-openssl-dev
 ##     (deb).</code></pre>
 <p>Test non-existing repos, and other errors:</p>
@@ -413,7 +435,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb19-11" data-line-number="11">})</a></code></pre></div>
 <p>Test:</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1"><span class="kw">synchronise</span>(<span class="kw">get_gh_sha</span>(<span class="st">&quot;jeroen&quot;</span>, <span class="st">&quot;curl&quot;</span>))</a></code></pre></div>
-<pre><code>## [1] &quot;f81fc8a048c5f087ace19636e2f92d7925517e46&quot;</code></pre>
+<pre><code>## [1] &quot;528a8f46d3cae3b5affe894e74dbdcec16c8b032&quot;</code></pre>
 <p>A small helper function to get a GitHub download URL from the user name, repo name and the sha hash:</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1">get_gh_download_url &lt;-<span class="st"> </span><span class="cf">function</span>(user, repo, sha) {</a>
 <a class="sourceLine" id="cb22-2" data-line-number="2">  <span class="kw">paste0</span>(<span class="st">&quot;https://api.github.com/repos/&quot;</span>, user, <span class="st">&quot;/&quot;</span>, repo,</a>
@@ -436,15 +458,15 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <p>Test:</p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1"><span class="kw">synchronise</span>(<span class="kw">resolve_gh</span>(<span class="st">&quot;jeroen/curl&quot;</span>))</a></code></pre></div>
 <pre><code>## $url
-## [1] &quot;https://api.github.com/repos/jeroen/curl/zipball/f81fc8a048c5f087ace19636e2f92d7925517e46&quot;
+## [1] &quot;https://api.github.com/repos/jeroen/curl/zipball/528a8f46d3cae3b5affe894e74dbdcec16c8b032&quot;
 ## 
 ## $description
 ## Type: Package
 ## Package: curl
 ## Title: A Modern and Flexible Web Client for R
-## Version: 3.2
+## Version: 3.3.9000
 ## Authors@R (parsed):
-##     * Jeroen Ooms &lt;jeroen@berkeley.edu&gt; [aut, cre] (0000-0002-4035-0289)
+##     * Jeroen Ooms &lt;jeroen@berkeley.edu&gt; [aut, cre] (&lt;https://orcid.org/0000-0002-4035-0289&gt;)
 ##     * Hadley Wickham &lt;hadley@rstudio.com&gt; [ctb]
 ##     * RStudio [cph]
 ## Description: The curl() and curl_download() functions provide highly
@@ -470,14 +492,14 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ##     jsonlite,
 ##     rmarkdown,
 ##     magrittr,
-##     httpuv,
+##     httpuv (&gt;= 1.4.4),
 ##     webutils
 ## VignetteBuilder:
 ##     knitr
 ## Encoding: UTF-8
 ## Language: en-US
 ## LazyData: true
-## RoxygenNote: 6.0.1.9000
+## RoxygenNote: 6.1.1
 ## SystemRequirements: libcurl: libcurl-devel (rpm) or libcurl4-openssl-dev
 ##     (deb).</code></pre>
 <p>Resolving a package at an HTTP URL is much simpler, it needs a single HTTP request, because we simply need to download the package to get the DESCRIPTION file. We place the downloaded package in a temporary file (with the same file name), and return a <code>file://</code> URL to this file.</p>
@@ -497,7 +519,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" data-line-number="1">curl20_url &lt;-<span class="st"> &quot;https://cloud.r-project.org/src/contrib/Archive/curl/curl_2.0.tar.gz&quot;</span></a>
 <a class="sourceLine" id="cb27-2" data-line-number="2"><span class="kw">synchronise</span>(<span class="kw">resolve_url</span>(curl20_url))</a></code></pre></div>
 <pre><code>## $url
-## [1] &quot;file:// /private/var/folders/59/0gkmw1yj2w7bf2dfc3jznv5w0000gn/T/RtmpedSyws/file18062798afba9/curl_2.0.tar.gz&quot;
+## [1] &quot;file:// /private/var/folders/59/0gkmw1yj2w7bf2dfc3jznv5w0000gn/T/RtmpRFHmrg/filed5cc42ad4b3f/curl_2.0.tar.gz&quot;
 ## 
 ## $description
 ## Type: Package
@@ -559,13 +581,14 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb31-7" data-line-number="7">  )),</a>
 <a class="sourceLine" id="cb31-8" data-line-number="8">  <span class="dt">error =</span> <span class="cf">function</span>(e) e</a>
 <a class="sourceLine" id="cb31-9" data-line-number="9">)</a></code></pre></div>
-<pre><code>## &lt;async_rejected in read.dcf(con): Line starting '{ ...' is malformed!&gt;</code></pre>
+<pre><code>## &lt;async error: Line starting '{ ...' is malformed!
+##  in *parent* callback of `http_get(url, file = dest)$then(http_stop_for_status)$then(...)` at ./&lt;text&gt;:4:3&gt;</code></pre>
 <p>But we can also handle errors locally, at any point we wish. E.g. we can simply return <code>NULL</code> values for the failed packages.</p>
 <div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" data-line-number="1">res &lt;-<span class="st"> </span><span class="kw">synchronise</span>(<span class="kw">when_all</span>(</a>
 <a class="sourceLine" id="cb33-2" data-line-number="2">  <span class="kw">resolve_gh</span>(<span class="st">&quot;jeroen/curl&quot;</span>),</a>
-<a class="sourceLine" id="cb33-3" data-line-number="3">  <span class="kw">resolve_gh</span>(<span class="st">&quot;ropensci/magickfoooooobar&quot;</span>)<span class="op">$</span><span class="kw">catch</span>(<span class="dt">error =</span> <span class="op">~</span><span class="st"> </span><span class="ot">NULL</span>),</a>
+<a class="sourceLine" id="cb33-3" data-line-number="3">  <span class="kw">resolve_gh</span>(<span class="st">&quot;ropensci/magickfoooooobar&quot;</span>)<span class="op">$</span><span class="kw">catch</span>(<span class="dt">error =</span> <span class="cf">function</span>(e) <span class="ot">NULL</span>),</a>
 <a class="sourceLine" id="cb33-4" data-line-number="4">  <span class="kw">resolve_url</span>(curl20_url),</a>
-<a class="sourceLine" id="cb33-5" data-line-number="5">  <span class="kw">resolve_url</span>(<span class="st">&quot;https://httpbin.org/status/401&quot;</span>)<span class="op">$</span><span class="kw">catch</span>(<span class="dt">error =</span> <span class="op">~</span><span class="st"> </span><span class="ot">NULL</span>)</a>
+<a class="sourceLine" id="cb33-5" data-line-number="5">  <span class="kw">resolve_url</span>(<span class="st">&quot;https://httpbin.org/status/401&quot;</span>)<span class="op">$</span><span class="kw">catch</span>(<span class="dt">error =</span> <span class="cf">function</span>(e) <span class="ot">NULL</span>)</a>
 <a class="sourceLine" id="cb33-6" data-line-number="6">))</a>
 <a class="sourceLine" id="cb33-7" data-line-number="7">res[[<span class="dv">1</span>]]<span class="op">$</span>description<span class="op">$</span><span class="kw">get</span>(<span class="st">&quot;Package&quot;</span>)</a></code></pre></div>
 <pre><code>## Package 
@@ -577,7 +600,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 ##   &quot;2.0&quot;</code></pre>
 <div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" data-line-number="1">res[[<span class="dv">4</span>]]</a></code></pre></div>
 <pre><code>## NULL</code></pre>
-</section>
+</div>
 
 
 

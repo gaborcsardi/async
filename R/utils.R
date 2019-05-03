@@ -71,6 +71,14 @@ get_id <- local({
   }
 })
 
+new_event_loop_id <- local({
+  id <- 0L
+  function() {
+    id <<- id + 1L
+    id
+  }
+})
+
 lapply_args <- function(X, FUN, ..., .args = list()) {
   do.call("lapply", c(list(X = X, FUN = FUN), list(...), .args))
 }
@@ -90,4 +98,23 @@ get_source_position <- function(call) {
       getSrcLocation(call, "line", TRUE) %||% "?", ":",
       getSrcLocation(call, "column", TRUE) %||% "?")
   )
+}
+
+file_size <- function(...) {
+  file.info(..., extra_cols = FALSE)$size
+}
+
+read_all <- function(filename, encoding) {
+  r <- readBin(filename, what = raw(0), n = file_size(filename))
+  s <- rawToChar(r)
+  Encoding(s) <- encoding
+  s
+}
+
+crash <- function () {
+  get("attach")(structure(list(), class = "UserDefinedDatabase"))
+}
+
+str_trim <- function(x) {
+  sub("\\s+$", "", sub("^\\s+", "", x))
 }

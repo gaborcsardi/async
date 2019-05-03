@@ -24,15 +24,12 @@ report their results via deferred values. Deferred values can be chained
 together for complex async computation, and they are evaluated lazily,
 at synchronisation points.
 
-*Caveat: currently only timers and (some) async HTTP requests are
-implemented.*
-
 ## Features
 
 - A `deferred` class which is the basic building block for async
   computation.
-- Some built-in `deferred` value types: `delay()`, `async_constant()`,
-  `http_get()` and `http_head()`.
+- Timers, HTTP queries, generic external processes, external R processes.
+- A worker pool for calling R functions in the background.
 - Operations to combine deferred values: `$then()`, `$when_all()`,
   `when_any()`, `when_some()`, `$finally()` and the `$catch()`
   operation to handle errors.
@@ -50,6 +47,15 @@ implemented.*
   callback function.
 - Additional helper functions for working with deferred values, e.g.
   `async_map()`, `async_detect()`, `async_filter()`, etc.
+
+## Supported async I/O and computation
+
+We support the following async primitives:
+- Timers: `delay()`.
+- HTTP queries: `http_get()`, `http_head()`.
+- External processes: `run_process()`.
+- External R processes: `run_r_process()`.
+- A workers pool of processes to evaluate R code: `call_function()`.
 
 ## Installation
 
@@ -85,6 +91,15 @@ The async package has built-in async functions that create deferred values:
 - `http_get()` and `http_head()` perform HTTP requests, asynchronously.
 - `async_constant()` creates a simple deferred that represents the supplied
   value.
+- `run_process()` runs an external process using processx and returns
+  its exit code, standard output and error, asynchronously.
+- `run_r_process()` runs an external R process, and calls the specified
+  R function in this process. It returns its exit status, standard output,
+  standard error, and the return value of the R function call,
+  asynchronously.
+- `call_function()` uses a worker pool of persistent external R processes
+  to call R functions. It returns the return value of the function, and
+  the standard output and error of the process, asynchronously.
 
 ## Deferred chains
 

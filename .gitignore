@@ -3,4 +3,5 @@
 .RData
 /src/*.o
 /src/async.so
+/src/async.dll
 /.env

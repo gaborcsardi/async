@@ -16,11 +16,15 @@ get_default_event_loop <- function() {
 }
 
 push_event_loop <- function() {
+  num_loops <- length(async_env$loops)
+  if (num_loops > 0) async_env$loops[[num_loops]]$suspend()
   new_el <- event_loop$new()
   async_env$loops <- c(async_env$loops, list(new_el))
   new_el
 }
 
 pop_event_loop <- function() {
-  async_env$loops[[length(async_env$loops)]] <- NULL
+  num_loops <- length(async_env$loops)
+  async_env$loops[[num_loops]] <- NULL
+  if (num_loops > 1) async_env$loops[[num_loops - 1]]$wakeup()
 }

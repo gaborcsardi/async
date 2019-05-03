@@ -13,6 +13,7 @@ LazyData: true
 URL: https://github.com/r-lib/async#readme
 BugReports: https://github.com/r-lib/async/issues
 RoxygenNote: 6.1.1
+Depends: R (>= 3.2.0)
 Suggests:
     cli,
     covr,
@@ -23,46 +24,20 @@ Suggests:
     mockery,
     pingr,
     rmarkdown,
-    testthat
+    testthat,
+    withr
 VignetteBuilder: knitr
 Encoding: UTF-8
 Imports:
     assertthat,
+    callr (>= 2.0.4.9000),
     curl (>= 3.2),
+    processx (>= 3.3.0.9001),
     R6,
     rlang,
     utils,
     uuid
+Remotes:
+    r-lib/processx
 Roxygen: list(markdown = TRUE)
 KeepSource: yes
-Collate: 
-    'aaa-async.R'
-    'assertions.R'
-    'constant.R'
-    'context.R'
-    'debug.R'
-    'deferred.R'
-    'delay.R'
-    'detect.R'
-    'event-loop.R'
-    'events.R'
-    'every.R'
-    'filter.R'
-    'http.R'
-    'map.R'
-    'onload.R'
-    'package.R'
-    'reflect.R'
-    'replicate.R'
-    'retry.R'
-    'sequence.R'
-    'some.R'
-    'synchronise.R'
-    'timeout.R'
-    'timer.R'
-    'try-each.R'
-    'until.R'
-    'utils.R'
-    'when_all.R'
-    'when_any.R'
-    'whilst.R'

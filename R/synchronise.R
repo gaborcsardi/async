@@ -9,7 +9,7 @@
 #' If an error is not handled in the async phase, `synchronise()` will
 #' re-throw that error.
 #'
-#' `synchronise()` cancels all async processes on interrupt or extrenal
+#' `synchronise()` cancels all async processes on interrupt or external
 #' error.
 #'
 #' @param expr Async function call expression. If it does not evaluate

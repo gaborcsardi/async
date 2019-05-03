@@ -32,5 +32,5 @@ test_that("http_stop_for_status", {
     http_get("https://eu.httpbin.org/status/404")$
       then(http_stop_for_status)
   })
-  expect_error(synchronise(do()), "404")
+  expect_error(synchronise(do()), "404", class = "async_http_404")
 })

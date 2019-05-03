@@ -30,7 +30,7 @@ async <- function(fun) {
     mget(ls(environment(), all.names = TRUE), environment())
     fun2 <- function() {
       evalq(
-      { !!! body(fun) },
+      { !! body(fun) },
       envir = parent.env(environment())
       )
     }

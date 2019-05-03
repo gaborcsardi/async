@@ -11,8 +11,8 @@ mirror_urls <- mirrors$URL[mirrors$CountryCode == "us"]
 response_time <- async(function(url) {
   http_head(url)$
     then(http_stop_for_status)$
-    then(~ setNames(.[["times"]][["total"]], url))$
-    catch(error = ~ setNames(Inf, url))
+    then(function(x) setNames(x[["times"]][["total"]], url))$
+    catch(error = function(e) setNames(Inf, url))
 })
 
 ## ------------------------------------------------------------------------
@@ -23,7 +23,7 @@ synchronise(response_time("https://httpbin.org/status/404"))
 fastest_urls <- async(function(urls) {
   reqs <- lapply(urls, response_time)
   when_some(10, .list = reqs)$
-    then(~ sort(unlist(.)))
+    then(function(x) sort(unlist(x)))
 })
 
 ## ------------------------------------------------------------------------
@@ -139,9 +139,9 @@ tryCatch(
 ## ------------------------------------------------------------------------
 res <- synchronise(when_all(
   resolve_gh("jeroen/curl"),
-  resolve_gh("ropensci/magickfoooooobar")$catch(error = ~ NULL),
+  resolve_gh("ropensci/magickfoooooobar")$catch(error = function(e) NULL),
   resolve_url(curl20_url),
-  resolve_url("https://httpbin.org/status/401")$catch(error = ~ NULL)
+  resolve_url("https://httpbin.org/status/401")$catch(error = function(e) NULL)
 ))
 res[[1]]$description$get("Package")
 res[[2]]
