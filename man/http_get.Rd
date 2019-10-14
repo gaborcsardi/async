@@ -4,8 +4,13 @@
 \alias{http_get}
 \title{Asynchronous HTTP GET request}
 \usage{
-http_get(url, headers = character(), file = NULL,
-  options = list(timeout = 600), on_progress = NULL)
+http_get(
+  url,
+  headers = character(),
+  file = NULL,
+  options = list(timeout = 600),
+  on_progress = NULL
+)
 }
 \arguments{
 \item{url}{URL to connect to.}
@@ -55,6 +60,6 @@ synchronise(afun())
 }
 }
 \seealso{
-Other asyncronous HTTP calls: \code{\link{http_head}}
+Other asyncronous HTTP calls: \code{\link{http_head}()}
 }
 \concept{asyncronous HTTP calls}

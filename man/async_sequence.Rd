@@ -17,7 +17,7 @@ They are performed left to right, the ones in \code{.list} are the last
 ones.
 }
 \description{
-This is equivalent to using the \code{$then()} method of a deferred, but
+This is equivalent to using the \verb{$then()} method of a deferred, but
 it is easier to use programmatically.
 }
 \examples{
@@ -29,9 +29,10 @@ synchronise(check_url("https://eu.httpbin.org/status/200"))
 }
 }
 \seealso{
-Other async control flow: \code{\link{async_reflect}},
-  \code{\link{async_retryable}}, \code{\link{async_retry}},
-  \code{\link{async_try_each}}, \code{\link{async_until}},
-  \code{\link{async_whilst}}
+Other async control flow: \code{\link{async_reflect}()},
+  \code{\link{async_retryable}()},
+  \code{\link{async_retry}()},
+  \code{\link{async_try_each}()},
+  \code{\link{async_until}()}, \code{\link{async_whilst}()}
 }
 \concept{async control flow}

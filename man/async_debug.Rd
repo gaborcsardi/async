@@ -33,8 +33,11 @@ async_debug(id, action = TRUE, parent = TRUE)
 
 async_wait_for(id)
 
-async_where(calls = sys.calls(), parents = sys.parents(),
-  frm = get_async_frames())
+async_where(
+  calls = sys.calls(),
+  parents = sys.parents(),
+  frm = get_async_frames()
+)
 
 async_debug_shortcuts()
 

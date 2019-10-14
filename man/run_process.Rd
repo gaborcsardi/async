@@ -4,10 +4,16 @@
 \alias{run_process}
 \title{Asynchronous external process execution}
 \usage{
-run_process(command = NULL, args = character(),
-  error_on_status = TRUE, wd = NULL, env = NULL,
-  windows_verbatim_args = FALSE, windows_hide_window = FALSE,
-  encoding = "")
+run_process(
+  command = NULL,
+  args = character(),
+  error_on_status = TRUE,
+  wd = NULL,
+  env = NULL,
+  windows_verbatim_args = FALSE,
+  windows_hide_window = FALSE,
+  encoding = ""
+)
 }
 \arguments{
 \item{command}{Character scalar, the command to run.}

@@ -77,7 +77,7 @@ nodes.)
 
 \code{on_cancel} is a function that is called without arguments when a
 deferred value is cancelled. This includes explicit cancellation by
-calling its \code{$cancel()} method, or auto-cancellation (see below).
+calling its \verb{$cancel()} method, or auto-cancellation (see below).
 
 \code{parents} is a list of deferred values that need to be computed before
 the current deferred value. When a parent deferred is resolved, the
@@ -132,7 +132,7 @@ deferred.
 to the previous one, but the id of the parent is also included in the
 call.
 \item A list of named error handlers, corresponding to the error handlers
-of \code{$catch()} (and \code{tryCatch()}). If these error handlers handle the
+of \verb{$catch()} (and \code{tryCatch()}). If these error handlers handle the
 parent's error, the deferred is resolved with the result of the
 handlers. Otherwise the deferred will be failed with the parent's
 error. The error handlers may also throw a new error.
@@ -144,22 +144,22 @@ error. The error handlers may also throw a new error.
 
 The action function of the deferred, and also the \code{parent_resolve} and
 \code{parent_reject} handlers may throw errors if the deferred cannot be
-computed. Errors can be handled wit the \code{$catch()} member function:\preformatted{dx$catch(...)
+computed. Errors can be handled wit the \verb{$catch()} member function:\preformatted{dx$catch(...)
 }
 
 It takes the same named error handler arguments as \code{tryCatch()}.
 
-Technically, \code{$catch()} creates a new deferred value, and this new
+Technically, \verb{$catch()} creates a new deferred value, and this new
 deferred value is resolved to the result of the error handlers. Of the
 handlers do not handle the error, then the new deferred will fail
 with the same error.
 
-The \code{$finally()} method can be used to run create finalizer code that
+The \verb{$finally()} method can be used to run create finalizer code that
 runs when a deferred is resolved or when it fails. It can be used to
 close database connections or other resources:\preformatted{dx$finally(on_finally)
 }
 
-Technically, \code{$finally()} creates a new deferred, which will resolve
+Technically, \verb{$finally()} creates a new deferred, which will resolve
 or fail the same way as the original one, but before doing that it will
 call the \code{on_finally} function with no arguments.
 }
@@ -180,7 +180,7 @@ The async package comes with some basic async functions:
 
 Async computation (just like ordinary sync computation) usually
 consists of several steps that needs to be performed in the specified
-order. The \code{$then()} method specifies that a step of computation needs
+order. The \verb{$then()} method specifies that a step of computation needs
 to be performed after the deferred value is known:\preformatted{dx$then(on_fulfilled)
 }
 
@@ -188,15 +188,15 @@ to be performed after the deferred value is known:\preformatted{dx$then(on_fulfi
 It will be called once the result of the deferred is known, with its
 result. (The result is omitted if it has no arguments).
 
-\code{$then()} creates another deferred value, that will resolve to the
+\verb{$then()} creates another deferred value, that will resolve to the
 result of the \code{on_fulfilled} callback. Should this callback return
-with a deferred value, then \code{$then()} the deferred value will be a
+with a deferred value, then \verb{$then()} the deferred value will be a
 child of this newly creted deferred, and only resolve after that.
 
 See also \code{\link[=when_all]{when_all()}}, \code{\link[=when_some]{when_some()}} and \code{\link[=when_any]{when_any()}}, which can combine
 multiple deferred values into one.
 
-You cannot call \code{$then()} (or \code{\link[=when_any]{when_any()}}, \code{\link[=when_all]{when_all()}}, etc. on the
+You cannot call \verb{$then()} (or \code{\link[=when_any]{when_any()}}, \code{\link[=when_all]{when_all()}}, etc. on the
 same deferred value multiple times, unless it is a shared deferred
 value. See \emph{Ownership} below.
 
@@ -214,7 +214,7 @@ below).
 
 After a \code{dx2 <- dx$then()} call, the \code{dx} deferred is \emph{owned} by the
 newly created deferred value. (The same applied to \code{\link[=when_any]{when_any()}}, etc.)
-This means that it is not possible to call \code{$then()} on the same
+This means that it is not possible to call \verb{$then()} on the same
 deferred value multiple times. The deferred value that is synchronized
 by calling \code{\link[=synchronise]{synchronise()}} on it, is owned by \code{\link[=synchronise]{synchronise()}}, see
 \emph{Synchronization} below.
@@ -275,15 +275,15 @@ operation on the leaked deferred value.
 In a typical application, a function is implemented asynchronously, and
 then used synchronously by the interactive user, or another piece of
 synchronous code, via \code{\link[=synchronise]{synchronise()}} calls. The following example makes
-three HTTP requests in parallel:\preformatted{http_status3 <- function() {
-  http_status <- function(url) {
+three HTTP requests in parallel:\preformatted{http_status3 <- function() \{
+  http_status <- function(url) \{
     http_get(url)$then(function(response) response$status_code)
-  }
+  \}
   r1 <- http_status("https://eu.httpbin.org/status/403")
   r2 <- http_status("https://eu.httpbin.org/status/404")
   r3 <- http_status("https://eu.httpbin.org/status/200")
   when_all(r1, r2, r3)
-}
+\}
 synchronise(http_status3())
 }
 
@@ -300,13 +300,13 @@ result of the async phase, so it would be a waste of resources working on
 them. (It is also unclear how their errors should be handled.)
 
 In the following example, \code{d1} and \code{d2} are created, but they are not
-part of the async DAG, so they are never evaluated.\preformatted{do <- function() {
+part of the async DAG, so they are never evaluated.\preformatted{do <- function() \{
   d1 <- delay(1/100)$then(function() print("d1"))
   d2 <- d1$then(function() print("d2"))
   d3 <- delay(1/100)$then(function() print("d3"))
   d4 <- d3$then(function() print("d4"))
   d4
-}
+\}
 invisible(synchronise(do()))
 }
 }
@@ -352,7 +352,7 @@ interrupted externally, either by the user or some system error. In this
 case all processes and resources that were created in the event loop,
 are cancelled and freed.
 
-Shared deferred values (see \code{$share()}) are not auto-cancelled when their
+Shared deferred values (see \verb{$share()}) are not auto-cancelled when their
 children are resolved or errored, but they are always cancelled at the
 end of the async phase.
 }
