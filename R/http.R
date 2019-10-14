@@ -121,6 +121,52 @@ http_head <- function(url, headers = character(), file = NULL,
 
 http_head <- mark_as_async(http_head)
 
+#' Asynchronous HTTP POST request
+#'
+#' Start an HTTP POST requrest in the background, and report its completion
+#' via a deferred value.
+#'
+#' @inheritParams http_get
+#' @param on_progress: Progress handler function. It is only used if the
+#'   response body is written to a file. See details at [http_get()].
+#'
+#' @export
+#' @examples
+#' json <- jsonlite::toJSON(list(baz = 100, foo = "bar"))
+#'
+#' do <- function() {
+#'   headers <- c("content-type" = "application/json")
+#'   http_post("https://eu.httpbin.org/post", data = json, headers = headers)$
+#'     then(http_stop_for_status)$
+#'     then(function(x) {
+#'       jsonlite::fromJSON(rawToChar(x$content))$json
+#'     })
+#' }
+#'
+#' synchronise(do())
+
+http_post <- function(url, data, headers = character(), file = NULL,
+                      options = list(timeout = 600), on_progress = NULL) {
+
+  url; data; headers; file; options; on_progress
+  if (!is.raw(data)) data <- charToRaw(data)
+
+  make_deferred_http(
+    function() {
+      assert_that(is_string(url))
+      handle <- new_handle(url = url)
+      handle_setheaders(handle, .list = headers)
+      handle_setopt(handle, customrequest = "POST",
+                    postfieldsize = length(data), postfields = data,
+                    .list = options)
+      list(handle = handle, options = options)
+    },
+    file
+  )
+}
+
+http_post <- mark_as_async(http_post)
+
 make_deferred_http <- function(cb, file) {
   cb; file
   id <- NULL

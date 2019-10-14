@@ -1,5 +1,5 @@
 
-context("HTTP")
+context("http")
 
 test_that("GET", {
 
@@ -265,4 +265,22 @@ test_that("errors contain the response if 'file' arg given", {
   expect_s3_class(err, "async_rejected")
   expect_s3_class(err, "async_http_418")
   expect_true(any(grepl("teapot", readLines(tmp))))
+})
+
+test_that("http_post", {
+  resp <- NULL
+  obj <- list(baz = 100, foo = "bar")
+  data <- jsonlite::toJSON(obj)
+
+  do <- function() {
+    headers <- c("content-type" = "application/json")
+    http_post("https://eu.httpbin.org/post", data = data, headers = headers)$
+      then(http_stop_for_status)$
+      then(function(x) resp <<- x)
+  }
+
+  synchronise(do())
+  expect_equal(resp$status_code, 200)
+  cnt <- jsonlite::fromJSON(rawToChar(resp$content), simplifyVector = TRUE)
+  expect_equal(cnt$json, obj)
 })
