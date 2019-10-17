@@ -53,7 +53,7 @@ test_that("calls that error", {
     )
   })
 
-  expect_error(synchronise(afun()), "nope")
+  expect_error(synchronise(afun()), "nope", class = "error")
 })
 
 test_that("calls that crash", {
@@ -109,7 +109,7 @@ test_that("handling call errors", {
   expect_true(is_count(res[[2]]))
   expect_true(is_count(res[[3]]))
   expect_s3_class(res[[4]], "async_rejected")
-  expect_equal(res[[4]]$message, "nope")
+  expect_match(res[[4]]$message, "nope")
 })
 
 test_that("mix calls with others", {
