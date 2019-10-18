@@ -33,7 +33,7 @@ test_that("preserves closure", {
   env <- new.env()
   foo <- local(envir = env, {
     baz <- list(x = 7)
-    async(function() parent.env(environment()))
+    async(function() parent.env(parent.env(environment())))
   })
 
   do <- async(function() {

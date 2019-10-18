@@ -26,11 +26,11 @@ async <- function(fun) {
   if (is_async(fun)) return(fun)
 
   async_fun <- fun
-  body(async_fun) <- expr({
+  body(async_fun) <- bquote({
     mget(ls(environment(), all.names = TRUE), environment())
     fun2 <- function() {
       evalq(
-      { !! body(fun) },
+      .(body(fun)),
       envir = parent.env(environment())
       )
     }
@@ -40,6 +40,11 @@ async <- function(fun) {
       action = function(resolve) resolve(fun2())
     )
   })
+
+  # This is needed, otherwise async_fun might not find 'deferred'
+  async_env <- new.env(parent = environment(async_fun))
+  async_env$deferred <- deferred
+  environment(async_fun) <- async_env
 
   mark_as_async(async_fun)
 }
