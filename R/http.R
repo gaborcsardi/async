@@ -177,7 +177,7 @@ get_default_curl_options <- function(options) {
     if (!is.null(v <- options[[nm]])) return(v)
     anm <- paste0("async_http_", nm)
     if (!is.null(v <- getOption(anm))) return(v)
-    if (!is.na(v <- Sys.getenv(toupper(anm)))) return (v)
+    if (!is.na(v <- Sys.getenv(toupper(anm), NA_character_))) return (v)
   }
   list(
     timeout = as.integer(getopt("timeout") %||% 3600),
