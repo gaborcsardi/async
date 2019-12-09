@@ -37,7 +37,5 @@ Imports:
     rlang,
     utils,
     uuid
-Remotes:
-    r-lib/processx
 Roxygen: list(markdown = TRUE)
 KeepSource: yes
