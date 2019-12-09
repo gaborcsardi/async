@@ -129,7 +129,9 @@ http_head <- mark_as_async(http_head)
 #' via a deferred value.
 #'
 #' @inheritParams http_get
-#' @param on_progress: Progress handler function. It is only used if the
+#' @param data Data to send. Either a raw vector, or a character string
+#'   that will be converted to raw with [base::charToRaw].
+#' @param on_progress Progress handler function. It is only used if the
 #'   response body is written to a file. See details at [http_get()].
 #'
 #' @export
