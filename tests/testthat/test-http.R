@@ -243,6 +243,7 @@ test_that("more sophisticated timeouts", {
 
   do <- function() {
     withr::local_options(list(
+      async_http_timeout = 6,
       async_http_low_speed_time = 2,
       async_http_low_speed_limit = 10
     ))
@@ -255,7 +256,7 @@ test_that("more sophisticated timeouts", {
 
   expect_s3_class(err, "async_rejected")
   expect_match(conditionMessage(err), "too slow")
-  expect_true(toc - tic < as.difftime(4, units = "secs"))
+  expect_true(toc - tic < as.difftime(5, units = "secs"))
 })
 
 test_that("errors contain the response", {
