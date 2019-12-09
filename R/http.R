@@ -40,9 +40,10 @@
 #' }
 
 http_get <- function(url, headers = character(), file = NULL,
-                     options = list(timeout = 600), on_progress = NULL) {
+                     options = list(), on_progress = NULL) {
 
   url; headers; file; options; on_progress
+  options <- get_default_curl_options(options)
 
   make_deferred_http(
     function() {
@@ -102,9 +103,10 @@ http_get <- mark_as_async(http_get)
 #' }
 
 http_head <- function(url, headers = character(), file = NULL,
-                      options = list(timeout = 600), on_progress = NULL) {
+                      options = list(), on_progress = NULL) {
 
   url; headers; file; options; on_progress
+  options <- get_default_curl_options(options)
 
   make_deferred_http(
     function() {
@@ -146,10 +148,11 @@ http_head <- mark_as_async(http_head)
 #' synchronise(do())
 
 http_post <- function(url, data, headers = character(), file = NULL,
-                      options = list(timeout = 600), on_progress = NULL) {
+                      options = list(), on_progress = NULL) {
 
   url; data; headers; file; options; on_progress
   if (!is.raw(data)) data <- charToRaw(data)
+  options <- get_default_curl_options(options)
 
   make_deferred_http(
     function() {
@@ -166,6 +169,21 @@ http_post <- function(url, data, headers = character(), file = NULL,
 }
 
 http_post <- mark_as_async(http_post)
+
+get_default_curl_options <- function(options) {
+  getopt <- function(nm) {
+    if (!is.null(v <- options[[nm]])) return(v)
+    anm <- paste0("async_http_", nm)
+    if (!is.null(v <- getOption(anm))) return(v)
+    if (!is.na(v <- Sys.getenv(toupper(anm)))) return (v)
+  }
+  list(
+    timeout = as.integer(getopt("timeout") %||% 3600),
+    connecttimeout = as.integer(getopt("connecttimeout") %||% 30),
+    low_speed_time = as.integer(getopt("low_speed_time") %||% 30),
+    low_speed_limit = as.integer(getopt("low_speed_limit") %||% 100)
+  )
+}
 
 make_deferred_http <- function(cb, file) {
   cb; file

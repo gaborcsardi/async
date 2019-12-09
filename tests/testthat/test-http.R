@@ -237,6 +237,27 @@ test_that("timeout, failed request", {
   expect_true(toc - tic < as.difftime(4, units = "secs"))
 })
 
+test_that("more sophisticated timeouts", {
+
+  skip_if_offline()
+
+  do <- function() {
+    withr::local_options(list(
+      async_http_low_speed_time = 2,
+      async_http_low_speed_limit = 10
+    ))
+    http_get("https://eu.httpbin.org/drip?duration=5&numbytes=10&code=200&delay=0")
+  }
+
+  tic <- Sys.time()
+  err <- tryCatch(synchronise(do()), error = identity)
+  toc <- Sys.time()
+
+  expect_s3_class(err, "async_rejected")
+  expect_match(conditionMessage(err), "too slow")
+  expect_true(toc - tic < as.difftime(4, units = "secs"))
+})
+
 test_that("errors contain the response", {
 
   skip_if_offline()
