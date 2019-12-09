@@ -61,7 +61,7 @@ the timing of the timer events.
 counter <- 0L
 do <- function() {
   cb <- function() {
-    cat("called\\n")
+    cat("called\n")
     counter <<- counter + 1L
     if (runif(1) < 0.1) t$cancel()
   }
@@ -75,14 +75,14 @@ counter
 counter <- 0L
 do <- function() {
   cb <- function() {
-    cat("called\\n")
+    cat("called\n")
     counter <<- counter + 1L
     if (counter == 2L) stop("foobar")
     if (counter == 3L) t$cancel()
   }
   t <- async_timer$new(1/10, cb)
   handler <- function(err) {
-    cat("Got error:", sQuote(conditionMessage(err)), ", handled\\n")
+    cat("Got error:", sQuote(conditionMessage(err)), ", handled\n")
   }
   t$listen_on("error", handler)
 }
@@ -94,7 +94,7 @@ counter
 counter <- 0L
 do <- function() {
   cb <- function() {
-    cat("called\\n")
+    cat("called\n")
     counter <<- counter + 1L
     if (counter == 2L) stop("foobar")
     if (counter == 3L) t$cancel()
@@ -104,42 +104,4 @@ do <- function() {
 
 tryCatch(run_event_loop(do()), error = function(x) x)
 counter
-}
-\section{Super class}{
-\code{\link[async:event_emitter]{async::event_emitter}} -> \code{\link[async:async_timer]{async::async_timer}}
-}
-\section{Methods}{
-\subsection{Public methods}{
-\itemize{
-\item \href{#method-new}{\code{async_timer$new()}}
-\item \href{#method-cancel}{\code{async_timer$cancel()}}
-}
-}
-\if{html}{\subsection{Inherited methods}{
-\itemize{
-\item \href{../../async/html/event_emitter.html#method-emit}{\code{async::event_emitter$emit()}}
-\item \href{../../async/html/event_emitter.html#method-get_event_names}{\code{async::event_emitter$get_event_names()}}
-\item \href{../../async/html/event_emitter.html#method-get_listener_count}{\code{async::event_emitter$get_listener_count()}}
-\item \href{../../async/html/event_emitter.html#method-listen_off}{\code{async::event_emitter$listen_off()}}
-\item \href{../../async/html/event_emitter.html#method-listen_on}{\code{async::event_emitter$listen_on()}}
-\item \href{../../async/html/event_emitter.html#method-listen_once}{\code{async::event_emitter$listen_once()}}
-\item \href{../../async/html/event_emitter.html#method-remove_all_listeners}{\code{async::event_emitter$remove_all_listeners()}}
-}
-}}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\subsection{Method \code{new()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{async_timer$new(delay, callback)}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cancel"></a>}}
-\subsection{Method \code{cancel()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{async_timer$cancel()}\if{html}{\out{</div>}}
-}
-
-}
 }

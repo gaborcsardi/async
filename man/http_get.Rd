@@ -8,7 +8,7 @@ http_get(
   url,
   headers = character(),
   file = NULL,
-  options = list(timeout = 600),
+  options = list(),
   on_progress = NULL
 )
 }
@@ -60,6 +60,7 @@ synchronise(afun())
 }
 }
 \seealso{
-Other asyncronous HTTP calls: \code{\link{http_head}()}
+Other asyncronous HTTP calls: 
+\code{\link{http_head}()}
 }
 \concept{asyncronous HTTP calls}

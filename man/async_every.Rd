@@ -34,7 +34,9 @@ synchronise(async_every(c(1,3,5,7,10,11), is_odd))
 synchronise(async_every(c(1,3,5,7,11), is_odd))
 }
 \seealso{
-Other async iterators: \code{\link{async_detect}()},
-  \code{\link{async_filter}()}, \code{\link{async_map}()}
+Other async iterators: 
+\code{\link{async_detect}()},
+\code{\link{async_filter}()},
+\code{\link{async_map}()}
 }
 \concept{async iterators}

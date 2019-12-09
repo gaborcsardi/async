@@ -9,7 +9,7 @@ http_post(
   data,
   headers = character(),
   file = NULL,
-  options = list(timeout = 600),
+  options = list(),
   on_progress = NULL
 )
 }

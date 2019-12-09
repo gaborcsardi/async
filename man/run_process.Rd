@@ -51,7 +51,7 @@ via a deferred.
 \dontrun{
 afun <- function() {
   run_process("ls", "-l")$
-    then(function(x) strsplit(x$stdout, "\\r?\\n")[[1]])
+    then(function(x) strsplit(x$stdout, "\r?\n")[[1]])
 }
 synchronise(afun())
 }
