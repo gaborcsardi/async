@@ -2,8 +2,8 @@ language: r
 sudo: false
 cache: packages
 
-r_build_args: '--no-build-vignettes'
-r_check_args: '--no-vignettes'
+r_github_packages:
+  - r-lib/async
 
 r:
  - 3.2
