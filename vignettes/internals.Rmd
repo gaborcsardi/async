@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Internals of the async package}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{async::lazyrmd}
   %\VignetteEncoding{UTF-8}
 ---
 

@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Examples for the async package}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{async::lazyrmd}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -128,11 +128,11 @@ synchronise(get_gh_description("jeroen", "curl"))
 
 Test non-existing repos, and other errors:
 
-```{r, error = TRUE}
+```{r, error = TRUE, purl = FALSE}
 synchronise(get_gh_description("jeroen", "curlqwerty"))
 ```
 
-```{r, error = TRUE}
+```{r, error = TRUE, purl = FALSE}
 synchronise(get_gh_description("git", "git"))
 ```
 
