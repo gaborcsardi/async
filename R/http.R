@@ -172,6 +172,8 @@ http_post <- function(url, data, headers = character(), file = NULL,
 
 http_post <- mark_as_async(http_post)
 
+#' @importFrom utils modifyList
+
 get_default_curl_options <- function(options) {
   getopt <- function(nm) {
     if (!is.null(v <- options[[nm]])) return(v)
@@ -179,11 +181,14 @@ get_default_curl_options <- function(options) {
     if (!is.null(v <- getOption(anm))) return(v)
     if (!is.na(v <- Sys.getenv(toupper(anm), NA_character_))) return (v)
   }
-  list(
-    timeout = as.integer(getopt("timeout") %||% 3600),
-    connecttimeout = as.integer(getopt("connecttimeout") %||% 30),
-    low_speed_time = as.integer(getopt("low_speed_time") %||% 30),
-    low_speed_limit = as.integer(getopt("low_speed_limit") %||% 100)
+  modifyList(
+    options,
+    list(
+      timeout = as.integer(getopt("timeout") %||% 3600),
+      connecttimeout = as.integer(getopt("connecttimeout") %||% 30),
+      low_speed_time = as.integer(getopt("low_speed_time") %||% 30),
+      low_speed_limit = as.integer(getopt("low_speed_limit") %||% 100)
+    )
   )
 }
 
