@@ -44,6 +44,7 @@ test_that("successful calls", {
 })
 
 test_that("calls that error", {
+  skip_without_package("processx", "3.4.1.9001")
   afun <- async(function(x) {
     when_all(
       call_function(function() Sys.getpid()),
@@ -57,6 +58,7 @@ test_that("calls that error", {
 })
 
 test_that("calls that crash", {
+  skip_without_package("processx", "3.4.1.9001")
   afun <- async(function(x) {
     when_all(
       call_function(function() Sys.getpid()),
@@ -89,6 +91,7 @@ test_that("calls that crash", {
 })
 
 test_that("handling call errors", {
+  skip_without_package("processx", "3.4.1.9001")
 
   worker_pid <- async(function() {
     call_function(function() Sys.getpid())$then(function(x) x$result)
