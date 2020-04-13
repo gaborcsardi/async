@@ -3,12 +3,10 @@ context("parallel")
 
 test_that("parallel", {
 
-  skip_if_offline()
-
   do <- async(function() {
-    dx1 <- http_get("https://eu.httpbin.org/get?q=foo")$
+    dx1 <- http_get(http$url("/get", query = list(q = "foo")))$
       then( ~ rawToChar(.$content))
-    dx2 <- http_get("https://eu.httpbin.org/get?q=bar")$
+    dx2 <- http_get(http$url("/get", query = list(q = "bar")))$
       then( ~ rawToChar(.$content))
 
     when_all(

@@ -2,10 +2,8 @@
 context("deferred then")
 
 test_that("HTTP HEAD & synchronous then", {
-  skip_if_offline()
-
   do <- function() {
-    http_head("https://eu.httpbin.org")$
+    http_head(http$url("/"))$
       then(function(value) value$status_code)$
       then(function(x) expect_equal(x, 200))
   }
@@ -13,10 +11,8 @@ test_that("HTTP HEAD & synchronous then", {
 })
 
 test_that("HTTP HEAD & async then", {
-  skip_if_offline()
-
   do <- function() {
-    http_head("https://eu.httpbin.org")$
+    http_head(http$url("/"))$
       then(function(value) http_get(value$url))$
       then(function(value) expect_equal(value$status_code, 200))
   }
@@ -24,10 +20,8 @@ test_that("HTTP HEAD & async then", {
 })
 
 test_that("HTTP HEAD & async then & sync then", {
-  skip_if_offline()
-
   do <- function() {
-    http_head("https://eu.httpbin.org") $
+    http_head(http$url("/"))$
       then(function(value) http_get(value$url))$
       then(function(value) value$status_code)$
       then(function(value) expect_equal(value, 200))
@@ -36,11 +30,9 @@ test_that("HTTP HEAD & async then & sync then", {
 })
 
 test_that("then for fulfilled", {
-  skip_if_offline()
-
   do <- async(function() {
-    dx <- http_head("https://eu.httpbin.org/status/404")
-    dx2 <- http_head("https://eu.httpbin.org/status/404")
+    dx <- http_head(http$url("/status/404"))
+    dx2 <- http_head(http$url("/status/404"))
     dx$then(function() {
       dx2$
         then(function(value) value$status_code)$
@@ -63,11 +55,9 @@ test_that("multiple then clauses are not allowed", {
 })
 
 test_that("compact function notation", {
-  skip_if_offline()
-
   do <- function() {
-    http_head("https://eu.httpbin.org") $
-      then(~ http_get(.$url)) $
+    http_head(http$url("/"))$
+      then(~ http_get(.$url))$
       then(~ .$status_code)$
       then(~ expect_equal(., 200))
   }

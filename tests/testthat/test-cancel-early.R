@@ -3,9 +3,7 @@ context("early cancellation")
 
 test_that("auto-cancellation", {
 
-  skip_if_offline()
-
-  http <- NULL
+  httpx <- NULL
   idx <- 0
 
   do <- async(function() {
@@ -13,17 +11,15 @@ test_that("auto-cancellation", {
 
     response_time <- async(function(url) {
       idx <<- idx + 1
-      http[[idx]] <<- http_head(url)
-      http[[idx]]$
+      httpx[[idx]] <<- http_head(url)
+      httpx[[idx]]$
         then(function(x) { req_done <<- req_done + 1L ; x })$
         then(http_stop_for_status)$
         then(~ setNames(.[["times"]][["total"]], url))$
         catch(~ setNames(Inf, url))
     })
 
-    urls <- c(paste0(httpbin_url(), "/delay/5"),
-              paste0(httpbin_url(), "/get"))
-
+    urls <- http$url(c("/delay/5", "/get"))
     reqs <- lapply(urls, response_time)
     when_any(.list = reqs)
   })
@@ -32,7 +28,7 @@ test_that("auto-cancellation", {
   err <- tryCatch(synchronise(do()), error = identity)
   toc <- Sys.time()
   expect_true(toc - tic < as.difftime(2, units = "secs"))
-  expect_true(get_private(http[[1]])$cancelled)
+  expect_true(get_private(httpx[[1]])$cancelled)
 })
 
 test_that("detect, if one is done", {

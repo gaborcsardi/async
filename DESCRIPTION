@@ -23,9 +23,11 @@ Suggests:
     knitr,
     mockery,
     pingr,
+    presser,
     rmarkdown,
     testthat,
     withr
+Remotes: r-lib/presser
 VignetteBuilder: async
 Encoding: UTF-8
 Imports:

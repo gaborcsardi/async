@@ -27,15 +27,13 @@ test_that("process", {
 })
 
 test_that("process + http", {
-  skip_if_offline()
-
   px <- asNamespace("processx")$get_tool("px")
 
   afun <- async(function() {
     when_all(
       delay = delay(1/1000)$
         then(function() 1),
-      http = http_get("https://eu.httpbin.org/status/418")$
+      http = http_get(http$url("/status/418"))$
         then(function(x) x$status_code),
       process = run_process(px, c("outln", "foobar"))$
         then(function(x) str_trim(x$stdout)),
