@@ -10,3 +10,4 @@
 ^.env$
 ^\.Rprofile$
 ^r-packages$
+^\.github$
