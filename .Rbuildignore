@@ -11,3 +11,4 @@
 ^\.Rprofile$
 ^r-packages$
 ^\.github$
+^vignettes$
