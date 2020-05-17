@@ -127,8 +127,7 @@ test_that("http progress bars & etags", {
 })
 
 test_that("progress bar for in-memory data", {
-  skip_if_offline()
-  u1 <- "http://eu.httpbin.org/stream-bytes/2048?chunk_size=1024"
+  u1 <- http$url("/stream-bytes/2048", c(chunk_size=1024))
 
   called <- 0L
   bytes <- 0L
@@ -210,14 +209,16 @@ test_that("timeout, failed request", {
 })
 
 test_that("more sophisticated timeouts", {
-  skip_if_offline()
   do <- function() {
     withr::local_options(list(
       async_http_timeout = 6,
       async_http_low_speed_time = 2,
       async_http_low_speed_limit = 10
     ))
-    http_get("https://eu.httpbin.org/drip?duration=5&numbytes=10&code=200&delay=0")
+    http_get(http$url(
+      "/drip",
+      c(duration = 5, numbytes = 10, code = 200, delay = 0)
+    ))
   }
 
   tic <- Sys.time()
