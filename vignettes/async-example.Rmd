@@ -3,10 +3,6 @@ title: "Examples for the async package"
 author: "Gábor Csárdi"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Examples for the async package}
-  %\VignetteEngine{async::lazyrmd}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r}

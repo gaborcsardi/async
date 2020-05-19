@@ -20,13 +20,12 @@ Suggests:
     debugme,
     desc,
     jsonlite,
-    knitr,
     mockery,
     pingr,
-    rmarkdown,
+    presser,
     testthat,
     withr
-VignetteBuilder: async
+Remotes: r-lib/presser
 Encoding: UTF-8
 Imports:
     assertthat,

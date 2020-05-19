@@ -8,3 +8,7 @@
 ^src/async.so$
 ^src/.*\.o$
 ^.env$
+^\.Rprofile$
+^r-packages$
+^\.github$
+^vignettes$
