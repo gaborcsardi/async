@@ -156,6 +156,8 @@ el_add_delayed <- function(self, private, delay, func, callback, rep) {
     data = list(delay = delay, func = func, rep = rep),
     type = "delayed"
   )
+  # This has to be real time, because our event loop time might
+  # be very much in the past when his is called.
   private$timers[id] <- Sys.time() + as.difftime(delay, units = "secs")
   id
 }
@@ -213,8 +215,8 @@ el_run <- function(self, private, mode) {
   if (! alive) private$update_time()
 
   while (alive && !private$stop_flag) {
-    private$update_curl_data()
     private$update_time()
+    private$update_curl_data()
     private$run_timers()
     ran_pending <- private$run_pending()
     ## private$run_idle()
@@ -340,6 +342,11 @@ el__io_poll <- function(self, private, timeout) {
     pollables <- rbind(pollables, pool_pollables)
   }
 
+  if (!is.null(private$curl_timer) && private$curl_timer <= private$time) {
+    multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
+    private$curl_timer <- NULL
+  }
+
   if (nrow(pollables)) {
 
     ## OK, ready to poll
@@ -349,7 +356,6 @@ el__io_poll <- function(self, private, timeout) {
     if (private$curl_poll &&
         pollables$ready[match("curl", pollables$type)] == "event") {
       multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
-      private$curl_timer <- NULL
     }
 
     ## Any processes
@@ -439,15 +445,12 @@ el__get_poll_timeout <- function(self, private) {
     t <- min(t, private$curl_timer - private$time)
   }
 
+  t <- max(t, 0)
+
   if (is.finite(t)) as.integer(t * 1000) else -1L
 }
 
 el__run_timers <- function(self, private) {
-
-  if (!is.null(private$curl_timer) && private$curl_timer < private$time) {
-    multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
-    private$curl_timer <- NULL
-  }
 
   expired <- names(private$timers)[private$timers <= private$time]
   expired <- expired[order(private$timers[expired])]
@@ -483,6 +486,6 @@ el__update_curl_data <- function(self, private) {
   num_fds <- length(unique(unlist(private$curl_fdset[1:3])))
   private$curl_poll <- num_fds > 0
   private$curl_timer <- if ((t <- private$curl_fdset$timeout) != -1) {
-    Sys.time() + as.difftime(t / 1000.0, units = "secs")
+    private$time + as.difftime(t / 1000.0, units = "secs")
   }
 }
