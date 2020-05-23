@@ -59,10 +59,11 @@ test_that("when_any, late error is ignored", {
 })
 
 test_that("when_any, multiple errors", {
+  skip_on_cran()
   errors <- list()
   do <- async(function() {
-    d1 <- delay(1/100  )$then(function(value) stop("foo"))
-    d2 <- delay(1/10000)$then(function(value) stop("bar"))
+    d1 <- delay(1/10  )$then(function(value) stop("foo"))
+    d2 <- delay(1/100000)$then(function(value) stop("bar"))
 
     dx <- when_any(d1, d2)$
       catch(error = function(reason) {
