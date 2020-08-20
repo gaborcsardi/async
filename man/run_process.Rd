@@ -12,7 +12,8 @@ run_process(
   env = NULL,
   windows_verbatim_args = FALSE,
   windows_hide_window = FALSE,
-  encoding = ""
+  encoding = "",
+  ...
 )
 }
 \arguments{
@@ -39,6 +40,13 @@ application on windows. Ignored on other platforms.}
 \code{stderr}. By default the encoding of the current locale is
 used. Note that \code{processx} always reencodes the output of
 both streams in UTF-8 currently.}
+
+\item{...}{Extra arguments are passed to \code{process$new()}, see
+\link[processx]{process}. Note that you cannot pass \code{stout} or \code{stderr} here,
+because they are used internally by \code{run()}. You can use the
+\code{stdout_callback}, \code{stderr_callback}, etc. arguments to manage
+the standard output and error, or the \link[processx]{process} class directly
+if you need more flexibility.}
 }
 \value{
 Deferred object.

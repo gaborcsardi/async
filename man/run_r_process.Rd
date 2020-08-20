@@ -48,7 +48,11 @@ supplied function and some error handling code.}
 
 \item{system_profile}{Whether to use the system profile file.}
 
-\item{user_profile}{Whether to use the user's profile file.}
+\item{user_profile}{Whether to use the user's profile file.
+If this is \code{"project"}, then only the profile from the working
+directory is used, but the \code{R_PROFILE_USER} environment variable
+and the user level profile are not. See also "Security considerations"
+below.}
 
 \item{env}{Environment variables to set for the child process.}
 }

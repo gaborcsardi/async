@@ -24,10 +24,10 @@
 run_process <- function(command = NULL, args = character(),
   error_on_status = TRUE, wd = NULL, env = NULL,
   windows_verbatim_args = FALSE, windows_hide_window = FALSE,
-  encoding = "") {
+  encoding = "", ...) {
 
   command; args; error_on_status; wd; env; windows_verbatim_args;
-  windows_hide_window; encoding
+  windows_hide_window; encoding; list(...)
 
   id <- NULL
 
@@ -40,7 +40,7 @@ run_process <- function(command = NULL, args = character(),
       stderr <- tempfile()
       px <- process$new(command, args = args,
         stdout = stdout, stderr = stderr, poll_connection = TRUE,
-        env = env, cleanup = TRUE, wd = wd, encoding = encoding)
+        env = env, cleanup = TRUE, wd = wd, encoding = encoding, ...)
       pipe <- px$get_poll_connection()
       id <<- get_default_event_loop()$add_process(
         list(pipe),
