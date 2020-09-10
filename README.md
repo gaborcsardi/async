@@ -61,8 +61,8 @@ install.packages("async")
 
 ## Introduction
 
-The async package brings asychronous I/O and computation to R. As a first
-step it implements asynchronous HTTP requests.
+The async package brings asychronous I/O and computation to R. It implements
+asynchronous HTTP requests, timers, subprocesses and an R worker pool.
 
 ## Deferred Values
 
