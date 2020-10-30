@@ -374,13 +374,16 @@ el__io_poll <- function(self, private, timeout) {
         timeout = FALSE
       )
 
+      error <- FALSE
       if (p$type == "r-process") {
-        res$result = p$data$process$get_result()
+        res$result <- tryCatch({
+          p$data$process$get_result()
+        }, error = function(e) { error <<- TRUE; e })
       }
 
       unlink(c(p$data$stdout, p$data$stderr))
 
-      if (p$data$error_on_status && res$status != 0) {
+      if (p$data$error_on_status && (error || res$status != 0)) {
         err <- make_error("process exited with non-zero status")
         err$data <- res
         res <- NULL
