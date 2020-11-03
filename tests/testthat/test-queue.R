@@ -2,7 +2,7 @@
 test_that("push one, pop one", {
 
   do <- function() {
-    q <- make_async_queue()
+    q <- make_async_queue(2)
     q$push(delay(1))
     q$push(delay(1))
     p1 <- q$pop()$then(function() print("first"))

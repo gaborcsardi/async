@@ -1,15 +1,18 @@
 
 #' TODO:
-#' * implement concurrency
-#' * do we need to do anything about errors? Maybe not.
 #'
 #' @export
 
-make_async_queue <- function(concurrency = 1) {
-  concurrency
+make_async_queue <- function(run_limit = 1, input_limit = Inf) {
+
+  assert_that(
+    input_limit == Inf || (is_count(input_limit) && input_limit >= 0),
+    run_limit == Inf || (is_count(run_limit) && run_limit >= 1)
+  )
 
   done <- FALSE
   queue_resolve <- NULL
+  waiting <- list()
   ready <- list()
   pops <- list()
   running <- 0L
@@ -27,8 +30,18 @@ make_async_queue <- function(concurrency = 1) {
       } else {
         ready[[length(ready) + 1]] <<- value
       }
+      running <<- running - 1L
+      maybe_queue()
     }
   )
+
+  maybe_queue <- function() {
+    if (running < run_limit && length(waiting) > 0) {
+      waiting[[1]]$then(queue)
+      waiting <<- waiting[-1]
+      running <<- running + 1L
+    }
+  }
 
   maybe_resolve <- function() {
     if (length(ready) == 0 && length(pops) == 0) {
@@ -38,8 +51,9 @@ make_async_queue <- function(concurrency = 1) {
 
   list(
     push = function(task) {
-      if (done) stop("queue is done already")
-      task$then(queue)
+      if (done) stop("queue is done already") # TODO exhausted
+      waiting[[length(waiting) + 1L]] <<- task
+      maybe_queue()
     },
 
     pop = function() {
