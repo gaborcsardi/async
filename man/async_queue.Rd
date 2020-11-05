@@ -2,10 +2,10 @@
 % Please edit documentation in R/queue.R
 \name{async_queue}
 \alias{async_queue}
-\title{TODO:}
+\title{TODO}
 \usage{
-async_queue(run_limit = 1, input_limit = Inf)
+async_queue(task_generator, limit = 1)
 }
 \description{
-TODO:
+TODO
 }
