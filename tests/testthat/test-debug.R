@@ -25,11 +25,11 @@ test_that("async_next", {
 
   async_next()
   al <- async_list()
-  expect_equal(sort(al$state), c("fulfilled", rep("pending", 3)))
+  expect_equal(sort(al$state), c("pending", "pending"))
 
   async_next()
   al <- async_list()
-  expect_equal(sort(al$state), c(rep("fulfilled", 2), rep("pending", 2)))
+  expect_equal(sort(al$state), c("fulfilled", "pending"))
 })
 
 test_that("async_list", {

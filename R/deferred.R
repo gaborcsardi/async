@@ -450,6 +450,8 @@ deferred <- R6Class(
       def__maybe_cancel_parents(self, private, reason),
     add_as_parent = function(child)
       def__add_as_parent(self, private, child),
+    update_parent = function(old, new)
+      def__update_parent(self, private, old, new),
 
     get_info = function()
       def__get_info(self, private)
@@ -600,7 +602,19 @@ def__resolve <- function(self, private, value) {
   if (is_deferred(value)) {
     private$parent_resolve <- def__make_parent_resolve(NULL)
     private$parent_reject <- def__make_parent_reject(NULL)
-    value$then(self)
+
+    # we need this in case self was shared and had multiple children
+    val_pvt <- get_private(value)
+    val_pvt$id <- private$id
+    val_pvt$shared <- private$shared
+    val_pvt$dead_end <- private$dead_end # This should not happen, though
+
+    for (child in private$children) {
+      ch_pvt <- get_private(child)
+      ch_pvt$update_parent(self, value)
+    }
+
+    val_pvt$run_action()
 
   } else {
     if (!private$dead_end && !length(private$children) &&
@@ -772,6 +786,17 @@ def__add_as_parent <- function(self, private, child) {
   } else {
     def__call_then("parent_reject", child, private$value, self$get_id())
   }
+}
+
+def__update_parent <- function(self, private, old, new) {
+  for (i in seq_along(private$parents)) {
+    if (identical(private$parents[[i]], old)) {
+      private$parents[[i]] <- new
+    }
+  }
+
+  new_pvt <- get_private(new)
+  new_pvt$add_as_parent(self)
 }
 
 def__progress <- function(self, private, data) {

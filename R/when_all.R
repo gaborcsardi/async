@@ -30,22 +30,27 @@
 when_all <- function(..., .list = list()) {
 
   defs <- c(list(...), .list)
-  isdef <- vlapply(defs, is_deferred)
-  nx <- sum(isdef)
+  nx <- 0L
 
-  deferred$new(
-    type = "when_all", call = sys.call(),
-    parents = defs[isdef],
-    action = function(resolve) if (nx == 0) resolve(defs),
+  me <- deferred$new(
+    type = "when_all",
+    call = sys.call(),
+    action = function(resolve) {
+      me; nx; defs
+      lapply(seq_along(defs), FUN = function(idx) {
+        if (is_deferred(defs[[idx]])) {
+          nx <<- nx + 1L
+          defs[[idx]]$then(function(val) list(idx, val))$then(me)
+        }
+      })
+      if (nx == 0) resolve(defs)
+    },
     parent_resolve = function(value, resolve) {
+      defs[[ value[[1]] ]] <<- value[[2]]
       nx <<- nx - 1L
-      if (nx == 0L) resolve(lapply(defs, get_value_x))
+      if (nx == 0L) resolve(defs)
     }
   )
 }
 
 when_all <- mark_as_async(when_all)
-
-get_value_x <- function(x) {
-  if (is_deferred(x)) get_private(x)$value else x
-}

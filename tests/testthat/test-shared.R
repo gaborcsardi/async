@@ -12,18 +12,19 @@ test_that("can have multiple children", {
 })
 
 test_that("not cancelled at auto-cancellation", {
-  d1 <- d2 <- NULL
+  d1 <- d2 <- d3 <- NULL
   do <- async(function() {
     d1 <<- delay(1/1000)$share()
     d2 <<- d1$then(~ delay(3))
-    d3 <- d2$then(~ "foo")
-    d4 <- d3$catch(error = ~ "ok")
-    d5 <- d1$then(~ "bar")$then(function() { d3$cancel(); "ok2" })
-    when_all(d4, d5)
+    d3 <<- d2$then(~ "foo")
+    d4 <- d3$then(~ "bar")
+    d5 <- d4$catch(error = ~ "ok")
+    d6 <- d1$then(~ "bar")$then(function() { d4$cancel(); "ok2" })
+    when_all(d5, d6)
   })
   expect_equal(synchronise(do()), list("ok", "ok2"))
   expect_false(get_private(d1)$cancelled)
-  expect_true(get_private(d2)$cancelled)
+  expect_true(get_private(d3)$cancelled)
 })
 
 test_that("shared on an already fulfilled one", {
