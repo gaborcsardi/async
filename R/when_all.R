@@ -32,15 +32,15 @@ when_all <- function(..., .list = list()) {
   defs <- c(list(...), .list)
   nx <- 0L
 
-  me <- deferred$new(
+  self <- deferred$new(
     type = "when_all",
     call = sys.call(),
     action = function(resolve) {
-      me; nx; defs
-      lapply(seq_along(defs), FUN = function(idx) {
+      self; nx; defs
+      lapply(seq_along(defs), function(idx) {
         if (is_deferred(defs[[idx]])) {
           nx <<- nx + 1L
-          defs[[idx]]$then(function(val) list(idx, val))$then(me)
+          defs[[idx]]$then(function(val) list(idx, val))$then(self)
         }
       })
       if (nx == 0) resolve(defs)

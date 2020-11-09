@@ -84,10 +84,10 @@ the current deferred value. When a parent deferred is resolved, the
 \code{parent_resolve} function is called. When a parent referred throws an
 error, the parent_reject` function is called.
 
-\code{parent_resolve} is a function with (up to) three arguments:
-\code{value}, \code{resolve} and \code{id}. It will be called with the value of the
-parent, the \code{resolve} callback of the deferred, and the id of the parent.
-\code{parent_resolve} can resolve the dereffed by calling the supplied \code{resolve}
+\code{parent_resolve} is a function with (up to) two arguments:
+\code{value} and \code{resolve}. It will be called with the value of the
+parent, the \code{resolve} callback of the deferred.
+\code{parent_resolve} can resolve the deferred by calling the supplied \code{resolve}
 callback, or it can keep waiting on other parents and/or external
 computation. It may throw an error to fail the deferred.
 
@@ -102,15 +102,12 @@ return value.
 \item A function with arguments \code{value} and \code{resolve}. This function is
 called with the value of the parent, and the resolve callback of the
 deferred.
-\item A function with arguments \code{value}, \code{resolve} and \code{id}. This is similar
-to the previous one, but the id of the parent is also included in the
-call.
 }
 
-\code{parent_reject} is a function with (up to) three arguments:
-\code{value}, \code{resolve} and \code{id}. It will be called with the error object
-thrown by the parent, the \code{resolve} callback of the deferred and the id
-of the parent.
+\code{parent_reject} is a function with (up to) two arguments:
+\code{value}, \code{resolve}. It will be called with the error object
+thrown by the parent.
+
 \code{parent_resolve} can resolve the deferred by calling the supplied
 \code{resolve} callback, or it can keep waiting on other parents and/or
 external computation. It may throw an error to fail the deferred. It may
@@ -128,9 +125,6 @@ return value.
 \item A function with arguments \code{value} and \code{resolve}. This function is
 called with the value of the parent, and the resolve callback of the
 deferred.
-\item A function with arguments \code{value}, \code{resolve} and \code{id}. This is similar
-to the previous one, but the id of the parent is also included in the
-call.
 \item A list of named error handlers, corresponding to the error handlers
 of \verb{$catch()} (and \code{tryCatch()}). If these error handlers handle the
 parent's error, the deferred is resolved with the result of the

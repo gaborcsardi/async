@@ -206,7 +206,7 @@ test_that("summary.async_rejected", {
   id <- NULL
   do  <- function() {
     p <- delay(1/1000)$then(function() stop("oops"))
-    id <<- p$get_id()
+    id <<- get_private(p)$id
     p
   }
 

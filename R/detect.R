@@ -36,19 +36,19 @@ async_detect_nolimit <- function(.x, .p, ...) {
   defs <- lapply(.x, async(.p), ...)
   nx <- length(defs)
   done <- FALSE
-  ids <- NULL
 
-  deferred$new(
+  self <- deferred$new(
     type = "async_detect", call = sys.call(),
-    parents = defs,
     action = function(resolve) {
-      ids <<- viapply(defs, function(x) x$get_id())
+      lapply(seq_along(defs), function(idx) {
+        defs[[idx]]$then(function(val) if (isTRUE(val)) idx)$then(self)
+      })
       if (nx == 0) resolve(NULL)
     },
-    parent_resolve = function(value, resolve, id) {
-      if (!done && isTRUE(value)) {
+    parent_resolve = function(value, resolve) {
+      if (!done && !is.null(value)) {
         done <<- TRUE
-        resolve(.x[[match(id, ids)]])
+        resolve(.x[[value]])
       } else if (!done) {
         nx <<- nx - 1L
         if (nx == 0) resolve(NULL)
@@ -66,24 +66,27 @@ async_detect_limit <- function(.x, .p, ..., .limit = .limit) {
   done <- FALSE
   nextone <- .limit + 1L
   firsts <- lapply(.x[seq_len(.limit)], .p, ...)
-  ids <- viapply(firsts, function(x) x$get_id())
 
   self <- deferred$new(
     type = "async_detect (limit)", call = sys.call(),
-    parents = firsts,
-    action = function(resolve) if (nx == 0) resolve(NULL),
-    parent_resolve = function(value, resolve, id) {
-      if (!done && isTRUE(value)) {
+    action = function(resolve) {
+      lapply(seq_along(firsts), function(idx) {
+        firsts[[idx]]$then(function(val) if (isTRUE(val)) idx)$then(self)
+      })
+      if (nx == 0) resolve(NULL)
+    },
+    parent_resolve = function(value, resolve) {
+      if (!done && !is.null(value)) {
         done <<- TRUE
-        resolve(.x[[match(id, ids)]])
+        resolve(.x[[value]])
       } else if (!done) {
         nx <<- nx - 1L
         if (nx == 0) {
           resolve(NULL)
         } else if (nextone <= len) {
+          idx <- nextone
           dx <- .p(.x[[nextone]], ...)
-          ids <<- c(ids, dx$get_id())
-          dx$then(self)
+          dx$then(function(val) if (isTRUE(val)) idx)$then(self)
           nextone <<- nextone + 1L
         }
       }

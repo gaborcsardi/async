@@ -17,7 +17,7 @@ http_post(
 \item{url}{URL to connect to.}
 
 \item{data}{Data to send. Either a raw vector, or a character string
-that will be converted to raw with \link[base:charToRaw]{base::charToRaw}.}
+that will be converted to raw with \link[base:rawConversion]{base::charToRaw}.}
 
 \item{headers}{HTTP headers to send.}
 
@@ -25,7 +25,7 @@ that will be converted to raw with \link[base:charToRaw]{base::charToRaw}.}
 The body of the response is written to this file.}
 
 \item{options}{Options to set on the handle. Passed to
-\code{\link[curl:handle_setopt]{curl::handle_setopt()}}.}
+\code{\link[curl:handle]{curl::handle_setopt()}}.}
 
 \item{on_progress}{Progress handler function. It is only used if the
 response body is written to a file. See details at \code{\link[=http_get]{http_get()}}.}

@@ -47,23 +47,25 @@ async_replicate_nolimit <- function(n, task, ...) {
 async_replicate_limit  <- function(n, task, ..., .limit = .limit) {
   n; .limit
 
-  defs <- ids <- nextone <- result <- NULL
+  defs <- nextone <- result <- NULL
 
   self <- deferred$new(
     type = "async_replicate", call = sys.call(),
     action = function(resolve) {
       defs <<- lapply(seq_len(n), function(i) task(...))
-      ids <<- viapply(defs, function(x) x$get_id())
       result <<- vector(n, mode = "list")
-      for (i in 1:.limit) defs[[i]]$then(self)
+      lapply(seq_len(.limit), function(idx) {
+        defs[[idx]]$then(function(val) list(idx, val))$then(self)
+      })
       nextone <<- .limit + 1L
     },
-    parent_resolve = function(value, resolve, id) {
-      result[[match(id, ids)]] <<- value
+    parent_resolve = function(value, resolve) {
+      result[[ value[[1]] ]] <<- value[[2]]
       if (nextone > n) {
         resolve(result)
       } else {
-        defs[[nextone]]$then(self)
+        idx <- nextone
+        defs[[nextone]]$then(function(val) list(idx, val))$then(self)
         nextone <<- nextone + 1L
       }
     }

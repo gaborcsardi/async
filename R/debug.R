@@ -158,7 +158,7 @@ async_list <- function(def = NULL) {
 async_tree <- function(def = NULL) {
   def <- def %||% find_sync_frame()$res
   data <- async_list(def)
-  root <- as.character(def$get_id())
+  root <- as.character(get_private(def)$id)
   cli::tree(data, root = root)
 }
 
@@ -310,7 +310,7 @@ find_deferred <- function(id, def = NULL) {
   def <- def %||% find_sync_frame()$res
   if (is.null(def)) stop("No async context")
   search_parents <- function(def) {
-    if (def$get_id() == id) return(def)
+    if (get_private(def)$id == id) return(def)
     prn <- get_private(def)$parents
     for (p in lapply(prn, search_parents)) {
       if (!is.null(p)) return(p)
