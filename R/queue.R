@@ -23,7 +23,7 @@ async_queue <- function(task_generator, limit = 1) {
       maybe_resolve(resolve)
     },
 
-    parent_resolve = function(value, resolve, id) {
+    parent_resolve = function(value, resolve) {
       num_running <<- num_running - 1L
       if (length(pops) > 0) {
         pop <- pops[[1]]
