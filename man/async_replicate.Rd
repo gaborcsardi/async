@@ -19,7 +19,7 @@ async_replicate(n, task, ..., .limit = Inf)
 Resolves to a list of the results of the \code{n} \code{task} calls.
 }
 \description{
-Similar to \code{\link[base:replicate]{base::replicate()}}, with some differences:
+Similar to \code{\link[base:lapply]{base::replicate()}}, with some differences:
 \itemize{
 \item it takes an async function, instead of an expression, and
 \item it always returns a list.

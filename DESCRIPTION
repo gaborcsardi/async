@@ -12,7 +12,7 @@ License: MIT + file LICENSE
 LazyData: true
 URL: https://github.com/r-lib/async#readme
 BugReports: https://github.com/r-lib/async/issues
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
 Depends: R (>= 3.2.0)
 Suggests:
     cli,

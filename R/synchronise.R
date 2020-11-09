@@ -33,7 +33,9 @@ synchronise <- function(expr) {
   ## Mark this frame as a synchronization point, for debugging
   `__async_synchronise_frame__` <- TRUE
 
-  res <- expr
+  ## We need an extra final promise that cannot be replaced,
+  ## so priv stays the same
+  res <- expr$then(function(x) x)
 
   if (!is_deferred(res)) return(res)
 

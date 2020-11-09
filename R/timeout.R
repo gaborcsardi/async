@@ -32,16 +32,20 @@
 async_timeout <- function(task, timeout, ...) {
   task <- async(task)
   force(timeout)
+  list(...)
   done <- FALSE
 
-  deferred$new(
+  self <- deferred$new(
     type = "timeout", call = sys.call(),
-    parents = list(d1 <- task(...), d2 <- delay(timeout)),
-    parent_resolve = function(value, resolve, id) {
+    action = function(resolve) {
+      task(...)$then(function(x) list("ok", x))$then(self)
+      delay(timeout)$then(~ list("timeout"))$then(self)
+    },
+    parent_resolve = function(value, resolve) {
       if (!done) {
         done <<- TRUE
-        if (id == d1$get_id()) {
-          resolve(value)
+        if (value[[1]] == "ok") {
+          resolve(value[[2]])
         } else {
           stop("Timed out")
         }

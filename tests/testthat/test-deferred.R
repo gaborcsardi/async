@@ -67,3 +67,28 @@ test_that("unused computation is never created", {
   expect_false(called1)
   expect_true(called2)
 })
+
+test_that("replacing promises does not leak", {
+
+  loop <- function(limit = 5) {
+    limit
+    n <- 1
+    x <- list()
+
+    do <- async(function() {
+      x <<- append(x, list(async_list()))
+      if (n < limit) {
+        n <<- n + 1
+        delay(0)$then(do)
+      } else {
+        async_constant(x)
+      }
+    })
+
+    do()
+  }
+
+  x <- synchronise(when_any(loop()))
+  expect_equal(length(x), 5L)
+  expect_equal(nrow(x[[1]]), nrow(x[[5]]))
+})

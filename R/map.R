@@ -36,7 +36,6 @@ async_map_limit <- function(.x, .f, ..., .args = list(), .limit = Inf) {
 
   nextone <- .limit + 1L
   firsts <- lapply_args(.x[seq_len(.limit)], .f, .args = args)
-  ids <- viapply(firsts, function(x) x$get_id())
 
   result <- structure(
     vector(mode = "list", length = len),
@@ -45,17 +44,23 @@ async_map_limit <- function(.x, .f, ..., .args = list(), .limit = Inf) {
 
   self <- deferred$new(
     type = "async_map (limit)", call = sys.call(),
-    parents = firsts,
-    action = function(resolve) if (nx == 0) resolve(result),
-    parent_resolve = function(value, resolve, id) {
+    action = function(resolve) {
+      self; nx; firsts
+      lapply(seq_along(firsts), function(idx) {
+        firsts[[idx]]$then(function(val) list(idx, val))$then(self)
+      })
+      if (nx == 0) resolve(result)
+    },
+    parent_resolve = function(value, resolve) {
+      self; nx; nextone; result; .f
       nx <<- nx - 1L
-      result[[match(id, ids)]] <<- value
+      result[[ value[[1]] ]] <<- value[[2]]
       if (nx == 0) {
         resolve(result)
       } else if (nextone <= len) {
+        idx <- nextone
         dx <- do.call(".f", c(list(.x[[nextone]]), args))
-        ids <<- c(ids, dx$get_id())
-        dx$then(self)
+        dx$then(function(val) list(idx, val))$then(self)
         nextone <<- nextone + 1L
       }
     }

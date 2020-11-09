@@ -25,11 +25,11 @@ test_that("async_next", {
 
   async_next()
   al <- async_list()
-  expect_equal(sort(al$state), c("fulfilled", rep("pending", 3)))
+  expect_equal(sort(al$state), c("pending", "pending"))
 
   async_next()
   al <- async_list()
-  expect_equal(sort(al$state), c(rep("fulfilled", 2), rep("pending", 2)))
+  expect_equal(sort(al$state), c("fulfilled", "pending"))
 })
 
 test_that("async_list", {
@@ -46,7 +46,7 @@ test_that("async_list", {
   priv$null()
   priv$run_action()
 
-  sh <- p1$get_id() - 1L
+  sh <- get_private(p1)$id - 1L
   al <- async_list()
   expect_equal(al$id, 3:1 + sh)
   expect_equal(unclass(al$parents), list(2L + sh, 1L + sh, integer()))
@@ -105,22 +105,22 @@ test_that("async_debug", {
   priv$null()
   priv$run_action()
 
-  async_debug(p2$get_id())
+  async_debug(get_private(p2)$id)
   expect_true(isdebugged(get_private(p2)$parent_resolve))
   expect_true(isdebugged(get_private(p2)$parent_reject))
 
-  async_wait_for(p1$get_id())
-  expect_message(async_debug(p1$get_id()), "already resolved")
+  async_wait_for(get_private(p1)$id)
+  expect_message(async_debug(get_private(p1)$id), "already resolved")
 
   res <- deferred$new()
   priv <- get_private(res)
   priv$null()
-  expect_message(async_debug(res$get_id()), "has no action")
+  expect_message(async_debug(get_private(res)$id), "has no action")
 
   res <- deferred$new(action = function() { })
   priv <-  get_private(res)
   priv$null()
-  expect_message(async_debug(res$get_id()), "debugging action")
+  expect_message(async_debug(get_private(res)$id), "debugging action")
 })
 
 test_that("async_wait_for", {
@@ -137,7 +137,7 @@ test_that("async_wait_for", {
   priv$null()
   priv$run_action()
 
-  async_wait_for(p2$get_id())
+  async_wait_for(get_private(p2)$id)
   expect_equal(get_private(p1)$state, "fulfilled")
   expect_equal(get_private(p2)$state, "fulfilled")
   expect_equal(get_private(res)$state, "pending")
@@ -150,7 +150,7 @@ test_that("async_where", {
     p <- delay(1/10000)$
       then(function() "foo")$
       then(function() async_where())
-    id <<- p$get_id()
+    id <<- get_private(p)$id
     p
   }
 
@@ -168,7 +168,7 @@ test_that("format.async_where", {
     p <- delay(1/10000)$
       then(function() "foo")$
       then(function() async_where())
-    id <<- p$get_id()
+    id <<- get_private(p)$id
     p
   }
 

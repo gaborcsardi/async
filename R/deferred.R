@@ -77,10 +77,10 @@
 #' `parent_resolve` function is called. When a parent referred throws an
 #' error, the parent_reject` function is called.
 #'
-#' `parent_resolve` is a function with (up to) three arguments:
-#' `value`, `resolve` and `id`. It will be called with the value of the
-#' parent, the `resolve` callback of the deferred, and the id of the parent.
-#' `parent_resolve` can resolve the dereffed by calling the supplied `resolve`
+#' `parent_resolve` is a function with (up to) two arguments:
+#' `value` and `resolve`. It will be called with the value of the
+#' parent, the `resolve` callback of the deferred.
+#' `parent_resolve` can resolve the deferred by calling the supplied `resolve`
 #' callback, or it can keep waiting on other parents and/or external
 #' computation. It may throw an error to fail the deferred.
 #'
@@ -94,14 +94,11 @@
 #' * A function with arguments `value` and `resolve`. This function is
 #'   called with the value of the parent, and the resolve callback of the
 #'   deferred.
-#' * A function with arguments `value`, `resolve` and `id`. This is similar
-#'   to the previous one, but the id of the parent is also included in the
-#'   call.
 #'
-#' `parent_reject` is a function with (up to) three arguments:
-#' `value`, `resolve` and `id`. It will be called with the error object
-#' thrown by the parent, the `resolve` callback of the deferred and the id
-#' of the parent.
+#' `parent_reject` is a function with (up to) two arguments:
+#' `value`, `resolve`. It will be called with the error object
+#' thrown by the parent.
+#'
 #' `parent_resolve` can resolve the deferred by calling the supplied
 #' `resolve` callback, or it can keep waiting on other parents and/or
 #' external computation. It may throw an error to fail the deferred. It may
@@ -118,9 +115,7 @@
 #' * A function with arguments `value` and `resolve`. This function is
 #'   called with the value of the parent, and the resolve callback of the
 #'   deferred.
-#' * A function with arguments `value`, `resolve` and `id`. This is similar
-#'   to the previous one, but the id of the parent is also included in the
-#'   call.
+
 #' * A list of named error handlers, corresponding to the error handlers
 #'   of `$catch()` (and `tryCatch()`). If these error handlers handle the
 #'   parent's error, the deferred is resolved with the result of the
@@ -407,8 +402,7 @@ deferred <- R6Class(
       def_finally(self, private, on_finally),
     cancel = function(reason = "Cancelled")
       def_cancel(self, private, reason),
-    share = function() { private$shared <<- TRUE; invisible(self) },
-    get_id = function() private$id
+    share = function() { private$shared <<- TRUE; invisible(self) }
   ),
 
   private = list(
@@ -450,6 +444,8 @@ deferred <- R6Class(
       def__maybe_cancel_parents(self, private, reason),
     add_as_parent = function(child)
       def__add_as_parent(self, private, child),
+    update_parent = function(old, new)
+      def__update_parent(self, private, old, new),
 
     get_info = function()
       def__get_info(self, private)
@@ -522,7 +518,7 @@ def__run_action <- function(self, private) {
     if (prt_priv$state != "pending") {
       def__call_then(
         if (prt_priv$state == "fulfilled") "parent_resolve" else "parent_reject",
-        self, prt_priv$value, prt_priv$id)
+        self, prt_priv$value)
     }
     prt_priv$run_action()
   }
@@ -600,21 +596,33 @@ def__resolve <- function(self, private, value) {
   if (is_deferred(value)) {
     private$parent_resolve <- def__make_parent_resolve(NULL)
     private$parent_reject <- def__make_parent_reject(NULL)
-    value$then(self)
+
+    # we need this in case self was shared and had multiple children
+    val_pvt <- get_private(value)
+    val_pvt$id <- private$id
+    val_pvt$shared <- private$shared
+    val_pvt$dead_end <- private$dead_end # This should not happen, though
+
+    for (child in private$children) {
+      ch_pvt <- get_private(child)
+      ch_pvt$update_parent(self, value)
+    }
+
+    val_pvt$run_action()
 
   } else {
     if (!private$dead_end && !length(private$children) &&
         !private$shared) {
       ## This cannot happen currently
-      "!DEBUG ??? DEAD END `self$get_id()`"   # nocov
+      "!DEBUG ??? DEAD END `private$id`"   # nocov
       warning("Computation going nowhere...")   # nocov
     }
 
-    "!DEBUG +++ RESOLVE `self$get_id()`"
+    "!DEBUG +++ RESOLVE `private$id`"
     private$state <- "fulfilled"
     private$value <- value
     for (child in private$children) {
-      def__call_then("parent_resolve", child, value, self$get_id())
+      def__call_then("parent_resolve", child, value)
     }
     private$maybe_cancel_parents(private$value)
     private$parents <- NULL
@@ -639,19 +647,16 @@ def__make_error_object <- function(self, private, err) {
 
 def__make_parent_resolve <- function(fun) {
   if (is.null(fun)) {
-    function(value, resolve, id) resolve(value)
+    function(value, resolve) resolve(value)
   } else if (!is.function(fun)) {
     fun <- as_function(fun)
-    function(value, resolve, id) resolve(fun(value))
+    function(value, resolve) resolve(fun(value))
   } else if (num_args(fun) == 0) {
-    function(value, resolve, id) resolve(fun())
+    function(value, resolve) resolve(fun())
   } else if (num_args(fun) == 1) {
-    function(value, resolve, id) resolve(fun(value))
+    function(value, resolve) resolve(fun(value))
   } else if (identical(names(formals(fun)),
                        c("value", "resolve"))) {
-    function(value, resolve, id) fun(value, resolve)
-  } else if (identical(names(formals(fun)),
-                       c("value", "resolve", "id"))) {
     fun
   } else {
     stop("Invalid parent_resolve callback")
@@ -660,21 +665,18 @@ def__make_parent_resolve <- function(fun) {
 
 def__make_parent_reject <- function(fun) {
   if (is.null(fun)) {
-    function(value, resolve, id) stop(value)
+    function(value, resolve) stop(value)
   } else if (is.list(fun)) {
     def__make_parent_reject_catch(fun)
   } else if (!is.function(fun)) {
     fun <- as_function(fun)
-    function(value, resolve, id) resolve(fun(value))
+    function(value, resolve) resolve(fun(value))
   } else if (num_args(fun) == 0) {
-    function(value, resolve, id) resolve(fun())
+    function(value, resolve) resolve(fun())
   } else if (num_args(fun) == 1) {
-    function(value, resolve, id) resolve(fun(value))
+    function(value, resolve) resolve(fun(value))
   } else if (identical(names(formals(fun)),
                        c("value", "resolve"))) {
-    function(value, resolve, id) fun(value, resolve)
-  } else if (identical(names(formals(fun)),
-                       c("value", "resolve", "id"))) {
     fun
   } else {
     stop("Invalid parent_reject callback")
@@ -683,7 +685,7 @@ def__make_parent_reject <- function(fun) {
 
 def__make_parent_reject_catch <- function(handlers) {
   handlers <- lapply(handlers, as_function)
-  function(value, resolve, id) {
+  function(value, resolve) {
     ok <- FALSE
     ret <- tryCatch({
       quo <- quo(tryCatch(stop(value), !!!handlers))
@@ -702,7 +704,7 @@ def__reject <- function(self, private, reason) {
 
   ## 'reason' cannot be a deferred here
 
-  "!DEBUG !!! REJECT `self$get_id()`"
+  "!DEBUG !!! REJECT `private$id`"
   private$state <- "rejected"
   private$value <- private$make_error_object(reason)
   if (inherits(private$value, "async_cancelled")) {
@@ -712,7 +714,7 @@ def__reject <- function(self, private, reason) {
     private$cancel_callback(conditionMessage(private$value))
   }
   for (child in private$children) {
-    def__call_then("parent_reject", child, private$value, self$get_id())
+    def__call_then("parent_reject", child, private$value)
   }
   private$maybe_cancel_parents(private$value)
   private$parents <- NULL
@@ -729,8 +731,8 @@ def__maybe_cancel_parents <- function(self, private, reason) {
   }
 }
 
-def__call_then <- function(which, x, value, id)  {
-  force(value); force(id)
+def__call_then <- function(which, x, value)  {
+  force(value);
   private <- get_private(x)
   if (!private$running) return()
   if (private$state != "pending") return()
@@ -742,13 +744,13 @@ def__call_then <- function(which, x, value, id)  {
         debug1(private[[which]])        # nocov
       }
       `__async_data__` <- list(private$id, "parent", x)
-      private[[which]](value, private$resolve, id)
+      private[[which]](value, private$resolve)
     },
     function(err, res) if (!is.null(err)) private$reject(err))
 }
 
 def__add_as_parent <- function(self, private, child) {
-  "!DEBUG EDGE [`private$id` -> `child$get_id()`]"
+  "!DEBUG EDGE [`private$id` -> `get_private(child)$id`]"
 
   if (! identical(private$event_loop, get_private(child)$event_loop)) {
     err <- make_error(
@@ -767,11 +769,22 @@ def__add_as_parent <- function(self, private, child) {
     ## Nothing to do
 
   } else if (private$state == "fulfilled") {
-    def__call_then("parent_resolve", child, private$value, self$get_id())
+    def__call_then("parent_resolve", child, private$value)
 
   } else {
-    def__call_then("parent_reject", child, private$value, self$get_id())
+    def__call_then("parent_reject", child, private$value)
   }
+}
+
+def__update_parent <- function(self, private, old, new) {
+  for (i in seq_along(private$parents)) {
+    if (identical(private$parents[[i]], old)) {
+      private$parents[[i]] <- new
+    }
+  }
+
+  new_pvt <- get_private(new)
+  new_pvt$add_as_parent(self)
 }
 
 def__progress <- function(self, private, data) {
@@ -784,10 +797,10 @@ def__get_info <- function(self, private) {
   res <- data.frame(
     stringsAsFactors = FALSE,
     id = private$id,
-    parents = I(list(viapply(private$parents, function(x) x$get_id()))),
+    parents = I(list(viapply(private$parents, function(x) get_private(x)$id))),
     label = as.character(private$id),
     call = I(list(private$mycall)),
-    children = I(list(viapply(private$children, function(x) x$get_id()))),
+    children = I(list(viapply(private$children, function(x) get_private(x)$id))),
     type = private$type %||%  "unknown",
     running = private$running,
     state = private$state,

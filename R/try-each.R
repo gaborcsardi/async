@@ -37,10 +37,10 @@ async_try_each <- function(..., .list = list()) {
       wh <<- 1L
       defs[[wh]]$then(self)
     },
-    parent_resolve = function(value, resolve, id) {
+    parent_resolve = function(value, resolve) {
       resolve(value)
     },
-    parent_reject = function(value, resolve, id) {
+    parent_reject = function(value, resolve) {
       errors <<- c(errors, list(value))
       if (wh == nx) {
         err <- structure(
