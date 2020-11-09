@@ -95,3 +95,15 @@ test_that("when_all, multiple errors", {
   expect_true(done)
   expect_match(conditionMessage(err), "bar")
 })
+
+test_that("resolving to NULL", {
+  do <- async(function() {
+    when_all(
+      delay(0)$then(~ NULL),
+      delay(0)$then(~ 46)
+    )
+  })
+
+  ret <- synchronise(do())
+  expect_equal(ret, list(NULL, 46))
+})

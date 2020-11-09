@@ -38,6 +38,7 @@ when_all <- function(..., .list = list()) {
     action = function(resolve) {
       self; nx; defs
       lapply(seq_along(defs), function(idx) {
+        idx
         if (is_deferred(defs[[idx]])) {
           nx <<- nx + 1L
           defs[[idx]]$then(function(val) list(idx, val))$then(self)
@@ -46,7 +47,7 @@ when_all <- function(..., .list = list()) {
       if (nx == 0) resolve(defs)
     },
     parent_resolve = function(value, resolve) {
-      defs[[ value[[1]] ]] <<- value[[2]]
+      defs[ value[[1]] ] <<- value[2]
       nx <<- nx - 1L
       if (nx == 0L) resolve(defs)
     }

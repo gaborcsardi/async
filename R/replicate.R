@@ -60,7 +60,7 @@ async_replicate_limit  <- function(n, task, ..., .limit = .limit) {
       nextone <<- .limit + 1L
     },
     parent_resolve = function(value, resolve) {
-      result[[ value[[1]] ]] <<- value[[2]]
+      result[ value[[1]] ] <<- value[2]
       if (nextone > n) {
         resolve(result)
       } else {

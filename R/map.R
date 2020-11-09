@@ -54,7 +54,7 @@ async_map_limit <- function(.x, .f, ..., .args = list(), .limit = Inf) {
     parent_resolve = function(value, resolve) {
       self; nx; nextone; result; .f
       nx <<- nx - 1L
-      result[[ value[[1]] ]] <<- value[[2]]
+      result[ value[[1]] ] <<- value[2]
       if (nx == 0) {
         resolve(result)
       } else if (nextone <= len) {
