@@ -75,7 +75,7 @@ test_that("replacing promises does not leak", {
     n <- 1
     x <- list()
 
-    do <- async(function() {
+    do <- function() {
       x <<- append(x, list(async_list()))
       if (n < limit) {
         n <<- n + 1
@@ -83,12 +83,12 @@ test_that("replacing promises does not leak", {
       } else {
         async_constant(x)
       }
-    })
+    }
 
     do()
   }
 
   x <- synchronise(when_any(loop()))
   expect_equal(length(x), 5L)
-  expect_equal(nrow(x[[1]]), nrow(x[[5]]))
+  expect_equal(nrow(x[[2]]), nrow(x[[5]]))
 })

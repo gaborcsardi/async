@@ -33,8 +33,14 @@ synchronise <- function(expr) {
   ## Mark this frame as a synchronization point, for debugging
   `__async_synchronise_frame__` <- TRUE
 
+  ## This is to allow `expr` to contain `async_list()` etc
+  ## calls that look for the top promise. Without this there
+  ## is no top promise. This is a temporary top promise that
+  ## is never started.
+  res <- async_constant(NULL)
+
   ## We need an extra final promise that cannot be replaced,
-  ## so priv stays the same
+  ## so priv stays the same.
   res <- expr$then(function(x) x)
 
   if (!is_deferred(res)) return(res)
