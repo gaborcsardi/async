@@ -1,4 +1,4 @@
 
-http <- presser::new_app_process(
-  presser::httpbin_app(), opts = presser::server_opts(num_threads = 3)
+http <- webfakes::new_app_process(
+  webfakes::httpbin_app(), opts = webfakes::server_opts(num_threads = 3)
 )

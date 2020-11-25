@@ -22,10 +22,10 @@ Suggests:
     jsonlite,
     mockery,
     pingr,
-    presser,
+    webfakes,
     testthat,
     withr
-Remotes: r-lib/presser
+Remotes: r-lib/webfakes
 Encoding: UTF-8
 Imports:
     assertthat,
