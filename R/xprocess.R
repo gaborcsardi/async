@@ -1,5 +1,5 @@
 
-#' Extarnal process via a process generator
+#' External process via a process generator
 #'
 #' Wrap any [processx::process] object into a deferred value. The
 #' process is created by a generator function.
@@ -16,10 +16,16 @@
 #' * It must take a `...` argument, and pass it to
 #'   `processx::process$new()`.
 #' * It must use the `poll_connection = TRUE` argument.
-#' * It must use files for `stdout` and `stderr`. E.g. it may use
-#'   [tempfile()] to redirect standard output and error to temporary
-#'   files.
 #' These requirements might be relaxed in the future.
+#'
+#' If you want to obtain the standard output and/or error of the
+#' process, then `process_generator` must redirect them to files.
+#' If you want to discard them, `process_generator` can set them to
+#' `NULL`.
+#'
+#' `process_generator` should not use pipes (`"|"`) for the standard
+#' output or error, because the process will stop running if the
+#' pipe buffer gets full. We currently never read out the pipe buffer.
 #'
 #' @export
 #' @examples

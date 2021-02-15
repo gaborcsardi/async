@@ -57,3 +57,24 @@ test_that("cancel external_process", {
   while (Sys.time() < limit && proc$is_alive()) Sys.sleep(0.1)
   expect_false(proc$is_alive())
 })
+
+test_that("discarding stdout/stderr works", {
+  px <- asNamespace("processx")$get_tool("px")
+  pxgen <- function(...) {
+    processx::process$new(
+      px,
+      c("outln", "foo", "errln", "bar"),
+      stdout = NULL,
+      stderr = NULL,
+      ...
+    )
+  }
+
+  afun <- function() external_process(pxgen)
+
+  res <- synchronise(afun())
+  expect_equal(res$status, 0L)
+  expect_null(res$stdout)
+  expect_null(res$stderr)
+  expect_false(res$timeout)
+})

@@ -2,7 +2,7 @@
 % Please edit documentation in R/xprocess.R
 \name{external_process}
 \alias{external_process}
-\title{Extarnal process via a process generator}
+\title{External process via a process generator}
 \usage{
 external_process(process_generator, error_on_status = TRUE, ...)
 }
@@ -24,11 +24,17 @@ Current requirements for \code{process_generator}:
 \item It must take a \code{...} argument, and pass it to
 \code{processx::process$new()}.
 \item It must use the \code{poll_connection = TRUE} argument.
-\item It must use files for \code{stdout} and \code{stderr}. E.g. it may use
-\code{\link[=tempfile]{tempfile()}} to redirect standard output and error to temporary
-files.
 These requirements might be relaxed in the future.
 }
+
+If you want to obtain the standard output and/or error of the
+process, then \code{process_generator} must redirect them to files.
+If you want to discard them, \code{process_generator} can set them to
+\code{NULL}.
+
+\code{process_generator} should not use pipes (\code{"|"}) for the standard
+output or error, because the process will stop running if the
+pipe buffer gets full. We currently never read out the pipe buffer.
 }
 \description{
 Wrap any \link[processx:process]{processx::process} object into a deferred value. The
