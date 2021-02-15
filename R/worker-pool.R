@@ -231,9 +231,9 @@ wp__try_start <- function(self, private) {
 #' 1. we successfully interrupted a computation, then
 #'    we'll just poll_io(), and read() and we'll get back an
 #'    interrupt error.
-#' 2. The compuration has finished, so we did not interrupt it.
+#' 2. The computation has finished, so we did not interrupt it.
 #'    In this case the background R process will apply the interrupt
-#'    to the next compuration (at least on Unix) so the bg process
+#'    to the next computation (at least on Unix) so the bg process
 #'    needs to run a quick harmless call to absorb the interrupt.
 #'    We can use `Sys.sleep()` for this, and `write_input()` directly
 #'    for speed and simplicity.
