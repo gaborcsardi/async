@@ -39,11 +39,13 @@ synchronise <- function(expr) {
   ## is never started.
   res <- async_constant(NULL)
 
-  ## We need an extra final promise that cannot be replaced,
-  ## so priv stays the same.
-  res <- expr$then(function(x) x)
+  res <- expr
 
   if (!is_deferred(res)) return(res)
+
+  ## We need an extra final promise that cannot be replaced,
+  ## so priv stays the same.
+  res <- res$then(function(x) x)
 
   priv <- get_private(res)
   if (! identical(priv$event_loop, new_el)) {
