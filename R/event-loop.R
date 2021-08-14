@@ -10,6 +10,9 @@ event_loop <- R6Class(
     add_http = function(handle, callback, file = NULL, progress = NULL,
                         data = NULL)
       el_add_http(self, private, handle, callback, file, progress, data),
+    http_setopt = function(total_con = NULL, host_con = NULL, multiplex = NULL)
+      el_http_setopt(self, private, total_con, host_con, multiplex),
+
     add_process = function(conns, callback, data)
       el_add_process(self, private, conns, callback, data),
     add_r_process = function(conns, callback, data)
@@ -38,8 +41,8 @@ event_loop <- R6Class(
   private = list(
     create_task = function(callback, ..., id =  NULL, type = "foobar")
       el__create_task(self, private, callback, ..., id = id, type = type),
-    ensure_pool = function(...)
-      el__ensure_pool(self, private, ...),
+    ensure_pool = function()
+      el__ensure_pool(self, private),
     get_poll_timeout = function()
       el__get_poll_timeout(self, private),
     run_pending = function()
@@ -65,7 +68,8 @@ event_loop <- R6Class(
     curl_poll = TRUE,                  # should we poll for curl sockets?
     curl_timer = NULL,                 # call multi_run() before this
     next_ticks = character(),
-    worker_pool = NULL
+    worker_pool = NULL,
+    http_opts = NULL
   )
 )
 
@@ -432,8 +436,40 @@ el__create_task <- function(self, private, callback, data, ..., id, type) {
 
 #' @importFrom curl new_pool
 
-el__ensure_pool <- function(self, private, ...) {
-  if (is.null(private$pool)) private$pool <- new_pool(...)
+el__ensure_pool <- function(self, private) {
+  getopt <- function(nm) {
+    anm <- paste0("async_http_", nm)
+    if (!is.null(v <- getOption(anm))) return(v)
+    if (!is.na(v <- Sys.getenv(toupper(anm), NA_character_))) return(v)
+    NULL
+  }
+  if (is.null(private$pool)) {
+    private$http_opts <- list(
+      total_con = getopt("total_con") %||% 100,
+      host_con = getopt("host_con") %||%  6,
+      multiplex  = getopt("multiplex") %||% TRUE
+    )
+    private$pool <- new_pool(
+      total_con = private$http_opts$total_con,
+      host_con =  private$http_opts$host_con,
+      multiplex = private$http_opts$multiplex
+    )
+  }
+}
+
+#' @importFrom curl multi_set
+
+el_http_setopt <- function(self, private, total_con, host_con, multiplex) {
+  private$ensure_pool()
+  if (!is.null(total_con)) private$http_opts$total_con <- total_con
+  if (!is.null(host_con))  private$http_opts$host_con  <- host_con
+  if (!is.null(multiplex)) private$http_opts$multiplex <- multiplex
+  multi_set(
+    pool = private$pool,
+    total_con = private$http_opts$total_con,
+    host_con = private$http_opts$host_con,
+    multiplex = private_http_opts$multiplex
+  )
 }
 
 el__get_poll_timeout <- function(self, private) {

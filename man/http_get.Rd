@@ -61,6 +61,7 @@ synchronise(afun())
 }
 \seealso{
 Other asyncronous HTTP calls: 
-\code{\link{http_head}()}
+\code{\link{http_head}()},
+\code{\link{http_setopt}()}
 }
 \concept{asyncronous HTTP calls}

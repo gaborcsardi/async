@@ -272,3 +272,20 @@ test_that("http_post", {
   cnt <- jsonlite::fromJSON(rawToChar(resp$content), simplifyVector = TRUE)
   expect_equal(cnt$json, obj)
 })
+
+test_that("curl multi options", {
+  # It is not possible to query the options that were set on a handle,
+  # so this is not a great test case.
+  withr::local_options(
+    async_http_total_con = 1,
+    async_http_host_con = 1,
+    async_multiplext = 1
+  )
+  do <- function() {
+    http_get(http$url("/delay/0.34"))
+  }
+  tic <- proc.time()["elapsed"]
+  synchronise(when_all(do(), do(), do()))
+  toc <- proc.time()["elapsed"]
+  expect_true(toc - tic > as.difftime(1, units = "secs"))
+})

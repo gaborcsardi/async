@@ -356,3 +356,23 @@ http_statuses <- c(
   "598" = "Network read timeout error (Unknown)",
   "599" = "Network connect timeout error (Unknown)"
 )
+
+#' Set curl HTTP options in an event loop
+#'
+#' The event loop must be already running. In other words, you can only
+#' call this function from async functions.
+#'
+#' The default values are set when the first deferred HTTP operation of the
+#' event loop is created, and they are taken from the `async_http_total_con`,
+#' `async_http_host_con` and `async_http_multiplex` options.
+#'
+#' @param total_con,host_con, multiplex They are passed to
+#'   [curl::multi_set()]. If an argument is `NULL` (the default) then it is
+#'   ignored.
+#' @export
+#' @family asyncronous HTTP calls
+
+http_setopt <- function(total_con = NULL, host_con = NULL, multiplex = NULL) {
+  get_default_event_loop()$http_setopt(total_con, host_con, multiplex)
+  invisible()
+}

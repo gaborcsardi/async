@@ -51,6 +51,7 @@ synchronise(afun(urls))
 }
 \seealso{
 Other asyncronous HTTP calls: 
-\code{\link{http_get}()}
+\code{\link{http_get}()},
+\code{\link{http_setopt}()}
 }
 \concept{asyncronous HTTP calls}

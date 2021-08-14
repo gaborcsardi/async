@@ -17,7 +17,9 @@ run_process(
 )
 }
 \arguments{
-\item{command}{Character scalar, the command to run.}
+\item{command}{Character scalar, the command to run. If you are
+running \code{.bat} or \code{.cmd} files on Windows, make sure you read the
+'Batch files' section in the \link[processx]{process} manual page.}
 
 \item{args}{Character vector, arguments to the command.}
 
@@ -27,8 +29,15 @@ program exits with a non-zero status.}
 \item{wd}{Working directory of the process. If \code{NULL}, the current
 working directory is used.}
 
-\item{env}{Environment of the child process, a named character vector.
-IF \code{NULL}, the environment of the parent is inherited.}
+\item{env}{Environment variables of the child process. If \code{NULL},
+the parent's environment is inherited. On Windows, many programs
+cannot function correctly if some environment variables are not
+set, so we always set \code{HOMEDRIVE}, \code{HOMEPATH}, \code{LOGONSERVER},
+\code{PATH}, \code{SYSTEMDRIVE}, \code{SYSTEMROOT}, \code{TEMP}, \code{USERDOMAIN},
+\code{USERNAME}, \code{USERPROFILE} and \code{WINDIR}. To append new environment
+variables to the ones set in the current process, specify
+\code{"current"} in \code{env}, without a name, and the appended ones with
+names. The appended ones can overwrite the current ones.}
 
 \item{windows_verbatim_args}{Whether to omit the escaping of the
 command and the arguments on windows. Ignored on other platforms.}

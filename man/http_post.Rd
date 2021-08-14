@@ -31,7 +31,7 @@ The body of the response is written to this file.}
 response body is written to a file. See details at \code{\link[=http_get]{http_get()}}.}
 }
 \description{
-Start an HTTP POST requrest in the background, and report its completion
+Start an HTTP POST request in the background, and report its completion
 via a deferred value.
 }
 \examples{
