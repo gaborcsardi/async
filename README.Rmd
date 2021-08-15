@@ -12,11 +12,11 @@ knitr::opts_chunk$set(
 
 > Asynchronous HTTP
 
-[![Linux Build Status](https://travis-ci.org/r-lib/async.svg?branch=master)](https://travis-ci.org/r-lib/async)
-[![Windows Build status](https://ci.appveyor.com/api/projects/status/github/r-lib/async?svg=true)](https://ci.appveyor.com/project/gaborcsardi/async)
-[![](http://www.r-pkg.org/badges/version/async)](http://www.r-pkg.org/pkg/async)
-[![CRAN RStudio mirror downloads](http://cranlogs.r-pkg.org/badges/async)](http://www.r-pkg.org/pkg/async)
-[![Coverage Status](https://img.shields.io/codecov/c/github/r-lib/async/master.svg)](https://codecov.io/github/r-lib/async?branch=master)
+<!-- badges: start -->
+![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
+[![Codecov test coverage](https://codecov.io/gh/gaborcsardi/async/branch/master/graph/badge.svg)](https://codecov.io/gh/gaborcsardi/async?branch=master)
+[![R build status](https://github.com/gaborcsardi/async/workflows/R-CMD-check/badge.svg)](https://github.com/gaborcsardi/async/actions)
+<!-- badges: end -->
 
 The async package brings asynchronous (async) computation and I/O to R.
 It uses an event loop to schedule asynchronous functions that
