@@ -468,7 +468,7 @@ el_http_setopt <- function(self, private, total_con, host_con, multiplex) {
     pool = private$pool,
     total_con = private$http_opts$total_con,
     host_con = private$http_opts$host_con,
-    multiplex = private_http_opts$multiplex
+    multiplex = private$http_opts$multiplex
   )
 }
 
