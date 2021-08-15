@@ -7,7 +7,7 @@
 http_setopt(total_con = NULL, host_con = NULL, multiplex = NULL)
 }
 \arguments{
-\item{total_con, host_con, }{multiplex They are passed to
+\item{total_con, host_con, multiplex}{They are passed to
 \code{\link[curl:multi]{curl::multi_set()}}. If an argument is \code{NULL} (the default) then it is
 ignored.}
 }

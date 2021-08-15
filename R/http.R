@@ -366,7 +366,7 @@ http_statuses <- c(
 #' event loop is created, and they are taken from the `async_http_total_con`,
 #' `async_http_host_con` and `async_http_multiplex` options.
 #'
-#' @param total_con,host_con, multiplex They are passed to
+#' @param total_con,host_con,multiplex They are passed to
 #'   [curl::multi_set()]. If an argument is `NULL` (the default) then it is
 #'   ignored.
 #' @export
