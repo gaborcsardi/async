@@ -10,7 +10,8 @@ http_post(
   headers = character(),
   file = NULL,
   options = list(),
-  on_progress = NULL
+  on_progress = NULL,
+  form_data = list()
 )
 }
 \arguments{
@@ -29,6 +30,9 @@ The body of the response is written to this file.}
 
 \item{on_progress}{Progress handler function. It is only used if the
 response body is written to a file. See details at \code{\link[=http_get]{http_get()}}.}
+
+\item{form_data}{Form data to send. A list where each element is named
+with the key.}
 }
 \description{
 Start an HTTP POST request in the background, and report its completion
