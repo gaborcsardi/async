@@ -137,6 +137,7 @@ http_head <- mark_as_async(http_head)
 #'   with the key.
 #'
 #' @export
+#' @importFrom curl handle_setform
 #' @examples
 #' json <- jsonlite::toJSON(list(baz = 100, foo = "bar"))
 #'
