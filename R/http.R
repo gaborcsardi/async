@@ -131,10 +131,11 @@ http_head <- mark_as_async(http_head)
 #' @inheritParams http_get
 #' @param data Data to send. Either a raw vector, or a character string
 #'   that will be converted to raw with [base::charToRaw].
+#'   Exactly one of `data` and `form_data` must be given.
 #' @param on_progress Progress handler function. It is only used if the
 #'   response body is written to a file. See details at [http_get()].
 #' @param form_data Form data to send. A list where each element is named
-#'   with the key.
+#'   with the key. Exactly one of `data` and `form_data` must be given.
 #'
 #' @export
 #' @importFrom curl handle_setform
@@ -152,12 +153,15 @@ http_head <- mark_as_async(http_head)
 #'
 #' synchronise(do())
 
-http_post <- function(url, data, headers = character(), file = NULL,
-                      options = list(), on_progress = NULL,
-                      form_data = list()) {
+http_post <- function(url, data = NULL, headers = character(), file = NULL,
+                      options = list(), form_data = NULL, on_progress = NULL) {
 
-  url; data; headers; file; options; on_progress
-  if (!is.raw(data)) data <- charToRaw(data)
+  url; data; headers; file; options; form_data; on_progress
+  if (is.null(data) + is.null(form_data) != 1) {
+    stop("Exactly one of `data` and `form_data` must be given")
+  }
+
+  if (!is.null(data) && !is.raw(data)) data <- charToRaw(data)
   options <- get_default_curl_options(options)
 
   make_deferred_http(
@@ -165,10 +169,13 @@ http_post <- function(url, data, headers = character(), file = NULL,
       assert_that(is_string(url))
       handle <- new_handle(url = url)
       handle_setheaders(handle, .list = headers)
-      handle_setopt(handle, customrequest = "POST",
-                    postfieldsize = length(data), postfields = data,
-                    .list = options)
-      handle_setform(handle, .list = form_data)
+      handle_setopt(handle, customrequest = "POST", .list = options)
+      if (!is.null(data)) {
+        handle_setopt(handle, postfieldsize = length(data), postfields = data)
+      }
+      if (!is.null(form_data)) {
+        handle_setform(handle, .list = form_data)
+      }
       list(handle = handle, options = options)
     },
     file

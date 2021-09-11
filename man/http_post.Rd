@@ -6,19 +6,20 @@
 \usage{
 http_post(
   url,
-  data,
+  data = NULL,
   headers = character(),
   file = NULL,
   options = list(),
-  on_progress = NULL,
-  form_data = list()
+  form_data = NULL,
+  on_progress = NULL
 )
 }
 \arguments{
 \item{url}{URL to connect to.}
 
 \item{data}{Data to send. Either a raw vector, or a character string
-that will be converted to raw with \link[base:rawConversion]{base::charToRaw}.}
+that will be converted to raw with \link[base:rawConversion]{base::charToRaw}.
+Exactly one of \code{data} and \code{form_data} must be given.}
 
 \item{headers}{HTTP headers to send.}
 
@@ -28,11 +29,11 @@ The body of the response is written to this file.}
 \item{options}{Options to set on the handle. Passed to
 \code{\link[curl:handle]{curl::handle_setopt()}}.}
 
+\item{form_data}{Form data to send. A list where each element is named
+with the key. Exactly one of \code{data} and \code{form_data} must be given.}
+
 \item{on_progress}{Progress handler function. It is only used if the
 response body is written to a file. See details at \code{\link[=http_get]{http_get()}}.}
-
-\item{form_data}{Form data to send. A list where each element is named
-with the key.}
 }
 \description{
 Start an HTTP POST request in the background, and report its completion

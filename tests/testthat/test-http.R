@@ -273,6 +273,25 @@ test_that("http_post", {
   expect_equal(cnt$json, obj)
 })
 
+test_that("http_post multipart/form-data", {
+  resp <- NULL
+  obj <- list(baz = 100, foo = "bar")
+
+  do <- function() {
+    form_data <- list(
+      foo = "blabla",
+      bar = charToRaw("boeboe")
+    )
+    http_post(http$url("/post"), form_data = form_data)$
+      then(http_stop_for_status)$
+      then(function(x) resp <<- x)
+  }
+
+  synchronise(do())
+  cnt <- jsonlite::fromJSON(rawToChar(resp$content), simplifyVector = TRUE)
+  expect_equal(cnt$form, list(foo = "blabla", bar = "boeboe"))
+})
+
 test_that("curl multi options", {
   # It is not possible to query the options that were set on a handle,
   # so this is not a great test case.
