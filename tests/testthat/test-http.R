@@ -274,9 +274,17 @@ test_that("http_post", {
 })
 
 test_that("http_post multipart/form-data", {
-  resp <- NULL
-  obj <- list(baz = 100, foo = "bar")
+  do <- function() {
+    http_post(
+      http$url("/post"),
+      data = jsonlite::toJSON(list(foo = 1)),
+      form_data = list(this = "that")
+    )
+  }
 
+  expect_error(synchronise(do()), "Exactly one of")
+
+  resp <- NULL
   do <- function() {
     form_data <- list(
       foo = "blabla",
