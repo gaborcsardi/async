@@ -39,7 +39,7 @@ async_timeout <- function(task, timeout, ...) {
     type = "timeout", call = sys.call(),
     action = function(resolve) {
       task(...)$then(function(x) list("ok", x))$then(self)
-      delay(timeout)$then(~ list("timeout"))$then(self)
+      delay(timeout)$then(function() list("timeout"))$then(self)
     },
     parent_resolve = function(value, resolve) {
       if (!done) {

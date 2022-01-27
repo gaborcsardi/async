@@ -4,8 +4,8 @@ context("http")
 test_that("GET", {
   do <- async(function() {
     http_get(http$url("/get", query = list(q = 42)))$
-      then(~ rawToChar(.$content))$
-      then(~ expect_match(., "\"q\":[ ]*\"42\""))
+      then(function(.) rawToChar(.$content))$
+      then(function(.) expect_match(., "\"q\":[ ]*\"42\""))
   })
   synchronise(do())
 })
@@ -25,7 +25,7 @@ test_that("headers", {
   do <- async(function() {
     headers = c("X-Header-Test" = "foobar", "X-Another" = "boooyakasha")
     http_get(http$url("/headers"), headers = headers)$
-      then(~ jsonlite::fromJSON(rawToChar(.$content), simplifyVector = FALSE))$
+      then(function(.) jsonlite::fromJSON(rawToChar(.$content), simplifyVector = FALSE))$
       then(function(x) xx <<- x)
   })
   synchronise(do())
@@ -197,7 +197,7 @@ test_that("timeout, failed request", {
   expect_true(toc - tic < as.difftime(4, units = "secs"))
 
   do2 <- function() {
-    do()$catch(error = ~ "fixed")
+    do()$catch(error = function(.) "fixed")
   }
 
   tic <- Sys.time()

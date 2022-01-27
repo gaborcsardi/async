@@ -22,7 +22,7 @@
 #' dx
 
 async <- function(fun) {
-  fun <- as_function(fun)
+  fun <- as.function(fun)
   if (is_async(fun)) return(fun)
 
   async_fun <- fun

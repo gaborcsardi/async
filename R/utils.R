@@ -120,3 +120,7 @@ crash <- function () {
 str_trim <- function(x) {
   sub("\\s+$", "", sub("^\\s+", "", x))
 }
+
+expr_name <- function(x) {
+  paste0(format(as.list(x)[[1]]), collapse = "")
+}

@@ -5,8 +5,6 @@ test_that("def__make_parent_*", {
   good <- list(
     NULL,
     function(x) x,
-    ~ .,
-    ~ .x,
     function() 42,
     function(value, resolve) resolve(value)
   )

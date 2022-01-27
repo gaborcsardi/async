@@ -21,7 +21,7 @@ test_that("when_some, few errors", {
   done <- FALSE
   do <- async(function() {
     d1 <- delay(1/10)$then(function(value) "foo")
-    d2 <- delay(1/10000)$then(~ stop("ooops"))
+    d2 <- delay(1/10000)$then(function(.) stop("ooops"))
     d3 <- delay(1/10000)$then(function(value) "bar")
 
     dx <- when_some(2, d1, d2, d3)$
@@ -37,8 +37,8 @@ test_that("when_some, few errors", {
 test_that("too many errors", {
   done <- FALSE
   do <- async(function() {
-    d1 <- delay(1/10)$then(~ stop("ooops again"))
-    d2 <- delay(1/10000)$then(~ stop("ooops"))
+    d1 <- delay(1/10)$then(function(.) stop("ooops again"))
+    d2 <- delay(1/10000)$then(function(.) stop("ooops"))
     d3 <- delay(1/10000)$then(function(value) "bar")
 
     when_some(2, d1, d2, d3)
@@ -57,7 +57,7 @@ test_that("not enough values", {
   expect_s3_class(err, "async_rejected")
 
   do2 <- async(function() {
-    do()$catch(error = ~ "repaired")
+    do()$catch(error = function(.) "repaired")
   })
   expect_equal(synchronise(do2()), "repaired")
 })

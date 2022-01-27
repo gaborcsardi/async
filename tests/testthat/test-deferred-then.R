@@ -45,8 +45,8 @@ test_that("then for fulfilled", {
 test_that("multiple then clauses are not allowed", {
   do <- async(function() {
     dx <- delay(1/1000)
-    dx$then(~ 1)
-    dx$then(~ 2)
+    dx$then(function() 1)
+    dx$then(function() 2)
   })
 
   err <- tryCatch(synchronise(do()), error = identity)
@@ -57,9 +57,9 @@ test_that("multiple then clauses are not allowed", {
 test_that("compact function notation", {
   do <- function() {
     http_head(http$url("/"))$
-      then(~ http_get(.$url))$
-      then(~ .$status_code)$
-      then(~ expect_equal(., 200))
+      then(function(.) http_get(.$url))$
+      then(function(.) .$status_code)$
+      then(function(.) expect_equal(., 200))
   }
   synchronise(do())
 })
@@ -71,7 +71,7 @@ test_that("embedded then", {
   do <- function() {
     add1(4)$
       then(mul3)$
-      then(~ expect_equal(., 15))
+      then(function(.) expect_equal(., 15))
   }
   synchronise(do())
 })

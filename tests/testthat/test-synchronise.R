@@ -41,7 +41,7 @@ test_that("synchronization barriers, async_constant", {
   }
 
   afun2 <- function(x) {
-    x$then(~ . + 42)
+    x$then(function(.) . + 42)
   }
 
   expect_error(
@@ -57,7 +57,7 @@ test_that("synchronization barriers, async_detect", {
   }
 
   afun2 <- function(x) {
-    async_detect(list(x, 2), function(.x) .x$then(~ . == 1))
+    async_detect(list(x, 2), function(.x) .x$then(function(.) . == 1))
   }
 
   expect_error(
@@ -73,7 +73,7 @@ test_that("synchronization barriers, async_every", {
   }
 
   afun2 <- function(x) {
-    async_every(list(x, 1), function(.x) .x$then(~ . == 1))
+    async_every(list(x, 1), function(.x) .x$then(function(.) . == 1))
   }
 
   expect_error(
@@ -90,7 +90,7 @@ test_that("synchronization barriers, async_filter", {
   }
 
   afun2 <- function(x) {
-    async_filter(list(x, 1), function(.x) .x$then(~ . == 1))
+    async_filter(list(x, 1), function(.x) .x$then(function(.) . == 1))
   }
 
   expect_error(
@@ -106,7 +106,7 @@ test_that("synchronization barriers, async_map", {
   }
 
   afun2 <- function(x) {
-    async_filter(list(x, 1), function(.x) .x$then(~ . + 1))
+    async_filter(list(x, 1), function(.x) .x$then(function(.) . + 1))
   }
 
   expect_error(
@@ -197,7 +197,7 @@ test_that("printing async_rejected", {
   expect_match(
     format(res),
     paste0("<async error: oops\n in *parent* callback of ",
-           "`delay(1/1000)$then(function() stop(\"oops\"))` at "),
+           "`delay(1/1000)$then` at "),
     fixed = TRUE
   )
 })
