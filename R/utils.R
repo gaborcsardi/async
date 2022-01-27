@@ -131,7 +131,12 @@ expr_name <- function(expr) {
   }
 
   if (is.call(expr)) {
-    return(paste0(format(as.list(expr)[[1]]), collapse = ""))
+    cl <- as.list(expr)[[1]]
+    if (is.symbol(cl)) {
+      return(as.character(cl))
+    } else {
+      return(paste0(format(cl), collapse = ""))
+    }
   }
 
   if (is.atomic(expr) && length(expr) == 1) {
