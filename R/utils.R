@@ -121,6 +121,22 @@ str_trim <- function(x) {
   sub("\\s+$", "", sub("^\\s+", "", x))
 }
 
-expr_name <- function(x) {
-  paste0(format(as.list(x)[[1]]), collapse = "")
+expr_name <- function(expr) {
+  if (is.null(expr)) {
+    return("NULL")
+  }
+
+  if (is.symbol(expr)) {
+    return(as.character(expr))
+  }
+
+  if (is.call(expr)) {
+    return(paste0(format(as.list(expr)[[1]]), collapse = ""))
+  }
+
+  if (is.atomic(expr) && length(expr) == 1) {
+    return(as.character(expr))
+  }
+
+  gsub("\n.*$", "...", as.character(expr))
 }
