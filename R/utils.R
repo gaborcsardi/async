@@ -120,3 +120,28 @@ crash <- function () {
 str_trim <- function(x) {
   sub("\\s+$", "", sub("^\\s+", "", x))
 }
+
+expr_name <- function(expr) {
+  if (is.null(expr)) {
+    return("NULL")
+  }
+
+  if (is.symbol(expr)) {
+    return(as.character(expr))
+  }
+
+  if (is.call(expr)) {
+    cl <- as.list(expr)[[1]]
+    if (is.symbol(cl)) {
+      return(as.character(cl))
+    } else {
+      return(paste0(format(cl), collapse = ""))
+    }
+  }
+
+  if (is.atomic(expr) && length(expr) == 1) {
+    return(as.character(expr))
+  }
+
+  gsub("\n.*$", "...", as.character(expr))
+}

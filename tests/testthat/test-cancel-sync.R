@@ -8,7 +8,7 @@ test_that("detect, if one is done", {
       force(n)
       delay(n)$
         then(function() pinged <<- pinged + 1)$
-        then(~ TRUE)
+        then(function() TRUE)
     }
     async_detect(c(1/1000, 5), f)
   }
@@ -28,7 +28,7 @@ test_that("detect, if one errors",  {
       force(n)
       delay(n)$
         then(function() pinged <<- pinged + 1)$
-        then(~ stop("foobar"))
+        then(function() stop("foobar"))
     }
     async_detect(c(1/1000, 5), f)
   }
@@ -50,7 +50,7 @@ test_that("every, if one is FALSE", {
       force(n)
       delay(n)$
         then(function() pinged <<- pinged + 1)$
-        then(~ FALSE)
+        then(function() FALSE)
     }
     async_every(c(1/1000, 5), f)
   }
@@ -69,7 +69,7 @@ test_that("every, if one errors", {
       force(n)
       delay(n)$
         then(function() pinged <<- pinged + 1)$
-        then(~ stop("foobar"))
+        then(function() stop("foobar"))
     }
     async_every(c(1/1000, 5), f)
   }
@@ -91,7 +91,7 @@ test_that("filter, if one errors", {
       force(n)
       delay(n)$
         then(function() pinged <<- pinged + 1)$
-        then(~ stop("foobar"))
+        then(function() stop("foobar"))
     }
     async_filter(c(1/1000, 5), f)
   }
@@ -113,7 +113,7 @@ test_that("map, if one errors", {
       force(n)
       delay(n)$
         then(function() pinged <<- pinged + 1)$
-        then(~ stop("foobar"))
+        then(function() stop("foobar"))
     }
     async_map(c(1/1000, 5), f)
   }
@@ -135,7 +135,7 @@ test_that("some, if one is TRUE", {
       force(n)
       delay(n)$
         then(function() pinged <<- pinged + 1)$
-        then(~ TRUE)
+        then(function() TRUE)
     }
     async_some(c(1/1000, 5), f)
   }
@@ -154,7 +154,7 @@ test_that("every, if one errors", {
       force(n)
       delay(n)$
         then(function() pinged <<- pinged + 1)$
-        then(~ stop("foobar"))
+        then(function() stop("foobar"))
     }
     async_some(c(1/1000, 5), f)
   }
@@ -176,7 +176,7 @@ test_that("when_all, if one errors", {
       force(n)
       delay(n)$
         then(function() pinged <<- pinged + 1)$
-        then(~ stop("foobar"))
+        then(function() stop("foobar"))
     }
     defs <- lapply(c(1/1000, 5, 5), f)
     when_all(.list = defs)
@@ -199,7 +199,7 @@ test_that("when_some, if enough are done", {
       force(n)
       delay(n)$
         then(function() pinged <<- pinged + 1)$
-        then(~ "yep")
+        then(function() "yep")
     }
     defs <- lapply(c(1/1000, 5, 1/1000, 5), f)
     when_some(2, .list = defs)
@@ -221,7 +221,7 @@ test_that("when_some, if some error", {
       force(n)
       delay(n)$
         then(function() pinged <<- pinged + 1)$
-        then(~ stop("foobar"))
+        then(function() stop("foobar"))
     }
     defs <- lapply(c(5, 1/1000, 1/1000, 5), f)
     when_some(3, .list = defs)
@@ -247,7 +247,7 @@ test_that("when_any, if one is done", {
       force(n)
       delay(n)$
         then(function() pinged <<- pinged + 1)$
-        then(~ "yep")
+        then(function() "yep")
     }
     defs <- lapply(c(5, 5, 1/1000, 5), f)
     when_any(.list = defs)

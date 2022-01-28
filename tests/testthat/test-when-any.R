@@ -19,7 +19,7 @@ test_that("when_any, non-deferred", {
 
     when_any(d1, d2)$
       then(function(value) expect_equal(value, "bar"))$
-      then(~ d1)$
+      then(function(.) d1)$
       catch(error = identity)
   })
   synchronise(do())

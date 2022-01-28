@@ -10,13 +10,13 @@ test_that("async_every", {
 
   do <- function() {
     d1 <- async_every(1:10, is_odd)$
-      then(~ expect_identical(., FALSE))
+      then(function(.) expect_identical(., FALSE))
 
     d2 <- async_every(numeric(), is_odd)$
-      then(~ expect_identical(., TRUE))
+      then(function(.) expect_identical(., TRUE))
 
     d3 <- async_every(1:10 * 2 + 1, is_odd)$
-      then(~ expect_identical(., TRUE))
+      then(function(.) expect_identical(., TRUE))
 
     when_all(d1, d2, d3)
   }

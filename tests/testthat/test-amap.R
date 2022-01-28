@@ -32,7 +32,7 @@ test_that("async_map with limit, error", {
   list <- structure(as.list(1:10), names = letters[1:10])
   fun <- async(function(x) {
     force(x)
-    delay(1/10000)$then(~ if (x == 7) stop("oops") else x * 2)
+    delay(1/10000)$then(function() if (x == 7) stop("oops") else x * 2)
   })
 
   for (l in c(1:10, Inf)) {

@@ -5,8 +5,8 @@ test_that("rejection", {
 
   do <- async(function() {
     dx <- delay(1/10000)$
-      then(~ stop("ohno!"))$
-      catch(error = ~ expect_match(.$message, "ohno!"))
+      then(function() stop("ohno!"))$
+      catch(error = function(.) expect_match(.$message, "ohno!"))
   })
   synchronise(do())
 })
@@ -16,12 +16,12 @@ test_that("error propagates", {
   do <- async(function() {
     called <- FALSE
     dx <- delay(1/10000)$
-      then(~ .)$
-      then(~ stop("ohno!"))$
+      then(function(.) .)$
+      then(function() stop("ohno!"))$
       then(function(x) called <<- TRUE)
 
     dx$
-      catch(error = ~ expect_match(.$message, "ohno!"))$
+      catch(error = function(.) expect_match(.$message, "ohno!"))$
       then(function(x) expect_false(called))
   })
   synchronise(do())
@@ -33,8 +33,8 @@ test_that("handled error is not an error any more", {
     delay(1/10000)$
       then(function(x) stop("ohno!"))$
       catch(error = function(x) "OK")$
-      then(~ expect_equal(., "OK"))$
-      catch(error = ~ stop("not called"))
+      then(function(.) expect_equal(., "OK"))$
+      catch(error = function() stop("not called"))
   })
   synchronise(do())
 })
@@ -42,10 +42,10 @@ test_that("handled error is not an error any more", {
 test_that("catch", {
   do <- async(function() {
     dx <- delay(1/1000)$
-      then(~ .)$
-      then(~ stop("ooops"))$
-      then(~ "not this one")$
-      catch(error = ~ "nothing to see here")
+      then(function(.) .)$
+      then(function() stop("ooops"))$
+      then(function() "not this one")$
+      catch(error = function(.) "nothing to see here")
   })
   expect_equal(
     synchronise(do()),
@@ -57,9 +57,9 @@ test_that("finally", {
   called <- FALSE
   do <- async(function() {
     delay(1/1000)$
-      then(~ .)$
-      then(~ stop("oops"))$
-      then(~ "not this one")$
+      then(function(.) .)$
+      then(function() stop("oops"))$
+      then(function() "not this one")$
       finally(function() called <<- TRUE)
   })
   expect_error(synchronise(do()), "oops")
@@ -68,8 +68,8 @@ test_that("finally", {
   called <- FALSE
   do <- async(function() {
     delay(1/1000)$
-      then(~ .)$
-      then(~ "this one")$
+      then(function(.) .)$
+      then(function() "this one")$
       finally(function() called <<- TRUE)
   })
   expect_equal(synchronise(do()), "this one")
@@ -133,7 +133,7 @@ test_that("catch handers", {
       catch(special = function(e) spec <<- e)$
       catch(foobar = function(e) foobar1 <<- e)$
       then(function(e) foobar2 <<- e)$
-      then(~ "ok")
+      then(function() "ok")
   })
 
   expect_equal(synchronise(do()), "ok")

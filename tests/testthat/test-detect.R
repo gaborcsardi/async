@@ -11,22 +11,22 @@ test_that("async_detect", {
 
   test <- function(limit) {
     d1 <- async_detect(1:10, is_odd, .limit = limit)$
-      then(~ expect_true(. %in% c(1L, 3L, 5L, 7L, 9L)))
+      then(function(.) expect_true(. %in% c(1L, 3L, 5L, 7L, 9L)))
 
     d2 <- async_detect(2:10, is_odd, .limit = limit)$
-      then(~ expect_true(. %in% c(3L, 5L, 7L, 9L)))
+      then(function(.) expect_true(. %in% c(3L, 5L, 7L, 9L)))
 
     d3 <- async_detect(2, is_odd, .limit = limit)$
-      then(~ expect_null(.))
+      then(function(.) expect_null(.))
 
     d4 <- async_detect(c(1:10 * 2L, 43L), is_odd, .limit = limit)$
-      then(~ expect_identical(., 43L))
+      then(function(.) expect_identical(., 43L))
 
     d5 <- async_detect(numeric(), is_odd, .limit = limit)$
-      then(~ expect_null(.))
+      then(function(.) expect_null(.))
 
     d6 <- async_detect(1:10 * 2, is_odd, .limit = limit)$
-      then(~ expect_null(.))
+      then(function(.) expect_null(.))
 
     when_all(d1, d2, d3, d4, d5, d6)
   }

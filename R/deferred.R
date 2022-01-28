@@ -492,7 +492,7 @@ def__run_action <- function(self, private) {
 
   if (!is.null(action)) {
     if (!is.function(action)) {
-      action <- as_function(action)
+      action <- as.function(action)
       formals(action) <- alist(resolve = NULL, progress = NULL)
     }
     assert_that(is_action_function(action))
@@ -649,7 +649,7 @@ def__make_parent_resolve <- function(fun) {
   if (is.null(fun)) {
     function(value, resolve) resolve(value)
   } else if (!is.function(fun)) {
-    fun <- as_function(fun)
+    fun <- as.function(fun)
     function(value, resolve) resolve(fun(value))
   } else if (num_args(fun) == 0) {
     function(value, resolve) resolve(fun())
@@ -669,7 +669,7 @@ def__make_parent_reject <- function(fun) {
   } else if (is.list(fun)) {
     def__make_parent_reject_catch(fun)
   } else if (!is.function(fun)) {
-    fun <- as_function(fun)
+    fun <- as.function(fun)
     function(value, resolve) resolve(fun(value))
   } else if (num_args(fun) == 0) {
     function(value, resolve) resolve(fun())
@@ -684,12 +684,12 @@ def__make_parent_reject <- function(fun) {
 }
 
 def__make_parent_reject_catch <- function(handlers) {
-  handlers <- lapply(handlers, as_function)
+  handlers <- lapply(handlers, as.function)
   function(value, resolve) {
     ok <- FALSE
     ret <- tryCatch({
-      quo <- quo(tryCatch(stop(value), !!!handlers))
-      ret <- eval_tidy(quo)
+      quo <- as.call(c(list(quote(tryCatch), quote(stop(value))), handlers))
+      ret <- eval(quo)
       ok <- TRUE
       ret
     }, error = function(x) x)

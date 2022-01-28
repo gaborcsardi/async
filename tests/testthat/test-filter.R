@@ -10,13 +10,13 @@ test_that("async_filter", {
 
   do <- function() {
     d1 <- async_filter(1:10, is_odd)$
-      then(~ expect_identical(., c(1L, 3L, 5L, 7L, 9L)))
+      then(function(.) expect_identical(., c(1L, 3L, 5L, 7L, 9L)))
 
     d2 <- async_filter(numeric(), is_odd)$
-      then(~ expect_identical(., numeric()))
+      then(function(.) expect_identical(., numeric()))
 
     d3 <- async_filter(1:10 * 2, is_odd)$
-      then(~ expect_identical(., numeric()))
+      then(function(.) expect_identical(., numeric()))
 
     when_all(d1, d2, d3)
   }
@@ -50,13 +50,13 @@ test_that("async_reject", {
 
   do <- function() {
     d1 <- async_reject(1:10, is_even)$
-      then(~ expect_identical(., c(1L, 3L, 5L, 7L, 9L)))
+      then(function(.) expect_identical(., c(1L, 3L, 5L, 7L, 9L)))
 
     d2 <- async_reject(numeric(), is_even)$
-      then(~ expect_identical(., numeric()))
+      then(function(.) expect_identical(., numeric()))
 
     d3 <- async_reject(1:10 * 2, is_even)$
-      then(~ expect_identical(., numeric()))
+      then(function(.) expect_identical(., numeric()))
 
     when_all(d1, d2, d3)
   }

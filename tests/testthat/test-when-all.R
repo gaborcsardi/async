@@ -99,8 +99,8 @@ test_that("when_all, multiple errors", {
 test_that("resolving to NULL", {
   do <- async(function() {
     when_all(
-      delay(0)$then(~ NULL),
-      delay(0)$then(~ 46)
+      delay(0)$then(function(.) NULL),
+      delay(0)$then(function(.) 46)
     )
   })
 
