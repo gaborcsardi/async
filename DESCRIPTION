@@ -33,7 +33,6 @@ Imports:
     curl (>= 3.2),
     processx (>= 3.3.0.9001),
     R6,
-    utils,
-    uuid
+    utils
 Roxygen: list(markdown = TRUE, r6 = FALSE)
 KeepSource: yes

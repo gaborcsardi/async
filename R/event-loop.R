@@ -419,10 +419,8 @@ el__io_poll <- function(self, private, timeout) {
   }
 }
 
-#' @importFrom uuid UUIDgenerate
-
 el__create_task <- function(self, private, callback, data, ..., id, type) {
-  id <- id %||% UUIDgenerate()
+  id <- id %||% get_uuid()
   private$tasks[[id]] <- list(
     type = type,
     id = id,
