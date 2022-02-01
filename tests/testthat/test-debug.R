@@ -82,7 +82,11 @@ test_that("async_tree", {
   priv$run_action()
 
   tree <- async_tree()
-  expect_s3_class(tree, "tree")
+  if (packageVersion("cli") >= "3.1.1.9000") {
+    expect_s3_class(tree, "cli_tree")
+  } else {
+    expect_s3_class(tree, "tree")
+  }
   prn <- format(tree)
   expect_equal(length(prn), 3)
   expect_match(prn[1], "p2$then", fixed = TRUE)
