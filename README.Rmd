@@ -19,8 +19,8 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 ![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
-[![Codecov test coverage](https://codecov.io/gh/gaborcsardi/async/branch/master/graph/badge.svg)](https://codecov.io/gh/gaborcsardi/async?branch=master)
-[![R build status](https://github.com/gaborcsardi/async/workflows/R-CMD-check/badge.svg)](https://github.com/gaborcsardi/async/actions)
+[![Codecov test coverage](https://codecov.io/gh/gaborcsardi/async/branch/master/graph/badge.svg)](https://app.codecov.io/gh/gaborcsardi/async?branch=master)
+[![R-CMD-check](https://github.com/gaborcsardi/async/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gaborcsardi/async/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The async package brings asynchronous (async) computation and I/O to R.

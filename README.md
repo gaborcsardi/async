@@ -9,9 +9,8 @@
 
 ![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
 [![Codecov test
-coverage](https://codecov.io/gh/gaborcsardi/async/branch/master/graph/badge.svg)](https://codecov.io/gh/gaborcsardi/async?branch=master)
-[![R build
-status](https://github.com/gaborcsardi/async/workflows/R-CMD-check/badge.svg)](https://github.com/gaborcsardi/async/actions)
+coverage](https://codecov.io/gh/gaborcsardi/async/branch/master/graph/badge.svg)](https://app.codecov.io/gh/gaborcsardi/async?branch=master)
+[![R-CMD-check](https://github.com/gaborcsardi/async/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gaborcsardi/async/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The async package brings asynchronous (async) computation and I/O to R.
@@ -22,27 +21,27 @@ at synchronisation points.
 
 ## Features
 
-  - A `deferred` class which is the basic building block for async
+-   A `deferred` class which is the basic building block for async
     computation.
-  - Timers, HTTP queries, generic external processes, external R
+-   Timers, HTTP queries, generic external processes, external R
     processes.
-  - A worker pool for calling R functions in the background.
-  - Operations to combine deferred values: `$then()`, `$when_all()`,
+-   A worker pool for calling R functions in the background.
+-   Operations to combine deferred values: `$then()`, `$when_all()`,
     `when_any()`, `when_some()`, `$finally()` and the `$catch()`
     operation to handle errors.
-  - A strong ownership model: each deferred value has exactly one child
+-   A strong ownership model: each deferred value has exactly one child
     that receives the result (or error) of its async computation.
-  - Synchronisation (sync) points to embed async code into synchronous
+-   Synchronisation (sync) points to embed async code into synchronous
     code. Sync points run their own event loop, and they can be stacked.
-  - Lazy evaluation of deferred values. Only the deferred values that
+-   Lazy evaluation of deferred values. Only the deferred values that
     are needed to calculate the result of the async phase are evaluated.
-  - Auto-cancellation. Deferred values that are not needed for the final
+-   Auto-cancellation. Deferred values that are not needed for the final
     result(s) of the async phase are automatically cancelled, as soon as
     possible.
-  - Manual cancellation is also possible.
-  - Progress bar support. Deferred values can report their progress via
+-   Manual cancellation is also possible.
+-   Progress bar support. Deferred values can report their progress via
     a callback function.
-  - Additional helper functions for working with deferred values, e.g.
+-   Additional helper functions for working with deferred values, e.g.
     `async_map()`, `async_detect()`, `async_filter()`, etc.
 
 ## Supported async I/O and computation
@@ -200,7 +199,7 @@ synchronise(response_time("https://google.com"))
 ```
 
     #> https://google.com 
-    #>           0.352159
+    #>           0.213394
 
 ``` r
 synchronise(response_time("https://httpbin.org/status/401"))
@@ -303,10 +302,10 @@ already resolved and nodes that have already failed).
 Auto-cancellation is very convenient, as you can be sure that resources
 are free as soon as they are not needed. Some practical examples:
 
-  - Making HTTP requests to many mirror web sites, to check their
+-   Making HTTP requests to many mirror web sites, to check their
     response time. As soon as the first reply is in, the rest of the
     HTTP requests are cancelled.
-  - In multi-process computation, as soon as one process fails, the rest
+-   In multi-process computation, as soon as one process fails, the rest
     are automatically cancelled. (Unless the failure is handled, of
     course.)
 
@@ -350,7 +349,7 @@ function with a timeout.
 
 ## Other Async Utilities
 
-  - `async_constant()` takes a value and creates and asynchronous
+-   `async_constant()` takes a value and creates and asynchronous
     function that returns that value.
 
 ## Examples
@@ -379,13 +378,13 @@ synchronise(revdep_authors())[1:3]
 ```
 
     #> [[1]]
-    #> [1] "Yihui Xie [aut, cre] (<https://orcid.org/0000-0003-0645-5666>),\nAbhraneel Sarma [ctb],\nAdam Vogt [ctb],\nAlastair Andrew [ctb],\nAlex Zvoleff [ctb],\nAndre Simon [ctb] (the CSS files under inst/themes/ were derived from\nthe Highlight package http://www.andre-simon.de),\nAron Atkins [ctb],\nAaron Wolen [ctb],\nAshley Manton [ctb],\nAtsushi Yasumoto [ctb] (<https://orcid.org/0000-0002-8335-495X>),\nBen Baumer [ctb],\nBrian Diggs [ctb],\nBrian Zhang [ctb],\nBulat Yapparov [ctb],\nCassio Pereira [ctb],\nChristophe Dervieux [ctb],\nDavid Hall [ctb],\nDavid Hugh-Jones [ctb],\nDavid Robinson [ctb],\nDoug Hemken [ctb],\nDuncan Murdoch [ctb],\nElio Campitelli [ctb],\nEllis Hughes [ctb],\nEmily Riederer [ctb],\nFabian Hirschmann [ctb],\nFitch Simeon [ctb],\nForest Fang [ctb],\nFrank E Harrell Jr [ctb] (the Sweavel package at inst/misc/Sweavel.sty),\nGarrick Aden-Buie [ctb],\nGregoire Detrez [ctb],\nHadley Wickham [ctb],\nHao Zhu [ctb],\nHeewon Jeon [ctb],\nHenrik Bengtsson [ctb],\nHiroaki Yutani [ctb],\nIan Lyttle [ctb],\nHodges Daniel [ctb],\nJake Burkhead [ctb],\nJames Manton [ctb],\nJared Lander [ctb],\nJason Punyon [ctb],\nJavier Luraschi [ctb],\nJeff Arnold [ctb],\nJenny Bryan [ctb],\nJeremy Ashkenas [ctb, cph] (the CSS file at\ninst/misc/docco-classic.css),\nJeremy Stephens [ctb],\nJim Hester [ctb],\nJoe Cheng [ctb],\nJohannes Ranke [ctb],\nJohn Honaker [ctb],\nJohn Muschelli [ctb],\nJonathan Keane [ctb],\nJJ Allaire [ctb],\nJohan Toloe [ctb],\nJonathan Sidi [ctb],\nJoseph Larmarange [ctb],\nJulien Barnier [ctb],\nKaiyin Zhong [ctb],\nKamil Slowikowski [ctb],\nKarl Forner [ctb],\nKevin K. Smith [ctb],\nKirill Mueller [ctb],\nKohske Takahashi [ctb],\nLorenz Walthert [ctb],\nLucas Gallindo [ctb],\nMarius Hofert [ctb],\nMartin Modrák [ctb],\nMichael Chirico [ctb],\nMichael Friendly [ctb],\nMichal Bojanowski [ctb],\nMichel Kuhlmann [ctb],\nMiller Patrick [ctb],\nNacho Caballero [ctb],\nNick Salkowski [ctb],\nNiels Richard Hansen [ctb],\nNoam Ross [ctb],\nObada Mahdi [ctb],\nPavel N. Krivitsky [ctb] (<https://orcid.org/0000-0002-9101-3362>),\nQiang Li [ctb],\nRamnath Vaidyanathan [ctb],\nRichard Cotton [ctb],\nRobert Krzyzanowski [ctb],\nRomain Francois [ctb],\nRuaridh Williamson [ctb],\nScott Kostyshak [ctb],\nSebastian Meyer [ctb],\nSietse Brouwer [ctb],\nSimon de Bernard [ctb],\nSylvain Rousseau [ctb],\nTaiyun Wei [ctb],\nThibaut Assus [ctb],\nThibaut Lamadon [ctb],\nThomas Leeper [ctb],\nTim Mastny [ctb],\nTom Torsney-Weir [ctb],\nTrevor Davis [ctb],\nViktoras Veitas [ctb],\nWeicheng Zhu [ctb],\nWush Wu [ctb],\nZachary Foster [ctb]"
+    #> [1] "Yihui Xie [aut, cre] (<https://orcid.org/0000-0003-0645-5666>),\nAbhraneel Sarma [ctb],\nAdam Vogt [ctb],\nAlastair Andrew [ctb],\nAlex Zvoleff [ctb],\nAndre Simon [ctb] (the CSS files under inst/themes/ were derived from\nthe Highlight package http://www.andre-simon.de),\nAron Atkins [ctb],\nAaron Wolen [ctb],\nAshley Manton [ctb],\nAtsushi Yasumoto [ctb] (<https://orcid.org/0000-0002-8335-495X>),\nBen Baumer [ctb],\nBrian Diggs [ctb],\nBrian Zhang [ctb],\nBulat Yapparov [ctb],\nCassio Pereira [ctb],\nChristophe Dervieux [ctb],\nDavid Hall [ctb],\nDavid Hugh-Jones [ctb],\nDavid Robinson [ctb],\nDoug Hemken [ctb],\nDuncan Murdoch [ctb],\nElio Campitelli [ctb],\nEllis Hughes [ctb],\nEmily Riederer [ctb],\nFabian Hirschmann [ctb],\nFitch Simeon [ctb],\nForest Fang [ctb],\nFrank E Harrell Jr [ctb] (the Sweavel package at inst/misc/Sweavel.sty),\nGarrick Aden-Buie [ctb],\nGregoire Detrez [ctb],\nHadley Wickham [ctb],\nHao Zhu [ctb],\nHeewon Jeon [ctb],\nHenrik Bengtsson [ctb],\nHiroaki Yutani [ctb],\nIan Lyttle [ctb],\nHodges Daniel [ctb],\nJake Burkhead [ctb],\nJames Manton [ctb],\nJared Lander [ctb],\nJason Punyon [ctb],\nJavier Luraschi [ctb],\nJeff Arnold [ctb],\nJenny Bryan [ctb],\nJeremy Ashkenas [ctb, cph] (the CSS file at\ninst/misc/docco-classic.css),\nJeremy Stephens [ctb],\nJim Hester [ctb],\nJoe Cheng [ctb],\nJohannes Ranke [ctb],\nJohn Honaker [ctb],\nJohn Muschelli [ctb],\nJonathan Keane [ctb],\nJJ Allaire [ctb],\nJohan Toloe [ctb],\nJonathan Sidi [ctb],\nJoseph Larmarange [ctb],\nJulien Barnier [ctb],\nKaiyin Zhong [ctb],\nKamil Slowikowski [ctb],\nKarl Forner [ctb],\nKevin K. Smith [ctb],\nKirill Mueller [ctb],\nKohske Takahashi [ctb],\nLorenz Walthert [ctb],\nLucas Gallindo [ctb],\nMarius Hofert [ctb],\nMartin Modrák [ctb],\nMichael Chirico [ctb],\nMichael Friendly [ctb],\nMichal Bojanowski [ctb],\nMichel Kuhlmann [ctb],\nMiller Patrick [ctb],\nNacho Caballero [ctb],\nNick Salkowski [ctb],\nNiels Richard Hansen [ctb],\nNoam Ross [ctb],\nObada Mahdi [ctb],\nPavel N. Krivitsky [ctb] (<https://orcid.org/0000-0002-9101-3362>),\nQiang Li [ctb],\nRamnath Vaidyanathan [ctb],\nRichard Cotton [ctb],\nRobert Krzyzanowski [ctb],\nRomain Francois [ctb],\nRuaridh Williamson [ctb],\nScott Kostyshak [ctb],\nSebastian Meyer [ctb],\nSietse Brouwer [ctb],\nSimon de Bernard [ctb],\nSylvain Rousseau [ctb],\nTaiyun Wei [ctb],\nThibaut Assus [ctb],\nThibaut Lamadon [ctb],\nThomas Leeper [ctb],\nTim Mastny [ctb],\nTom Torsney-Weir [ctb],\nTrevor Davis [ctb],\nViktoras Veitas [ctb],\nWeicheng Zhu [ctb],\nWush Wu [ctb],\nZachary Foster [ctb],\nZhian N. Kamvar [ctb] (<https://orcid.org/0000-0003-1458-7108>)"
     #> 
     #> [[2]]
     #> [1] "Hadley Wickham [aut, cre],\nRStudio [cph, fnd],\nR Core team [ctb] (Implementation of utils::recover())"
     #> 
     #> [[3]]
-    #> [1] "JJ Allaire [aut],\nYihui Xie [aut, cre] (<https://orcid.org/0000-0003-0645-5666>),\nJonathan McPherson [aut],\nJavier Luraschi [aut],\nKevin Ushey [aut],\nAron Atkins [aut],\nHadley Wickham [aut],\nJoe Cheng [aut],\nWinston Chang [aut],\nRichard Iannone [aut] (<https://orcid.org/0000-0003-3925-190X>),\nAndrew Dunning [ctb] (<https://orcid.org/0000-0003-0464-5036>),\nAtsushi Yasumoto [ctb, cph] (<https://orcid.org/0000-0002-8335-495X>,\nNumber sections Lua filter),\nBarret Schloerke [ctb],\nCarson Sievert [ctb] (<https://orcid.org/0000-0002-4958-2844>),\nChristophe Dervieux [ctb],\nDevon Ryan [ctb] (<https://orcid.org/0000-0002-8549-0971>),\nFrederik Aust [ctb] (<https://orcid.org/0000-0003-4900-788X>),\nJeff Allen [ctb],\nJooYoung Seo [ctb] (<https://orcid.org/0000-0002-4064-6012>),\nMalcolm Barrett [ctb],\nRob Hyndman [ctb],\nRomain Lesur [ctb],\nRoy Storey [ctb],\nRuben Arslan [ctb],\nSergio Oller [ctb],\nRStudio, PBC [cph],\njQuery Foundation [cph] (jQuery library),\njQuery contributors [ctb, cph] (jQuery library; authors listed in\ninst/rmd/h/jquery-AUTHORS.txt),\njQuery UI contributors [ctb, cph] (jQuery UI library; authors listed in\ninst/rmd/h/jqueryui-AUTHORS.txt),\nMark Otto [ctb] (Bootstrap library),\nJacob Thornton [ctb] (Bootstrap library),\nBootstrap contributors [ctb] (Bootstrap library),\nTwitter, Inc [cph] (Bootstrap library),\nAlexander Farkas [ctb, cph] (html5shiv library),\nScott Jehl [ctb, cph] (Respond.js library),\nIvan Sagalaev [ctb, cph] (highlight.js library),\nGreg Franko [ctb, cph] (tocify library),\nJohn MacFarlane [ctb, cph] (Pandoc templates),\nGoogle, Inc. [ctb, cph] (ioslides library),\nDave Raggett [ctb] (slidy library),\nW3C [cph] (slidy library),\nDave Gandy [ctb, cph] (Font-Awesome),\nBen Sperry [ctb] (Ionicons),\nDrifty [cph] (Ionicons),\nAidan Lister [ctb, cph] (jQuery StickyTabs),\nBenct Philip Jonsson [ctb, cph] (pagebreak Lua filter),\nAlbert Krewinkel [ctb, cph] (pagebreak Lua filter)"
+    #> [1] "JJ Allaire [aut],\nYihui Xie [aut, cre] (<https://orcid.org/0000-0003-0645-5666>),\nJonathan McPherson [aut],\nJavier Luraschi [aut],\nKevin Ushey [aut],\nAron Atkins [aut],\nHadley Wickham [aut],\nJoe Cheng [aut],\nWinston Chang [aut],\nRichard Iannone [aut] (<https://orcid.org/0000-0003-3925-190X>),\nAndrew Dunning [ctb] (<https://orcid.org/0000-0003-0464-5036>),\nAtsushi Yasumoto [ctb, cph] (<https://orcid.org/0000-0002-8335-495X>,\nNumber sections Lua filter),\nBarret Schloerke [ctb],\nCarson Sievert [ctb] (<https://orcid.org/0000-0002-4958-2844>),\nChristophe Dervieux [ctb],\nDevon Ryan [ctb] (<https://orcid.org/0000-0002-8549-0971>),\nFrederik Aust [ctb] (<https://orcid.org/0000-0003-4900-788X>),\nJeff Allen [ctb],\nJooYoung Seo [ctb] (<https://orcid.org/0000-0002-4064-6012>),\nMalcolm Barrett [ctb],\nRob Hyndman [ctb],\nRomain Lesur [ctb],\nRoy Storey [ctb],\nRuben Arslan [ctb],\nSergio Oller [ctb],\nRStudio, PBC [cph],\njQuery UI contributors [ctb, cph] (jQuery UI library; authors listed in\ninst/rmd/h/jqueryui-AUTHORS.txt),\nMark Otto [ctb] (Bootstrap library),\nJacob Thornton [ctb] (Bootstrap library),\nBootstrap contributors [ctb] (Bootstrap library),\nTwitter, Inc [cph] (Bootstrap library),\nAlexander Farkas [ctb, cph] (html5shiv library),\nScott Jehl [ctb, cph] (Respond.js library),\nIvan Sagalaev [ctb, cph] (highlight.js library),\nGreg Franko [ctb, cph] (tocify library),\nJohn MacFarlane [ctb, cph] (Pandoc templates),\nGoogle, Inc. [ctb, cph] (ioslides library),\nDave Raggett [ctb] (slidy library),\nW3C [cph] (slidy library),\nDave Gandy [ctb, cph] (Font-Awesome),\nBen Sperry [ctb] (Ionicons),\nDrifty [cph] (Ionicons),\nAidan Lister [ctb, cph] (jQuery StickyTabs),\nBenct Philip Jonsson [ctb, cph] (pagebreak Lua filter),\nAlbert Krewinkel [ctb, cph] (pagebreak Lua filter)"
 
 ### Checking URLs
 
@@ -412,8 +411,8 @@ urls <- c("https://cran.rstudio.com", "https://cran.r-project.org",
 synchronise(fastest_urls(urls))
 ```
 
-    #>        https://cran.rstudio.com https://www.stats.bris.ac.uk/R/ 
-    #>                        0.074959                        0.197476
+    #>   https://cran.rstudio.com https://cran.r-project.org 
+    #>                   0.057224                   0.174976
 
 See the package vignettes for more examples.
 

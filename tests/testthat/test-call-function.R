@@ -92,6 +92,7 @@ test_that("calls that crash", {
 
 test_that("handling call errors", {
   skip_without_package("processx", "3.4.1.9001")
+  skip_without_package("callr", "3.7.1")
 
   worker_pid <- async(function() {
     call_function(function() Sys.getpid())$then(function(x) x$result)
@@ -112,7 +113,7 @@ test_that("handling call errors", {
   expect_true(is_count(res[[2]]))
   expect_true(is_count(res[[3]]))
   expect_s3_class(res[[4]], "async_rejected")
-  expect_match(res[[4]]$message, "nope")
+  expect_match(res[[4]]$message, "error in callr subprocess")
 })
 
 test_that("mix calls with others", {

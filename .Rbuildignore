@@ -12,3 +12,4 @@
 ^r-packages$
 ^\.github$
 ^vignettes$
+^codecov\.yml$
