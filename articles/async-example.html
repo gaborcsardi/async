@@ -118,7 +118,7 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">response_time</span><span class="op">(</span><span class="va">mirror_urls</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## https://cloud.r-project.org/ </span></span>
-<span><span class="co">##                      0.02213</span></span></code></pre>
+<span><span class="co">##                     0.101318</span></span></code></pre>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">response_time</span><span class="op">(</span><span class="st">"https://httpbin.org/status/404"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## https://httpbin.org/status/404 </span></span>
@@ -134,25 +134,25 @@
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">fastest_urls</span><span class="op">(</span><span class="va">mirror_urls</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##             https://cloud.r-project.org/ </span></span>
-<span><span class="co">##                                 0.022122 </span></span>
+<span><span class="co">##                                 0.045025 </span></span>
 <span><span class="co">##             http://ftp.ussg.iu.edu/CRAN/ </span></span>
-<span><span class="co">##                                 0.106157 </span></span>
-<span><span class="co">## https://repo.miserver.it.umich.edu/cran/ </span></span>
-<span><span class="co">##                                 0.115334 </span></span>
-<span><span class="co">##                   https://cran.case.edu/ </span></span>
-<span><span class="co">##                                 0.147058 </span></span>
-<span><span class="co">##         https://cran.mirrors.hoobly.com/ </span></span>
-<span><span class="co">##                                 0.153646 </span></span>
-<span><span class="co">##         https://ftp.osuosl.org/pub/cran/ </span></span>
-<span><span class="co">##                                 0.169980 </span></span>
-<span><span class="co">##     https://archive.linux.duke.edu/cran/ </span></span>
-<span><span class="co">##                                 0.172031 </span></span>
-<span><span class="co">##          http://lib.stat.cmu.edu/R/CRAN/ </span></span>
-<span><span class="co">##                                 0.224318 </span></span>
+<span><span class="co">##                                 0.206837 </span></span>
 <span><span class="co">##          https://rweb.crmda.ku.edu/cran/ </span></span>
-<span><span class="co">##                                 0.232026 </span></span>
+<span><span class="co">##                                 0.209531 </span></span>
+<span><span class="co">##         https://cran.mirrors.hoobly.com/ </span></span>
+<span><span class="co">##                                 0.216664 </span></span>
 <span><span class="co">##              https://cran.microsoft.com/ </span></span>
-<span><span class="co">##                                 0.282239</span></span></code></pre>
+<span><span class="co">##                                 0.221668 </span></span>
+<span><span class="co">##         https://ftp.osuosl.org/pub/cran/ </span></span>
+<span><span class="co">##                                 0.281378 </span></span>
+<span><span class="co">##                   http://cran.wustl.edu/ </span></span>
+<span><span class="co">##                                 0.421101 </span></span>
+<span><span class="co">##     https://mirror.las.iastate.edu/CRAN/ </span></span>
+<span><span class="co">##                                 0.429220 </span></span>
+<span><span class="co">##                   https://cran.case.edu/ </span></span>
+<span><span class="co">##                                 0.437520 </span></span>
+<span><span class="co">## https://repo.miserver.it.umich.edu/cran/ </span></span>
+<span><span class="co">##                                 0.464455</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="resolve-packages-from-github-and-urls">Resolve packages from GitHub and URLs<a class="anchor" aria-label="anchor" href="#resolve-packages-from-github-and-urls"></a>
@@ -335,7 +335,7 @@
 <code class="sourceCode R"><span><span class="va">curl20_url</span> <span class="op">&lt;-</span> <span class="st">"https://cloud.r-project.org/src/contrib/Archive/curl/curl_2.0.tar.gz"</span></span>
 <span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">resolve_url</span><span class="op">(</span><span class="va">curl20_url</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $url</span></span>
-<span><span class="co">## [1] "file:// /tmp/RtmpajfIg6/file30a840b9e001/curl_2.0.tar.gz"</span></span>
+<span><span class="co">## [1] "file:// /tmp/RtmpCXqKaD/file2bfce9cabd1/curl_2.0.tar.gz"</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $description</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Type</span>: Package</span></span>
