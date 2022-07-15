@@ -34,6 +34,7 @@ calls
 }
 \seealso{
 Other async control flow: 
+\code{\link{async_backoff}()},
 \code{\link{async_reflect}()},
 \code{\link{async_retryable}()},
 \code{\link{async_retry}()},

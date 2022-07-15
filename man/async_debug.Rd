@@ -69,8 +69,10 @@ Helper function to help with the non-trivial debugging of async code.
 }
 \details{
 Async debugging can be turned on by setting the \code{async_debug} global
-option to \code{TRUE}:\preformatted{options(async_debug = TRUE)
-}
+option to \code{TRUE}:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{options(async_debug = TRUE)
+}\if{html}{\out{</div>}}
 
 Setting this value to \code{FALSE} will turn off debugging.
 

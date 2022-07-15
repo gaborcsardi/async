@@ -8,7 +8,9 @@ This is a generic class that can be used to create event emitters.
 It is mostly modelled after the 'node.js' \code{EventEmitter} class
 }
 \section{Usage}{
-\preformatted{ee <- event_emitter$new(async = TRUE)
+
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{ee <- event_emitter$new(async = TRUE)
 ee$listen_on(event, callback)
 ee$listen_off(event, callback)
 ee$listen_once(event, callback)
@@ -16,7 +18,7 @@ ee$emit(event, ...)
 ee$get_event_names()
 ee$get_listener_count(event)
 ee$remove_all_listeners(event)
-}
+}\if{html}{\out{</div>}}
 }
 
 \section{Arguments}{

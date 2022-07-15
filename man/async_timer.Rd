@@ -8,9 +8,11 @@ The supplied callback function will be called by the event loop
 every \code{delay} seconds.
 }
 \section{Usage}{
-\preformatted{t <- async_timer$new(delay, callback)
+
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{t <- async_timer$new(delay, callback)
 t$cancel()
-}
+}\if{html}{\out{</div>}}
 }
 
 \section{Arguments}{

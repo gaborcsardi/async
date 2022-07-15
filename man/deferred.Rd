@@ -7,7 +7,9 @@
 Deferred value
 }
 \section{Usage}{
-\preformatted{dx <- deferred$new(action = NULL, on_progress = NULL, on_cancel = NULL,
+
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{dx <- deferred$new(action = NULL, on_progress = NULL, on_cancel = NULL,
          parents = NULL, parent_resolve = NULL, parent_reject = NULL,
          type = NULL)
 dx$then(on_fulfilled)
@@ -15,7 +17,7 @@ dx$catch(...)
 dx$finally(on_finally)
 dx$cancel(reason = "Cancelled")
 dx$share()
-}
+}\if{html}{\out{</div>}}
 }
 
 \section{Arguments}{
@@ -53,10 +55,12 @@ deferred.
 
 
 Asynchronous computation is represented by deferred values.
-A deferred value is an \href{https://github.com/wch/R6}{R6} object.\preformatted{deferred$new(action = NULL, on_progress = NULL, on_cancel = NULL,
+A deferred value is an \href{https://github.com/wch/R6}{R6} object.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{deferred$new(action = NULL, on_progress = NULL, on_cancel = NULL,
    parents = NULL, parent_resolve = NULL, parent_reject = NULL,
    type = NULL)
-}
+}\if{html}{\out{</div>}}
 
 Creates a new deferred value. \code{action} is a function that is called
 once the deferred value is \emph{started} (i.e. \emph{not} when \code{dx} is created).
@@ -138,8 +142,10 @@ error. The error handlers may also throw a new error.
 
 The action function of the deferred, and also the \code{parent_resolve} and
 \code{parent_reject} handlers may throw errors if the deferred cannot be
-computed. Errors can be handled wit the \verb{$catch()} member function:\preformatted{dx$catch(...)
-}
+computed. Errors can be handled wit the \verb{$catch()} member function:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{dx$catch(...)
+}\if{html}{\out{</div>}}
 
 It takes the same named error handler arguments as \code{tryCatch()}.
 
@@ -150,8 +156,10 @@ with the same error.
 
 The \verb{$finally()} method can be used to run create finalizer code that
 runs when a deferred is resolved or when it fails. It can be used to
-close database connections or other resources:\preformatted{dx$finally(on_finally)
-}
+close database connections or other resources:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{dx$finally(on_finally)
+}\if{html}{\out{</div>}}
 
 Technically, \verb{$finally()} creates a new deferred, which will resolve
 or fail the same way as the original one, but before doing that it will
@@ -175,8 +183,10 @@ The async package comes with some basic async functions:
 Async computation (just like ordinary sync computation) usually
 consists of several steps that needs to be performed in the specified
 order. The \verb{$then()} method specifies that a step of computation needs
-to be performed after the deferred value is known:\preformatted{dx$then(on_fulfilled)
-}
+to be performed after the deferred value is known:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{dx$then(on_fulfilled)
+}\if{html}{\out{</div>}}
 
 \code{on_fulfilled} is a function with zero or one formal arguments.
 It will be called once the result of the deferred is known, with its
@@ -223,8 +233,10 @@ is the synchronised deferred, the final result of the async phase.
 
 
 In the rare cases when the strong ownership model is too restrictive,
-a deferred value can be marked as \emph{shared}:\preformatted{dx$share()
-}
+a deferred value can be marked as \emph{shared}:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{dx$share()
+}\if{html}{\out{</div>}}
 
 This has the following implications:
 \itemize{
@@ -269,7 +281,9 @@ operation on the leaked deferred value.
 In a typical application, a function is implemented asynchronously, and
 then used synchronously by the interactive user, or another piece of
 synchronous code, via \code{\link[=synchronise]{synchronise()}} calls. The following example makes
-three HTTP requests in parallel:\preformatted{http_status3 <- function() \{
+three HTTP requests in parallel:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{http_status3 <- function() \{
   http_status <- function(url) \{
     http_get(url)$then(function(response) response$status_code)
   \}
@@ -279,7 +293,7 @@ three HTTP requests in parallel:\preformatted{http_status3 <- function() \{
   when_all(r1, r2, r3)
 \}
 synchronise(http_status3())
-}
+}\if{html}{\out{</div>}}
 
 This async function can also be used asychronously, as a parent of
 another deferred value, in an async phase.
@@ -294,7 +308,9 @@ result of the async phase, so it would be a waste of resources working on
 them. (It is also unclear how their errors should be handled.)
 
 In the following example, \code{d1} and \code{d2} are created, but they are not
-part of the async DAG, so they are never evaluated.\preformatted{do <- function() \{
+part of the async DAG, so they are never evaluated.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{do <- function() \{
   d1 <- delay(1/100)$then(function() print("d1"))
   d2 <- d1$then(function() print("d2"))
   d3 <- delay(1/100)$then(function() print("d3"))
@@ -302,15 +318,17 @@ part of the async DAG, so they are never evaluated.\preformatted{do <- function(
   d4
 \}
 invisible(synchronise(do()))
-}
+}\if{html}{\out{</div>}}
 }
 
 \section{Cancellation}{
 
 
 The computation of a deferred can be cancelled when it is not needed
-any more:\preformatted{dx$cancel(reason = "Cancelled")
-}
+any more:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{dx$cancel(reason = "Cancelled")
+}\if{html}{\out{</div>}}
 
 This will \emph{fail} the children of the deferred, unless they have been
 completed already. It will also auto-cancel the parent DAG of the
