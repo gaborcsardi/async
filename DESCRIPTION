@@ -9,7 +9,6 @@ Description: The 'async' package brings asynchronous ('async') computation
     values can be chained together for complex async computation, and they
     are evaluated lazily, at synchronisation points.
 License: MIT + file LICENSE
-LazyData: true
 URL: https://github.com/gaborcsardi/async#readme
 BugReports: https://github.com/gaborcsardi/async/issues
 RoxygenNote: 7.2.0.9000
