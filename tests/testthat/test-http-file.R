@@ -9,10 +9,11 @@ test_that("GET file://", {
   url <- paste0("file://", normalizePath(tmp))
   ret <- synchronise(http_get(url)$then(http_stop_for_status))
   expect_equal(ret$status_code, 0)
-  expect_equal(
-    ret$content,
-    as.raw(c(0x66, 0x6f, 0x6f, 0x62, 0x61, 0x72, 0x0a))
-  )
+  xp <- as.raw(c(0x66, 0x6f, 0x6f, 0x62, 0x61, 0x72, 0x0a))
+  if (.Platform$OS.type == "windows") {
+    xp <- c(xp, charToRaw("\r"))
+  }
+  expect_equal(ret$content, xp)
 })
 
 test_that("HEAD file://", {
@@ -34,10 +35,11 @@ test_that("file:// to file", {
   url <- paste0("file://", normalizePath(tmp))
   ret <- synchronise(http_get(url, file = tmp2)$then(http_stop_for_status))
   expect_equal(ret$status_code, 0)
-  expect_equal(
-    readBin(tmp2, "raw", 100),
-    as.raw(c(0x66, 0x6f, 0x6f, 0x62, 0x61, 0x72, 0x0a))
-  )
+  xp <- as.raw(c(0x66, 0x6f, 0x6f, 0x62, 0x61, 0x72, 0x0a))
+  if (.Platform$OS.type == "windows") {
+    xp <- c(xp, charToRaw("\r"))
+  }
+  expect_equal(readBin(tmp2, "raw", 100), xp)
 })
 
 test_that("file:// does not exist", {
