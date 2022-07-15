@@ -13,3 +13,4 @@
 ^\.github$
 ^vignettes$
 ^codecov\.yml$
+^dev-lib$
