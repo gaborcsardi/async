@@ -71,9 +71,10 @@ every <code>delay</code> seconds.</p>
     <div id="usage">
     <h2>Usage</h2>
     
-<div class="sourceCode"><pre><code><span><span class="va">t</span> <span class="op">&lt;-</span> <span class="va"><a href="../reference/async_timer.html">async_timer</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">delay</span>, <span class="va">callback</span><span class="op">)</span></span>
-<span><span class="va">t</span><span class="op">$</span><span class="fu">cancel</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 
+
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> async_timer<span class="sc">$</span><span class="fu">new</span>(delay, callback)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>t<span class="sc">$</span><span class="fu">cancel</span>()</span></code></pre><p></p></div>
     </div>
     <div id="arguments">
     <h2>Arguments</h2>
@@ -139,9 +140,8 @@ the timing of the timer events.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> called</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> called</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> called</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> called</span>
 <span class="r-in"><span><span class="va">counter</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Error handling</span></span></span>
 <span class="r-in"><span><span class="va">counter</span> <span class="op">&lt;-</span> <span class="fl">0L</span></span></span>

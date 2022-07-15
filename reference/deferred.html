@@ -69,15 +69,16 @@
     <div id="usage">
     <h2>Usage</h2>
     
-<div class="sourceCode"><pre><code><span><span class="va">dx</span> <span class="op">&lt;-</span> <span class="va"><a href="../reference/deferred.html">deferred</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>action <span class="op">=</span> <span class="cn">NULL</span>, on_progress <span class="op">=</span> <span class="cn">NULL</span>, on_cancel <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>         parents <span class="op">=</span> <span class="cn">NULL</span>, parent_resolve <span class="op">=</span> <span class="cn">NULL</span>, parent_reject <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>         type <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
-<span><span class="va">dx</span><span class="op">$</span><span class="fu">then</span><span class="op">(</span><span class="va">on_fulfilled</span><span class="op">)</span></span>
-<span><span class="va">dx</span><span class="op">$</span><span class="fu">catch</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span>
-<span><span class="va">dx</span><span class="op">$</span><span class="fu">finally</span><span class="op">(</span><span class="va">on_finally</span><span class="op">)</span></span>
-<span><span class="va">dx</span><span class="op">$</span><span class="fu">cancel</span><span class="op">(</span>reason <span class="op">=</span> <span class="st">"Cancelled"</span><span class="op">)</span></span>
-<span><span class="va">dx</span><span class="op">$</span><span class="fu">share</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 
+
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dx <span class="ot">&lt;-</span> deferred<span class="sc">$</span><span class="fu">new</span>(<span class="at">action =</span> <span class="cn">NULL</span>, <span class="at">on_progress =</span> <span class="cn">NULL</span>, <span class="at">on_cancel =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">parents =</span> <span class="cn">NULL</span>, <span class="at">parent_resolve =</span> <span class="cn">NULL</span>, <span class="at">parent_reject =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">type =</span> <span class="cn">NULL</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>dx<span class="sc">$</span><span class="fu">then</span>(on_fulfilled)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>dx<span class="sc">$</span><span class="fu">catch</span>(...)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>dx<span class="sc">$</span><span class="fu">finally</span>(on_finally)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>dx<span class="sc">$</span><span class="fu">cancel</span>(<span class="at">reason =</span> <span class="st">"Cancelled"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>dx<span class="sc">$</span><span class="fu">share</span>()</span></code></pre><p></p></div>
     </div>
     <div id="arguments">
     <h2>Arguments</h2>
@@ -115,10 +116,10 @@ deferred.</p></li>
 
 
 <p>Asynchronous computation is represented by deferred values.
-A deferred value is an <a href="https://github.com/wch/R6" class="external-link">R6</a> object.</p><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/deferred.html">deferred</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>action <span class="op">=</span> <span class="cn">NULL</span>, on_progress <span class="op">=</span> <span class="cn">NULL</span>, on_cancel <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>   parents <span class="op">=</span> <span class="cn">NULL</span>, parent_resolve <span class="op">=</span> <span class="cn">NULL</span>, parent_reject <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>   type <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
-
+A deferred value is an <a href="https://github.com/wch/R6" class="external-link">R6</a> object.</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>deferred<span class="sc">$</span><span class="fu">new</span>(<span class="at">action =</span> <span class="cn">NULL</span>, <span class="at">on_progress =</span> <span class="cn">NULL</span>, <span class="at">on_cancel =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>   <span class="at">parents =</span> <span class="cn">NULL</span>, <span class="at">parent_resolve =</span> <span class="cn">NULL</span>, <span class="at">parent_reject =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>   <span class="at">type =</span> <span class="cn">NULL</span>)</span></code></pre><p></p></div>
 <p>Creates a new deferred value. <code>action</code> is a function that is called
 once the deferred value is <em>started</em> (i.e. <em>not</em> when <code>dx</code> is created).
 It must have one or two arguments: <code>resolve</code>, or <code>resolve</code> and <code>progress</code>
@@ -185,8 +186,8 @@ error. The error handlers may also throw a new error.</p></li>
 
 <p>The action function of the deferred, and also the <code>parent_resolve</code> and
 <code>parent_reject</code> handlers may throw errors if the deferred cannot be
-computed. Errors can be handled wit the <code>$catch()</code> member function:</p><div class="sourceCode"><pre><code><span><span class="va">dx</span><span class="op">$</span><span class="fu">catch</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code></pre></div>
-
+computed. Errors can be handled wit the <code>$catch()</code> member function:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dx<span class="sc">$</span><span class="fu">catch</span>(...)</span></code></pre><p></p></div>
 <p>It takes the same named error handler arguments as <code><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch()</a></code>.</p>
 <p>Technically, <code>$catch()</code> creates a new deferred value, and this new
 deferred value is resolved to the result of the error handlers. Of the
@@ -194,8 +195,8 @@ handlers do not handle the error, then the new deferred will fail
 with the same error.</p>
 <p>The <code>$finally()</code> method can be used to run create finalizer code that
 runs when a deferred is resolved or when it fails. It can be used to
-close database connections or other resources:</p><div class="sourceCode"><pre><code><span><span class="va">dx</span><span class="op">$</span><span class="fu">finally</span><span class="op">(</span><span class="va">on_finally</span><span class="op">)</span></span></code></pre></div>
-
+close database connections or other resources:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dx<span class="sc">$</span><span class="fu">finally</span>(on_finally)</span></code></pre><p></p></div>
 <p>Technically, <code>$finally()</code> creates a new deferred, which will resolve
 or fail the same way as the original one, but before doing that it will
 call the <code>on_finally</code> function with no arguments.</p>
@@ -217,8 +218,8 @@ call the <code>on_finally</code> function with no arguments.</p>
 <p>Async computation (just like ordinary sync computation) usually
 consists of several steps that needs to be performed in the specified
 order. The <code>$then()</code> method specifies that a step of computation needs
-to be performed after the deferred value is known:</p><div class="sourceCode"><pre><code><span><span class="va">dx</span><span class="op">$</span><span class="fu">then</span><span class="op">(</span><span class="va">on_fulfilled</span><span class="op">)</span></span></code></pre></div>
-
+to be performed after the deferred value is known:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dx<span class="sc">$</span><span class="fu">then</span>(on_fulfilled)</span></code></pre><p></p></div>
 <p><code>on_fulfilled</code> is a function with zero or one formal arguments.
 It will be called once the result of the deferred is known, with its
 result. (The result is omitted if it has no arguments).</p>
@@ -260,8 +261,8 @@ is the synchronised deferred, the final result of the async phase.</p>
 
 
 <p>In the rare cases when the strong ownership model is too restrictive,
-a deferred value can be marked as <em>shared</em>:</p><div class="sourceCode"><pre><code><span><span class="va">dx</span><span class="op">$</span><span class="fu">share</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-
+a deferred value can be marked as <em>shared</em>:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dx<span class="sc">$</span><span class="fu">share</span>()</span></code></pre><p></p></div>
 <p>This has the following implications:</p><ul><li><p>A shared deferred value can have multiple children (owners) in the
 async DAG.</p></li>
 <li><p>A shared deferred value is started after its first child is started.</p></li>
@@ -298,17 +299,17 @@ operation on the leaked deferred value.</p>
 <p>In a typical application, a function is implemented asynchronously, and
 then used synchronously by the interactive user, or another piece of
 synchronous code, via <code><a href="synchronise.html">synchronise()</a></code> calls. The following example makes
-three HTTP requests in parallel:</p><div class="sourceCode"><pre><code><span><span class="va">http_status3</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">http_status</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">url</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="../reference/http_get.html">http_get</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span><span class="op">$</span><span class="fu">then</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">response</span><span class="op">)</span> <span class="va">response</span><span class="op">$</span><span class="va">status_code</span><span class="op">)</span></span>
-<span>  <span class="op">}</span></span>
-<span>  <span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu">http_status</span><span class="op">(</span><span class="st">"https://eu.httpbin.org/status/403"</span><span class="op">)</span></span>
-<span>  <span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">http_status</span><span class="op">(</span><span class="st">"https://eu.httpbin.org/status/404"</span><span class="op">)</span></span>
-<span>  <span class="va">r3</span> <span class="op">&lt;-</span> <span class="fu">http_status</span><span class="op">(</span><span class="st">"https://eu.httpbin.org/status/200"</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="../reference/when_all.html">when_all</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span>, <span class="va">r3</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">http_status3</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-
+three HTTP requests in parallel:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>http_status3 <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  http_status <span class="ot">&lt;-</span> <span class="cf">function</span>(url) {</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">http_get</span>(url)<span class="sc">$</span><span class="fu">then</span>(<span class="cf">function</span>(response) response<span class="sc">$</span>status_code)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  r1 <span class="ot">&lt;-</span> <span class="fu">http_status</span>(<span class="st">"https://eu.httpbin.org/status/403"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  r2 <span class="ot">&lt;-</span> <span class="fu">http_status</span>(<span class="st">"https://eu.httpbin.org/status/404"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  r3 <span class="ot">&lt;-</span> <span class="fu">http_status</span>(<span class="st">"https://eu.httpbin.org/status/200"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">when_all</span>(r1, r2, r3)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">synchronise</span>(<span class="fu">http_status3</span>())</span></code></pre><p></p></div>
 <p>This async function can also be used asychronously, as a parent of
 another deferred value, in an async phase.</p>
     </div>
@@ -322,15 +323,15 @@ DAG of the async phase. These are clearly not needed to compute the
 result of the async phase, so it would be a waste of resources working on
 them. (It is also unclear how their errors should be handled.)</p>
 <p>In the following example, <code>d1</code> and <code>d2</code> are created, but they are not
-part of the async DAG, so they are never evaluated.</p><div class="sourceCode"><pre><code><span><span class="va">do</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">d1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/delay.html">delay</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">100</span><span class="op">)</span><span class="op">$</span><span class="fu">then</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"d1"</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">d2</span> <span class="op">&lt;-</span> <span class="va">d1</span><span class="op">$</span><span class="fu">then</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"d2"</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">d3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/delay.html">delay</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">100</span><span class="op">)</span><span class="op">$</span><span class="fu">then</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"d3"</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">d4</span> <span class="op">&lt;-</span> <span class="va">d3</span><span class="op">$</span><span class="fu">then</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"d4"</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">d4</span></span>
-<span><span class="op">}</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">do</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-
+part of the async DAG, so they are never evaluated.</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>do <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  d1 <span class="ot">&lt;-</span> <span class="fu">delay</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">100</span>)<span class="sc">$</span><span class="fu">then</span>(<span class="cf">function</span>() <span class="fu">print</span>(<span class="st">"d1"</span>))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  d2 <span class="ot">&lt;-</span> d1<span class="sc">$</span><span class="fu">then</span>(<span class="cf">function</span>() <span class="fu">print</span>(<span class="st">"d2"</span>))</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  d3 <span class="ot">&lt;-</span> <span class="fu">delay</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">100</span>)<span class="sc">$</span><span class="fu">then</span>(<span class="cf">function</span>() <span class="fu">print</span>(<span class="st">"d3"</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  d4 <span class="ot">&lt;-</span> d3<span class="sc">$</span><span class="fu">then</span>(<span class="cf">function</span>() <span class="fu">print</span>(<span class="st">"d4"</span>))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  d4</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">invisible</span>(<span class="fu">synchronise</span>(<span class="fu">do</span>()))</span></code></pre><p></p></div>
     </div>
     <div id="cancellation">
     <h2>Cancellation</h2>
@@ -338,8 +339,8 @@ part of the async DAG, so they are never evaluated.</p><div class="sourceCode"><
 
 
 <p>The computation of a deferred can be cancelled when it is not needed
-any more:</p><div class="sourceCode"><pre><code><span><span class="va">dx</span><span class="op">$</span><span class="fu">cancel</span><span class="op">(</span>reason <span class="op">=</span> <span class="st">"Cancelled"</span><span class="op">)</span></span></code></pre></div>
-
+any more:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dx<span class="sc">$</span><span class="fu">cancel</span>(<span class="at">reason =</span> <span class="st">"Cancelled"</span>)</span></code></pre><p></p></div>
 <p>This will <em>fail</em> the children of the deferred, unless they have been
 completed already. It will also auto-cancel the parent DAG of the
 deferred, unless they are shared deferreds, see the next Section.</p>

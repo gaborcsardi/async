@@ -71,15 +71,16 @@ It is mostly modelled after the 'node.js' <code>EventEmitter</code> class</p>
     <div id="usage">
     <h2>Usage</h2>
     
-<div class="sourceCode"><pre><code><span><span class="va">ee</span> <span class="op">&lt;-</span> <span class="va"><a href="../reference/event_emitter.html">event_emitter</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>async <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">ee</span><span class="op">$</span><span class="fu">listen_on</span><span class="op">(</span><span class="va">event</span>, <span class="va">callback</span><span class="op">)</span></span>
-<span><span class="va">ee</span><span class="op">$</span><span class="fu">listen_off</span><span class="op">(</span><span class="va">event</span>, <span class="va">callback</span><span class="op">)</span></span>
-<span><span class="va">ee</span><span class="op">$</span><span class="fu">listen_once</span><span class="op">(</span><span class="va">event</span>, <span class="va">callback</span><span class="op">)</span></span>
-<span><span class="va">ee</span><span class="op">$</span><span class="fu">emit</span><span class="op">(</span><span class="va">event</span>, <span class="va">...</span><span class="op">)</span></span>
-<span><span class="va">ee</span><span class="op">$</span><span class="fu">get_event_names</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">ee</span><span class="op">$</span><span class="fu">get_listener_count</span><span class="op">(</span><span class="va">event</span><span class="op">)</span></span>
-<span><span class="va">ee</span><span class="op">$</span><span class="fu">remove_all_listeners</span><span class="op">(</span><span class="va">event</span><span class="op">)</span></span></code></pre></div>
 
+
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ee <span class="ot">&lt;-</span> event_emitter<span class="sc">$</span><span class="fu">new</span>(<span class="at">async =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ee<span class="sc">$</span><span class="fu">listen_on</span>(event, callback)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ee<span class="sc">$</span><span class="fu">listen_off</span>(event, callback)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>ee<span class="sc">$</span><span class="fu">listen_once</span>(event, callback)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>ee<span class="sc">$</span><span class="fu">emit</span>(event, ...)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>ee<span class="sc">$</span><span class="fu">get_event_names</span>()</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>ee<span class="sc">$</span><span class="fu">get_listener_count</span>(event)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>ee<span class="sc">$</span><span class="fu">remove_all_listeners</span>(event)</span></code></pre><p></p></div>
     </div>
     <div id="arguments">
     <h2>Arguments</h2>
