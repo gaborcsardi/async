@@ -6,25 +6,45 @@
 \usage{
 async_backoff(
   task,
+  ...,
+  .args = list(),
   times = Inf,
   time_limit = Inf,
-  backoff_callback = NULL,
-  ...
+  custom_backoff = NULL,
+  on_progress = NULL,
+  progress_data = NULL
 )
 }
 \arguments{
 \item{task}{An asynchronous function.}
 
+\item{...}{Arguments to pass to \code{task}.}
+
+\item{.args}{More arguments to pass to \code{task}.}
+
 \item{times}{Maximum number of tries.}
 
 \item{time_limit}{Maximum number of seconds to try.}
 
-\item{backoff_callback}{If not \code{NULL} then a callback function to
+\item{custom_backoff}{If not \code{NULL} then a callback function to
 calculate waiting time, after the \code{i}the try. \code{i} is passed as an
 argument. If \code{NULL}, then the default is used, which is a uniform
 random number of seconds between 1 and 2^i.}
 
-\item{...}{Arguments to pass to \code{task}.}
+\item{on_progress}{Callback function for a progress bar. Retries are
+announced here, if not \code{NULL}. \code{on_progress} is called with two
+arguments. The first is a named list with entries:
+\itemize{
+\item \code{event}: string that is either \code{"retry"} or \code{"givenup"},
+\item \code{tries}: number of tried so far,
+\item \code{spent}: number of seconds spent trying so far,
+\item \code{error}: the error object for the last failure,
+\item \code{retry_in}: number of seconds before the next try.
+The second argument is \code{progress_data}.
+}}
+
+\item{progress_data}{\code{async_backoff()} will pass this object to
+\code{on_progress} as the second argument.}
 }
 \value{
 Deferred value for the operation with retries.
@@ -34,6 +54,9 @@ Keeps trying until the function's deferred value resolves without
 error, or \code{times} tries have been performed, or \code{time_limit} seconds
 have passed since the start of the first try.
 }
+\details{
+Note that all unnamed arguments are passed to \code{task}.
+}
 \examples{
 \donttest{
 afun <- function() {
@@ -41,7 +64,7 @@ afun <- function() {
   async_backoff(
     function() if (runif(1) < 0.8) stop("nope") else "yes!",
     times = 5,
-    backoff_callback = wait_100_ms
+    custom_backoff = wait_100_ms
   )
 }
 
