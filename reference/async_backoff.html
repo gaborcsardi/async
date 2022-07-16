@@ -72,10 +72,13 @@ have passed since the start of the first try.</p>
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">async_backoff</span><span class="op">(</span></span>
 <span>  <span class="va">task</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  .args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  times <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  time_limit <span class="op">=</span> <span class="cn">Inf</span>,</span>
-<span>  backoff_callback <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  custom_backoff <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  on_progress <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  progress_data <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -83,6 +86,14 @@ have passed since the start of the first try.</p>
     <h2>Arguments</h2>
     <dl><dt>task</dt>
 <dd><p>An asynchronous function.</p></dd>
+
+
+<dt>...</dt>
+<dd><p>Arguments to pass to <code>task</code>.</p></dd>
+
+
+<dt>.args</dt>
+<dd><p>More arguments to pass to <code>task</code>.</p></dd>
 
 
 <dt>times</dt>
@@ -93,15 +104,28 @@ have passed since the start of the first try.</p>
 <dd><p>Maximum number of seconds to try.</p></dd>
 
 
-<dt>backoff_callback</dt>
+<dt>custom_backoff</dt>
 <dd><p>If not <code>NULL</code> then a callback function to
 calculate waiting time, after the <code>i</code>the try. <code>i</code> is passed as an
 argument. If <code>NULL</code>, then the default is used, which is a uniform
 random number of seconds between 1 and 2^i.</p></dd>
 
 
-<dt>...</dt>
-<dd><p>Arguments to pass to <code>task</code>.</p></dd>
+<dt>on_progress</dt>
+<dd><p>Callback function for a progress bar. Retries are
+announced here, if not <code>NULL</code>. <code>on_progress</code> is called with two
+arguments. The first is a named list with entries:</p><ul><li><p><code>event</code>: string that is either <code>"retry"</code> or <code>"givenup"</code>,</p></li>
+<li><p><code>tries</code>: number of tried so far,</p></li>
+<li><p><code>spent</code>: number of seconds spent trying so far,</p></li>
+<li><p><code>error</code>: the error object for the last failure,</p></li>
+<li><p><code>retry_in</code>: number of seconds before the next try.
+The second argument is <code>progress_data</code>.</p></li>
+</ul></dd>
+
+
+<dt>progress_data</dt>
+<dd><p><code>async_backoff()</code> will pass this object to
+<code>on_progress</code> as the second argument.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -109,6 +133,10 @@ random number of seconds between 1 and 2^i.</p></dd>
     
 
 <p>Deferred value for the operation with retries.</p>
+    </div>
+    <div id="details">
+    <h2>Details</h2>
+    <p>Note that all unnamed arguments are passed to <code>task</code>.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -130,7 +158,7 @@ random number of seconds between 1 and 2^i.</p></dd>
 <span class="r-in"><span>  <span class="fu">async_backoff</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">0.8</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"nope"</span><span class="op">)</span> <span class="kw">else</span> <span class="st">"yes!"</span>,</span></span>
 <span class="r-in"><span>    times <span class="op">=</span> <span class="fl">5</span>,</span></span>
-<span class="r-in"><span>    backoff_callback <span class="op">=</span> <span class="va">wait_100_ms</span></span></span>
+<span class="r-in"><span>    custom_backoff <span class="op">=</span> <span class="va">wait_100_ms</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
