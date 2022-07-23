@@ -50,7 +50,7 @@ default_gh_headers <- function() {
 get_gh_description <- async(function(user, repo)  {
   desc_url <- paste0(
     "https://raw.githubusercontent.com/", user, "/", repo,
-    "/master/DESCRIPTION")
+    "/HEAD/DESCRIPTION")
   http_get(desc_url, headers = default_gh_headers())$
     then(http_stop_for_status)$
     then(function(resp) rawToChar(resp$content))$
@@ -69,7 +69,7 @@ synchronise(get_gh_description("jeroen", "curl"))
 ## ------------------------------------------------------------------------
 get_gh_sha <- async(function(user, repo) {
   commit_url <- paste0(
-    "https://api.github.com/repos/", user, "/", repo, "/git/trees/master")
+    "https://api.github.com/repos/", user, "/", repo, "/git/trees/HEAD")
   http_get(commit_url, headers = default_gh_headers())$
     then(http_stop_for_status)$
     then(function(resp) {

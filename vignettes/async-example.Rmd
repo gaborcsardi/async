@@ -108,7 +108,7 @@ access it, etc. We don't catch this (or other) error here, so
 get_gh_description <- async(function(user, repo)  {
   desc_url <- paste0(
     "https://raw.githubusercontent.com/", user, "/", repo,
-    "/master/DESCRIPTION")
+    "/HEAD/DESCRIPTION")
   http_get(desc_url, headers = default_gh_headers())$
     then(http_stop_for_status)$
     then(function(resp) rawToChar(resp$content))$
@@ -133,13 +133,13 @@ synchronise(get_gh_description("git", "git"))
 ```
 
 The next thing we need is the SHA of the commit we want to download.
-For simplicity we always use the last commit of the `master` branch here.
+For simplicity we always use the last commit of default branch here.
 This function is very similar to the previous one otherwise.
 
 ```{r}
 get_gh_sha <- async(function(user, repo) {
   commit_url <- paste0(
-    "https://api.github.com/repos/", user, "/", repo, "/git/trees/master")
+    "https://api.github.com/repos/", user, "/", repo, "/git/trees/HEAD")
   http_get(commit_url, headers = default_gh_headers())$
     then(http_stop_for_status)$
     then(function(resp) {

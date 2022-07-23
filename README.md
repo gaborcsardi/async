@@ -9,7 +9,7 @@
 
 ![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
 [![Codecov test
-coverage](https://codecov.io/gh/gaborcsardi/async/branch/master/graph/badge.svg)](https://app.codecov.io/gh/gaborcsardi/async?branch=master)
+coverage](https://codecov.io/gh/gaborcsardi/async/branch/main/graph/badge.svg)](https://app.codecov.io/gh/gaborcsardi/async?branch=main)
 [![R-CMD-check](https://github.com/gaborcsardi/async/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gaborcsardi/async/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
