@@ -1,5 +1,6 @@
 
 test_that("fail, success", {
+  local_edition(3)
   did <- 0L
   uns <- function() {
     if (did == 3) {
@@ -44,6 +45,7 @@ test_that("fail, success", {
 })
 
 test_that("progress", {
+  local_edition(3)
   did <- 0L
   uns <- function() {
     if (did == 3) {
@@ -58,6 +60,8 @@ test_that("progress", {
   bo <- function(i) 0.1
 
   progress <- function(status, data) {
+    status$error$call <- status$error$calls <- status$error$aframe <- NULL
+    class(status$error) <- setdiff(class(status$error), "async_rejected")
     print(status)
     print(data)
   }
@@ -104,6 +108,7 @@ test_that("default_backoff", {
 })
 
 test_that("HTTP backoff example", {
+  local_edition(3)
 
   flaky <- webfakes::new_app()
   flaky$get("/unstable", function(req, res) {

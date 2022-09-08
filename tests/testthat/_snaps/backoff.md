@@ -55,8 +55,8 @@
       Time difference of <some> secs
       
       $error
-      <async error: not yet
-       in *action* callback of `deferred$new` at ?/?:?:?>
+      <simpleError: not yet>
+      
       $retry_in
       [1] 0.1
       
@@ -74,8 +74,8 @@
       Time difference of <some> secs
       
       $error
-      <async error: not yet
-       in *action* callback of `deferred$new` at ?/?:?:?>
+      <simpleError: not yet>
+      
       $retry_in
       [1] 0.1
       
@@ -93,8 +93,8 @@
       Time difference of <some> secs
       
       $error
-      <async error: not yet
-       in *action* callback of `deferred$new` at ?/?:?:?>
+      <simpleError: not yet>
+      
       $retry_in
       [1] 0.1
       
@@ -119,8 +119,8 @@
       Time difference of <some> secs
       
       $error
-      <async error: not yet
-       in *action* callback of `deferred$new` at ?/?:?:?>
+      <simpleError: not yet>
+      
       $retry_in
       [1] 0.1
       
@@ -138,8 +138,8 @@
       Time difference of <some> secs
       
       $error
-      <async error: not yet
-       in *action* callback of `deferred$new` at ?/?:?:?>
+      <simpleError: not yet>
+      
       $retry_in
       [1] NA
       
