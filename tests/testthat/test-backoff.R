@@ -68,7 +68,7 @@ test_that("progress", {
 
   trfm <- function(x) {
     sub(
-      "Time difference of 0[.][0-9]+ secs",
+      "Time difference of [.0-9]+ secs",
       "Time difference of <some> secs",
       x
     )
