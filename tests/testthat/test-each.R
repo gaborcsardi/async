@@ -1,6 +1,4 @@
 
-context("each")
-
 test_that("each", {
 
   do <- async(function() {

@@ -1,6 +1,4 @@
 
-context("errors")
-
 test_that("rejection", {
 
   do <- async(function() {

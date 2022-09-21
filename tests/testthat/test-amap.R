@@ -1,6 +1,4 @@
 
-context("async_map")
-
 test_that("async_map", {
   list <- structure(as.list(1:10), names = letters[1:10])
 

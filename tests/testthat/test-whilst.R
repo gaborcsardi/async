@@ -1,6 +1,4 @@
 
-context("async_whilst")
-
 test_that("async_whilst", {
 
   count <- 0

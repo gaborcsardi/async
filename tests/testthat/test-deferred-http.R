@@ -1,6 +1,4 @@
 
-context("deferred http")
-
 test_that("GET", {
   do <- async(function() {
     http_get(http$url("/get", query = list(q = 42)))$

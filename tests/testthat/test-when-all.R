@@ -1,6 +1,4 @@
 
-context("when_all")
-
 test_that("when_all", {
   done <- FALSE
   do <- async(function() {

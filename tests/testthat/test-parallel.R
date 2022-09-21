@@ -1,6 +1,4 @@
 
-context("parallel")
-
 test_that("parallel", {
 
   do <- async(function() {

@@ -1,6 +1,4 @@
 
-context("async_retryable")
-
 test_that("async_retryable", {
 
   do <- async(function() {

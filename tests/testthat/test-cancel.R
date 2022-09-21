@@ -1,6 +1,4 @@
 
-context("cancellation")
-
 test_that("on_cancel callback is called", {
 
   dx <- NULL

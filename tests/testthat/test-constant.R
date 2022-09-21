@@ -1,6 +1,4 @@
 
-context("async_constant")
-
 test_that("creates a deferred value", {
   do <- function() {
     dx <- async_constant()

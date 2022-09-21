@@ -1,6 +1,4 @@
 
-context("deferred timeout")
-
 test_that("deferred timeout", {
   skip_on_cran()
 

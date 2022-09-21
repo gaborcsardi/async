@@ -1,6 +1,4 @@
 
-context("event loop")
-
 test_that("create", {
   el <- event_loop$new()
   expect_s3_class(el, "event_loop")

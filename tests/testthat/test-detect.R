@@ -1,6 +1,4 @@
 
-context("async_detect")
-
 test_that("async_detect", {
 
   is_odd <- function(x) {

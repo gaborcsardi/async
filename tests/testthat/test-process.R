@@ -1,6 +1,4 @@
 
-context("process")
-
 test_that("process", {
 
   px <- asNamespace("processx")$get_tool("px")

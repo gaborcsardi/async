@@ -1,6 +1,4 @@
 
-context("progress reporting")
-
 test_that("tick", {
 
   do <- async(function() {

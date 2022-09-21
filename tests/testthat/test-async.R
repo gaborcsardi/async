@@ -1,6 +1,4 @@
 
-context("async")
-
 test_that("it returns a function", {
   ret <- async(function() { })
   expect_true(is.function(ret))

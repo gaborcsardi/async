@@ -1,6 +1,4 @@
 
-context("async_debug")
-
 test_that("async_next", {
 
   new_el <- push_event_loop()

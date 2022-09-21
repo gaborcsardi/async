@@ -1,6 +1,4 @@
 
-context("synchronise")
-
 test_that("error if async function is called from sync context", {
 
   mockery::stub(get_default_event_loop, "length", 0)

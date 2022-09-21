@@ -1,6 +1,4 @@
 
-context("async_try_each")
-
 test_that("only one, success", {
   do <- function() {
     async_try_each(

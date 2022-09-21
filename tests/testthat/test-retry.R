@@ -1,6 +1,4 @@
 
-context("async_retry")
-
 test_that("unsuccessful async_retry", {
 
   do <- async(function() {

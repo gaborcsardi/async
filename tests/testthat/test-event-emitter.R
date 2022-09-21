@@ -1,6 +1,4 @@
 
-context("event_emitter")
-
 test_that("can create event emitter", {
   do <- function() {
     x <- event_emitter$new(async = FALSE)

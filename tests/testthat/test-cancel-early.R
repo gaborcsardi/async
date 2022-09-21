@@ -1,6 +1,4 @@
 
-context("early cancellation")
-
 test_that("auto-cancellation", {
 
   httpx <- NULL

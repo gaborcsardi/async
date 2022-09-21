@@ -1,6 +1,4 @@
 
-context("deferred then")
-
 test_that("HTTP HEAD & synchronous then", {
   do <- function() {
     http_head(http$url("/"))$

@@ -1,6 +1,4 @@
 
-context("call_function")
-
 test_that("nested event loops", {
   ## Create a function that finishes while its event loop is inactive
   sleeper <- function(x) { Sys.sleep(x); Sys.getpid() }

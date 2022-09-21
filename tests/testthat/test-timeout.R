@@ -1,6 +1,4 @@
 
-context("async_timeout")
-
 test_that("timed out", {
   skip_on_cran()
   f <- function() delay(1/10)$then(function(value) "OK")

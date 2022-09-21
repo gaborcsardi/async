@@ -1,6 +1,4 @@
 
-context("deferred")
-
 test_that("action in formula notation", {
   do <- function() {
     dx1 <- deferred$new(function(resolve) resolve(TRUE))$

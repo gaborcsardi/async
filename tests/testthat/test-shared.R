@@ -1,6 +1,4 @@
 
-context("shared")
-
 test_that("can have multiple children", {
   do <- async(function() {
     d1 <- delay(1/1000)$share()

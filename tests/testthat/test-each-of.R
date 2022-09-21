@@ -1,6 +1,4 @@
 
-context("each_of")
-
 test_that("each_of", {
 
   done <- character()

@@ -1,6 +1,4 @@
 
-context("async_replicate")
-
 test_that("0 times", {
   do <- function() async_replicate(0, function() stop("doh"))
   expect_equal(synchronise(do()), list())

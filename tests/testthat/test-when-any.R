@@ -1,6 +1,4 @@
 
-context("when_any")
-
 test_that("when_any", {
   do <- async(function() {
     d1 <- delay(1/10)$then(function(value) "foo")

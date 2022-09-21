@@ -1,6 +1,4 @@
 
-context("cancellation at sync point")
-
 test_that("detect, if one is done", {
   pinged <- 0L
   do <- function() {

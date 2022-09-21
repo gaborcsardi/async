@@ -1,6 +1,4 @@
 
-context("deferred pieces")
-
 test_that("def__make_parent_*", {
   good <- list(
     NULL,

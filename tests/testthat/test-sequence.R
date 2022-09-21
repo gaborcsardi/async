@@ -1,6 +1,4 @@
 
-context("async_sequence")
-
 test_that("async_sequence", {
 
   add1 <- function(n) { n ; delay(10/1000)$then(function(value) n + 1) }

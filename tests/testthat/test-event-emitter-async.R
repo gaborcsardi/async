@@ -1,6 +1,4 @@
 
-context("event emitter (async)")
-
 test_that("outside of async context errors", {
   do <- function() {
     x <- event_emitter$new(async = TRUE)

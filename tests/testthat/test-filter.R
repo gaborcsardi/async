@@ -1,6 +1,4 @@
 
-context("async_filter")
-
 test_that("async_filter", {
 
   is_odd <- function(x) {
@@ -38,8 +36,6 @@ test_that("async_filter, errors", {
   synchronise(do())
   expect_false(called)
 })
-
-context("async_reject")
 
 test_that("async_reject", {
 

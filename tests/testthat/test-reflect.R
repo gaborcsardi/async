@@ -1,6 +1,4 @@
 
-context("async_reflect")
-
 test_that("async_reflect", {
 
   badfun <- async(function() stop("oh no!"))

@@ -1,6 +1,4 @@
 
-context("worker pool")
-
 test_that("simple CRUD", {
   skip_on_cran()
 

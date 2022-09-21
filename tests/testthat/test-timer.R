@@ -1,6 +1,4 @@
 
-context("timer")
-
 test_that("keeps event loop alive", {
 
   counter <- 0L
