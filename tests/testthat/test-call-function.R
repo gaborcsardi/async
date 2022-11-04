@@ -111,7 +111,7 @@ test_that("handling call errors", {
   expect_true(is_count(res[[2]]))
   expect_true(is_count(res[[3]]))
   expect_s3_class(res[[4]], "async_rejected")
-  expect_match(res[[4]]$message, "error in callr subprocess")
+  expect_match(res[[4]]$message, "in callr subprocess")
 })
 
 test_that("mix calls with others", {
