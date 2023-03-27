@@ -370,13 +370,29 @@ el__io_poll <- function(self, private, timeout) {
       private$tasks[[id]] <- NULL
       ## TODO: this should be async
       p$data$process$wait(1000)
-      p$data$process$kill()
+      encoding <- p$data$encoding
+
+      stdout <- switch(
+        px_file_type(p$data$stdout),
+        conn = paste_all(p$data$process$read_output_lines(), encoding),
+        file = read_all(p$data$stdout, encoding),
+        NULL
+      )
+      stderr <- switch(
+        px_file_type(p$data$stderr),
+        conn = paste_all(p$data$process$read_error_lines(), encoding),
+        file = read_all(p$data$stderr, encoding),
+        NULL
+      )
+
       res <- list(
         status = p$data$process$get_exit_status(),
-        stdout = read_all(p$data$stdout, p$data$encoding),
-        stderr = read_all(p$data$stderr, p$data$encoding),
+        stdout = stdout,
+        stderr = stderr,
         timeout = FALSE
       )
+
+      p$data$process$kill()
 
       error <- FALSE
       if (p$type == "r-process") {

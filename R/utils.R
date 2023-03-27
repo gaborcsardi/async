@@ -113,6 +113,25 @@ read_all <- function(filename, encoding) {
   s
 }
 
+paste_all <- function(xs, encoding) {
+  out <- paste(xs, collapse = "\n")
+  Encoding(out) <- encoding
+  out
+}
+
+px_file_type <- function(file) {
+  if (!is_string(file)) {
+    return("NULL")
+  }
+
+  switch(
+    basename(file),
+    "2>&1" = "NULL",
+    "|" = "conn",
+    "file"
+  )
+}
+
 crash <- function () {
   get("attach")(structure(list(), class = "UserDefinedDatabase"))
 }
