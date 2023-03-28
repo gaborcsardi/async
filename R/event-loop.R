@@ -320,15 +320,14 @@ el__io_poll <- function(self, private, timeout) {
   ## Processes
   proc <- types %in% c("process", "r-process")
   if (sum(proc)) {
-    conns <- unlist(lapply(
-      private$tasks[proc], function(t) t$data$conns),
-      recursive = FALSE)
-    proc_pollables <- data.frame(
-      stringsAsFactors = FALSE,
-      id = names(private$tasks)[proc],
-      pollable = I(conns),
-      type = types[proc],
-      ready = rep("silent", sum(proc)))
+    proc_conns <- lapply(private$tasks[proc], function(t) t$data$conns)
+    proc_conns <- map2(proc_conns, names(proc_conns), function(c, id) {
+      data.frame(id = id, pollable = I(unname(c)), type = names(c))
+    })
+
+    proc_pollables <- do.call(rbind, proc_conns)
+    proc_pollables$ready <- "silent"
+
     pollables <- rbind(pollables, proc_pollables)
   }
 
@@ -362,6 +361,27 @@ el__io_poll <- function(self, private, timeout) {
       multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
     }
 
+    ## Any process outputs
+    proc_output <- pollables$type %in% c("stdout", "stderr") &
+      pollables$ready == "ready"
+
+    for (i in which(proc_output)) {
+      pollable <- pollables[i, ]
+      px <- private$tasks[[pollable$id]]$data$process
+
+      if (pollable$type == "stdout") {
+        private$tasks[[pollable$id]]$data$output_lines <- c(
+          private$tasks[[pollable$id]]$data$output_lines,
+          px$read_output_lines()
+        )
+      } else {
+        private$tasks[[pollable$id]]$data$error_lines <- c(
+          private$tasks[[pollable$id]]$data$error_lines,
+          px$read_error_lines()
+        )
+      }
+    }
+
     ## Any processes
     proc_ready <- pollables$type %in% c("process", "r-process") &
       pollables$ready == "ready"
@@ -374,13 +394,25 @@ el__io_poll <- function(self, private, timeout) {
 
       stdout <- switch(
         px_file_type(p$data$stdout),
-        conn = paste_all(p$data$process$read_output_lines(), encoding),
+        conn = paste_all(
+          c(
+            p$data$output_lines,
+            p$data$process$read_output_lines()
+          ),
+          encoding = encoding
+        ),
         file = read_all(p$data$stdout, encoding),
         NULL
       )
       stderr <- switch(
         px_file_type(p$data$stderr),
-        conn = paste_all(p$data$process$read_error_lines(), encoding),
+        conn = paste_all(
+          c(
+            p$data$error_lines,
+            p$data$process$read_error_lines()
+          ),
+          encoding = encoding
+        ),
         file = read_all(p$data$stderr, encoding),
         NULL
       )

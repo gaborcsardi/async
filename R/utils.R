@@ -132,6 +132,14 @@ px_file_type <- function(file) {
   )
 }
 
+px_conns <- function(px) {
+  compact(list(
+    process = if (px$has_poll_connection()) px$get_poll_connection(),
+    stdout = if (px$has_output_connection()) px$get_output_connection(),
+    stderr = if (px$has_error_connection()) px$get_error_connection()
+  ))
+}
+
 crash <- function () {
   get("attach")(structure(list(), class = "UserDefinedDatabase"))
 }
@@ -163,4 +171,8 @@ expr_name <- function(expr) {
   }
 
   gsub("\n.*$", "...", as.character(expr))
+}
+
+data.frame <- function(..., stringsAsFactors = FALSE) {
+  base::data.frame(..., stringsAsFactors = stringsAsFactors)
 }

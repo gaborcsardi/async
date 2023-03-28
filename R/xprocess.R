@@ -63,9 +63,8 @@ external_process <- function(process_generator, error_on_status = TRUE,
       px <- do.call(process_generator, args)
       stdout <- px$get_output_file()
       stderr <- px$get_error_file()
-      pipe <- px$get_poll_connection()
       id <<- get_default_event_loop()$add_process(
-        list(pipe),
+        px_conns(px),
         function(err, res) if (is.null(err)) resolve(res) else reject(err),
         list(process = px, stdout = stdout, stderr = stderr,
              error_on_status = error_on_status, encoding = args$encoding)

@@ -40,7 +40,7 @@ run_r_process <- function(func, args = list(), libpath = .libPaths(),
       rx <- r_process$new(opts)
       pipe <- rx$get_poll_connection()
       id <<- get_default_event_loop()$add_r_process(
-        list(pipe),
+        list(process = pipe),
         function(err, res) if (is.null(err)) resolve(res) else reject(err),
         list(process = rx, stdout = stdout, stderr = stderr,
              error_on_status = TRUE, encoding = ""))
