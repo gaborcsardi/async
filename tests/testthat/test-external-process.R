@@ -78,3 +78,28 @@ test_that("discarding stdout/stderr works", {
   expect_null(res$stderr)
   expect_false(res$timeout)
 })
+
+test_that("can disable error on status", {
+  px <- asNamespace("processx")$get_tool("px")
+  pxgen <- function(...) {
+    processx::process$new(
+      px,
+      c("return", "1"),
+      ...
+    )
+  }
+  afun <- function(...) external_process(pxgen, ...)
+
+  expect_error(
+    synchronise(afun()),
+    "exited with non-zero status"
+  )
+
+  res <- synchronise(afun(error_on_status = FALSE))
+  expect_equal(res, list(
+    status = 1L,
+    stdout = NULL,
+    stderr = NULL,
+    timeout = FALSE
+  ))
+})
