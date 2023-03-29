@@ -368,17 +368,12 @@ el__io_poll <- function(self, private, timeout) {
     for (i in which(proc_output)) {
       pollable <- pollables[i, ]
       px <- private$tasks[[pollable$id]]$data$process
+      buffers <- private$tasks[[pollable$id]]$data$buffers
 
       if (pollable$type == "stdout") {
-        private$tasks[[pollable$id]]$data$output_lines <- c(
-          private$tasks[[pollable$id]]$data$output_lines,
-          px$read_output_lines()
-        )
+        buffers$stdout$push(px$read_output())
       } else {
-        private$tasks[[pollable$id]]$data$error_lines <- c(
-          private$tasks[[pollable$id]]$data$error_lines,
-          px$read_error_lines()
-        )
+        buffers$stderr$push(px$read_error())
       }
     }
 
@@ -394,25 +389,13 @@ el__io_poll <- function(self, private, timeout) {
 
       stdout <- switch(
         px_file_type(p$data$stdout),
-        conn = paste_all(
-          c(
-            p$data$output_lines,
-            p$data$process$read_output_lines()
-          ),
-          encoding = encoding
-        ),
+        conn = p$data$buffers$stdout$read(),
         file = read_all(p$data$stdout, encoding),
         NULL
       )
       stderr <- switch(
         px_file_type(p$data$stderr),
-        conn = paste_all(
-          c(
-            p$data$error_lines,
-            p$data$process$read_error_lines()
-          ),
-          encoding = encoding
-        ),
+        conn = p$data$buffers$stderr$read(),
         file = read_all(p$data$stderr, encoding),
         NULL
       )
@@ -425,6 +408,7 @@ el__io_poll <- function(self, private, timeout) {
       )
 
       p$data$process$kill()
+      for (b in p$data$buffers) b$done()
 
       error <- FALSE
       if (p$type == "r-process") {

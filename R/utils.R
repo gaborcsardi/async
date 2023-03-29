@@ -113,12 +113,6 @@ read_all <- function(filename, encoding) {
   s
 }
 
-paste_all <- function(xs, encoding) {
-  out <- paste(xs, collapse = "\n")
-  Encoding(out) <- encoding
-  out
-}
-
 px_file_type <- function(file) {
   if (!is_string(file)) {
     return("NULL")
@@ -138,6 +132,31 @@ px_conns <- function(px) {
     stdout = if (px$has_output_connection()) px$get_output_connection(),
     stderr = if (px$has_error_connection()) px$get_error_connection()
   ))
+}
+
+px_buffers <- function(px) {
+  compact(list(
+    stdout = if (px$has_output_connection()) make_buffer(),
+    stderr = if (px$has_error_connection()) make_buffer()
+  ))
+}
+
+make_buffer <- function() {
+  con <- file(open = "w+b")
+
+  size <- 0L
+  list(
+    push = function(text) {
+      size <<- size + nchar(text, type = "bytes")
+      cat(text, file = con)
+    },
+    read = function() {
+      readChar(con, size, useBytes = TRUE)
+    },
+    done = function() {
+      close(con)
+    }
+  )
 }
 
 crash <- function () {

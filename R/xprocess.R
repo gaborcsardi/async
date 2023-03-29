@@ -67,7 +67,8 @@ external_process <- function(process_generator, error_on_status = TRUE,
         px_conns(px),
         function(err, res) if (is.null(err)) resolve(res) else reject(err),
         list(process = px, stdout = stdout, stderr = stderr,
-             error_on_status = error_on_status, encoding = args$encoding)
+             buffers = px_buffers(px), error_on_status = error_on_status,
+             encoding = args$encoding)
       )
     },
     on_cancel = function(reason) {
