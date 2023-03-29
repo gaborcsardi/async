@@ -103,3 +103,28 @@ test_that("can disable error on status", {
     timeout = FALSE
   ))
 })
+
+test_that("subprocesses are cancelled by default (#74)", {
+  px <- asNamespace("processx")$get_tool("px")
+
+  n_r_process <- function() {
+    sum(ps::ps()$name == "R")
+  }
+  n <- n_r_process()
+
+  synchronise(
+    when_any(
+      delay(0.5),
+      run_r_process(function() Sys.sleep(Inf))
+    )
+  )
+  expect_equal(n_r_process(), n)
+
+  synchronise(
+    when_any(
+      delay(0.5),
+      run_r_process(function() callr::r(function() Sys.sleep(Inf)))
+    )
+  )
+  expect_equal(n_r_process(), n)
+})

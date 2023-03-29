@@ -36,7 +36,7 @@ run_r_process <- function(func, args = list(), libpath = .libPaths(),
         func = func, args = args, libpath = libpath, repos = repos,
         cmdargs = cmdargs, system_profile = system_profile,
         user_profile = user_profile, env = env, stdout = stdout,
-        stderr = stderr)
+        stderr = stderr, cleanup_tree = TRUE)
       rx <- r_process$new(opts)
       pipe <- rx$get_poll_connection()
       id <<- get_default_event_loop()$add_r_process(
