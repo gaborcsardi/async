@@ -114,7 +114,7 @@ test_that("subprocesses are cancelled by default (#74)", {
 
   synchronise(
     when_any(
-      delay(0.5),
+      delay(0.1),
       run_r_process(function() Sys.sleep(Inf))
     )
   )
@@ -122,7 +122,7 @@ test_that("subprocesses are cancelled by default (#74)", {
 
   synchronise(
     when_any(
-      delay(0.5),
+      delay(0.1),
       run_r_process(function() callr::r(function() Sys.sleep(Inf)))
     )
   )
