@@ -85,7 +85,7 @@
                         <h4 data-toc-skip class="author">Gábor
 Csárdi</h4>
             
-            <h4 data-toc-skip class="date">2022-11-04</h4>
+            <h4 data-toc-skip class="date">2023-03-29</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/gaborcsardi/async/blob/HEAD/vignettes/async-example.Rmd" class="external-link"><code>vignettes/async-example.Rmd</code></a></small>
       <div class="hidden name"><code>async-example.Rmd</code></div>
@@ -124,7 +124,7 @@ HTTP 404 status code.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">response_time</span><span class="op">(</span><span class="va">mirror_urls</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## https://cloud.r-project.org/ </span></span>
-<span><span class="co">##                     0.180089</span></span></code></pre>
+<span><span class="co">##                     0.105704</span></span></code></pre>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">response_time</span><span class="op">(</span><span class="st">"https://httpbin.org/status/404"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## https://httpbin.org/status/404 </span></span>
@@ -142,25 +142,25 @@ the results, so the fastest response is first.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">fastest_urls</span><span class="op">(</span><span class="va">mirror_urls</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##             https://cloud.r-project.org/ </span></span>
-<span><span class="co">##                                 0.042202 </span></span>
-<span><span class="co">##              https://cran.microsoft.com/ </span></span>
-<span><span class="co">##                                 0.108632 </span></span>
-<span><span class="co">## https://repo.miserver.it.umich.edu/cran/ </span></span>
-<span><span class="co">##                                 0.241804 </span></span>
-<span><span class="co">##         https://cran.mirrors.hoobly.com/ </span></span>
-<span><span class="co">##                                 0.299296 </span></span>
-<span><span class="co">##                  https://cran.wustl.edu/ </span></span>
-<span><span class="co">##                                 0.366386 </span></span>
+<span><span class="co">##                                 0.089387 </span></span>
 <span><span class="co">##             http://ftp.ussg.iu.edu/CRAN/ </span></span>
-<span><span class="co">##                                 0.378574 </span></span>
-<span><span class="co">##         https://ftp.osuosl.org/pub/cran/ </span></span>
-<span><span class="co">##                                 0.394243 </span></span>
+<span><span class="co">##                                 0.430503 </span></span>
+<span><span class="co">## https://repo.miserver.it.umich.edu/cran/ </span></span>
+<span><span class="co">##                                 0.570671 </span></span>
 <span><span class="co">##     https://mirror.las.iastate.edu/CRAN/ </span></span>
-<span><span class="co">##                                 0.464375 </span></span>
-<span><span class="co">##                   https://cran.case.edu/ </span></span>
-<span><span class="co">##                                 0.543090 </span></span>
+<span><span class="co">##                                 0.571382 </span></span>
+<span><span class="co">##         https://ftp.osuosl.org/pub/cran/ </span></span>
+<span><span class="co">##                                 0.796587 </span></span>
 <span><span class="co">##       https://mirrors.nics.utk.edu/cran/ </span></span>
-<span><span class="co">##                                 0.556437</span></span></code></pre>
+<span><span class="co">##                                 0.870978 </span></span>
+<span><span class="co">##                   https://cran.case.edu/ </span></span>
+<span><span class="co">##                                 0.941288 </span></span>
+<span><span class="co">##     https://archive.linux.duke.edu/cran/ </span></span>
+<span><span class="co">##                                 0.954872 </span></span>
+<span><span class="co">##                  https://cran.wustl.edu/ </span></span>
+<span><span class="co">##                                 0.988637 </span></span>
+<span><span class="co">##          http://lib.stat.cmu.edu/R/CRAN/ </span></span>
+<span><span class="co">##                                 1.139582</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="resolve-packages-from-github-and-urls">Resolve packages from GitHub and URLs<a class="anchor" aria-label="anchor" href="#resolve-packages-from-github-and-urls"></a>
@@ -211,7 +211,7 @@ access it, etc. We don’t catch this (or other) error here, so
 <pre><code><span><span class="co">## <span style="color: #0000BB;">Type</span>: Package</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Package</span>: curl</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Title</span>: A Modern and Flexible Web Client for R</span></span>
-<span><span class="co">## <span style="color: #0000BB;">Version</span>: 4.3.3</span></span>
+<span><span class="co">## <span style="color: #0000BB;">Version</span>: 5.0.9000</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Authors@R</span> (parsed):</span></span>
 <span><span class="co">##     * Jeroen Ooms &lt;jeroen@berkeley.edu&gt; [aut, cre] (&lt;https://orcid.org/0000-0002-4035-0289&gt;)</span></span>
 <span><span class="co">##     * Hadley Wickham &lt;hadley@rstudio.com&gt; [ctb]</span></span>
@@ -227,8 +227,8 @@ access it, etc. We don’t catch this (or other) error here, so
 <span><span class="co">##     more-user-friendly web client see the 'httr' package which builds on</span></span>
 <span><span class="co">##     this package with http specific tools and logic.</span></span>
 <span><span class="co">## <span style="color: #0000BB;">License</span>: MIT + file LICENSE</span></span>
-<span><span class="co">## <span style="color: #0000BB;">URL</span>: <span style="color: #BB0000;">https://github.com/jeroen/curl (devel)</span></span></span>
-<span><span class="co"><span style="color: #BB0000;">##     https://curl.se/libcurl/ (upstream)</span></span></span>
+<span><span class="co">## <span style="color: #0000BB;">URL</span>: <span style="color: #BB0000;">https://github.com/jeroen/curl</span></span></span>
+<span><span class="co"><span style="color: #BB0000;">##     https://jeroen.r-universe.dev/curl https://curl.se/libcurl/</span></span></span>
 <span><span class="co">## <span style="color: #0000BB;">BugReports</span>: https://github.com/jeroen/curl/issues</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Depends</span>:</span></span>
 <span><span class="co">##     R (&gt;= 3.0.0)</span></span>
@@ -245,7 +245,8 @@ access it, etc. We don’t catch this (or other) error here, so
 <span><span class="co">##     knitr</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Encoding</span>: UTF-8</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Language</span>: en-US</span></span>
-<span><span class="co">## <span style="color: #0000BB;">RoxygenNote</span>: 7.1.2</span></span>
+<span><span class="co">## <span style="color: #0000BB;">Roxygen</span>: list(markdown = TRUE)</span></span>
+<span><span class="co">## <span style="color: #0000BB;">RoxygenNote</span>: 7.2.3</span></span>
 <span><span class="co">## <span style="color: #0000BB;">SystemRequirements</span>: libcurl: libcurl-devel (rpm) or</span></span>
 <span><span class="co">##     libcurl4-openssl-dev (deb).</span></span></code></pre>
 <p>Test non-existing repos, and other errors:</p>
@@ -273,7 +274,7 @@ This function is very similar to the previous one otherwise.</p>
 <p>Test:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">get_gh_sha</span><span class="op">(</span><span class="st">"jeroen"</span>, <span class="st">"curl"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "ee880ee249bc24af90eb18ef6a6a984e84fb0e6b"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "ec379976dc5e358adbdee5f640cd7686a830f2d0"</span></span></code></pre>
 <p>A small helper function to get a GitHub download URL from the user
 name, repo name and the sha hash:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
@@ -305,13 +306,13 @@ it with the already parsed <code>DESCRIPTION</code>.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">resolve_gh</span><span class="op">(</span><span class="st">"jeroen/curl"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $url</span></span>
-<span><span class="co">## [1] "https://api.github.com/repos/jeroen/curl/zipball/ee880ee249bc24af90eb18ef6a6a984e84fb0e6b"</span></span>
+<span><span class="co">## [1] "https://api.github.com/repos/jeroen/curl/zipball/ec379976dc5e358adbdee5f640cd7686a830f2d0"</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $description</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Type</span>: Package</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Package</span>: curl</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Title</span>: A Modern and Flexible Web Client for R</span></span>
-<span><span class="co">## <span style="color: #0000BB;">Version</span>: 4.3.3</span></span>
+<span><span class="co">## <span style="color: #0000BB;">Version</span>: 5.0.9000</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Authors@R</span> (parsed):</span></span>
 <span><span class="co">##     * Jeroen Ooms &lt;jeroen@berkeley.edu&gt; [aut, cre] (&lt;https://orcid.org/0000-0002-4035-0289&gt;)</span></span>
 <span><span class="co">##     * Hadley Wickham &lt;hadley@rstudio.com&gt; [ctb]</span></span>
@@ -327,8 +328,8 @@ it with the already parsed <code>DESCRIPTION</code>.</p>
 <span><span class="co">##     more-user-friendly web client see the 'httr' package which builds on</span></span>
 <span><span class="co">##     this package with http specific tools and logic.</span></span>
 <span><span class="co">## <span style="color: #0000BB;">License</span>: MIT + file LICENSE</span></span>
-<span><span class="co">## <span style="color: #0000BB;">URL</span>: <span style="color: #BB0000;">https://github.com/jeroen/curl (devel)</span></span></span>
-<span><span class="co"><span style="color: #BB0000;">##     https://curl.se/libcurl/ (upstream)</span></span></span>
+<span><span class="co">## <span style="color: #0000BB;">URL</span>: <span style="color: #BB0000;">https://github.com/jeroen/curl</span></span></span>
+<span><span class="co"><span style="color: #BB0000;">##     https://jeroen.r-universe.dev/curl https://curl.se/libcurl/</span></span></span>
 <span><span class="co">## <span style="color: #0000BB;">BugReports</span>: https://github.com/jeroen/curl/issues</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Depends</span>:</span></span>
 <span><span class="co">##     R (&gt;= 3.0.0)</span></span>
@@ -345,7 +346,8 @@ it with the already parsed <code>DESCRIPTION</code>.</p>
 <span><span class="co">##     knitr</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Encoding</span>: UTF-8</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Language</span>: en-US</span></span>
-<span><span class="co">## <span style="color: #0000BB;">RoxygenNote</span>: 7.1.2</span></span>
+<span><span class="co">## <span style="color: #0000BB;">Roxygen</span>: list(markdown = TRUE)</span></span>
+<span><span class="co">## <span style="color: #0000BB;">RoxygenNote</span>: 7.2.3</span></span>
 <span><span class="co">## <span style="color: #0000BB;">SystemRequirements</span>: libcurl: libcurl-devel (rpm) or</span></span>
 <span><span class="co">##     libcurl4-openssl-dev (deb).</span></span></code></pre>
 <p>Resolving a package at an HTTP URL is much simpler, it needs a single
@@ -371,7 +373,7 @@ file.</p>
 <code class="sourceCode R"><span><span class="va">curl20_url</span> <span class="op">&lt;-</span> <span class="st">"https://cloud.r-project.org/src/contrib/Archive/curl/curl_2.0.tar.gz"</span></span>
 <span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">resolve_url</span><span class="op">(</span><span class="va">curl20_url</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $url</span></span>
-<span><span class="co">## [1] "file:// /tmp/Rtmp2BdPeX/file3567706f3b85/curl_2.0.tar.gz"</span></span>
+<span><span class="co">## [1] "file:// /tmp/RtmpWozwvn/file1df267161e05/curl_2.0.tar.gz"</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $description</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Type</span>: Package</span></span>
@@ -480,7 +482,7 @@ can simply return <code>NULL</code> values for the failed packages.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
