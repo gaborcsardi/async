@@ -54,6 +54,7 @@ external_process <- function(process_generator, error_on_status = TRUE,
   args$poll_connection <- args$poll_connection %||% TRUE
 
   id <- NULL
+  buffers <- NULL
 
   deferred$new(
     type = "external_process", call = sys.call(),
@@ -61,18 +62,25 @@ external_process <- function(process_generator, error_on_status = TRUE,
       resolve
       reject <- environment(resolve)$private$reject
       px <- do.call(process_generator, args)
+
       stdout <- px$get_output_file()
       stderr <- px$get_error_file()
+      buffers <<- px_buffers(px)
+
       id <<- get_default_event_loop()$add_process(
         px_conns(px),
         function(err, res) if (is.null(err)) resolve(res) else reject(err),
         list(process = px, stdout = stdout, stderr = stderr,
-             buffers = px_buffers(px), error_on_status = error_on_status,
+             buffers = buffers, error_on_status = error_on_status,
              encoding = args$encoding)
       )
     },
     on_cancel = function(reason) {
       if (!is.null(id)) get_default_event_loop()$cancel(id)
+
+      if (!is.null(buffers)) {
+        for (b in buffers) b$done()
+      }
     }
   )
 }

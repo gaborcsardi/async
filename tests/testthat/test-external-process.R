@@ -106,6 +106,7 @@ test_that("can disable error on status", {
 
 test_that("can create processes with output connections", {
   px <- asNamespace("processx")$get_tool("px")
+  old_conns <- getAllConnections()
 
   pxgen <- function(...) {
     processx::process$new(
@@ -141,4 +142,14 @@ test_that("can create processes with output connections", {
   expect_false(res$timeout)
 
   expect_equal(gsub("\r", "", res$stdout), long)
+
+  # Check that buffers were closed
+  expect_equal(getAllConnections(), old_conns)
+
+  # Check that buffers are closed on cancellation
+  cmds <- c("sleep", "10")
+  synchronise(
+    when_any(delay(0.05), afun())
+  )
+  expect_equal(getAllConnections(), old_conns)
 })
