@@ -72,3 +72,17 @@ test_that("when_any, multiple errors", {
   expect_match(conditionMessage(errors[[1]]), "bar")
   expect_match(conditionMessage(errors[[2]]), "foo")
 })
+
+test_that("when_race() rejects (#76)", {
+  defer_fail <- function() {
+    deferred$new(action = function(resolve) stop("foo"))
+  }
+
+  expect_error(
+    synchronise(when_race(
+      delay(0.1),
+      defer_fail()
+    )),
+    "foo"
+  )
+})
