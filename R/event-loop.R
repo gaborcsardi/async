@@ -389,13 +389,13 @@ el__io_poll <- function(self, private, timeout) {
 
       stdout <- switch(
         px_file_type(p$data$stdout),
-        conn = p$data$buffers$stdout$read(),
+        conn = set_encoding(p$data$buffers$stdout$read(), encoding),
         file = read_all(p$data$stdout, encoding),
         NULL
       )
       stderr <- switch(
         px_file_type(p$data$stderr),
-        conn = p$data$buffers$stderr$read(),
+        conn = set_encoding(p$data$buffers$stderr$read(), encoding),
         file = read_all(p$data$stderr, encoding),
         NULL
       )

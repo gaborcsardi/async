@@ -113,6 +113,11 @@ read_all <- function(filename, encoding) {
   s
 }
 
+set_encoding <- function(x, encoding) {
+  Encoding(x) <- encoding
+  x
+}
+
 px_file_type <- function(file) {
   if (!is_string(file)) {
     return("NULL")
