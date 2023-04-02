@@ -5,7 +5,7 @@ test_that("race() rejects (#76)", {
   }
 
   expect_error(
-    synchronise(race(
+    synchronise(async_race(
       delay(0.1),
       defer_fail()
     )),

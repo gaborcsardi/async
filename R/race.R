@@ -3,10 +3,10 @@
 #' values resolve, or is rejected when one of them is rejected
 #'
 #' These functions are similar to [when_some()] and [when_any()], but they
-#' do not ignore errors. If a deferred is rejected, then `race_some()` and
-#' `race()` are rejected as well.
+#' do not ignore errors. If a deferred is rejected, then `async_race_some()` and
+#' `async_race()` are rejected as well.
 #'
-#' `race()` is a special case of `count = `: it resolves or is rejected
+#' `async_race()` is a special case of `count = `: it resolves or is rejected
 #' as soon as one deferred resolves or is rejected.
 #'
 #' async has auto-cancellation, so if the required number of deferred values
@@ -20,18 +20,18 @@
 #'
 #' @export
 
-race_some <- function(count, ..., .list = list()) {
+async_race_some <- function(count, ..., .list = list()) {
   when_some_internal(count, ..., .list = .list, .race = TRUE)
 }
 
-race_some <- mark_as_async(race_some)
+async_race_some <- mark_as_async(async_race_some)
 
 #' @export
-#' @rdname race_some
+#' @rdname async_race_some
 
-race <- function(..., .list = list()) {
+async_race <- function(..., .list = list()) {
   when_some_internal(1L, ..., .list = .list, .race = TRUE)$
     then(function(x) x[[1]])
 }
 
-race <- mark_as_async(race)
+async_race <- mark_as_async(async_race)
