@@ -3,14 +3,11 @@
 \name{when_some}
 \alias{when_some}
 \alias{when_any}
-\alias{when_race}
 \title{Resolve a deferred as soon as some deferred from a list resolve}
 \usage{
-when_some(count, ..., .list = list(), race = FALSE)
+when_some(count, ..., .list = list())
 
 when_any(..., .list = list())
-
-when_race(..., .list = list())
 }
 \arguments{
 \item{count}{Number of deferred values that need to resolve.}
@@ -18,11 +15,6 @@ when_race(..., .list = list())
 \item{...}{Deferred values.}
 
 \item{.list}{More deferred values.}
-
-\item{race}{Whether to resolve with the first deferred value that
-resolved, even if it's a rejection. By default rejections are
-ignored unless all deferred values rejected. If \code{TRUE},
-rejections are not ignored.}
 }
 \value{
 A deferred value, that is conditioned on all deferred values

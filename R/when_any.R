@@ -20,10 +20,6 @@
 #' @param count Number of deferred values that need to resolve.
 #' @param ... Deferred values.
 #' @param .list More deferred values.
-#' @param race Whether to resolve with the first deferred value that
-#'   resolved, even if it's a rejection. By default rejections are
-#'   ignored unless all deferred values rejected. If `TRUE`,
-#'   rejections are not ignored.
 #' @return A deferred value, that is conditioned on all deferred values
 #'   in `...` and `.list`.
 #'
@@ -40,8 +36,15 @@
 #' synchronise(afun())
 #' }
 
-when_some <- function(count, ..., .list = list(), race = FALSE) {
+when_some <- function(count, ..., .list = list()) {
+  when_some_internal(count, ..., .list = .list, .race = FALSE)
+}
+
+when_some <- mark_as_async(when_some)
+
+when_some_internal <- function(count, ..., .list, .race) {
   force(count)
+  force(.race)
   defs <- c(list(...), .list)
   num_defs <- length(defs)
   num_failed <- 0L
@@ -68,7 +71,7 @@ when_some <- function(count, ..., .list = list(), race = FALSE) {
       }
     },
     parent_reject = function(value, resolve) {
-      if (race) {
+      if (.race) {
         stop(value)
       }
       num_failed <<- num_failed + 1L
@@ -83,8 +86,6 @@ when_some <- function(count, ..., .list = list(), race = FALSE) {
   )
 }
 
-when_some <- mark_as_async(when_some)
-
 #' @export
 #' @rdname when_some
 
@@ -93,12 +94,3 @@ when_any <- function(..., .list = list()) {
 }
 
 when_any <- mark_as_async(when_any)
-
-#' @export
-#' @rdname when_some
-
-when_race <- function(..., .list = list()) {
-  when_some(1, ..., .list = .list, race = TRUE)$then(function(x) x[[1]])
-}
-
-when_race <- mark_as_async(when_race)
