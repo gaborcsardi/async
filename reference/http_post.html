@@ -70,7 +70,8 @@ via a deferred value.</p>
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">http_post</span><span class="op">(</span></span>
 <span>  <span class="va">url</span>,</span>
-<span>  <span class="va">data</span>,</span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  data_file <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  file <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -86,7 +87,13 @@ via a deferred value.</p>
 
 <dt>data</dt>
 <dd><p>Data to send. Either a raw vector, or a character string
-that will be converted to raw with base::charToRaw.</p></dd>
+that will be converted to raw with base::charToRaw. At most one of
+<code>data</code> and <code>data_file</code> must be non <code>NULL</code>.</p></dd>
+
+
+<dt>data_file</dt>
+<dd><p>Data file to send. At most one of <code>data</code> and
+<code>data_file</code> must be non <code>NULL</code>.</p></dd>
 
 
 <dt>headers</dt>
