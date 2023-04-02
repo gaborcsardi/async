@@ -6,7 +6,8 @@
 \usage{
 http_post(
   url,
-  data,
+  data = NULL,
+  data_file = NULL,
   headers = character(),
   file = NULL,
   options = list(),
@@ -17,7 +18,11 @@ http_post(
 \item{url}{URL to connect to.}
 
 \item{data}{Data to send. Either a raw vector, or a character string
-that will be converted to raw with \link[base:rawConversion]{base::charToRaw}.}
+that will be converted to raw with \link[base:rawConversion]{base::charToRaw}. At most one of
+\code{data} and \code{data_file} must be non \code{NULL}.}
+
+\item{data_file}{Data file to send. At most one of \code{data} and
+\code{data_file} must be non \code{NULL}.}
 
 \item{headers}{HTTP headers to send.}
 

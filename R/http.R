@@ -130,7 +130,10 @@ http_head <- mark_as_async(http_head)
 #'
 #' @inheritParams http_get
 #' @param data Data to send. Either a raw vector, or a character string
-#'   that will be converted to raw with [base::charToRaw].
+#'   that will be converted to raw with [base::charToRaw]. At most one of
+#'   `data` and `data_file` must be non `NULL`.
+#' @param data_file Data file to send. At most one of `data` and
+#'   `data_file` must be non `NULL`.
 #' @param on_progress Progress handler function. It is only used if the
 #'   response body is written to a file. See details at [http_get()].
 #'
@@ -149,10 +152,17 @@ http_head <- mark_as_async(http_head)
 #'
 #' synchronise(do())
 
-http_post <- function(url, data, headers = character(), file = NULL,
+http_post <- function(url, data = NULL, data_file = NULL,
+                      headers = character(), file = NULL,
                       options = list(), on_progress = NULL) {
 
-  url; data; headers; file; options; on_progress
+  url; data; data_file; headers; file; options; on_progress
+  if (!is.null(data) && !is.null(data_file)) {
+    stop("At most one of `data` and `data_file` can be non `NULL`.")
+  }
+  if (!is.null(data_file)) {
+    data <- readBin(data_file, "raw", file.size(data_file))
+  }
   if (!is.raw(data)) data <- charToRaw(data)
   options <- get_default_curl_options(options)
 
