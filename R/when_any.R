@@ -37,7 +37,14 @@
 #' }
 
 when_some <- function(count, ..., .list = list()) {
+  when_some_internal(count, ..., .list = .list, .race = FALSE)
+}
+
+when_some <- mark_as_async(when_some)
+
+when_some_internal <- function(count, ..., .list, .race) {
   force(count)
+  force(.race)
   defs <- c(list(...), .list)
   num_defs <- length(defs)
   num_failed <- 0L
@@ -64,6 +71,9 @@ when_some <- function(count, ..., .list = list()) {
       }
     },
     parent_reject = function(value, resolve) {
+      if (.race) {
+        stop(value)
+      }
       num_failed <<- num_failed + 1L
       errors <<- c(errors, list(value))
       if (num_failed + count == num_defs + 1L) {
@@ -75,8 +85,6 @@ when_some <- function(count, ..., .list = list()) {
     }
   )
 }
-
-when_some <- mark_as_async(when_some)
 
 #' @export
 #' @rdname when_some
