@@ -108,10 +108,13 @@ test_that("can create processes with output connections", {
   px <- asNamespace("processx")$get_tool("px")
   old_conns <- getAllConnections()
 
+  file <- tempfile()
+  defer(unlink(file))
+
   pxgen <- function(...) {
     processx::process$new(
       px,
-      cmds,
+      c("cat", file),
       stdout = "|",
       stderr = "2>&1",
       ...
@@ -120,7 +123,9 @@ test_that("can create processes with output connections", {
   afun <- function() external_process(pxgen)
 
   # Emit a large amount of lines to fill buffer
-  cmds <- rep(c("outln", "foo bar", "errln", "baz"), 2050)
+  for (i in seq_len(2050)) {
+    cat("foo bar\n", file = file, append = TRUE)
+  }
 
   res <- synchronise(afun())
   expect_equal(res$status, 0L)
@@ -129,12 +134,12 @@ test_that("can create processes with output connections", {
 
   expect_equal(
     gsub("\r", "", res$stdout),
-    paste0(strrep("foo bar\nbaz\n", 2050))
+    paste0(paste0(readLines(file), collapse = "\n"), "\n")
   )
 
   # Emit a very long line to fill buffer without "\n"
   long <- strrep("a ", 25000)
-  cmds <- c("out", long)
+  cat(long, file = file, append = FALSE)
 
   res <- synchronise(afun())
   expect_equal(res$status, 0L)

@@ -200,3 +200,8 @@ expr_name <- function(expr) {
 data.frame <- function(..., stringsAsFactors = FALSE) {
   base::data.frame(..., stringsAsFactors = stringsAsFactors)
 }
+
+defer <- function(expr, frame = parent.frame(), after = FALSE) {
+  thunk <- as.call(list(function() expr))
+  do.call(on.exit, list(thunk, add = TRUE, after = after), envir = frame)
+}
