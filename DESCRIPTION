@@ -21,7 +21,6 @@ Suggests:
     jsonlite,
     mockery,
     pingr,
-    ps,
     webfakes,
     testthat,
     withr
