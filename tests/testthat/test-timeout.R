@@ -2,7 +2,7 @@
 test_that("timed out", {
   skip_on_cran()
   f <- function() delay(1/10)$then(function(value) "OK")
-  expect_error(synchronise(async_timeout(f, 1/1000)), "Timed out")
+  expect_error(synchronise(async_timeout(f, 1/1000)), "Aync operation timed out")
 })
 
 test_that("did not time out", {
@@ -20,5 +20,5 @@ test_that("error before async_timeout", {
 test_that("error after async_timeout", {
   skip_on_cran()
   f <- function() delay(1/10)$then(function(value) stop("oops"))
-  expect_error(synchronise(async_timeout(f, 1/1000)), "Timed out")
+  expect_error(synchronise(async_timeout(f, 1/1000)), "Aync operation timed out")
 })
