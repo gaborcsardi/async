@@ -85,7 +85,7 @@
                         <h4 data-toc-skip class="author">Gábor
 Csárdi</h4>
             
-            <h4 data-toc-skip class="date">2023-04-11</h4>
+            <h4 data-toc-skip class="date">2023-05-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/gaborcsardi/async/blob/HEAD/vignettes/async-example.Rmd" class="external-link"><code>vignettes/async-example.Rmd</code></a></small>
       <div class="hidden name"><code>async-example.Rmd</code></div>
@@ -124,7 +124,7 @@ HTTP 404 status code.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">response_time</span><span class="op">(</span><span class="va">mirror_urls</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## https://cloud.r-project.org/ </span></span>
-<span><span class="co">##                     0.096354</span></span></code></pre>
+<span><span class="co">##                     0.099448</span></span></code></pre>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">response_time</span><span class="op">(</span><span class="st">"https://httpbin.org/status/404"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## https://httpbin.org/status/404 </span></span>
@@ -142,25 +142,25 @@ the results, so the fastest response is first.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">fastest_urls</span><span class="op">(</span><span class="va">mirror_urls</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##             https://cloud.r-project.org/ </span></span>
-<span><span class="co">##                                 0.096887 </span></span>
-<span><span class="co">##             http://ftp.ussg.iu.edu/CRAN/ </span></span>
-<span><span class="co">##                                 0.502693 </span></span>
-<span><span class="co">##          http://lib.stat.cmu.edu/R/CRAN/ </span></span>
-<span><span class="co">##                                 0.655026 </span></span>
-<span><span class="co">## https://repo.miserver.it.umich.edu/cran/ </span></span>
-<span><span class="co">##                                 0.760860 </span></span>
-<span><span class="co">##                  https://cran.wustl.edu/ </span></span>
-<span><span class="co">##                                 0.781000 </span></span>
-<span><span class="co">##     https://archive.linux.duke.edu/cran/ </span></span>
-<span><span class="co">##                                 0.793751 </span></span>
-<span><span class="co">##                   https://cran.case.edu/ </span></span>
-<span><span class="co">##                                 0.808984 </span></span>
+<span><span class="co">##                                 0.074264 </span></span>
 <span><span class="co">##       https://mirrors.nics.utk.edu/cran/ </span></span>
-<span><span class="co">##                                 0.823430 </span></span>
+<span><span class="co">##                                 0.477779 </span></span>
+<span><span class="co">##         https://cran.mirrors.hoobly.com/ </span></span>
+<span><span class="co">##                                 0.478349 </span></span>
+<span><span class="co">##          http://lib.stat.cmu.edu/R/CRAN/ </span></span>
+<span><span class="co">##                                 0.478597 </span></span>
+<span><span class="co">##     https://archive.linux.duke.edu/cran/ </span></span>
+<span><span class="co">##                                 0.555447 </span></span>
 <span><span class="co">##     https://mirror.las.iastate.edu/CRAN/ </span></span>
-<span><span class="co">##                                 0.824121 </span></span>
-<span><span class="co">##         https://ftp.osuosl.org/pub/cran/ </span></span>
-<span><span class="co">##                                 0.834464</span></span></code></pre>
+<span><span class="co">##                                 0.558807 </span></span>
+<span><span class="co">##                   https://cran.case.edu/ </span></span>
+<span><span class="co">##                                 0.620819 </span></span>
+<span><span class="co">## https://repo.miserver.it.umich.edu/cran/ </span></span>
+<span><span class="co">##                                 0.650164 </span></span>
+<span><span class="co">##                  https://cran.wustl.edu/ </span></span>
+<span><span class="co">##                                 0.668302 </span></span>
+<span><span class="co">##             http://ftp.ussg.iu.edu/CRAN/ </span></span>
+<span><span class="co">##                                      Inf</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="resolve-packages-from-github-and-urls">Resolve packages from GitHub and URLs<a class="anchor" aria-label="anchor" href="#resolve-packages-from-github-and-urls"></a>
@@ -373,7 +373,7 @@ file.</p>
 <code class="sourceCode R"><span><span class="va">curl20_url</span> <span class="op">&lt;-</span> <span class="st">"https://cloud.r-project.org/src/contrib/Archive/curl/curl_2.0.tar.gz"</span></span>
 <span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">resolve_url</span><span class="op">(</span><span class="va">curl20_url</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $url</span></span>
-<span><span class="co">## [1] "file:// /tmp/Rtmp2Z78zy/file1d5961a35071/curl_2.0.tar.gz"</span></span>
+<span><span class="co">## [1] "file:// /tmp/RtmpYJThfh/file18ba1dd3b8b8/curl_2.0.tar.gz"</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $description</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Type</span>: Package</span></span>
