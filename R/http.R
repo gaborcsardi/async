@@ -182,6 +182,24 @@ http_post <- function(url, data = NULL, data_file = NULL,
 
 http_post <- mark_as_async(http_post)
 
+http_delete <- function(url, headers = character(), file = NULL,
+                        options = list()) {
+  url; headers; options;
+
+  make_deferred_http(
+    function() {
+      assert_that(is_string(url))
+      handle <- new_handle(url = url)
+      handle_setheaders(handle, .list = headers)
+      handle_setopt(handle, customrequest = "DELETE", .list = options)
+      list(handle = handle, options = options)
+    },
+    file
+  )
+}
+
+http_delete <- mark_as_async(http_delete)
+
 #' @importFrom utils modifyList
 
 get_default_curl_options <- function(options) {
