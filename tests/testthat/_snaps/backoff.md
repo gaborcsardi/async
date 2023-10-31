@@ -2,7 +2,7 @@
 
     Code
       synchronise(async_backoff(uns, custom_backoff = bo))
-    Message <simpleMessage>
+    Message
       not yet
       not yet
       not yet
@@ -13,17 +13,18 @@
 
     Code
       synchronise(async_backoff(uns, custom_backoff = bo, times = 2))
-    Message <simpleMessage>
+    Message
       not yet
       not yet
-    Error <async_rejected>
-      not yet
+    Condition
+      Error:
+      ! not yet
 
 ---
 
     Code
       synchronise(async_backoff(uns, custom_backoff = bo, time_limit = 1))
-    Message <simpleMessage>
+    Message
       not yet
       not yet
       not yet
@@ -34,15 +35,16 @@
 
     Code
       synchronise(async_backoff(uns2, custom_backoff = bo, time_limit = 0.1))
-    Error <async_rejected>
-      not yet
+    Condition
+      Error in `uns()`:
+      ! not yet
 
 # progress
 
     Code
       synchronise(async_backoff(uns, custom_backoff = bo, on_progress = progress,
         progress_data = "data"))
-    Message <simpleMessage>
+    Message
       not yet
     Output
       $event
@@ -61,7 +63,7 @@
       [1] 0.1
       
       [1] "data"
-    Message <simpleMessage>
+    Message
       not yet
     Output
       $event
@@ -80,7 +82,7 @@
       [1] 0.1
       
       [1] "data"
-    Message <simpleMessage>
+    Message
       not yet
     Output
       $event
@@ -106,7 +108,7 @@
     Code
       synchronise(async_backoff(uns, custom_backoff = bo, times = 2, on_progress = progress,
         progress_data = "data"))
-    Message <simpleMessage>
+    Message
       not yet
     Output
       $event
@@ -125,7 +127,7 @@
       [1] 0.1
       
       [1] "data"
-    Message <simpleMessage>
+    Message
       not yet
     Output
       $event
@@ -144,8 +146,9 @@
       [1] NA
       
       [1] "data"
-    Error <async_rejected>
-      not yet
+    Condition
+      Error:
+      ! not yet
 
 # HTTP backoff example
 

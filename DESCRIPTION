@@ -22,7 +22,7 @@ Suggests:
     mockery,
     pingr,
     webfakes,
-    testthat,
+    testthat (>= 3.2.0),
     withr
 Remotes: r-lib/webfakes
 Encoding: UTF-8
