@@ -62,14 +62,6 @@ We support the following async primitives:
 - External R processes: `run_r_process()`.
 - A workers pool of processes to evaluate R code: `call_function()`.
 
-## Installation
-
-Once on CRAN, install the package as usual:
-
-```{r eval = FALSE}
-install.packages("async")
-```
-
 ## Introduction
 
 The async package brings asychronous I/O and computation to R. It implements

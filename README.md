@@ -51,14 +51,6 @@ queries: `http_get()`, `http_head()`. - External processes:
 `run_process()`. - External R processes: `run_r_process()`. - A workers
 pool of processes to evaluate R code: `call_function()`.
 
-## Installation
-
-Once on CRAN, install the package as usual:
-
-``` r
-install.packages("async")
-```
-
 ## Introduction
 
 The async package brings asychronous I/O and computation to R. It
