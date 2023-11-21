@@ -6,7 +6,6 @@
 #'
 #' @inheritParams callr::r_bg
 #' @export
-#' @importFrom callr r_process_options r_process rcmd_safe_env
 #'
 #' @examples
 #' \dontrun{
@@ -19,7 +18,7 @@
 run_r_process <- function(func, args = list(), libpath = .libPaths(),
   repos = c(getOption("repos"), c(CRAN = "https://cloud.r-project.org")),
   cmdargs = c("--no-site-file", "--slave", "--no-save", "--no-restore"),
-  system_profile = FALSE, user_profile = FALSE, env = rcmd_safe_env()) {
+  system_profile = FALSE, user_profile = FALSE, env = callr::rcmd_safe_env()) {
 
   func; args; libpath; repos; cmdargs; system_profile; user_profile; env
 
@@ -32,13 +31,13 @@ run_r_process <- function(func, args = list(), libpath = .libPaths(),
       reject <- environment(resolve)$private$reject
       stdout <- tempfile()
       stderr <- tempfile()
-      opts <- r_process_options(
+      opts <- callr::r_process_options(
         func = func, args = args, libpath = libpath, repos = repos,
         cmdargs = cmdargs, system_profile = system_profile,
         user_profile = user_profile, env = env, stdout = stdout,
         stderr = stderr, extra = list(cleanup_tree = TRUE))
 
-      rx <- r_process$new(opts)
+      rx <- callr::r_process$new(opts)
       pipe <- rx$get_poll_connection()
       id <<- get_default_event_loop()$add_r_process(
         list(pipe),

@@ -57,9 +57,6 @@ wp_init <- function(self, private) {
   invisible(self)
 }
 
-#' @importFrom callr r_session
-#' @importFrom processx conn_get_fileno
-
 wp_start_workers <- function(self, private) {
   num <- worker_pool_size()
 
@@ -68,8 +65,8 @@ wp_start_workers <- function(self, private) {
 
   ## Yeah, start some more
   to_start <- num - NROW(private$workers)
-  sess <- lapply(1:to_start, function(x) r_session$new(wait = FALSE))
-  fd <- viapply(sess, function(x) conn_get_fileno(x$get_poll_connection()))
+  sess <- lapply(1:to_start, function(x) callr::r_session$new(wait = FALSE))
+  fd <- viapply(sess, function(x) processx::conn_get_fileno(x$get_poll_connection()))
   new_workers <- data.frame(
     stringsAsFactors = FALSE,
     session = I(sess),

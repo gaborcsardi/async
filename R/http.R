@@ -29,7 +29,6 @@
 #'
 #' @family asyncronous HTTP calls
 #' @export
-#' @importFrom curl new_handle handle_setheaders
 #' @examples
 #' \donttest{
 #' afun <- async(function() {
@@ -48,8 +47,8 @@ http_get <- function(url, headers = character(), file = NULL,
   make_deferred_http(
     function() {
       assert_that(is_string(url))
-      handle <- new_handle(url = url)
-      handle_setheaders(handle, .list = headers)
+      handle <- curl::new_handle(url = url)
+      curl::handle_setheaders(handle, .list = headers)
 
       if (!is.null(on_progress)) {
         options$noprogress <- FALSE
@@ -68,7 +67,7 @@ http_get <- function(url, headers = character(), file = NULL,
         reg.finalizer(handle, function(...) fun, onexit = TRUE)
       }
 
-      handle_setopt(handle, .list = options)
+      curl::handle_setopt(handle, .list = options)
       list(handle = handle, options = options)
     },
     file
@@ -84,7 +83,6 @@ http_get <- mark_as_async(http_get)
 #'
 #' @family asyncronous HTTP calls
 #' @export
-#' @importFrom curl handle_setopt
 #' @examples
 #' \donttest{
 #' afun <- async(function() {
@@ -111,9 +109,9 @@ http_head <- function(url, headers = character(), file = NULL,
   make_deferred_http(
     function() {
       assert_that(is_string(url))
-      handle <- new_handle(url = url)
-      handle_setheaders(handle, .list = headers)
-      handle_setopt(handle, customrequest = "HEAD", nobody = TRUE,
+      handle <- curl::new_handle(url = url)
+      curl::handle_setheaders(handle, .list = headers)
+      curl::handle_setopt(handle, customrequest = "HEAD", nobody = TRUE,
                     .list = options)
       list(handle = handle, options = options)
     },
@@ -169,9 +167,9 @@ http_post <- function(url, data = NULL, data_file = NULL,
   make_deferred_http(
     function() {
       assert_that(is_string(url))
-      handle <- new_handle(url = url)
-      handle_setheaders(handle, .list = headers)
-      handle_setopt(handle, customrequest = "POST",
+      handle <- curl::new_handle(url = url)
+      curl::handle_setheaders(handle, .list = headers)
+      curl::handle_setopt(handle, customrequest = "POST",
                     postfieldsize = length(data), postfields = data,
                     .list = options)
       list(handle = handle, options = options)
@@ -189,9 +187,9 @@ http_delete <- function(url, headers = character(), file = NULL,
   make_deferred_http(
     function() {
       assert_that(is_string(url))
-      handle <- new_handle(url = url)
-      handle_setheaders(handle, .list = headers)
-      handle_setopt(handle, customrequest = "DELETE", .list = options)
+      handle <- curl::new_handle(url = url)
+      curl::handle_setheaders(handle, .list = headers)
+      curl::handle_setopt(handle, customrequest = "DELETE", .list = options)
       list(handle = handle, options = options)
     },
     file

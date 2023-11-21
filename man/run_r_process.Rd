@@ -12,7 +12,7 @@ run_r_process(
   cmdargs = c("--no-site-file", "--slave", "--no-save", "--no-restore"),
   system_profile = FALSE,
   user_profile = FALSE,
-  env = rcmd_safe_env()
+  env = callr::rcmd_safe_env()
 )
 }
 \arguments{

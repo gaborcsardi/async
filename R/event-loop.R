@@ -78,8 +78,6 @@ el_init <- function(self, private) {
   invisible(self)
 }
 
-#' @importFrom curl multi_add parse_headers_list handle_data
-
 el_add_http <- function(self, private, handle, callback, progress, file,
                         data) {
   self; private; handle; callback; progress; outfile <- file; data
@@ -91,7 +89,7 @@ el_add_http <- function(self, private, handle, callback, progress, file,
 
   content <- NULL
 
-  multi_add(
+  curl::multi_add(
     handle = handle,
     pool = private$pool,
     done = function(response) {
@@ -173,13 +171,11 @@ el_add_next_tick <- function(self, private, func, callback, data) {
   private$next_ticks <- c(private$next_ticks, id)
 }
 
-#' @importFrom curl multi_cancel
-
 el_cancel <- function(self, private, id) {
   private$next_ticks <- setdiff(private$next_ticks, id)
   private$timers  <- private$timers[setdiff(names(private$timers), id)]
   if (id %in% names(private$tasks) && private$tasks[[id]]$type == "http") {
-    multi_cancel(private$tasks[[id]]$data$handle)
+    curl::multi_cancel(private$tasks[[id]]$data$handle)
   } else if (id %in% names(private$tasks) &&
              private$tasks[[id]]$type %in% c("process", "r-process")) {
     private$tasks[[id]]$data$process$kill()
@@ -191,11 +187,9 @@ el_cancel <- function(self, private, id) {
   invisible(self)
 }
 
-#' @importFrom curl multi_cancel multi_list
-
 el_cancel_all <- function(self, private) {
-  http <- multi_list(pool = private$pool)
-  lapply(http, multi_cancel)
+  http <- curl::multi_list(pool = private$pool)
+  lapply(http, curl::multi_cancel)
   private$next_ticks <- character()
   private$timers <- Sys.time()[numeric()]
 
@@ -290,8 +284,6 @@ el__run_pending <- function(self, private) {
   length(next_ticks) > 0 || finished_pool
 }
 
-#' @importFrom curl multi_run multi_fdset
-
 el__io_poll <- function(self, private, timeout) {
 
   types <- vcapply(private$tasks, "[[", "type")
@@ -347,7 +339,7 @@ el__io_poll <- function(self, private, timeout) {
   }
 
   if (!is.null(private$curl_timer) && private$curl_timer <= private$time) {
-    multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
+    curl::multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
     private$curl_timer <- NULL
   }
 
@@ -359,7 +351,7 @@ el__io_poll <- function(self, private, timeout) {
     ## Any HTTP?
     if (private$curl_poll &&
         pollables$ready[match("curl", pollables$type)] == "event") {
-      multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
+      curl::multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
     }
 
     ## Any processes
@@ -432,8 +424,6 @@ el__create_task <- function(self, private, callback, data, ..., id, type) {
   id
 }
 
-#' @importFrom curl new_pool
-
 el__ensure_pool <- function(self, private) {
   getopt <- function(nm) {
     anm <- paste0("async_http_", nm)
@@ -447,7 +437,7 @@ el__ensure_pool <- function(self, private) {
       host_con = getopt("host_con") %||%  6,
       multiplex  = getopt("multiplex") %||% TRUE
     )
-    private$pool <- new_pool(
+    private$pool <- curl::new_pool(
       total_con = private$http_opts$total_con,
       host_con =  private$http_opts$host_con,
       multiplex = private$http_opts$multiplex
@@ -455,14 +445,12 @@ el__ensure_pool <- function(self, private) {
   }
 }
 
-#' @importFrom curl multi_set
-
 el_http_setopt <- function(self, private, total_con, host_con, multiplex) {
   private$ensure_pool()
   if (!is.null(total_con)) private$http_opts$total_con <- total_con
   if (!is.null(host_con))  private$http_opts$host_con  <- host_con
   if (!is.null(multiplex)) private$http_opts$multiplex <- multiplex
-  multi_set(
+  curl::multi_set(
     pool = private$pool,
     total_con = private$http_opts$total_con,
     host_con = private$http_opts$host_con,
@@ -516,10 +504,8 @@ el__update_time <- function(self, private) {
   private$time <- Sys.time()
 }
 
-#' @importFrom curl multi_fdset
-#'
 el__update_curl_data <- function(self, private) {
-  private$curl_fdset <- multi_fdset(private$pool)
+  private$curl_fdset <- curl::multi_fdset(private$pool)
   num_fds <- length(unique(unlist(private$curl_fdset[1:3])))
   private$curl_poll <- num_fds > 0
   private$curl_timer <- if ((t <- private$curl_fdset$timeout) != -1) {

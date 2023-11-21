@@ -11,7 +11,6 @@
 #'
 #' @family asynchronous external processes
 #' @export
-#' @importFrom processx process
 #' @examples
 #' \dontrun{
 #' afun <- function() {
@@ -38,7 +37,7 @@ run_process <- function(command = NULL, args = character(),
       reject <- environment(resolve)$private$reject
       stdout <- tempfile()
       stderr <- tempfile()
-      px <- process$new(command, args = args,
+      px <- processx::process$new(command, args = args,
         stdout = stdout, stderr = stderr, poll_connection = TRUE,
         env = env, cleanup = TRUE, cleanup_tree = TRUE, wd = wd,
         encoding = encoding, ...)
