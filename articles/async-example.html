@@ -85,7 +85,7 @@
                         <h4 data-toc-skip class="author">Gábor
 Csárdi</h4>
             
-            <h4 data-toc-skip class="date">2023-11-21</h4>
+            <h4 data-toc-skip class="date">2024-03-15</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/gaborcsardi/async/blob/HEAD/vignettes/async-example.Rmd" class="external-link"><code>vignettes/async-example.Rmd</code></a></small>
       <div class="hidden name"><code>async-example.Rmd</code></div>
@@ -96,7 +96,7 @@ Csárdi</h4>
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/gaborcsardi/async#readme" class="external-link">async</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-lib/desc#readme" class="external-link">desc</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://desc.r-lib.org/" class="external-link">desc</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jeroen.r-universe.dev/jsonlite" class="external-link">jsonlite</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="find-the-fastest-cran-mirror-in-the-us">Find the fastest CRAN mirror in the US<a class="anchor" aria-label="anchor" href="#find-the-fastest-cran-mirror-in-the-us"></a>
@@ -124,7 +124,7 @@ HTTP 404 status code.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">response_time</span><span class="op">(</span><span class="va">mirror_urls</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## https://cloud.r-project.org/ </span></span>
-<span><span class="co">##                     0.068252</span></span></code></pre>
+<span><span class="co">##                     0.048863</span></span></code></pre>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">response_time</span><span class="op">(</span><span class="st">"https://httpbin.org/status/404"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## https://httpbin.org/status/404 </span></span>
@@ -141,16 +141,26 @@ the results, so the fastest response is first.</p>
 <p>Let’s run it on the real data.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">fastest_urls</span><span class="op">(</span><span class="va">mirror_urls</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##         https://cloud.r-project.org/      http://lib.stat.cmu.edu/R/CRAN/ </span></span>
-<span><span class="co">##                             0.060648                             0.217215 </span></span>
-<span><span class="co">## https://archive.linux.duke.edu/cran/     https://cran.mirrors.hoobly.com/ </span></span>
-<span><span class="co">##                             0.425910                             0.426594 </span></span>
-<span><span class="co">## https://mirror.las.iastate.edu/CRAN/   https://mirrors.nics.utk.edu/cran/ </span></span>
-<span><span class="co">##                             0.429563                             0.453975 </span></span>
-<span><span class="co">##              https://cran.wustl.edu/               https://cran.case.edu/ </span></span>
-<span><span class="co">##                             0.457156                             0.462774 </span></span>
-<span><span class="co">##     https://ftp.osuosl.org/pub/cran/         http://ftp.ussg.iu.edu/CRAN/ </span></span>
-<span><span class="co">##                             0.484084                                  Inf</span></span></code></pre>
+<pre><code><span><span class="co">##             https://cloud.r-project.org/ </span></span>
+<span><span class="co">##                                 0.035550 </span></span>
+<span><span class="co">##           https://mirrors.cicku.me/cran/ </span></span>
+<span><span class="co">##                                 0.252076 </span></span>
+<span><span class="co">## https://repo.miserver.it.umich.edu/cran/ </span></span>
+<span><span class="co">##                                 0.282927 </span></span>
+<span><span class="co">##     https://mirror.las.iastate.edu/CRAN/ </span></span>
+<span><span class="co">##                                 0.305108 </span></span>
+<span><span class="co">##         https://cran.mirrors.hoobly.com/ </span></span>
+<span><span class="co">##                                 0.309836 </span></span>
+<span><span class="co">##          http://lib.stat.cmu.edu/R/CRAN/ </span></span>
+<span><span class="co">##                                 0.437765 </span></span>
+<span><span class="co">##                  https://cran.wustl.edu/ </span></span>
+<span><span class="co">##                                 0.442062 </span></span>
+<span><span class="co">##       https://mirrors.nics.utk.edu/cran/ </span></span>
+<span><span class="co">##                                 0.638860 </span></span>
+<span><span class="co">##                   https://cran.case.edu/ </span></span>
+<span><span class="co">##                                 0.639544 </span></span>
+<span><span class="co">##     https://archive.linux.duke.edu/cran/ </span></span>
+<span><span class="co">##                                 0.639640</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="resolve-packages-from-github-and-urls">Resolve packages from GitHub and URLs<a class="anchor" aria-label="anchor" href="#resolve-packages-from-github-and-urls"></a>
@@ -177,7 +187,7 @@ token to avoid GitHub rate limits, this should be in the
 <span><span class="op">}</span></span></code></pre></div>
 <p>Getting the <code>DESCRIPTION</code> file is easy, we just need to
 hit the right API endpoint, and then extract the response.
-<code><a href="http://r-lib.github.io/desc/reference/desc.html" class="external-link">desc::desc()</a></code> creates a nice <code><a href="http://r-lib.github.io/desc/reference/description.html" class="external-link">desc::description</a></code>
+<code><a href="https://desc.r-lib.org/reference/desc.html" class="external-link">desc::desc()</a></code> creates a nice <code><a href="https://desc.r-lib.org/reference/description.html" class="external-link">desc::description</a></code>
 object that can be queried.</p>
 <p>We use <code><a href="../reference/http_stop_for_status.html">http_stop_for_status()</a></code> to error out, if the any
 error happens, e.g. the repo or the file does not exist, and we cannot
@@ -193,7 +203,7 @@ access it, etc. We don’t catch this (or other) error here, so
 <span>  <span class="fu"><a href="../reference/http_get.html">http_get</a></span><span class="op">(</span><span class="va">desc_url</span>, headers <span class="op">=</span> <span class="fu">default_gh_headers</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">$</span></span>
 <span>    <span class="fu">then</span><span class="op">(</span><span class="va">http_stop_for_status</span><span class="op">)</span><span class="op">$</span></span>
 <span>    <span class="fu">then</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">resp</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/rawConversion.html" class="external-link">rawToChar</a></span><span class="op">(</span><span class="va">resp</span><span class="op">$</span><span class="va">content</span><span class="op">)</span><span class="op">)</span><span class="op">$</span></span>
-<span>    <span class="fu">then</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">txt</span><span class="op">)</span> <span class="fu">desc</span><span class="fu">::</span><span class="fu"><a href="http://r-lib.github.io/desc/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span>text <span class="op">=</span> <span class="va">txt</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu">then</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">txt</span><span class="op">)</span> <span class="fu">desc</span><span class="fu">::</span><span class="fu"><a href="https://desc.r-lib.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span>text <span class="op">=</span> <span class="va">txt</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>Test:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
@@ -201,7 +211,7 @@ access it, etc. We don’t catch this (or other) error here, so
 <pre><code><span><span class="co">## <span style="color: #0000BB;">Type</span>: Package</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Package</span>: curl</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Title</span>: A Modern and Flexible Web Client for R</span></span>
-<span><span class="co">## <span style="color: #0000BB;">Version</span>: 5.2.0</span></span>
+<span><span class="co">## <span style="color: #0000BB;">Version</span>: 5.2.1</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Authors@R</span> (parsed):</span></span>
 <span><span class="co">##     * Jeroen Ooms &lt;jeroen@berkeley.edu&gt; [aut, cre] (&lt;https://orcid.org/0000-0002-4035-0289&gt;)</span></span>
 <span><span class="co">##     * Hadley Wickham &lt;hadley@rstudio.com&gt; [ctb]</span></span>
@@ -226,7 +236,7 @@ access it, etc. We don’t catch this (or other) error here, so
 <span><span class="co">##     httpuv (&gt;= 1.4.4),</span></span>
 <span><span class="co">##     jsonlite,</span></span>
 <span><span class="co">##     knitr,</span></span>
-<span><span class="co">##     magrittr,</span></span>
+<span><span class="co">##     later,</span></span>
 <span><span class="co">##     rmarkdown,</span></span>
 <span><span class="co">##     spelling,</span></span>
 <span><span class="co">##     testthat (&gt;= 1.0.0),</span></span>
@@ -236,7 +246,7 @@ access it, etc. We don’t catch this (or other) error here, so
 <span><span class="co">## <span style="color: #0000BB;">Encoding</span>: UTF-8</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Language</span>: en-US</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Roxygen</span>: list(markdown = TRUE)</span></span>
-<span><span class="co">## <span style="color: #0000BB;">RoxygenNote</span>: 7.2.3</span></span>
+<span><span class="co">## <span style="color: #0000BB;">RoxygenNote</span>: 7.3.0</span></span>
 <span><span class="co">## <span style="color: #0000BB;">SystemRequirements</span>: libcurl: libcurl-devel (rpm) or</span></span>
 <span><span class="co">##     libcurl4-openssl-dev (deb).</span></span></code></pre>
 <p>Test non-existing repos, and other errors:</p>
@@ -264,7 +274,7 @@ This function is very similar to the previous one otherwise.</p>
 <p>Test:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">get_gh_sha</span><span class="op">(</span><span class="st">"jeroen"</span>, <span class="st">"curl"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "1bcf1ab3b4c811f4706a03de8e0dc675e1403315"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "d9f2a6f50932307c89fb7b03bd1a0ef4783fc26f"</span></span></code></pre>
 <p>A small helper function to get a GitHub download URL from the user
 name, repo name and the sha hash:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
@@ -296,13 +306,13 @@ it with the already parsed <code>DESCRIPTION</code>.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">resolve_gh</span><span class="op">(</span><span class="st">"jeroen/curl"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $url</span></span>
-<span><span class="co">## [1] "https://api.github.com/repos/jeroen/curl/zipball/1bcf1ab3b4c811f4706a03de8e0dc675e1403315"</span></span>
+<span><span class="co">## [1] "https://api.github.com/repos/jeroen/curl/zipball/d9f2a6f50932307c89fb7b03bd1a0ef4783fc26f"</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $description</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Type</span>: Package</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Package</span>: curl</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Title</span>: A Modern and Flexible Web Client for R</span></span>
-<span><span class="co">## <span style="color: #0000BB;">Version</span>: 5.2.0</span></span>
+<span><span class="co">## <span style="color: #0000BB;">Version</span>: 5.2.1</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Authors@R</span> (parsed):</span></span>
 <span><span class="co">##     * Jeroen Ooms &lt;jeroen@berkeley.edu&gt; [aut, cre] (&lt;https://orcid.org/0000-0002-4035-0289&gt;)</span></span>
 <span><span class="co">##     * Hadley Wickham &lt;hadley@rstudio.com&gt; [ctb]</span></span>
@@ -327,7 +337,7 @@ it with the already parsed <code>DESCRIPTION</code>.</p>
 <span><span class="co">##     httpuv (&gt;= 1.4.4),</span></span>
 <span><span class="co">##     jsonlite,</span></span>
 <span><span class="co">##     knitr,</span></span>
-<span><span class="co">##     magrittr,</span></span>
+<span><span class="co">##     later,</span></span>
 <span><span class="co">##     rmarkdown,</span></span>
 <span><span class="co">##     spelling,</span></span>
 <span><span class="co">##     testthat (&gt;= 1.0.0),</span></span>
@@ -337,7 +347,7 @@ it with the already parsed <code>DESCRIPTION</code>.</p>
 <span><span class="co">## <span style="color: #0000BB;">Encoding</span>: UTF-8</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Language</span>: en-US</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Roxygen</span>: list(markdown = TRUE)</span></span>
-<span><span class="co">## <span style="color: #0000BB;">RoxygenNote</span>: 7.2.3</span></span>
+<span><span class="co">## <span style="color: #0000BB;">RoxygenNote</span>: 7.3.0</span></span>
 <span><span class="co">## <span style="color: #0000BB;">SystemRequirements</span>: libcurl: libcurl-devel (rpm) or</span></span>
 <span><span class="co">##     libcurl4-openssl-dev (deb).</span></span></code></pre>
 <p>Resolving a package at an HTTP URL is much simpler, it needs a single
@@ -355,7 +365,7 @@ file.</p>
 <span>      <span class="va">dest</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/normalizePath.html" class="external-link">normalizePath</a></span><span class="op">(</span><span class="va">dest</span><span class="op">)</span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>        url <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"file://"</span>, <span class="fu"><a href="https://rdrr.io/r/base/normalizePath.html" class="external-link">normalizePath</a></span><span class="op">(</span><span class="va">dest</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>        description <span class="op">=</span> <span class="fu">desc</span><span class="fu">::</span><span class="fu"><a href="http://r-lib.github.io/desc/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">dest</span><span class="op">)</span><span class="op">)</span></span>
+<span>        description <span class="op">=</span> <span class="fu">desc</span><span class="fu">::</span><span class="fu"><a href="https://desc.r-lib.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">dest</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="op">}</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>Test:</p>
@@ -363,7 +373,7 @@ file.</p>
 <code class="sourceCode R"><span><span class="va">curl20_url</span> <span class="op">&lt;-</span> <span class="st">"https://cloud.r-project.org/src/contrib/Archive/curl/curl_2.0.tar.gz"</span></span>
 <span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">resolve_url</span><span class="op">(</span><span class="va">curl20_url</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $url</span></span>
-<span><span class="co">## [1] "file:// /tmp/RtmpO2Too7/file1c0d2dc3ff8e/curl_2.0.tar.gz"</span></span>
+<span><span class="co">## [1] "file:// /tmp/RtmpLSGnpl/file1c01668e04fa/curl_2.0.tar.gz"</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $description</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Type</span>: Package</span></span>

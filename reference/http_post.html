@@ -72,6 +72,7 @@ via a deferred value.</p>
 <span>  <span class="va">url</span>,</span>
 <span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  data_file <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  data_form <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  file <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -88,12 +89,18 @@ via a deferred value.</p>
 <dt>data</dt>
 <dd><p>Data to send. Either a raw vector, or a character string
 that will be converted to raw with base::charToRaw. At most one of
-<code>data</code> and <code>data_file</code> must be non <code>NULL</code>.</p></dd>
+<code>data</code>, <code>data_file</code> and <code>data_form</code> can be non <code>NULL</code>.</p></dd>
 
 
 <dt>data_file</dt>
-<dd><p>Data file to send. At most one of <code>data</code> and
-<code>data_file</code> must be non <code>NULL</code>.</p></dd>
+<dd><p>Data file to send. At most one of <code>data</code>, <code>data_file</code>
+and <code>data_form</code> can be non <code>NULL</code>.</p></dd>
+
+
+<dt>data_form</dt>
+<dd><p>Form data to send. A name list, where each element
+is created with either <code><a href="https://rdrr.io/pkg/curl/man/multipart.html" class="external-link">curl::form_data()</a></code> or <code><a href="https://rdrr.io/pkg/curl/man/multipart.html" class="external-link">curl::form_file()</a></code>.
+At most one of <code>data</code>, <code>data_file</code> and <code>data_form</code> can be non <code>NULL</code>.</p></dd>
 
 
 <dt>headers</dt>

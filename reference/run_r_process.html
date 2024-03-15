@@ -92,10 +92,10 @@ is set to <code>.GlobalEnv</code> before passing it to the child process.
 Because of this, it is good practice to create an anonymous
 function and pass that to <code>callr</code>, instead of passing
 a function object from a (base or other) package. In particular</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">r</span>(.libPaths)</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">r</span>(.libPaths)</span></code></pre><p></p></div>
 <p>does not work, because <code>.libPaths</code> is defined in a special
 environment, but</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">r</span>(<span class="cf">function</span>() <span class="fu">.libPaths</span>())</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">r</span>(<span class="cf">function</span>() <span class="fu">.libPaths</span>())</span></code></pre><p></p></div>
 <p>works just fine.</p></dd>
 
 
