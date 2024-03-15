@@ -8,6 +8,7 @@ http_post(
   url,
   data = NULL,
   data_file = NULL,
+  data_form = NULL,
   headers = character(),
   file = NULL,
   options = list(),
@@ -19,10 +20,14 @@ http_post(
 
 \item{data}{Data to send. Either a raw vector, or a character string
 that will be converted to raw with \link[base:rawConversion]{base::charToRaw}. At most one of
-\code{data} and \code{data_file} must be non \code{NULL}.}
+\code{data}, \code{data_file} and \code{data_form} can be non \code{NULL}.}
 
-\item{data_file}{Data file to send. At most one of \code{data} and
-\code{data_file} must be non \code{NULL}.}
+\item{data_file}{Data file to send. At most one of \code{data}, \code{data_file}
+and \code{data_form} can be non \code{NULL}.}
+
+\item{data_form}{Form data to send. A name list, where each element
+is created with either \code{\link[curl:multipart]{curl::form_data()}} or \code{\link[curl:multipart]{curl::form_file()}}.
+At most one of \code{data}, \code{data_file} and \code{data_form} can be non \code{NULL}.}
 
 \item{headers}{HTTP headers to send.}
 

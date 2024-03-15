@@ -292,6 +292,29 @@ test_that("http_post file", {
   expect_equal(cnt$json, obj)
 })
 
+test_that("http_post form", {
+  resp <- NULL
+  tmp <- tempfile()
+  on.exit(unlink(tmp), add = TRUE)
+  writeBin(charToRaw("0123456789"), tmp)
+
+  do <- function() {
+    form <- list(
+      foo = curl::form_data("bar"),
+      baz = curl::form_file(tmp, type = "text/plain", name = "mrfile")
+    )
+    http_post(http$url("/post"), data_form = form)$
+      then(http_stop_for_status)$
+      then(function(x) resp <<- x)
+  }
+
+  resp <- synchronise(do())
+  obj <- jsonlite::fromJSON(rawToChar(resp$content))
+  expect_snapshot(obj$files)
+  expect_snapshot(obj$form)
+
+})
+
 test_that("curl multi options", {
   # It is not possible to query the options that were set on a handle,
   # so this is not a great test case.

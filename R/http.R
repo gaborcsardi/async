@@ -129,9 +129,12 @@ http_head <- mark_as_async(http_head)
 #' @inheritParams http_get
 #' @param data Data to send. Either a raw vector, or a character string
 #'   that will be converted to raw with [base::charToRaw]. At most one of
-#'   `data` and `data_file` must be non `NULL`.
-#' @param data_file Data file to send. At most one of `data` and
-#'   `data_file` must be non `NULL`.
+#'   `data`, `data_file` and `data_form` can be non `NULL`.
+#' @param data_file Data file to send. At most one of `data`, `data_file`
+#'   and `data_form` can be non `NULL`.
+#' @param data_form Form data to send. A name list, where each element
+#'   is created with either [curl::form_data()] or [curl::form_file()].
+#'   At most one of `data`, `data_file` and `data_form` can be non `NULL`.
 #' @param on_progress Progress handler function. It is only used if the
 #'   response body is written to a file. See details at [http_get()].
 #'
@@ -151,17 +154,20 @@ http_head <- mark_as_async(http_head)
 #' synchronise(do())
 
 http_post <- function(url, data = NULL, data_file = NULL,
-                      headers = character(), file = NULL,
+                      data_form = NULL, headers = character(), file = NULL,
                       options = list(), on_progress = NULL) {
 
-  url; data; data_file; headers; file; options; on_progress
-  if (!is.null(data) && !is.null(data_file)) {
-    stop("At most one of `data` and `data_file` can be non `NULL`.")
+  url; data; data_file; data_form; headers; file; options; on_progress
+  if ((!is.null(data) + !is.null(data_file) + !is.null(data_form)) > 1) {
+    stop(
+      "At most one of `data`, `data_file` and `data_form` ",
+      "can be non `NULL`."
+    )
   }
   if (!is.null(data_file)) {
     data <- readBin(data_file, "raw", file.size(data_file))
   }
-  if (!is.raw(data)) data <- charToRaw(data)
+  if (!is.null(data) && !is.raw(data)) data <- charToRaw(data)
   options <- get_default_curl_options(options)
 
   make_deferred_http(
@@ -172,6 +178,9 @@ http_post <- function(url, data = NULL, data_file = NULL,
       curl::handle_setopt(handle, customrequest = "POST",
                     postfieldsize = length(data), postfields = data,
                     .list = options)
+      if (!is.null(data_form)) {
+        curl::handle_setform(handle, .list = data_form)
+      }
       list(handle = handle, options = options)
     },
     file
