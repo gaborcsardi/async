@@ -293,6 +293,7 @@ test_that("http_post file", {
 })
 
 test_that("http_post form", {
+  local_edition(3)
   resp <- NULL
   tmp <- tempfile()
   on.exit(unlink(tmp), add = TRUE)
