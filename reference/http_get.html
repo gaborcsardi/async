@@ -108,6 +108,17 @@ response body is written to a file. See details below.</p></dd>
 
 <p>Deferred object.</p>
     </div>
+    <div id="details">
+    <h2>Details</h2>
+    <p>An async HTTP deferred object is also an event emitter, see
+<a href="event_emitter.html">event_emitter</a>. Use <code>$event_emitter</code> to access the event emitter API,
+and call <code>$event_emitter$listen_on()</code> etc. to listen on HTTP events,
+etc.</p><ul><li><p><code>"data"</code> is emitted when we receive data from the server, the data is
+passed on to the listeners as a raw vector. Note that zero-length
+raw vectors might also happen.</p></li>
+<li><p><code>"end"</code> is emitted at the end of the HTTP data stream, without
+additional arguments (Also on error.)</p></li>
+</ul></div>
     <div id="progress-bars">
     <h2>Progress bars</h2>
     
