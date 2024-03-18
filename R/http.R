@@ -4,6 +4,7 @@
 #' Start an HTTP GET request in the background, and report its completion
 #' via a deferred.
 #'
+#' @section HTTP event emitters:
 #' An async HTTP deferred object is also an event emitter, see
 #' [event_emitter]. Use `$event_emitter` to access the event emitter API,
 #' and call `$event_emitter$listen_on()` etc. to listen on HTTP events,
@@ -14,6 +15,26 @@
 #'   raw vectors might also happen.
 #' * `"end"` is emitted at the end of the HTTP data stream, without
 #'   additional arguments (Also on error.)
+#'
+#' Here is an example, that uses the web server from the webfakes
+#' package:
+#' ```r
+#' http <- webfakes::new_app_process(webfakes::httpbin_app())
+#' stream_http <- function() {
+#'   query <- http_get(http$url("/drip?duration=3&numbytes=10"))
+#'   query$event_emitter$
+#'     listen_on("data", function(bytes) {
+#'       writeLines(paste("Got", length(bytes), "byte(s):"))
+#'       print(bytes)
+#'     })$
+#'     listen_on("end", function() {
+#'       writeLines("Done.")
+#'     })
+#'   query
+#' }
+#'
+#' response <- synchronise(stream_http())
+#' ```
 #'
 #' @param url URL to connect to.
 #' @param headers HTTP headers to send.
