@@ -87,7 +87,7 @@ synchronization barrier, i.e. the last \code{synchronise()} or
 
 In an error happen within an \code{error} listener, then the same happens,
 the last \code{synchronise()} or \code{run_event_loop()} call fails. You can
-want to wrap the body of the error listeners in a \code{tryCatch()} call,
+wrap the body of the error listeners in a \code{tryCatch()} call,
 if you want to avoid this.
 }
 

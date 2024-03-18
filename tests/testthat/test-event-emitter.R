@@ -88,7 +88,7 @@ test_that("named arguments to listeners", {
 
 test_that("all listeners are called", {
   arg1 <- arg2 <- arg3 <- NULL
-  arg11 <- arg21 <- arg31 <- NULL
+  arg11 <- arg12 <- arg13 <- NULL
   do <- function() {
     x <- event_emitter$new(async = FALSE)
     x$listen_on("foo", function(a1, a2, a3) {

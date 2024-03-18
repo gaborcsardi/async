@@ -75,7 +75,7 @@
 #'
 #' In an error happen within an `error` listener, then the same happens,
 #' the last `synchronise()` or `run_event_loop()` call fails. You can
-#' want to wrap the body of the error listeners in a `tryCatch()` call,
+#' wrap the body of the error listeners in a `tryCatch()` call,
 #' if you want to avoid this.
 #'
 #' @export

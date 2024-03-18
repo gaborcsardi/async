@@ -391,9 +391,10 @@ deferred <- R6Class(
     initialize = function(action = NULL, on_progress = NULL, on_cancel = NULL,
                           parents = NULL, parent_resolve = NULL,
                           parent_reject = NULL, type = NULL,
-                          call = sys.call(-1))
+                          call = sys.call(-1), event_emitter = NULL)
       async_def_init(self, private, action, on_progress, on_cancel,
-                     parents, parent_resolve, parent_reject, type, call),
+                     parents, parent_resolve, parent_reject, type, call,
+                    event_emitter),
     then = function(on_fulfilled)
       def_then(self, private, on_fulfilled),
     catch = function(...)
@@ -402,7 +403,9 @@ deferred <- R6Class(
       def_finally(self, private, on_finally),
     cancel = function(reason = "Cancelled")
       def_cancel(self, private, reason),
-    share = function() { private$shared <<- TRUE; invisible(self) }
+    share = function() { private$shared <<- TRUE; invisible(self) },
+
+    event_emitter = NULL
   ),
 
   private = list(
@@ -454,7 +457,7 @@ deferred <- R6Class(
 
 async_def_init <- function(self, private, action, on_progress,
                            on_cancel, parents, parent_resolve,
-                           parent_reject, type, call) {
+                           parent_reject, type, call, event_emitter) {
 
   private$type <- type
   private$id <- get_id()
@@ -462,6 +465,7 @@ async_def_init <- function(self, private, action, on_progress,
   private$parents <- parents
   private$action <- action
   private$mycall <- call
+  self$event_emitter <- event_emitter
 
   "!DEBUG NEW `private$id` (`type`)"
 

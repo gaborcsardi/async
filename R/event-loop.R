@@ -94,12 +94,15 @@ el_add_http <- function(self, private, handle, callback, progress, file,
     pool = private$pool,
     done = function(response) {
       task <- private$tasks[[id]]
+      task$data$data$event_emitter$emit("end")
       private$tasks[[id]] <- NULL
       response$content <- do.call(c, as.list(content))
       response$file <- outfile
       task$callback(NULL, response)
     },
     data = function(bytes, ...) {
+      task <- private$tasks[[id]]
+      task$data$data$event_emitter$emit("data", bytes)
       if (!is.null(outfile)) {
         ## R runs out of connections very quickly, especially because they
         ## are not removed until a gc(). However, calling gc() is

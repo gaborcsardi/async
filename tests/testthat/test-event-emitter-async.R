@@ -109,10 +109,10 @@ test_that("named arguments to listeners", {
 
 test_that("all listeners are called", {
   arg1 <- arg2 <- arg3 <- NULL
-  arg11 <- arg21 <- arg31 <- NULL
+  arg11 <- arg12 <- arg13 <- NULL
 
   deadline <- Sys.time() + as.difftime(2, units = "secs")
-  
+
   do <- function() {
     x <- event_emitter$new(async = TRUE)
     x$listen_on("foo", function(a1, a2, a3) {
@@ -141,7 +141,7 @@ test_that("one shot listener is only called once", {
   called <- called1 <- 0L
 
   deadline <- Sys.time() + as.difftime(2, units = "secs")
-  
+
   do <- function() {
     x <- event_emitter$new(async = TRUE)
     x$listen_on("foo", function() { called <<- called + 1L })
@@ -160,7 +160,7 @@ test_that("can remove listener", {
   called <- called2 <- 0L
 
   deadline <- Sys.time() + as.difftime(2, units = "secs")
-  
+
   cb1 <- function() { called <<- called + 1L }
   cb2 <- function(x = 1) { called2 <<- called2 + 1L }
   do <- function() {

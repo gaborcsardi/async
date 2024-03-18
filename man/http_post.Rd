@@ -44,6 +44,10 @@ response body is written to a file. See details at \code{\link[=http_get]{http_g
 Start an HTTP POST request in the background, and report its completion
 via a deferred value.
 }
+\details{
+An async HTTP deferred object is also an event emitter, see
+\code{\link[=http_get]{http_get()}} for details, and also \link{event_emitter}.
+}
 \examples{
 json <- jsonlite::toJSON(list(baz = 100, foo = "bar"))
 

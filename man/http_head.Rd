@@ -30,7 +30,8 @@ response body is written to a file. See details below.}
 Deferred object.
 }
 \description{
-Asynchronous HTTP HEAD request
+An async HTTP deferred object is also an event emitter, see
+\code{\link[=http_get]{http_get()}} for details, and also \link{event_emitter}.
 }
 \examples{
 \donttest{

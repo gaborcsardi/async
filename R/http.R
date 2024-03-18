@@ -4,6 +4,17 @@
 #' Start an HTTP GET request in the background, and report its completion
 #' via a deferred.
 #'
+#' An async HTTP deferred object is also an event emitter, see
+#' [event_emitter]. Use `$event_emitter` to access the event emitter API,
+#' and call `$event_emitter$listen_on()` etc. to listen on HTTP events,
+#' etc.
+#'
+#' * `"data"` is emitted when we receive data from the server, the data is
+#'   passed on to the listeners as a raw vector. Note that zero-length
+#'   raw vectors might also happen.
+#' * `"end"` is emitted at the end of the HTTP data stream, without
+#'   additional arguments (Also on error.)
+#'
 #' @param url URL to connect to.
 #' @param headers HTTP headers to send.
 #' @param file If not `NULL`, it must be a string, specifying a file.
@@ -78,6 +89,9 @@ http_get <- mark_as_async(http_get)
 
 #' Asynchronous HTTP HEAD request
 #'
+#' An async HTTP deferred object is also an event emitter, see
+#' [http_get()] for details, and also [event_emitter].
+#'
 #' @inheritParams http_get
 #' @return Deferred object.
 #'
@@ -125,6 +139,9 @@ http_head <- mark_as_async(http_head)
 #'
 #' Start an HTTP POST request in the background, and report its completion
 #' via a deferred value.
+#'
+#' An async HTTP deferred object is also an event emitter, see
+#' [http_get()] for details, and also [event_emitter].
 #'
 #' @inheritParams http_get
 #' @param data Data to send. Either a raw vector, or a character string
@@ -228,9 +245,30 @@ get_default_curl_options <- function(options) {
   )
 }
 
+http_events <- R6Class(
+  "http_events",
+  inherit = event_emitter,
+  public = list(
+    listen_on = function(event, callback) {
+      private$check(event)
+      super$listen_on(event, callback)
+    },
+    listen_off = function(event, callback) {
+      private$check(event)
+      super$listen_off(event, callback)
+    }
+  ),
+  private = list(
+    check = function(event) {
+      stopifnot(event %in% c("data", "end"))
+    }
+  )
+)
+
 make_deferred_http <- function(cb, file) {
   cb; file
   id <- NULL
+  ee <- http_events$new()
   deferred$new(
     type = "http", call = sys.call(),
     action = function(resolve, progress) {
@@ -245,11 +283,13 @@ make_deferred_http <- function(cb, file) {
         function(err, res) if (is.null(err)) resolve(res) else reject(err),
         progress,
         file,
-        data = ho$options)
+        data = c(ho$options, list(event_emitter = ee))
+      )
     },
     on_cancel = function(reason) {
       if (!is.null(id)) get_default_event_loop()$cancel(id)
-    }
+    },
+    event_emitter = ee
   )
 }
 

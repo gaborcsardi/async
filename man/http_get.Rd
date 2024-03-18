@@ -33,6 +33,19 @@ Deferred object.
 Start an HTTP GET request in the background, and report its completion
 via a deferred.
 }
+\details{
+An async HTTP deferred object is also an event emitter, see
+\link{event_emitter}. Use \verb{$event_emitter} to access the event emitter API,
+and call \verb{$event_emitter$listen_on()} etc. to listen on HTTP events,
+etc.
+\itemize{
+\item \code{"data"} is emitted when we receive data from the server, the data is
+passed on to the listeners as a raw vector. Note that zero-length
+raw vectors might also happen.
+\item \code{"end"} is emitted at the end of the HTTP data stream, without
+additional arguments (Also on error.)
+}
+}
 \section{Progress bars}{
 
 
