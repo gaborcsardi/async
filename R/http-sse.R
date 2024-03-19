@@ -39,7 +39,7 @@ sse_events <- R6Class(
   inherit = event_emitter,
   public = list(
     initialize = function(http_handle) {
-      super$initialize()
+      super$initialize(async = FALSE)
       http_handle$event_emitter$listen_on("data", function(bytes) {
         private$data <- c(private$data, bytes)
         private$emit_events()
