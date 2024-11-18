@@ -24,10 +24,12 @@ Suggests:
     webfakes,
     testthat (>= 3.2.0),
     withr
-Remotes: r-lib/webfakes
+Remotes:
+    r-lib/callr,
+    r-lib/webfakes
 Encoding: UTF-8
 Imports:
-    callr (>= 2.0.4.9000),
+    callr (>= 3.7.6.9000),
     curl (>= 3.2),
     processx (>= 3.3.0.9001),
     R6,
