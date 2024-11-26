@@ -113,6 +113,57 @@ read_all <- function(filename, encoding) {
   s
 }
 
+set_encoding <- function(x, encoding) {
+  Encoding(x) <- encoding
+  x
+}
+
+px_file_type <- function(file) {
+  if (!is_string(file)) {
+    return("NULL")
+  }
+
+  switch(
+    basename(file),
+    "2>&1" = "NULL",
+    "|" = "conn",
+    "file"
+  )
+}
+
+px_conns <- function(px) {
+  compact(list(
+    process = if (px$has_poll_connection()) px$get_poll_connection(),
+    stdout = if (px$has_output_connection()) px$get_output_connection(),
+    stderr = if (px$has_error_connection()) px$get_error_connection()
+  ))
+}
+
+px_buffers <- function(px) {
+  compact(list(
+    stdout = if (px$has_output_connection()) make_buffer(),
+    stderr = if (px$has_error_connection()) make_buffer()
+  ))
+}
+
+make_buffer <- function() {
+  con <- file(open = "w+b")
+
+  size <- 0L
+  list(
+    push = function(text) {
+      size <<- size + nchar(text, type = "bytes")
+      cat(text, file = con)
+    },
+    read = function() {
+      readChar(con, size, useBytes = TRUE)
+    },
+    done = function() {
+      close(con)
+    }
+  )
+}
+
 crash <- function () {
   get("attach")(structure(list(), class = "UserDefinedDatabase"))
 }
@@ -144,4 +195,13 @@ expr_name <- function(expr) {
   }
 
   gsub("\n.*$", "...", as.character(expr))
+}
+
+data.frame <- function(..., stringsAsFactors = FALSE) {
+  base::data.frame(..., stringsAsFactors = stringsAsFactors)
+}
+
+defer <- function(expr, frame = parent.frame(), after = FALSE) {
+  thunk <- as.call(list(function() expr))
+  do.call(on.exit, list(thunk, add = TRUE, after = after), envir = frame)
 }
