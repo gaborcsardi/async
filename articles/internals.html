@@ -84,7 +84,7 @@
                         <h4 data-toc-skip class="author">Gábor
 Csárdi</h4>
             
-            <h4 data-toc-skip class="date">2024-11-18</h4>
+            <h4 data-toc-skip class="date">2025-01-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/gaborcsardi/async/blob/main/vignettes/internals.Rmd" class="external-link"><code>vignettes/internals.Rmd</code></a></small>
       <div class="hidden name"><code>internals.Rmd</code></div>
@@ -171,11 +171,11 @@ their workarounds here.</p>
 <p>The curl package implements a HTTP client, it uses libcurl
 internally. In async, we do not intend to re-implement a HTTP client,
 but we just want to use curl. We added the
-<code><a href="https://rdrr.io/pkg/curl/man/multi.html" class="external-link">curl::multi_fdset()</a></code> function to curl, this returns the
+<code><a href="https://jeroen.r-universe.dev/curl/reference/multi.html" class="external-link">curl::multi_fdset()</a></code> function to curl, this returns the
 socket file descriptiors to poll for curl’s HTTP connections and also
 the timeout value that curl prefers. We poll these file descriptors with
 <code><a href="http://processx.r-lib.org/reference/poll.html" class="external-link">processx::poll()</a></code> and if any of them have data, we call
-<code><a href="https://rdrr.io/pkg/curl/man/multi.html" class="external-link">curl::multi_run()</a></code>. We also use the returned timeout value
+<code><a href="https://jeroen.r-universe.dev/curl/reference/multi.html" class="external-link">curl::multi_run()</a></code>. We also use the returned timeout value
 as a maximum limit for the poll, unless we also have lower limits for
 other I/O or timers.</p>
 </div>
@@ -186,11 +186,11 @@ other I/O or timers.</p>
 automatically by libcurl, but we need to handle it somewhat specially,
 because libcurl does not report a file descriptor for it. E.g. if a curl
 multi handle has a single pending HTTP query which is in the DNS
-resolution phase, then <code><a href="https://rdrr.io/pkg/curl/man/multi.html" class="external-link">curl::multi_fdset()</a></code> returns zero
+resolution phase, then <code><a href="https://jeroen.r-universe.dev/curl/reference/multi.html" class="external-link">curl::multi_fdset()</a></code> returns zero
 file descriptors. But we still need to call
-<code><a href="https://rdrr.io/pkg/curl/man/multi.html" class="external-link">curl::multi_run()</a></code> to allow the DNS resolution to complete,
+<code><a href="https://jeroen.r-universe.dev/curl/reference/multi.html" class="external-link">curl::multi_run()</a></code> to allow the DNS resolution to complete,
 and the actually HTTP to start. To work around this, we always call
-<code><a href="https://rdrr.io/pkg/curl/man/multi.html" class="external-link">curl::multi_run()</a></code> if some curl handles are in the DNS
+<code><a href="https://jeroen.r-universe.dev/curl/reference/multi.html" class="external-link">curl::multi_run()</a></code> if some curl handles are in the DNS
 resolution phase and we used curl’s returned timeout value for the
 poll.</p>
 </div>
@@ -198,9 +198,9 @@ poll.</p>
 <h5 id="http-timeouts">HTTP timeouts<a class="anchor" aria-label="anchor" href="#http-timeouts"></a>
 </h5>
 <p>HTTP timeouts also have to be handled specially, because we need to
-call <code><a href="https://rdrr.io/pkg/curl/man/multi.html" class="external-link">curl::multi_run()</a></code> even if there is no data on the curl
+call <code><a href="https://jeroen.r-universe.dev/curl/reference/multi.html" class="external-link">curl::multi_run()</a></code> even if there is no data on the curl
 sockets. Similarly to the DNS resolution workaround, we always call
-<code><a href="https://rdrr.io/pkg/curl/man/multi.html" class="external-link">curl::multi_run()</a></code> if we used curl’s timeout for the poll.
+<code><a href="https://jeroen.r-universe.dev/curl/reference/multi.html" class="external-link">curl::multi_run()</a></code> if we used curl’s timeout for the poll.
 This makes sure that it is called no later than requrested by curl
 itself, and curl can take care of the HTTP timeouts.</p>
 </div>
