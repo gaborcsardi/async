@@ -159,9 +159,9 @@ test_that("error, invalid arg", {
 test_that("automatic cancellation", {
   called <- 0L
   do <- function() {
-    r1 <- http_get(http$url("/delay/5"))$
+    r1 <- http_get(http$url("/delay/5"), options = list(http_version = 2))$
       then(function() called <<- called + 1L)
-    r2 <- http_get(http$url("/get"))$
+    r2 <- http_get(http$url("/get"), options = list(http_version = 2))$
       then(function() called <<- called + 1L)
     when_any(r1, r2)
   }

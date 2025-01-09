@@ -9,7 +9,7 @@ test_that("auto-cancellation", {
 
     response_time <- async(function(url) {
       idx <<- idx + 1
-      httpx[[idx]] <<- http_head(url)
+      httpx[[idx]] <<- http_head(url, options = list(http_version = 2))
       httpx[[idx]]$
         then(function(x) { req_done <<- req_done + 1L ; x })$
         then(http_stop_for_status)$
