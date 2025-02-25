@@ -19,7 +19,6 @@ Suggests:
     debugme,
     desc,
     jsonlite,
-    mockery,
     pingr,
     webfakes,
     testthat (>= 3.2.0),

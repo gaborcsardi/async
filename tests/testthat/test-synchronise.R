@@ -1,7 +1,7 @@
 
 test_that("error if async function is called from sync context", {
 
-  mockery::stub(get_default_event_loop, "length", 0)
+  fake(get_default_event_loop, "length", 0)
   expect_error(
     get_default_event_loop(),
     class = "async_synchronization_barrier_error")
