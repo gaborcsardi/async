@@ -25,7 +25,7 @@ Suggests:
     withr
 Encoding: UTF-8
 Imports:
-    callr (>= 3.7.6.9000),
+    callr (>= 3.7.6),
     curl (>= 3.2),
     processx (>= 3.3.0.9001),
     R6,
