@@ -57,6 +57,7 @@ test_that("calls that error", {
 
 test_that("calls that crash", {
   skip_without_package("processx", "3.4.1.9001")
+  skip_without_package("callr", "3.7.6.9000")
   afun <- async(function(x) {
     when_all(
       call_function(function() Sys.getpid()),
