@@ -23,9 +23,6 @@ Suggests:
     webfakes,
     testthat (>= 3.2.0),
     withr
-Remotes:
-    r-lib/callr,
-    r-lib/webfakes
 Encoding: UTF-8
 Imports:
     callr (>= 3.7.6.9000),
