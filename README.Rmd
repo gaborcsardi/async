@@ -304,6 +304,7 @@ to a list and returns a single deferred value for the whole result.
 function, etc.
 
 The current iterators:
+
 * `async_map()` applies an async function to all elements of a vector or
   list (collection).
 * `async_detect()` finds an element of a collection that passed an async
