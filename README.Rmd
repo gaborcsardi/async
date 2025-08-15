@@ -84,6 +84,7 @@ an HTTP GET request with the `http_get()` function.
 ## Built-in Deferred Value Constructors
 
 The async package has built-in async functions that create deferred values:
+
 - `delay()` creates a timer that expires after the specified time.
 - `http_get()` and `http_head()` perform HTTP requests, asynchronously.
 - `async_constant()` creates a simple deferred that represents the supplied
@@ -303,6 +304,7 @@ to a list and returns a single deferred value for the whole result.
 function, etc.
 
 The current iterators:
+
 * `async_map()` applies an async function to all elements of a vector or
   list (collection).
 * `async_detect()` finds an element of a collection that passed an async
