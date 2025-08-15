@@ -84,6 +84,7 @@ an HTTP GET request with the `http_get()` function.
 ## Built-in Deferred Value Constructors
 
 The async package has built-in async functions that create deferred values:
+
 - `delay()` creates a timer that expires after the specified time.
 - `http_get()` and `http_head()` perform HTTP requests, asynchronously.
 - `async_constant()` creates a simple deferred that represents the supplied
