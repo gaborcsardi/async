@@ -43,7 +43,7 @@ run_process <- function(command = NULL, args = character(),
         encoding = encoding, ...)
       pipe <- px$get_poll_connection()
       id <<- get_default_event_loop()$add_process(
-        list(pipe),
+        list(process = pipe),
         function(err, res) if (is.null(err)) resolve(res) else reject(err),
         list(process = px, stdout = stdout, stderr = stderr,
              error_on_status = error_on_status, encoding = encoding))

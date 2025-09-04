@@ -103,3 +103,58 @@ test_that("can disable error on status", {
     timeout = FALSE
   ))
 })
+
+test_that("can create processes with output connections", {
+  px <- asNamespace("processx")$get_tool("px")
+  old_conns <- getAllConnections()
+
+  file <- tempfile()
+  defer(unlink(file))
+
+  pxgen <- function(...) {
+    processx::process$new(
+      px,
+      c("cat", file),
+      stdout = "|",
+      stderr = "2>&1",
+      ...
+    )
+  }
+  afun <- function() external_process(pxgen)
+
+  # Emit a large amount of lines to fill buffer
+  for (i in seq_len(2050)) {
+    cat("foo bar\n", file = file, append = TRUE)
+  }
+
+  res <- synchronise(afun())
+  expect_equal(res$status, 0L)
+  expect_null(res$stderr)
+  expect_false(res$timeout)
+
+  expect_equal(
+    gsub("\r", "", res$stdout),
+    paste0(paste0(readLines(file), collapse = "\n"), "\n")
+  )
+
+  # Emit a very long line to fill buffer without "\n"
+  long <- strrep("a ", 25000)
+  cat(long, file = file, append = FALSE)
+
+  res <- synchronise(afun())
+  expect_equal(res$status, 0L)
+  expect_null(res$stderr)
+  expect_false(res$timeout)
+
+  expect_equal(gsub("\r", "", res$stdout), long)
+
+  # Check that buffers were closed
+  expect_equal(getAllConnections(), old_conns)
+
+  # Check that buffers are closed on cancellation
+  cmds <- c("sleep", "10")
+  synchronise(
+    when_any(delay(0.05), afun())
+  )
+  expect_equal(getAllConnections(), old_conns)
+})

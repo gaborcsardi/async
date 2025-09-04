@@ -315,15 +315,14 @@ el__io_poll <- function(self, private, timeout) {
   ## Processes
   proc <- types %in% c("process", "r-process")
   if (sum(proc)) {
-    conns <- unlist(lapply(
-      private$tasks[proc], function(t) t$data$conns),
-      recursive = FALSE)
-    proc_pollables <- data.frame(
-      stringsAsFactors = FALSE,
-      id = names(private$tasks)[proc],
-      pollable = I(conns),
-      type = types[proc],
-      ready = rep("silent", sum(proc)))
+    proc_conns <- lapply(private$tasks[proc], function(t) t$data$conns)
+    proc_conns <- map2(proc_conns, names(proc_conns), function(c, id) {
+      data.frame(id = id, pollable = I(unname(c)), type = names(c))
+    })
+
+    proc_pollables <- do.call(rbind, proc_conns)
+    proc_pollables$ready <- "silent"
+
     pollables <- rbind(pollables, proc_pollables)
   }
 
@@ -357,6 +356,22 @@ el__io_poll <- function(self, private, timeout) {
       curl::multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
     }
 
+    ## Any process outputs
+    proc_output <- pollables$type %in% c("stdout", "stderr") &
+      pollables$ready == "ready"
+
+    for (i in which(proc_output)) {
+      pollable <- pollables[i, ]
+      px <- private$tasks[[pollable$id]]$data$process
+      buffers <- private$tasks[[pollable$id]]$data$buffers
+
+      if (pollable$type == "stdout") {
+        buffers$stdout$push(px$read_output())
+      } else {
+        buffers$stderr$push(px$read_error())
+      }
+    }
+
     ## Any processes
     proc_ready <- pollables$type %in% c("process", "r-process") &
       pollables$ready == "ready"
@@ -365,13 +380,30 @@ el__io_poll <- function(self, private, timeout) {
       private$tasks[[id]] <- NULL
       ## TODO: this should be async
       p$data$process$wait(1000)
-      p$data$process$kill()
+      encoding <- p$data$encoding
+
+      stdout <- switch(
+        px_file_type(p$data$stdout),
+        conn = set_encoding(p$data$buffers$stdout$read(), encoding),
+        file = read_all(p$data$stdout, encoding),
+        NULL
+      )
+      stderr <- switch(
+        px_file_type(p$data$stderr),
+        conn = set_encoding(p$data$buffers$stderr$read(), encoding),
+        file = read_all(p$data$stderr, encoding),
+        NULL
+      )
+
       res <- list(
         status = p$data$process$get_exit_status(),
-        stdout = read_all(p$data$stdout, p$data$encoding),
-        stderr = read_all(p$data$stderr, p$data$encoding),
+        stdout = stdout,
+        stderr = stderr,
         timeout = FALSE
       )
+
+      p$data$process$kill()
+      for (b in p$data$buffers) b$done()
 
       error <- FALSE
       if (p$type == "r-process") {
