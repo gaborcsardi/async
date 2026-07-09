@@ -7,3 +7,4 @@
 /.env
 /r-packages
 /dev-lib
+/.cache

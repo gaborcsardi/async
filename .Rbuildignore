@@ -14,3 +14,4 @@
 ^vignettes$
 ^codecov\.yml$
 ^dev-lib$
+^\.cache$
