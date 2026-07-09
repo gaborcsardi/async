@@ -245,6 +245,15 @@ http_delete <- function(url, headers = character(), file = NULL,
 
 http_delete <- mark_as_async(http_delete)
 
+default_http_version <- function() {
+  os <- Sys.info()[["sysname"]]
+  if (!is.na(os) && os %in% c("Darwin", "Linux")) {
+    2L # HTTP/1.1
+  } else {
+    0L # whatever libcurl chooses
+  }
+}
+
 #' @importFrom utils modifyList
 
 get_default_curl_options <- function(options) {
@@ -261,6 +270,9 @@ get_default_curl_options <- function(options) {
       connecttimeout = as.integer(getopt("connecttimeout") %||% 300),
       low_speed_time = as.integer(getopt("low_speed_time") %||% 0),
       low_speed_limit = as.integer(getopt("low_speed_limit") %||% 0),
+      http_version = as.integer(
+        getopt("http_version") %||% default_http_version()
+      ),
       cainfo = getopt("cainfo")
     ))
   )

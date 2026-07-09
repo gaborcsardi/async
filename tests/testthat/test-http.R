@@ -228,6 +228,34 @@ test_that("more sophisticated timeouts", {
   expect_true(toc - tic < as.difftime(5, units = "secs"))
 })
 
+test_that("http_version is set from options and env vars", {
+  # explicit option wins
+  expect_equal(
+    get_default_curl_options(list(http_version = 3))$http_version,
+    3L
+  )
+
+  # async_http_http_version option
+  withr::local_options(async_http_http_version = 3)
+  expect_equal(get_default_curl_options(list())$http_version, 3L)
+
+  # ASYNC_HTTP_HTTP_VERSION env var (option has priority)
+  withr::local_options(async_http_http_version = NULL)
+  withr::local_envvar(ASYNC_HTTP_HTTP_VERSION = "3")
+  expect_equal(get_default_curl_options(list())$http_version, 3L)
+
+  # default is used when nothing is set
+  withr::local_envvar(ASYNC_HTTP_HTTP_VERSION = NA_character_)
+  expect_equal(
+    get_default_curl_options(list())$http_version,
+    default_http_version()
+  )
+})
+
+test_that("default_http_version", {
+  expect_true(default_http_version() %in% c(0L, 2L))
+})
+
 test_that("errors contain the response", {
   do <- function() {
     http_get(http$url("/status/418"))$
