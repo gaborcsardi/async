@@ -246,12 +246,13 @@ http_delete <- function(url, headers = character(), file = NULL,
 http_delete <- mark_as_async(http_delete)
 
 default_http_version <- function() {
-  os <- Sys.info()[["sysname"]]
-  if (!is.na(os) && os %in% c("Darwin", "Linux")) {
-    2L # HTTP/1.1
-  } else {
-    0L # whatever libcurl chooses
-  }
+  # We default to HTTP/1.1 on every platform, because HTTP/2 has caused a
+  # number of transport-level failures (connection resets, `GOAWAY` frames,
+  # etc.) with various libcurl and server combinations, see e.g.
+  # https://github.com/r-lib/pak/issues/358
+  # https://github.com/r-lib/actions/issues/483
+  # https://github.com/r-lib/actions/issues/1091
+  2L # HTTP/1.1
 }
 
 #' @importFrom utils modifyList

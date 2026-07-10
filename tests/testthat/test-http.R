@@ -253,7 +253,7 @@ test_that("http_version is set from options and env vars", {
 })
 
 test_that("default_http_version", {
-  expect_true(default_http_version() %in% c(0L, 2L))
+  expect_equal(default_http_version(), 2L)
 })
 
 test_that("errors contain the response", {
