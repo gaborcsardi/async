@@ -1,8 +1,8 @@
 Package: async
 Title: Asynchronous Computation and 'I/O'
 Version: 0.0.0.9004
-Author: Gábor Csárdi
-Maintainer: Gábor Csárdi <csardi.gabor@gmail.com>
+Authors@R:
+    person("Gábor", "Csárdi", , "csardi.gabor@gmail.com", role = c("aut", "cre"))
 Description: The 'async' package brings asynchronous ('async') computation
     and 'I/O' to 'R'. It uses an event loop to schedule asynchronous
     functions that report their results via deferred values. Deferred
