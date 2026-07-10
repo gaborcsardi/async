@@ -55,7 +55,7 @@ deferred.
 
 
 Asynchronous computation is represented by deferred values.
-A deferred value is an \href{https://github.com/wch/R6}{R6} object.
+A deferred value is an \href{https://github.com/r-lib/R6}{R6} object.
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{deferred$new(action = NULL, on_progress = NULL, on_cancel = NULL,
    parents = NULL, parent_resolve = NULL, parent_reject = NULL,

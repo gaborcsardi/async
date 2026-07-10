@@ -9,8 +9,8 @@
 
 ![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
 [![Codecov test
-coverage](https://codecov.io/gh/r-lib/async/graph/badge.svg)](https://app.codecov.io/gh/r-lib/async)
-[![R-CMD-check](https://github.com/r-lib/async/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/r-lib/async/actions/workflows/R-CMD-check.yaml)
+coverage](https://codecov.io/gh/gaborcsardi/async/graph/badge.svg)](https://app.codecov.io/gh/gaborcsardi/async)
+[![R-CMD-check](https://github.com/gaborcsardi/async/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gaborcsardi/async/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The async package brings asynchronous (async) computation and I/O to R.
@@ -60,7 +60,7 @@ worker pool.
 ## Deferred Values
 
 Asynchronous computation is represented by deferred values. In async a
-deferred value is an [R6](https://github.com/wch/R6) object, so it has
+deferred value is an [R6](https://github.com/r-lib/R6) object, so it has
 reference semantics. In some other programming languages deferred values
 are called futures or promises.
 
@@ -410,4 +410,4 @@ See the package vignettes for more examples.
 
 ## License
 
-MIT © [RStudio Inc](https://rstudio.com)
+MIT © [Posit, PBC](https://posit.co/)
