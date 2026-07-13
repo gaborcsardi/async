@@ -1,4 +1,3 @@
-
 #' Asynchronous function call with a timeout
 #'
 #' If the deferred value is not resolved before the timeout expires,
@@ -36,7 +35,8 @@ async_timeout <- function(task, timeout, ...) {
   done <- FALSE
 
   self <- deferred$new(
-    type = "timeout", call = sys.call(),
+    type = "timeout",
+    call = sys.call(),
     action = function(resolve) {
       task(...)$then(function(x) list("ok", x))$then(self)
       delay(timeout)$then(function() list("timeout"))$then(self)

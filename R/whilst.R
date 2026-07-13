@@ -1,4 +1,3 @@
-
 #' Repeatedly call task, while test returns true
 #'
 #' @param test Synchronous test function.
@@ -26,8 +25,9 @@ async_whilst <- function(test, task, ...) {
   task <- async(task)
 
   self <- deferred$new(
-    type = "async_whilst", call = sys.call(),
-    action = function(resolve)  {
+    type = "async_whilst",
+    call = sys.call(),
+    action = function(resolve) {
       if (!test()) {
         resolve(NULL)
       } else {
@@ -35,7 +35,7 @@ async_whilst <- function(test, task, ...) {
       }
     },
     parent_resolve = function(value, resolve) {
-      if  (!test()) {
+      if (!test()) {
         resolve(value)
       } else {
         task(...)$then(self)

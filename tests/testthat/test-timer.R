@@ -1,13 +1,11 @@
-
 test_that("keeps event loop alive", {
-
   counter <- 0L
   do <- function() {
     cb <- function() {
       counter <<- counter + 1L
       if (counter == 3L) t$cancel()
     }
-    t <- async_timer$new(1/100, cb)
+    t <- async_timer$new(1 / 100, cb)
     "done"
   }
 
@@ -16,20 +14,21 @@ test_that("keeps event loop alive", {
   end <- Sys.time()
 
   expect_null(res)
-  expect_true(end - start >= as.difftime(3/100, units = "secs"))
+  expect_true(end - start >= as.difftime(3 / 100, units = "secs"))
   expect_true(end - start <= as.difftime(2, units = "secs"))
 })
 
 test_that("errors", {
-
   counter <- 0L
   do <- function() {
     cb <- function() {
       counter <<- counter + 1L
-      if (counter == 2L) stop("foobar")
+      if (counter == 2L) {
+        stop("foobar")
+      }
       if (counter == 3L) t$cancel()
     }
-    t <-  async_timer$new(1/100, cb)
+    t <- async_timer$new(1 / 100, cb)
   }
 
   expect_error(run_event_loop(do()), "foobar")
@@ -40,10 +39,12 @@ test_that("errors", {
   do <- function() {
     cb <- function() {
       counter <<- counter + 1L
-      if (counter == 2L) stop("foobar")
+      if (counter == 2L) {
+        stop("foobar")
+      }
       if (counter == 3L) t$cancel()
     }
-    t <-  async_timer$new(1/100, cb)
+    t <- async_timer$new(1 / 100, cb)
     t$listen_on("error", function(err) error <<- err)
   }
 
@@ -54,7 +55,6 @@ test_that("errors", {
 })
 
 test_that("mixing deferred and timers", {
-
   counter <- 0L
   do <- function(s) {
     counter <<- 0L
@@ -69,7 +69,7 @@ test_that("mixing deferred and timers", {
   ## Once we have the output, we quit
   start <- Sys.time()
   res <- synchronise(do(1))
-  end <-  Sys.time()
+  end <- Sys.time()
 
   expect_equal(res, "OK")
   expect_true(end - start >= as.difftime(1, units = "secs"))
@@ -79,10 +79,10 @@ test_that("mixing deferred and timers", {
   ## Run the timer to the end
   start <- Sys.time()
   res <- synchronise(do(3))
-  end <-  Sys.time()
+  end <- Sys.time()
 
   expect_equal(res, "OK")
-  expect_true(end - start >= as.difftime(1/5, units = "secs"))
+  expect_true(end - start >= as.difftime(1 / 5, units = "secs"))
   expect_true(end - start <= as.difftime(5, units = "secs"))
   expect_equal(counter, 3L)
 })

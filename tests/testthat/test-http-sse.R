@@ -36,7 +36,6 @@ test_that("chunk_sse_events", {
   # incomplete last event
   txt <- "foo: bar\nbaz: foobar\n\nanother: event\n\nand:another\n"
   expect_snapshot(chunk_sse_events(charToRaw(txt)))
-
 })
 
 test_that("sse", {

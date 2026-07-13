@@ -1,18 +1,17 @@
-
 test_that("it returns a function", {
-  ret <- async(function() { })
+  ret <- async(function() {})
   expect_true(is.function(ret))
 })
 
 test_that("it returns a function with the same arity", {
   defs <- list(
-    function(a, b, c) { },
-    function() { },
-    function(a, b, c, d, e, f, g, h) { },
-    function(x) { },
-    function(a = "foo", b = "bar") { },
-    function(...) { },
-    function(x = 10, ..., last = "foo") { }
+    function(a, b, c) {},
+    function() {},
+    function(a, b, c, d, e, f, g, h) {},
+    function(x) {},
+    function(a = "foo", b = "bar") {},
+    function(...) {},
+    function(x = 10, ..., last = "foo") {}
   )
 
   for (f in defs) {
@@ -35,8 +34,7 @@ test_that("preserves closure", {
   })
 
   do <- async(function() {
-    dx <- foo()$
-      then(function(result) expect_identical(result, env))
+    dx <- foo()$then(function(result) expect_identical(result, env))
   })
 
   synchronise(do())
@@ -44,9 +42,8 @@ test_that("preserves closure", {
 
 test_that("resolves to the definition", {
   do <- async(function() {
-    foo <- async(function () "blah")
-    dx <- foo()$
-      then(function(result) expect_equal(result, "blah"))
+    foo <- async(function() "blah")
+    dx <- foo()$then(function(result) expect_equal(result, "blah"))
   })
   synchronise(do())
 })
@@ -55,23 +52,26 @@ test_that("rejects with the thrown error", {
   do <- async(function() {
     act <- NULL
     exp <- simpleError("Expected thrown value to match rejection value")
-    foo <- async(function() { stop(exp); "blah" })
-    dx <- foo()$
-      catch(error = function(err) { act <<- exp; exp })$
-      then(function(value) {
-        if (is.null(act)) {
-          stop("Extected function to throw")
-        } else if (!identical(act, exp)) {
-          stop(exp)
-        }
-      })
+    foo <- async(function() {
+      stop(exp)
+      "blah"
+    })
+    dx <- foo()$catch(error = function(err) {
+      act <<- exp
+      exp
+    })$then(function(value) {
+      if (is.null(act)) {
+        stop("Extected function to throw")
+      } else if (!identical(act, exp)) {
+        stop(exp)
+      }
+    })
   })
 
   expect_silent(synchronise(do()))
 })
 
 test_that("triggers error on unhandled rejection", {
-
   did_trigger <- FALSE
   do <- async(function() {
     foo <- async(function() stop("Nobody handled me"))
@@ -86,7 +86,6 @@ test_that("triggers error on unhandled rejection", {
 })
 
 test_that("can be cancelled", {
-
   called <- called2 <- FALSE
   do <- function() {
     afun <- async(function() called <<- TRUE)

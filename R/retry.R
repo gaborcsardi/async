@@ -1,4 +1,3 @@
-
 #' Retry an asynchronous function a number of times
 #'
 #' Keeps trying until the function's deferred value resolves without
@@ -30,7 +29,8 @@ async_retry <- function(task, times, ...) {
   force(list(...))
 
   self <- deferred$new(
-    type = "retry", call = sys.call(),
+    type = "retry",
+    call = sys.call(),
     parents = list(task(...)),
     parent_reject = function(value, resolve) {
       times <<- times - 1L

@@ -128,12 +128,13 @@ sseapp <- function() {
         pause = pause
       )
 
-      res$
-        set_header("cache-control", "no-cache")$
-        set_header("content-type", "text/event-stream")$
-        set_header("access-control-allow-origin", "*")$
-        set_header("connection", "keep-alive")$
-        set_status(200)
+      res$set_header("cache-control", "no-cache")$set_header(
+        "content-type",
+        "text/event-stream"
+      )$set_header("access-control-allow-origin", "*")$set_header(
+        "connection",
+        "keep-alive"
+      )$set_status(200)
 
       if (delay > 0) {
         return(res$delay(delay))
@@ -141,7 +142,9 @@ sseapp <- function() {
     }
 
     msg <- paste0(
-      "event: ", res$locals$sse$sent + 1L, "\n",
+      "event: ",
+      res$locals$sse$sent + 1L,
+      "\n",
       "message: live long and prosper\n\n"
     )
     res$locals$sse$sent <- res$locals$sse$sent + 1L

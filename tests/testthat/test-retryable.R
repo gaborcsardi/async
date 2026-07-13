@@ -1,6 +1,4 @@
-
 test_that("async_retryable", {
-
   do <- async(function() {
     i <- 1
     f <- function() {

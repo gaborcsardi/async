@@ -1,4 +1,3 @@
-
 #' Synchronously wrap asynchronous code
 #'
 #' Evaluate an expression in an async phase. It creates an event loop,
@@ -28,7 +27,13 @@
 
 synchronise <- function(expr) {
   new_el <- push_event_loop()
-  on.exit({ new_el$cancel_all(); pop_event_loop() }, add = TRUE)
+  on.exit(
+    {
+      new_el$cancel_all()
+      pop_event_loop()
+    },
+    add = TRUE
+  )
 
   ## Mark this frame as a synchronization point, for debugging
   `__async_synchronise_frame__` <- TRUE
@@ -41,25 +46,32 @@ synchronise <- function(expr) {
 
   res <- expr
 
-  if (!is_deferred(res)) return(res)
+  if (!is_deferred(res)) {
+    return(res)
+  }
 
   ## We need an extra final promise that cannot be replaced,
   ## so priv stays the same.
   res <- res$then(function(x) x)
 
   priv <- get_private(res)
-  if (! identical(priv$event_loop, new_el)) {
+  if (!identical(priv$event_loop, new_el)) {
     err <- make_error(
       "Cannot create deferred chain across synchronization barrier",
-      class = "async_synchronization_barrier_error")
+      class = "async_synchronization_barrier_error"
+    )
     stop(err)
   }
 
   priv$null()
   priv$run_action()
 
-  if (isTRUE(getOption("async_debug"))) start_browser()
-  while (priv$state == "pending") new_el$run("once")
+  if (isTRUE(getOption("async_debug"))) {
+    start_browser()
+  }
+  while (priv$state == "pending") {
+    new_el$run("once")
+  }
 
   if (priv$state == "fulfilled") priv$value else stop(priv$value)
 }
@@ -70,7 +82,9 @@ start_browser <- function() {
   cat("This is a standard `browser()` call, but you can also use the\n")
   cat("following extra commands:\n")
   cat("- .an / async_next(): next event loop iteration.\n")
-  cat("- .as / async_step(): next event loop, debug next action or parent callback.\n")
+  cat(
+    "- .as / async_step(): next event loop, debug next action or parent callback.\n"
+  )
   cat("- .asb / async_step_back(): stop debugging of callbacks.\n")
   cat("- .al / async_list(): deferred values in the current async phase.\n")
   cat("- .at / async_tree(): DAG of the deferred values.\n")
@@ -113,7 +127,13 @@ start_browser <- function() {
 
 run_event_loop <- function(expr) {
   new_el <- push_event_loop()
-  on.exit({ new_el$cancel_all(); pop_event_loop() }, add = TRUE)
+  on.exit(
+    {
+      new_el$cancel_all()
+      pop_event_loop()
+    },
+    add = TRUE
+  )
 
   ## Mark this frame as a synchronization point, for debugging
   `__async_synchronise_frame__` <- TRUE
@@ -125,7 +145,9 @@ run_event_loop <- function(expr) {
 }
 
 distill_error <- function(err) {
-  if (is.null(err$aframe)) return(err)
+  if (is.null(err$aframe)) {
+    return(err)
+  }
   err$aframe <- list(
     frame = err$aframe$frame,
     deferred = err$aframe$data[[1]],
@@ -151,10 +173,18 @@ format.async_rejected <- function(x, ...) {
   x <- distill_error(x)
   src <- get_source_position(x$aframe$call)
   paste0(
-    "<async error: ", x$message, "\n",
-    " in *", x$aframe$type, "* callback of `",
+    "<async error: ",
+    x$message,
+    "\n",
+    " in *",
+    x$aframe$type,
+    "* callback of `",
     expr_name(x$aframe$call %||% ""),
-    "` at ", src$filename, ":", src$position, ">"
+    "` at ",
+    src$filename,
+    ":",
+    src$position,
+    ">"
   )
 }
 
@@ -163,12 +193,16 @@ format.async_rejected <- function(x, ...) {
 summary.async_rejected <- function(object, ...) {
   x <- distill_error(object)
   fmt_out <- format(object, ...)
-  stack <- async_where(calls = x$calls, parents = x$parents,
-                       frm = list(x$aframe))
+  stack <- async_where(
+    calls = x$calls,
+    parents = x$parents,
+    frm = list(x$aframe)
+  )
   stack_out <- format(stack)
   structure(
     paste0(fmt_out, "\n\n", stack_out),
-    class = "async_rejected_summary")
+    class = "async_rejected_summary"
+  )
 }
 
 # nocov start

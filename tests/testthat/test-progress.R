@@ -1,10 +1,10 @@
-
 test_that("tick", {
-
   do <- async(function() {
     deferred$new(
       function(resolve, progress) {
-        for (i in 1:10) progress(list(tick = 1))
+        for (i in 1:10) {
+          progress(list(tick = 1))
+        }
         progress(list(tick = 1))
         resolve("done")
       }
@@ -16,7 +16,9 @@ test_that("tick", {
   do <- async(function() {
     deferred$new(
       function(resolve, progress) {
-        for (i in 1:10) progress(list(tick = 1))
+        for (i in 1:10) {
+          progress(list(tick = 1))
+        }
         resolve("done")
       },
       function(data) ticked <<- ticked + data$tick
@@ -33,11 +35,15 @@ test_that("total", {
     deferred$new(
       function(resolve, progress) {
         progress(list(total = 10))
-        for (i in 1:10) progress(list(tick = 1))
+        for (i in 1:10) {
+          progress(list(tick = 1))
+        }
         resolve("done")
       },
       function(data) {
-        if (!is.null(data$total)) totalx <<- data$total
+        if (!is.null(data$total)) {
+          totalx <<- data$total
+        }
         if (!is.null(data$tick)) ticked <<- ticked + data$tick
       }
     )
@@ -52,7 +58,9 @@ test_that("ratio", {
   do <- async(function() {
     deferred$new(
       function(resolve, progress) {
-        for (i in 1:10) progress(list(ratio = i / 10))
+        for (i in 1:10) {
+          progress(list(ratio = i / 10))
+        }
         resolve("done")
       },
       function(data) ratiox <<- c(ratiox, data$ratio)
@@ -64,16 +72,20 @@ test_that("ratio", {
 
 test_that("amount", {
   amountx <- 0
-  totalx  <- 0
+  totalx <- 0
   do <- async(function() {
     deferred$new(
       function(resolve, progress) {
         progress(list(total = 100))
-        for (i in 1:10) progress(list(amount = 10))
+        for (i in 1:10) {
+          progress(list(amount = 10))
+        }
         resolve("done")
       },
       function(data) {
-        if (!is.null(data$total)) totalx <<- data$total
+        if (!is.null(data$total)) {
+          totalx <<- data$total
+        }
         if (!is.null(data$amount)) amountx <<- amountx + data$amount
       }
     )

@@ -1,62 +1,92 @@
-
 #' @importFrom R6 R6Class
 
 event_loop <- R6Class(
   "event_loop",
   public = list(
-    initialize = function()
-      el_init(self, private),
+    initialize = function() {
+      el_init(self, private)
+    },
 
-    add_http = function(handle, callback, file = NULL, progress = NULL,
-                        data = NULL)
-      el_add_http(self, private, handle, callback, file, progress, data),
-    http_setopt = function(total_con = NULL, host_con = NULL, multiplex = NULL)
-      el_http_setopt(self, private, total_con, host_con, multiplex),
+    add_http = function(
+      handle,
+      callback,
+      file = NULL,
+      progress = NULL,
+      data = NULL
+    ) {
+      el_add_http(self, private, handle, callback, file, progress, data)
+    },
+    http_setopt = function(
+      total_con = NULL,
+      host_con = NULL,
+      multiplex = NULL
+    ) {
+      el_http_setopt(self, private, total_con, host_con, multiplex)
+    },
 
-    add_process = function(conns, callback, data)
-      el_add_process(self, private, conns, callback, data),
-    add_r_process = function(conns, callback, data)
-      el_add_r_process(self, private, conns, callback, data),
-    add_pool_task = function(callback, data)
-      el_add_pool_task(self, private, callback, data),
-    add_delayed = function(delay, func, callback, rep = FALSE)
-      el_add_delayed(self, private, delay, func, callback, rep),
-    add_next_tick = function(func, callback, data = NULL)
-      el_add_next_tick(self, private, func, callback, data),
+    add_process = function(conns, callback, data) {
+      el_add_process(self, private, conns, callback, data)
+    },
+    add_r_process = function(conns, callback, data) {
+      el_add_r_process(self, private, conns, callback, data)
+    },
+    add_pool_task = function(callback, data) {
+      el_add_pool_task(self, private, callback, data)
+    },
+    add_delayed = function(delay, func, callback, rep = FALSE) {
+      el_add_delayed(self, private, delay, func, callback, rep)
+    },
+    add_next_tick = function(func, callback, data = NULL) {
+      el_add_next_tick(self, private, func, callback, data)
+    },
 
-    cancel = function(id)
-      el_cancel(self, private, id),
-    cancel_all = function()
-      el_cancel_all(self, private),
+    cancel = function(id) {
+      el_cancel(self, private, id)
+    },
+    cancel_all = function() {
+      el_cancel_all(self, private)
+    },
 
-    run = function(mode = c("default", "nowait", "once"))
-      el_run(self, private, mode = match.arg(mode)),
+    run = function(mode = c("default", "nowait", "once")) {
+      el_run(self, private, mode = match.arg(mode))
+    },
 
-    suspend = function()
-      el_suspend(self, private),
-    wakeup = function()
+    suspend = function() {
+      el_suspend(self, private)
+    },
+    wakeup = function() {
       el_wakeup(self, private)
+    }
   ),
 
   private = list(
-    create_task = function(callback, ..., id =  NULL, type = "foobar")
-      el__create_task(self, private, callback, ..., id = id, type = type),
-    ensure_pool = function()
-      el__ensure_pool(self, private),
-    get_poll_timeout = function()
-      el__get_poll_timeout(self, private),
-    run_pending = function()
-      el__run_pending(self, private),
-    run_timers = function()
-      el__run_timers(self, private),
-    is_alive = function()
-      el__is_alive(self, private),
-    update_time = function()
-      el__update_time(self, private),
-    io_poll = function(timeout)
-      el__io_poll(self, private, timeout),
-    update_curl_data = function()
-      el__update_curl_data(self, private),
+    create_task = function(callback, ..., id = NULL, type = "foobar") {
+      el__create_task(self, private, callback, ..., id = id, type = type)
+    },
+    ensure_pool = function() {
+      el__ensure_pool(self, private)
+    },
+    get_poll_timeout = function() {
+      el__get_poll_timeout(self, private)
+    },
+    run_pending = function() {
+      el__run_pending(self, private)
+    },
+    run_timers = function() {
+      el__run_timers(self, private)
+    },
+    is_alive = function() {
+      el__is_alive(self, private)
+    },
+    update_time = function() {
+      el__update_time(self, private)
+    },
+    io_poll = function(timeout) {
+      el__io_poll(self, private, timeout)
+    },
+    update_curl_data = function() {
+      el__update_curl_data(self, private)
+    },
 
     id = NULL,
     time = Sys.time(),
@@ -64,9 +94,9 @@ event_loop <- R6Class(
     tasks = list(),
     timers = Sys.time()[numeric()],
     pool = NULL,
-    curl_fdset = NULL,                 # return value of multi_fdset()
-    curl_poll = TRUE,                  # should we poll for curl sockets?
-    curl_timer = NULL,                 # call multi_run() before this
+    curl_fdset = NULL, # return value of multi_fdset()
+    curl_poll = TRUE, # should we poll for curl sockets?
+    curl_timer = NULL, # call multi_run() before this
     next_ticks = character(),
     worker_pool = NULL,
     http_opts = NULL
@@ -78,14 +108,24 @@ el_init <- function(self, private) {
   invisible(self)
 }
 
-el_add_http <- function(self, private, handle, callback, progress, file,
-                        data) {
-  self; private; handle; callback; progress; outfile <- file; data
+el_add_http <- function(self, private, handle, callback, progress, file, data) {
+  self
+  private
+  handle
+  callback
+  progress
+  outfile <- file
+  data
 
-  id  <- private$create_task(callback, list(handle = handle, data = data),
-                             type = "http")
+  id <- private$create_task(
+    callback,
+    list(handle = handle, data = data),
+    type = "http"
+  )
   private$ensure_pool()
-  if (!is.null(outfile)) cat("", file = outfile)
+  if (!is.null(outfile)) {
+    cat("", file = outfile)
+  }
 
   content <- NULL
 
@@ -111,7 +151,10 @@ el_add_http <- function(self, private, handle, callback, progress, file,
         ## so limited in their numbers.
         con <- tryCatch(
           file(outfile, open = "ab"),
-          error = function(e) { gc(); file(outfile, open = "ab") } # nocov
+          error = function(e) {
+            gc()
+            file(outfile, open = "ab")
+          } # nocov
         )
         writeBin(bytes, con)
         close(con)
@@ -123,8 +166,11 @@ el_add_http <- function(self, private, handle, callback, progress, file,
       task <- private$tasks[[id]]
       private$tasks[[id]] <- NULL
       error <- make_error(message = error)
-      class(error) <- unique(c("async_rejected", "async_http_error",
-                               class(error)))
+      class(error) <- unique(c(
+        "async_rejected",
+        "async_http_error",
+        class(error)
+      ))
       task$callback(error, NULL)
     }
   )
@@ -132,19 +178,30 @@ el_add_http <- function(self, private, handle, callback, progress, file,
 }
 
 el_add_process <- function(self, private, conns, callback, data) {
-  self; private; conns; callback; data
+  self
+  private
+  conns
+  callback
+  data
   data$conns <- conns
   private$create_task(callback, data, type = "process")
 }
 
 el_add_r_process <- function(self, private, conns, callback, data) {
-  self; private; conns; callback; data
+  self
+  private
+  conns
+  callback
+  data
   data$conns <- conns
   private$create_task(callback, data, type = "r-process")
 }
 
 el_add_pool_task <- function(self, private, callback, data) {
-  self; private; callback; data
+  self
+  private
+  callback
+  data
   id <- private$create_task(callback, data, type = "pool-task")
   if (is.null(async_env$worker_pool)) {
     async_env$worker_pool <- worker_pool$new()
@@ -154,7 +211,11 @@ el_add_pool_task <- function(self, private, callback, data) {
 }
 
 el_add_delayed <- function(self, private, delay, func, callback, rep) {
-  force(self); force(private); force(delay); force(func); force(callback)
+  force(self)
+  force(private)
+  force(delay)
+  force(func)
+  force(callback)
   force(rep)
   id <- private$create_task(
     callback,
@@ -168,7 +229,10 @@ el_add_delayed <- function(self, private, delay, func, callback, rep) {
 }
 
 el_add_next_tick <- function(self, private, func, callback, data) {
-  force(self) ; force(private) ; force(callback); force(data)
+  force(self)
+  force(private)
+  force(callback)
+  force(data)
   data$func <- func
   id <- private$create_task(callback, data = data, type = "nexttick")
   private$next_ticks <- c(private$next_ticks, id)
@@ -176,14 +240,18 @@ el_add_next_tick <- function(self, private, func, callback, data) {
 
 el_cancel <- function(self, private, id) {
   private$next_ticks <- setdiff(private$next_ticks, id)
-  private$timers  <- private$timers[setdiff(names(private$timers), id)]
+  private$timers <- private$timers[setdiff(names(private$timers), id)]
   if (id %in% names(private$tasks) && private$tasks[[id]]$type == "http") {
     curl::multi_cancel(private$tasks[[id]]$data$handle)
-  } else if (id %in% names(private$tasks) &&
-             private$tasks[[id]]$type %in% c("process", "r-process")) {
+  } else if (
+    id %in%
+      names(private$tasks) &&
+      private$tasks[[id]]$type %in% c("process", "r-process")
+  ) {
     private$tasks[[id]]$data$process$kill()
-  } else if (id %in% names(private$tasks) &&
-             private$tasks[[id]]$type == "pool-task") {
+  } else if (
+    id %in% names(private$tasks) && private$tasks[[id]]$type == "pool-task"
+  ) {
     async_env$worker_pool$cancel_task(id)
   }
   private$tasks[[id]] <- NULL
@@ -203,17 +271,18 @@ el_cancel_all <- function(self, private) {
     self$cancel(id)
   }
 
-  private$tasks <-  list()
+  private$tasks <- list()
   invisible(self)
 }
 
 el_run <- function(self, private, mode) {
-
   ## This is closely modeled after the libuv event loop, on purpose,
   ## because some time we might switch to that.
 
   alive <- private$is_alive()
-  if (! alive) private$update_time()
+  if (!alive) {
+    private$update_time()
+  }
 
   while (alive && !private$stop_flag) {
     private$update_time()
@@ -263,8 +332,11 @@ el__run_pending <- function(self, private) {
   for (id in next_ticks) {
     task <- private$tasks[[id]]
     private$tasks[[id]] <- NULL
-    call_with_callback(task$data$func, task$callback,
-                       info = task$data$error_info)
+    call_with_callback(
+      task$data$func,
+      task$callback,
+      info = task$data$error_info
+    )
   }
 
   ## Check for workers from the pool finished before, while another
@@ -288,7 +360,6 @@ el__run_pending <- function(self, private) {
 }
 
 el__io_poll <- function(self, private, timeout) {
-
   types <- vcapply(private$tasks, "[[", "type")
 
   ## The things we need to poll, and their types
@@ -308,22 +379,28 @@ el__io_poll <- function(self, private, timeout) {
       id = "curl",
       pollable = I(list(processx::curl_fds(private$curl_fdset))),
       type = "curl",
-      ready = "silent")
+      ready = "silent"
+    )
     pollables <- rbind(pollables, curl_pollables)
   }
 
   ## Processes
   proc <- types %in% c("process", "r-process")
   if (sum(proc)) {
-    conns <- unlist(lapply(
-      private$tasks[proc], function(t) t$data$conns),
-      recursive = FALSE)
+    conns <- unlist(
+      lapply(
+        private$tasks[proc],
+        function(t) t$data$conns
+      ),
+      recursive = FALSE
+    )
     proc_pollables <- data.frame(
       stringsAsFactors = FALSE,
       id = names(private$tasks)[proc],
       pollable = I(conns),
       type = types[proc],
-      ready = rep("silent", sum(proc)))
+      ready = rep("silent", sum(proc))
+    )
     pollables <- rbind(pollables, proc_pollables)
   }
 
@@ -337,7 +414,8 @@ el__io_poll <- function(self, private, timeout) {
       id = names(px_pool),
       pollable = I(px_pool),
       type = rep("pool", length(px_pool)),
-      ready = rep("silent", length(px_pool)))
+      ready = rep("silent", length(px_pool))
+    )
     pollables <- rbind(pollables, pool_pollables)
   }
 
@@ -347,18 +425,20 @@ el__io_poll <- function(self, private, timeout) {
   }
 
   if (nrow(pollables)) {
-
     ## OK, ready to poll
     pollables$ready <- unlist(processx::poll(pollables$pollable, timeout))
 
     ## Any HTTP?
-    if (private$curl_poll &&
-        pollables$ready[match("curl", pollables$type)] == "event") {
+    if (
+      private$curl_poll &&
+        pollables$ready[match("curl", pollables$type)] == "event"
+    ) {
       curl::multi_run(timeout = 0L, poll = TRUE, pool = private$pool)
     }
 
     ## Any processes
-    proc_ready <- pollables$type %in% c("process", "r-process") &
+    proc_ready <- pollables$type %in%
+      c("process", "r-process") &
       pollables$ready == "ready"
     for (id in pollables$id[proc_ready]) {
       p <- private$tasks[[id]]
@@ -375,9 +455,15 @@ el__io_poll <- function(self, private, timeout) {
 
       error <- FALSE
       if (p$type == "r-process") {
-        res$result <- tryCatch({
-          p$data$process$get_result()
-        }, error = function(e) { error <<- TRUE; e })
+        res$result <- tryCatch(
+          {
+            p$data$process$get_result()
+          },
+          error = function(e) {
+            error <<- TRUE
+            e
+          }
+        )
       }
 
       unlink(c(p$data$stdout, p$data$stderr))
@@ -396,8 +482,10 @@ el__io_poll <- function(self, private, timeout) {
     pool_ready <- pollables$type == "pool" & pollables$ready == "ready"
     if (sum(pool_ready)) {
       pool <- async_env$worker_pool
-      done <- pool$notify_event(as.integer(pollables$id[pool_ready]),
-                                event_loop = private$id)
+      done <- pool$notify_event(
+        as.integer(pollables$id[pool_ready]),
+        event_loop = private$id
+      )
       mine <- intersect(done, names(private$tasks))
       for (tid in mine) {
         task <- private$tasks[[tid]]
@@ -408,7 +496,6 @@ el__io_poll <- function(self, private, timeout) {
         task$callback(err, res)
       }
     }
-
   } else if (length(private$timers) || !is.null(private$curl_timer)) {
     Sys.sleep(timeout / 1000)
   }
@@ -430,19 +517,23 @@ el__create_task <- function(self, private, callback, data, ..., id, type) {
 el__ensure_pool <- function(self, private) {
   getopt <- function(nm) {
     anm <- paste0("async_http_", nm)
-    if (!is.null(v <- getOption(anm))) return(v)
-    if (!is.na(v <- Sys.getenv(toupper(anm), NA_character_))) return(v)
+    if (!is.null(v <- getOption(anm))) {
+      return(v)
+    }
+    if (!is.na(v <- Sys.getenv(toupper(anm), NA_character_))) {
+      return(v)
+    }
     NULL
   }
   if (is.null(private$pool)) {
     private$http_opts <- list(
       total_con = getopt("total_con") %||% 100,
-      host_con = getopt("host_con") %||%  6,
-      multiplex  = getopt("multiplex") %||% TRUE
+      host_con = getopt("host_con") %||% 6,
+      multiplex = getopt("multiplex") %||% TRUE
     )
     private$pool <- curl::new_pool(
       total_con = private$http_opts$total_con,
-      host_con =  private$http_opts$host_con,
+      host_con = private$http_opts$host_con,
       multiplex = private$http_opts$multiplex
     )
   }
@@ -450,9 +541,15 @@ el__ensure_pool <- function(self, private) {
 
 el_http_setopt <- function(self, private, total_con, host_con, multiplex) {
   private$ensure_pool()
-  if (!is.null(total_con)) private$http_opts$total_con <- total_con
-  if (!is.null(host_con))  private$http_opts$host_con  <- host_con
-  if (!is.null(multiplex)) private$http_opts$multiplex <- multiplex
+  if (!is.null(total_con)) {
+    private$http_opts$total_con <- total_con
+  }
+  if (!is.null(host_con)) {
+    private$http_opts$host_con <- host_con
+  }
+  if (!is.null(multiplex)) {
+    private$http_opts$multiplex <- multiplex
+  }
   curl::multi_set(
     pool = private$pool,
     total_con = private$http_opts$total_con,
@@ -479,7 +576,6 @@ el__get_poll_timeout <- function(self, private) {
 }
 
 el__run_timers <- function(self, private) {
-
   expired <- names(private$timers)[private$timers <= private$time]
   expired <- expired[order(private$timers[expired])]
   for (id in expired) {

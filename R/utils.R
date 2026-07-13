@@ -1,4 +1,3 @@
-
 `%||%` <- function(l, r) if (is.null(l)) r else l
 
 vlapply <- function(X, FUN, ..., FUN.VALUE = logical(1)) {
@@ -52,7 +51,9 @@ call_with_callback <- function(func, callback, info = NULL) {
         recerror <<- e
         recerror$aframe <<- recerror$aframe %||% find_async_data_frame()
         recerror$calls <<- recerror$calls %||% sys.calls()
-        if (is.null(recerror[["call"]])) recerror[["call"]] <<- sys.call()
+        if (is.null(recerror[["call"]])) {
+          recerror[["call"]] <<- sys.call()
+        }
         recerror$parents <<- recerror$parents %||% sys.parents()
         recerror[names(info)] <<- info
         handler <- getOption("async.error")
@@ -94,10 +95,13 @@ get_source_position <- function(call) {
   list(
     filename = file.path(
       c(getSrcDirectory(call), "?")[1],
-      c(getSrcFilename(call), "?")[1]),
+      c(getSrcFilename(call), "?")[1]
+    ),
     position = paste0(
-      getSrcLocation(call, "line", TRUE) %||% "?", ":",
-      getSrcLocation(call, "column", TRUE) %||% "?")
+      getSrcLocation(call, "line", TRUE) %||% "?",
+      ":",
+      getSrcLocation(call, "column", TRUE) %||% "?"
+    )
   )
 }
 
@@ -106,14 +110,16 @@ file_size <- function(...) {
 }
 
 read_all <- function(filename, encoding) {
-  if (is.null(filename)) return(NULL)
+  if (is.null(filename)) {
+    return(NULL)
+  }
   r <- readBin(filename, what = raw(0), n = file_size(filename))
   s <- rawToChar(r)
   Encoding(s) <- encoding
   s
 }
 
-crash <- function () {
+crash <- function() {
   get("attach")(structure(list(), class = "UserDefinedDatabase"))
 }
 

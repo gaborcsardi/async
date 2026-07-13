@@ -1,4 +1,3 @@
-
 #' Make a minimal deferred that resolves to the specified value
 #'
 #' This is sometimes useful to start a deferred chain.
@@ -21,8 +20,10 @@
 async_constant <- function(value = NULL) {
   force(value)
   deferred$new(
-    type = "constant", call = sys.call(),
-    function(resolve) resolve(value))
+    type = "constant",
+    call = sys.call(),
+    function(resolve) resolve(value)
+  )
 }
 
 async_constant <- mark_as_async(async_constant)

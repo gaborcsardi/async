@@ -1,4 +1,3 @@
-
 #' Deferred value
 #'
 #' @section Usage:
@@ -388,22 +387,47 @@ NULL
 deferred <- R6Class(
   "deferred",
   public = list(
-    initialize = function(action = NULL, on_progress = NULL, on_cancel = NULL,
-                          parents = NULL, parent_resolve = NULL,
-                          parent_reject = NULL, type = NULL,
-                          call = sys.call(-1), event_emitter = NULL)
-      async_def_init(self, private, action, on_progress, on_cancel,
-                     parents, parent_resolve, parent_reject, type, call,
-                    event_emitter),
-    then = function(on_fulfilled)
-      def_then(self, private, on_fulfilled),
-    catch = function(...)
-      def_catch(self, private, ...),
-    finally = function(on_finally)
-      def_finally(self, private, on_finally),
-    cancel = function(reason = "Cancelled")
-      def_cancel(self, private, reason),
-    share = function() { private$shared <<- TRUE; invisible(self) },
+    initialize = function(
+      action = NULL,
+      on_progress = NULL,
+      on_cancel = NULL,
+      parents = NULL,
+      parent_resolve = NULL,
+      parent_reject = NULL,
+      type = NULL,
+      call = sys.call(-1),
+      event_emitter = NULL
+    ) {
+      async_def_init(
+        self,
+        private,
+        action,
+        on_progress,
+        on_cancel,
+        parents,
+        parent_resolve,
+        parent_reject,
+        type,
+        call,
+        event_emitter
+      )
+    },
+    then = function(on_fulfilled) {
+      def_then(self, private, on_fulfilled)
+    },
+    catch = function(...) {
+      def_catch(self, private, ...)
+    },
+    finally = function(on_finally) {
+      def_finally(self, private, on_finally)
+    },
+    cancel = function(reason = "Cancelled") {
+      def_cancel(self, private, reason)
+    },
+    share = function() {
+      private$shared <<- TRUE
+      invisible(self)
+    },
 
     event_emitter = NULL
   ),
@@ -427,38 +451,57 @@ deferred <- R6Class(
     shared = FALSE,
     mycall = NULL,
 
-    run_action = function()
-      def__run_action(self, private),
+    run_action = function() {
+      def__run_action(self, private)
+    },
 
-    null = function()
-      def__null(self, private),
+    null = function() {
+      def__null(self, private)
+    },
 
-    resolve = function(value)
-      def__resolve(self, private, value),
-    reject = function(reason)
-      def__reject(self, private, reason),
-    progress = function(data)
-      def__progress(self, private, data),
+    resolve = function(value) {
+      def__resolve(self, private, value)
+    },
+    reject = function(reason) {
+      def__reject(self, private, reason)
+    },
+    progress = function(data) {
+      def__progress(self, private, data)
+    },
 
-    make_error_object = function(err)
-      def__make_error_object(self, private, err),
+    make_error_object = function(err) {
+      def__make_error_object(self, private, err)
+    },
 
-    maybe_cancel_parents = function(reason)
-      def__maybe_cancel_parents(self, private, reason),
-    add_as_parent = function(child)
-      def__add_as_parent(self, private, child),
-    update_parent = function(old, new)
-      def__update_parent(self, private, old, new),
+    maybe_cancel_parents = function(reason) {
+      def__maybe_cancel_parents(self, private, reason)
+    },
+    add_as_parent = function(child) {
+      def__add_as_parent(self, private, child)
+    },
+    update_parent = function(old, new) {
+      def__update_parent(self, private, old, new)
+    },
 
-    get_info = function()
+    get_info = function() {
       def__get_info(self, private)
+    }
   )
 )
 
-async_def_init <- function(self, private, action, on_progress,
-                           on_cancel, parents, parent_resolve,
-                           parent_reject, type, call, event_emitter) {
-
+async_def_init <- function(
+  self,
+  private,
+  action,
+  on_progress,
+  on_cancel,
+  parents,
+  parent_resolve,
+  parent_reject,
+  type,
+  call,
+  event_emitter
+) {
   private$type <- type
   private$id <- get_id()
   private$event_loop <- get_default_event_loop()
@@ -488,7 +531,9 @@ async_def_init <- function(self, private, action, on_progress,
 }
 
 def__run_action <- function(self, private) {
-  if (private$running) return()
+  if (private$running) {
+    return()
+  }
   action <- private$action
   private$running <- TRUE
   private$action <- NULL
@@ -509,10 +554,14 @@ def__run_action <- function(self, private) {
 
     private$event_loop$add_next_tick(
       function() {
-        if (isTRUE(getOption("async_debug_steps", FALSE))) debug1(action)
+        if (isTRUE(getOption("async_debug_steps", FALSE))) {
+          debug1(action)
+        }
         `__async_data__` <- list(private$id, "action", self, skip = 2L)
-        do.call(action, args) },
-      function(err, res) if (!is.null(err)) private$reject(err))
+        do.call(action, args)
+      },
+      function(err, res) if (!is.null(err)) private$reject(err)
+    )
   }
 
   ## If some parents are done, we want them to notify us.
@@ -521,22 +570,28 @@ def__run_action <- function(self, private) {
     prt_priv <- get_private(prt)
     if (prt_priv$state != "pending") {
       def__call_then(
-        if (prt_priv$state == "fulfilled") "parent_resolve" else "parent_reject",
-        self, prt_priv$value)
+        if (prt_priv$state == "fulfilled") {
+          "parent_resolve"
+        } else {
+          "parent_reject"
+        },
+        self,
+        prt_priv$value
+      )
     }
     prt_priv$run_action()
   }
 }
 
-def_then <- function(self, private, on_fulfilled = NULL,
-                     on_rejected = NULL) {
+def_then <- function(self, private, on_fulfilled = NULL, on_rejected = NULL) {
   force(self)
   force(private)
 
-  if (! identical(private$event_loop, get_default_event_loop())) {
+  if (!identical(private$event_loop, get_default_event_loop())) {
     err <- make_error(
       "Cannot create deferred chain across synchronization barrier",
-      class = "async_synchronization_barrier_error")
+      class = "async_synchronization_barrier_error"
+    )
     stop(err)
   }
 
@@ -544,12 +599,13 @@ def_then <- function(self, private, on_fulfilled = NULL,
     parent_resolve <- def__make_parent_resolve(on_fulfilled)
     parent_reject <- def__make_parent_reject(on_rejected)
 
-    deferred$new(parents = list(self),
-                 type = paste0("then-", private$id),
-                 parent_resolve = parent_resolve,
-                 parent_reject = parent_reject,
-                 call = sys.call(-1))
-
+    deferred$new(
+      parents = list(self),
+      type = paste0("then-", private$id),
+      parent_resolve = parent_resolve,
+      parent_reject = parent_reject,
+      call = sys.call(-1)
+    )
   } else {
     private$add_as_parent(on_fulfilled)
     child_private <- get_private(on_fulfilled)
@@ -579,7 +635,9 @@ def_finally <- function(self, private, on_finally) {
 }
 
 def_cancel <- function(self, private, reason) {
-  if (private$state != "pending") return()
+  if (private$state != "pending") {
+    return()
+  }
   cancel_cond <- structure(
     list(message = reason %||% "Deferred computation cancelled", call = NULL),
     class = c("async_cancelled", "error", "condition")
@@ -594,8 +652,12 @@ def__null <- function(self, private) {
 }
 
 def__resolve <- function(self, private, value) {
-  if (private$cancelled) return()
-  if (private$state != "pending") return()
+  if (private$cancelled) {
+    return()
+  }
+  if (private$state != "pending") {
+    return()
+  }
 
   if (is_deferred(value)) {
     private$parent_resolve <- def__make_parent_resolve(NULL)
@@ -613,13 +675,11 @@ def__resolve <- function(self, private, value) {
     }
 
     val_pvt$run_action()
-
   } else {
-    if (!private$dead_end && !length(private$children) &&
-        !private$shared) {
+    if (!private$dead_end && !length(private$children) && !private$shared) {
       ## This cannot happen currently
-      "!DEBUG ??? DEAD END `private$id`"   # nocov
-      warning("Computation going nowhere...")   # nocov
+      "!DEBUG ??? DEAD END `private$id`" # nocov
+      warning("Computation going nowhere...") # nocov
     }
 
     "!DEBUG +++ RESOLVE `private$id`"
@@ -659,8 +719,7 @@ def__make_parent_resolve <- function(fun) {
     function(value, resolve) resolve(fun())
   } else if (num_args(fun) == 1) {
     function(value, resolve) resolve(fun(value))
-  } else if (identical(names(formals(fun)),
-                       c("value", "resolve"))) {
+  } else if (identical(names(formals(fun)), c("value", "resolve"))) {
     fun
   } else {
     stop("Invalid parent_resolve callback")
@@ -679,8 +738,7 @@ def__make_parent_reject <- function(fun) {
     function(value, resolve) resolve(fun())
   } else if (num_args(fun) == 1) {
     function(value, resolve) resolve(fun(value))
-  } else if (identical(names(formals(fun)),
-                       c("value", "resolve"))) {
+  } else if (identical(names(formals(fun)), c("value", "resolve"))) {
     fun
   } else {
     stop("Invalid parent_reject callback")
@@ -691,20 +749,27 @@ def__make_parent_reject_catch <- function(handlers) {
   handlers <- lapply(handlers, as.function)
   function(value, resolve) {
     ok <- FALSE
-    ret <- tryCatch({
-      quo <- as.call(c(list(quote(tryCatch), quote(stop(value))), handlers))
-      ret <- eval(quo)
-      ok <- TRUE
-      ret
-    }, error = function(x) x)
+    ret <- tryCatch(
+      {
+        quo <- as.call(c(list(quote(tryCatch), quote(stop(value))), handlers))
+        ret <- eval(quo)
+        ok <- TRUE
+        ret
+      },
+      error = function(x) x
+    )
 
     if (ok) resolve(ret) else stop(ret)
   }
 }
 
 def__reject <- function(self, private, reason) {
-  if (private$cancelled) return()
-  if (private$state != "pending") return()
+  if (private$cancelled) {
+    return()
+  }
+  if (private$state != "pending") {
+    return()
+  }
 
   ## 'reason' cannot be a deferred here
 
@@ -726,40 +791,52 @@ def__reject <- function(self, private, reason) {
 
 def__maybe_cancel_parents <- function(self, private, reason) {
   for (parent in private$parents) {
-    if (is.null(parent)) next
+    if (is.null(parent)) {
+      next
+    }
 
     parent_priv <- get_private(parent)
-    if (parent_priv$state != "pending") next
-    if (parent_priv$shared) next
+    if (parent_priv$state != "pending") {
+      next
+    }
+    if (parent_priv$shared) {
+      next
+    }
     parent$cancel(reason)
   }
 }
 
-def__call_then <- function(which, x, value)  {
-  force(value);
+def__call_then <- function(which, x, value) {
+  force(value)
   private <- get_private(x)
-  if (!private$running) return()
-  if (private$state != "pending") return()
+  if (!private$running) {
+    return()
+  }
+  if (private$state != "pending") {
+    return()
+  }
 
   cb <- private[[which]]
   private$event_loop$add_next_tick(
     function() {
       if (isTRUE(getOption("async_debug_steps", FALSE))) {
-        debug1(private[[which]])        # nocov
+        debug1(private[[which]]) # nocov
       }
       `__async_data__` <- list(private$id, "parent", x)
       private[[which]](value, private$resolve)
     },
-    function(err, res) if (!is.null(err)) private$reject(err))
+    function(err, res) if (!is.null(err)) private$reject(err)
+  )
 }
 
 def__add_as_parent <- function(self, private, child) {
   "!DEBUG EDGE [`private$id` -> `get_private(child)$id`]"
 
-  if (! identical(private$event_loop, get_private(child)$event_loop)) {
+  if (!identical(private$event_loop, get_private(child)$event_loop)) {
     err <- make_error(
       "Cannot create deferred chain across synchronization barrier",
-      class = "async_synchronization_barrier_error")
+      class = "async_synchronization_barrier_error"
+    )
     stop(err)
   }
   if (length(private$children) && !private$shared) {
@@ -768,13 +845,13 @@ def__add_as_parent <- function(self, private, child) {
 
   private$children <- c(private$children, child)
 
-  if (get_private(child)$running) private$run_action()
+  if (get_private(child)$running) {
+    private$run_action()
+  }
   if (private$state == "pending") {
     ## Nothing to do
-
   } else if (private$state == "fulfilled") {
     def__call_then("parent_resolve", child, private$value)
-
   } else {
     def__call_then("parent_reject", child, private$value)
   }
@@ -792,8 +869,12 @@ def__update_parent <- function(self, private, old, new) {
 }
 
 def__progress <- function(self, private, data) {
-  if (private$state != "pending") return()
-  if (is.null(private$progress_callback)) return()
+  if (private$state != "pending") {
+    return()
+  }
+  if (is.null(private$progress_callback)) {
+    return()
+  }
   private$progress_callback(data)
 }
 
@@ -804,8 +885,10 @@ def__get_info <- function(self, private) {
     parents = I(list(viapply(private$parents, function(x) get_private(x)$id))),
     label = as.character(private$id),
     call = I(list(private$mycall)),
-    children = I(list(viapply(private$children, function(x) get_private(x)$id))),
-    type = private$type %||%  "unknown",
+    children = I(list(viapply(private$children, function(x) {
+      get_private(x)$id
+    }))),
+    type = private$type %||% "unknown",
     running = private$running,
     state = private$state,
     cancelled = private$cancelled,
@@ -815,11 +898,16 @@ def__get_info <- function(self, private) {
   res$filename <- src$filename
   res$position <- src$position
   res$label <- paste0(
-    res$id, " ",
+    res$id,
+    " ",
     if (private$state == "fulfilled") paste0(cli::symbol$tick, " "),
-    if (private$state == "rejected")  paste0(cli::symbol$cross, "  "),
-    deparse(private$mycall)[1], " @ ",
-    res$filename, ":", res$position)
+    if (private$state == "rejected") paste0(cli::symbol$cross, "  "),
+    deparse(private$mycall)[1],
+    " @ ",
+    res$filename,
+    ":",
+    res$position
+  )
 
   res
 }

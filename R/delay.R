@@ -1,4 +1,3 @@
-
 #' Delay async computation for the specified time
 #'
 #' Since R is single-threaded, the deferred value might be resolved (much)
@@ -28,7 +27,8 @@ delay <- function(delay) {
   force(delay)
   id <- NULL
   deferred$new(
-    type = "delay", call = sys.call(),
+    type = "delay",
+    call = sys.call(),
     action = function(resolve) {
       assert_that(is_time_interval(delay))
       force(resolve)

@@ -1,10 +1,16 @@
-
 test_that("nested event loops", {
   ## Create a function that finishes while its event loop is inactive
-  sleeper <- function(x) { Sys.sleep(x); Sys.getpid() }
-  afun1 <- async(function(x) { x; call_function(sleeper, args = list(x)) })
+  sleeper <- function(x) {
+    Sys.sleep(x)
+    Sys.getpid()
+  }
+  afun1 <- async(function(x) {
+    x
+    call_function(sleeper, args = list(x))
+  })
   afun2 <- async(function(x1, x2) {
-    x1; x2
+    x1
+    x2
     p1 <- afun1(x1)
     p2 <- delay(0)$then(function() {
       synchronise(afun1(x2))
@@ -20,8 +26,7 @@ test_that("nested event loops", {
 
 test_that("successful call", {
   afun <- async(function(x) {
-    call_function(function() 100)$
-      then(function(x) x$result)
+    call_function(function() 100)$then(function(x) x$result)
   })
   res <- synchronise(afun())
   expect_identical(res, 100)
@@ -72,7 +77,8 @@ test_that("calls that crash", {
   err <- tryCatch(synchronise(afun()), error = function(x) x)
   expect_true(
     grepl("R session crashed with exit code", err$message) ||
-    grepl("R session closed the process connection", err$message))
+      grepl("R session closed the process connection", err$message)
+  )
 
   afun <- async(function(x) {
     when_all(
@@ -87,7 +93,8 @@ test_that("calls that crash", {
   err <- tryCatch(synchronise(afun()), error = function(x) x)
   expect_true(
     grepl("R session crashed with exit code", err$message) ||
-    grepl("R session closed the process connection", err$message))
+      grepl("R session closed the process connection", err$message)
+  )
 })
 
 test_that("handling call errors", {
@@ -103,8 +110,7 @@ test_that("handling call errors", {
       worker_pid(),
       worker_pid(),
       worker_pid(),
-      call_function(function() stop("nope"))$
-        catch(error = function(e) e)
+      call_function(function() stop("nope"))$catch(error = function(e) e)
     )
   })
 
@@ -117,23 +123,19 @@ test_that("handling call errors", {
 })
 
 test_that("mix calls with others", {
-
   skip_on_cran()
 
   px <- asNamespace("processx")$get_tool("px")
 
   afun <- async(function() {
     when_all(
-      delay = delay(1/1000)$
-        then(function() 1),
-      http = http_get(http$url("/status/418"))$
-        then(function(x) x$status_code),
-      process = run_process(px, c("outln", "foobar"))$
-        then(function(x) str_trim(x$stdout)),
-      r_process = run_r_process(function() 2)$
-        then(function(x) x$result),
-      call = call_function(function() 3)$
-        then(function(x) x$result)
+      delay = delay(1 / 1000)$then(function() 1),
+      http = http_get(http$url("/status/418"))$then(function(x) x$status_code),
+      process = run_process(px, c("outln", "foobar"))$then(function(x) {
+        str_trim(x$stdout)
+      }),
+      r_process = run_r_process(function() 2)$then(function(x) x$result),
+      call = call_function(function() 3)$then(function(x) x$result)
     )
   })
 
@@ -141,10 +143,6 @@ test_that("mix calls with others", {
 
   expect_equal(
     res,
-    list(delay = 1,
-         http = 418,
-         process = "foobar",
-         r_process = 2,
-         call = 3)
+    list(delay = 1, http = 418, process = "foobar", r_process = 2, call = 3)
   )
 })

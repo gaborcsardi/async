@@ -1,4 +1,3 @@
-
 #' Deferred value for a set of deferred values
 #'
 #' Create a deferred value that is resolved when all listed deferred values
@@ -28,7 +27,6 @@
 #' }
 
 when_all <- function(..., .list = list()) {
-
   defs <- c(list(...), .list)
   nx <- 0L
 
@@ -36,7 +34,9 @@ when_all <- function(..., .list = list()) {
     type = "when_all",
     call = sys.call(),
     action = function(resolve) {
-      self; nx; defs
+      self
+      nx
+      defs
       lapply(seq_along(defs), function(idx) {
         idx
         if (is_deferred(defs[[idx]])) {
@@ -47,7 +47,7 @@ when_all <- function(..., .list = list()) {
       if (nx == 0) resolve(defs)
     },
     parent_resolve = function(value, resolve) {
-      defs[ value[[1]] ] <<- value[2]
+      defs[value[[1]]] <<- value[2]
       nx <<- nx - 1L
       if (nx == 0L) resolve(defs)
     }

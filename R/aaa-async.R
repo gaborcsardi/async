@@ -1,4 +1,3 @@
-
 #' Create an async function
 #'
 #' Create an async function, that returns a deferred value, from a
@@ -23,15 +22,17 @@
 
 async <- function(fun) {
   fun <- as.function(fun)
-  if (is_async(fun)) return(fun)
+  if (is_async(fun)) {
+    return(fun)
+  }
 
   async_fun <- fun
   body(async_fun) <- bquote({
     mget(ls(environment(), all.names = TRUE), environment())
     fun2 <- function() {
       evalq(
-      .(body(fun)),
-      envir = parent.env(environment())
+        .(body(fun)),
+        envir = parent.env(environment())
       )
     }
 

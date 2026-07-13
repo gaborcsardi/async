@@ -1,15 +1,13 @@
-
 test_that("when_some", {
   done <- FALSE
   do <- async(function() {
-    d1 <- delay(1/10)$then(function(value) "foo")
-    d2 <- delay(1/10000)$then(function(value) "bar")
+    d1 <- delay(1 / 10)$then(function(value) "foo")
+    d2 <- delay(1 / 10000)$then(function(value) "bar")
 
-    dx <- when_some(2, d1, d2)$
-      then(function(value) {
-        done <<- TRUE
-        expect_equal(value, list("bar", "foo"))
-      })
+    dx <- when_some(2, d1, d2)$then(function(value) {
+      done <<- TRUE
+      expect_equal(value, list("bar", "foo"))
+    })
   })
   synchronise(do())
   expect_true(done)
@@ -18,15 +16,14 @@ test_that("when_some", {
 test_that("when_some, few errors", {
   done <- FALSE
   do <- async(function() {
-    d1 <- delay(1/10)$then(function(value) "foo")
-    d2 <- delay(1/10000)$then(function(.) stop("ooops"))
-    d3 <- delay(1/10000)$then(function(value) "bar")
+    d1 <- delay(1 / 10)$then(function(value) "foo")
+    d2 <- delay(1 / 10000)$then(function(.) stop("ooops"))
+    d3 <- delay(1 / 10000)$then(function(value) "bar")
 
-    dx <- when_some(2, d1, d2, d3)$
-      then(function(value) {
-        done <<- TRUE
-        expect_equal(value, list("bar", "foo"))
-      })
+    dx <- when_some(2, d1, d2, d3)$then(function(value) {
+      done <<- TRUE
+      expect_equal(value, list("bar", "foo"))
+    })
   })
   synchronise(do())
   expect_true(done)
@@ -35,9 +32,9 @@ test_that("when_some, few errors", {
 test_that("too many errors", {
   done <- FALSE
   do <- async(function() {
-    d1 <- delay(1/10)$then(function(.) stop("ooops again"))
-    d2 <- delay(1/10000)$then(function(.) stop("ooops"))
-    d3 <- delay(1/10000)$then(function(value) "bar")
+    d1 <- delay(1 / 10)$then(function(.) stop("ooops again"))
+    d2 <- delay(1 / 10000)$then(function(.) stop("ooops"))
+    d3 <- delay(1 / 10000)$then(function(value) "bar")
 
     when_some(2, d1, d2, d3)
   })

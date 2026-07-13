@@ -1,4 +1,3 @@
-
 #' Find the value of a match, asynchronously
 #'
 #' All predicates are running in parallel, and the returned match
@@ -38,7 +37,8 @@ async_detect_nolimit <- function(.x, .p, ...) {
   done <- FALSE
 
   self <- deferred$new(
-    type = "async_detect", call = sys.call(),
+    type = "async_detect",
+    call = sys.call(),
     action = function(resolve) {
       lapply(seq_along(defs), function(idx) {
         defs[[idx]]$then(function(val) if (isTRUE(val)) idx)$then(self)
@@ -68,7 +68,8 @@ async_detect_limit <- function(.x, .p, ..., .limit = .limit) {
   firsts <- lapply(.x[seq_len(.limit)], .p, ...)
 
   self <- deferred$new(
-    type = "async_detect (limit)", call = sys.call(),
+    type = "async_detect (limit)",
+    call = sys.call(),
     action = function(resolve) {
       lapply(seq_along(firsts), function(idx) {
         firsts[[idx]]$then(function(val) if (isTRUE(val)) idx)$then(self)

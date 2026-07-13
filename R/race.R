@@ -1,4 +1,3 @@
-
 #' A deferred value that resolves when the specified number of deferred
 #' values resolve, or is rejected when one of them is rejected
 #'
@@ -30,8 +29,9 @@ async_race_some <- mark_as_async(async_race_some)
 #' @rdname async_race_some
 
 async_race <- function(..., .list = list()) {
-  when_some_internal(1L, ..., .list = .list, .race = TRUE)$
-    then(function(x) x[[1]])
+  when_some_internal(1L, ..., .list = .list, .race = TRUE)$then(function(x) {
+    x[[1]]
+  })
 }
 
 async_race <- mark_as_async(async_race)

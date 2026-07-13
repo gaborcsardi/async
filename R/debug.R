@@ -1,4 +1,3 @@
-
 #' Async debugging utilities
 #'
 #' Helper function to help with the non-trivial debugging of async code.
@@ -100,9 +99,11 @@ NULL
 
 async_next <- function(el = NULL) {
   el <- el %||% find_sync_frame()$new_el
-  if (is.null(el)) stop("No async context")
+  if (is.null(el)) {
+    stop("No async context")
+  }
   ## TODO: some visual indication that something has happened?
-  if (! el$run("once")) message("[ASYNC] async phase complete")
+  if (!el$run("once")) message("[ASYNC] async phase complete")
 }
 
 # nocov start
@@ -113,11 +114,13 @@ async_next <- function(el = NULL) {
 
 async_step <- function() {
   el <- find_sync_frame()$new_el
-  if (is.null(el)) stop("No async context")
+  if (is.null(el)) {
+    stop("No async context")
+  }
   ## TODO: some visual indication that something has happened?
   old <- options(async_debug_steps = TRUE)
   on.exit(options(old))
-  if (! el$run("once")) {
+  if (!el$run("once")) {
     message("[ASYNC] async phase complete")
   }
 }
@@ -139,7 +142,9 @@ async_step_back <- function() {
 
 async_list <- function(def = NULL) {
   def <- def %||% find_sync_frame()$res
-  if (is.null(def)) stop("No async context")
+  if (is.null(def)) {
+    stop("No async context")
+  }
   info <- list()
   find_parents <- function(def) {
     info <<- c(info, list(get_private(def)$get_info()))
@@ -167,7 +172,9 @@ async_tree <- function(def = NULL) {
 
 async_debug <- function(id, action = TRUE, parent = TRUE) {
   def <- find_deferred(id)
-  if (is.null(def)) stop("Cannot find deferred `", id, "`")
+  if (is.null(def)) {
+    stop("Cannot find deferred `", id, "`")
+  }
   prv <- get_private(def)
 
   if (prv$state != "pending") {
@@ -210,11 +217,17 @@ async_debug <- function(id, action = TRUE, parent = TRUE) {
 
 async_wait_for <- function(id) {
   el <- find_sync_frame()$new_el
-  if (is.null(el)) stop("No async context")
+  if (is.null(el)) {
+    stop("No async context")
+  }
   def <- find_deferred(id)
-  if (is.null(def)) stop("Cannot find deferred `", id, "`")
+  if (is.null(def)) {
+    stop("Cannot find deferred `", id, "`")
+  }
   priv <- get_private(def)
-  while (priv$state == "pending") el$run("once")
+  while (priv$state == "pending") {
+    el$run("once")
+  }
   message("[ASYNC] ", id, "  resolved")
 }
 
@@ -222,8 +235,11 @@ async_wait_for <- function(id) {
 #' @aliases .aw
 #' @rdname async_debug
 
-async_where <- function(calls = sys.calls(), parents = sys.parents(),
-                        frm = get_async_frames()) {
+async_where <- function(
+  calls = sys.calls(),
+  parents = sys.parents(),
+  frm = get_async_frames()
+) {
   afrm <- viapply(frm, "[[", "frame")
   num <- seq_along(calls)
 
@@ -269,29 +285,49 @@ print.async_where <- function(x, ...) {
 #' @export
 
 format.async_where <- function(x, ...) {
-  paste0(paste(
-    formatC(seq_len(nrow(x)), width = 3),
-    vcapply(x$call, expr_name),
-    paste0(" ", x$filename, ":", x$position),
-    ifelse (! x$async, "",
-            paste0("\n    ", x$def_id, " ", x$def_cb_type, " ",
-                   x$def_call, " ", x$def_filename, ":", x$def_position)),
-    collapse = "\n"
-  ), "\n")
+  paste0(
+    paste(
+      formatC(seq_len(nrow(x)), width = 3),
+      vcapply(x$call, expr_name),
+      paste0(" ", x$filename, ":", x$position),
+      ifelse(
+        !x$async,
+        "",
+        paste0(
+          "\n    ",
+          x$def_id,
+          " ",
+          x$def_cb_type,
+          " ",
+          x$def_call,
+          " ",
+          x$def_filename,
+          ":",
+          x$def_position
+        )
+      ),
+      collapse = "\n"
+    ),
+    "\n"
+  )
 }
 
 get_async_frames <- function() {
   drop_nulls(lapply(seq_along(sys.frames()), function(i) {
-    if (! is.null(data <- sys.frame(i)$`__async_data__`)) {
-      list(frame = i + data$skip %||% 1L, deferred = data[[1]], type = data[[2]],
-           call = get_private(data[[3]])$mycall)
+    if (!is.null(data <- sys.frame(i)$`__async_data__`)) {
+      list(
+        frame = i + data$skip %||% 1L,
+        deferred = data[[1]],
+        type = data[[2]],
+        call = get_private(data[[3]])$mycall
+      )
     }
   }))
 }
 
 find_sync_frame <- function() {
   for (i in seq_along(sys.frames())) {
-    cand  <- sys.frame(-i)
+    cand <- sys.frame(-i)
     if (isTRUE(cand$`__async_synchronise_frame__`)) return(cand)
   }
 }
@@ -299,7 +335,7 @@ find_sync_frame <- function() {
 find_async_data_frame <- function() {
   frames <- sys.frames()
   for (i in seq_along(frames)) {
-    cand  <- sys.frame(-i)
+    cand <- sys.frame(-i)
     if (!is.null(data <- cand$`__async_data__`)) {
       return(list(frame = length(frames) - i + 1L, data = data))
     }
@@ -308,9 +344,13 @@ find_async_data_frame <- function() {
 
 find_deferred <- function(id, def = NULL) {
   def <- def %||% find_sync_frame()$res
-  if (is.null(def)) stop("No async context")
+  if (is.null(def)) {
+    stop("No async context")
+  }
   search_parents <- function(def) {
-    if (get_private(def)$id == id) return(def)
+    if (get_private(def)$id == id) {
+      return(def)
+    }
     prn <- get_private(def)$parents
     for (p in lapply(prn, search_parents)) {
       if (!is.null(p)) return(p)
@@ -345,9 +385,9 @@ async_debug_shortcuts <- function() {
 
 async_debug_remove_shortcuts <- function() {
   tryCatch(
-    rm(list = c(".an", ".as", ".asb", ".al", ".at", ".aw"),
-       envir = .GlobalEnv),
-    error = function(x) x)
+    rm(list = c(".an", ".as", ".asb", ".al", ".at", ".aw"), envir = .GlobalEnv),
+    error = function(x) x
+  )
 }
 
 # nocov end

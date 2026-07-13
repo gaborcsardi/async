@@ -1,4 +1,3 @@
-
 #' It runs each task in series but stops whenever any of the functions were
 #' successful. If one of the tasks were successful, the callback will be
 #' passed the result of the successful task. If all tasks fail, the
@@ -30,10 +29,13 @@ async_try_each <- function(..., .list = list()) {
   errors <- list()
 
   self <- deferred$new(
-    type = "async_try_each", call = sys.call(),
+    type = "async_try_each",
+    call = sys.call(),
     action = function(resolve) {
       nx <<- length(defs)
-      if (nx == 0) resolve(NULL)
+      if (nx == 0) {
+        resolve(NULL)
+      }
       wh <<- 1L
       defs[[wh]]$then(self)
     },
@@ -45,7 +47,8 @@ async_try_each <- function(..., .list = list()) {
       if (wh == nx) {
         err <- structure(
           list(errors = errors, message = "async_try_each failed"),
-          class = c("async_rejected", "error", "condition"))
+          class = c("async_rejected", "error", "condition")
+        )
         stop(err)
       } else {
         wh <<- wh + 1

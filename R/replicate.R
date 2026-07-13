@@ -1,4 +1,3 @@
-
 #' Replicate an async function a number of times
 #'
 #' Similar to [base::replicate()], with some differences:
@@ -22,10 +21,12 @@
 #' synchronise(do())
 #' }
 
-async_replicate <- function(n, task, ...,  .limit = Inf) {
+async_replicate <- function(n, task, ..., .limit = Inf) {
   assert_that(
     is_count(n),
-    .limit == Inf || is_count(.limit), .limit >= 1L)
+    .limit == Inf || is_count(.limit),
+    .limit >= 1L
+  )
 
   force(list(...))
   task <- async(task)
@@ -44,13 +45,15 @@ async_replicate_nolimit <- function(n, task, ...) {
   when_all(.list = defs)
 }
 
-async_replicate_limit  <- function(n, task, ..., .limit = .limit) {
-  n; .limit
+async_replicate_limit <- function(n, task, ..., .limit = .limit) {
+  n
+  .limit
 
   defs <- nextone <- result <- NULL
 
   self <- deferred$new(
-    type = "async_replicate", call = sys.call(),
+    type = "async_replicate",
+    call = sys.call(),
     action = function(resolve) {
       defs <<- lapply(seq_len(n), function(i) task(...))
       result <<- vector(n, mode = "list")
@@ -60,7 +63,7 @@ async_replicate_limit  <- function(n, task, ..., .limit = .limit) {
       nextone <<- .limit + 1L
     },
     parent_resolve = function(value, resolve) {
-      result[ value[[1]] ] <<- value[2]
+      result[value[[1]]] <<- value[2]
       if (nextone > n) {
         resolve(result)
       } else {

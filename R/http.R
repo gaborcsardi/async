@@ -1,4 +1,3 @@
-
 #' Asynchronous HTTP GET request
 #'
 #' Start an HTTP GET request in the background, and report its completion
@@ -86,10 +85,20 @@
 #' synchronise(afun())
 #' }
 
-http_get <- function(url, headers = character(), file = NULL,
-                     options = list(), on_progress = NULL, retry = TRUE) {
-
-  url; headers; file; options; on_progress; retry
+http_get <- function(
+  url,
+  headers = character(),
+  file = NULL,
+  options = list(),
+  on_progress = NULL,
+  retry = TRUE
+) {
+  url
+  headers
+  file
+  options
+  on_progress
+  retry
   options <- get_default_curl_options(options)
 
   make_deferred_http(
@@ -153,10 +162,20 @@ http_get <- mark_as_async(http_get)
 #' synchronise(afun(urls))
 #' }
 
-http_head <- function(url, headers = character(), file = NULL,
-                      options = list(), on_progress = NULL, retry = TRUE) {
-
-  url; headers; file; options; on_progress; retry
+http_head <- function(
+  url,
+  headers = character(),
+  file = NULL,
+  options = list(),
+  on_progress = NULL,
+  retry = TRUE
+) {
+  url
+  headers
+  file
+  options
+  on_progress
+  retry
   options <- get_default_curl_options(options)
 
   make_deferred_http(
@@ -166,8 +185,12 @@ http_head <- function(url, headers = character(), file = NULL,
       assert_that(is_string(url))
       handle <- curl::new_handle(url = url)
       curl::handle_setheaders(handle, .list = headers)
-      curl::handle_setopt(handle, customrequest = "HEAD", nobody = TRUE,
-                    .list = options)
+      curl::handle_setopt(
+        handle,
+        customrequest = "HEAD",
+        nobody = TRUE,
+        .list = options
+      )
       list(handle = handle, options = options)
     },
     file = file
@@ -211,11 +234,26 @@ http_head <- mark_as_async(http_head)
 #'
 #' synchronise(do())
 
-http_post <- function(url, data = NULL, data_file = NULL,
-                      data_form = NULL, headers = character(), file = NULL,
-                      options = list(), on_progress = NULL, retry = TRUE) {
-
-  url; data; data_file; data_form; headers; file; options; on_progress; retry
+http_post <- function(
+  url,
+  data = NULL,
+  data_file = NULL,
+  data_form = NULL,
+  headers = character(),
+  file = NULL,
+  options = list(),
+  on_progress = NULL,
+  retry = TRUE
+) {
+  url
+  data
+  data_file
+  data_form
+  headers
+  file
+  options
+  on_progress
+  retry
   if ((!is.null(data) + !is.null(data_file) + !is.null(data_form)) > 1) {
     stop(
       "At most one of `data`, `data_file` and `data_form` ",
@@ -225,7 +263,9 @@ http_post <- function(url, data = NULL, data_file = NULL,
   if (!is.null(data_file)) {
     data <- readBin(data_file, "raw", file.size(data_file))
   }
-  if (!is.null(data) && !is.raw(data)) data <- charToRaw(data)
+  if (!is.null(data) && !is.raw(data)) {
+    data <- charToRaw(data)
+  }
   options <- get_default_curl_options(options)
 
   make_deferred_http(
@@ -235,9 +275,13 @@ http_post <- function(url, data = NULL, data_file = NULL,
       assert_that(is_string(url))
       handle <- curl::new_handle(url = url)
       curl::handle_setheaders(handle, .list = headers)
-      curl::handle_setopt(handle, customrequest = "POST",
-                    postfieldsize = length(data), postfields = data,
-                    .list = options)
+      curl::handle_setopt(
+        handle,
+        customrequest = "POST",
+        postfieldsize = length(data),
+        postfields = data,
+        .list = options
+      )
       if (!is.null(data_form)) {
         curl::handle_setform(handle, .list = data_form)
       }
@@ -249,9 +293,17 @@ http_post <- function(url, data = NULL, data_file = NULL,
 
 http_post <- mark_as_async(http_post)
 
-http_delete <- function(url, headers = character(), file = NULL,
-                        options = list(), retry = TRUE) {
-  url; headers; options; retry
+http_delete <- function(
+  url,
+  headers = character(),
+  file = NULL,
+  options = list(),
+  retry = TRUE
+) {
+  url
+  headers
+  options
+  retry
 
   make_deferred_http(
     method = "DELETE",
@@ -283,10 +335,14 @@ default_http_version <- function() {
 
 get_default_curl_options <- function(options) {
   getopt <- function(nm) {
-    if (!is.null(v <- options[[nm]])) return(v)
+    if (!is.null(v <- options[[nm]])) {
+      return(v)
+    }
     anm <- paste0("async_http_", nm)
-    if (!is.null(v <- getOption(anm))) return(v)
-    if (!is.na(v <- Sys.getenv(toupper(anm), NA_character_))) return (v)
+    if (!is.null(v <- getOption(anm))) {
+      return(v)
+    }
+    if (!is.na(v <- Sys.getenv(toupper(anm), NA_character_))) return(v)
   }
   modifyList(
     options,
@@ -324,7 +380,10 @@ http_events <- R6Class(
 )
 
 make_deferred_http <- function(cb, file, method = "GET", retry = TRUE) {
-  cb; file; method; retry
+  cb
+  file
+  method
+  retry
   retry <- get_default_http_retry(retry, method)
   ee <- http_events$new()
 
@@ -337,14 +396,18 @@ make_deferred_http <- function(cb, file, method = "GET", retry = TRUE) {
 
   did <- 0L
   self <- deferred$new(
-    type = "http", call = sys.call(),
+    type = "http",
+    call = sys.call(),
     action = function(resolve) {
       resolve
       once()$then(self)
     },
     parent_resolve = function(value, resolve) {
-      if (did < retry$limit && is.integer(value$status_code) &&
-          value$status_code %in% retry$status_codes) {
+      if (
+        did < retry$limit &&
+          is.integer(value$status_code) &&
+          value$status_code %in% retry$status_codes
+      ) {
         did <<- did + 1L
         wait <- http_retry_after(value) %||% default_backoff(did)
         delay(wait)$then(function() once())$then(self)
@@ -366,12 +429,16 @@ make_deferred_http <- function(cb, file, method = "GET", retry = TRUE) {
 }
 
 make_deferred_http_once <- function(cb, file, ee) {
-  cb; file; ee
+  cb
+  file
+  ee
   id <- NULL
   deferred$new(
-    type = "http", call = sys.call(),
+    type = "http",
+    call = sys.call(),
     action = function(resolve, progress) {
-      resolve; progress
+      resolve
+      progress
       ## This is a temporary hack until we have proper pollables
       ## Then the deferred will have a "work" callback, which will
       ## be able to throw.
@@ -401,7 +468,9 @@ http_retry_defaults <- list(
 )
 
 get_default_http_retry <- function(retry, method) {
-  if (is.null(retry) || isFALSE(retry)) return(NULL)
+  if (is.null(retry) || isFALSE(retry)) {
+    return(NULL)
+  }
 
   if (isTRUE(retry)) {
     spec <- http_retry_defaults
@@ -412,9 +481,11 @@ get_default_http_retry <- function(retry, method) {
     if (length(unknown)) {
       stop(
         "Unknown `retry` entry/entries: ",
-        paste0("`", unknown, "`", collapse = ", "), ". ",
+        paste0("`", unknown, "`", collapse = ", "),
+        ". ",
         "Allowed entries are: ",
-        paste0("`", names(http_retry_defaults), "`", collapse = ", "), "."
+        paste0("`", names(http_retry_defaults), "`", collapse = ", "),
+        "."
       )
     }
     spec <- modifyList(http_retry_defaults, retry)
@@ -431,8 +502,12 @@ get_default_http_retry <- function(retry, method) {
   spec$errors <- as.logical(spec$errors)
 
   ## No retries if the limit is not positive, or the method is not retryable.
-  if (is.na(spec$limit) || spec$limit <= 0) return(NULL)
-  if (!toupper(method) %in% spec$methods) return(NULL)
+  if (is.na(spec$limit) || spec$limit <= 0) {
+    return(NULL)
+  }
+  if (!toupper(method) %in% spec$methods) {
+    return(NULL)
+  }
 
   spec
 }
@@ -443,22 +518,30 @@ get_default_http_retry <- function(retry, method) {
 
 http_retry_after <- function(response) {
   headers <- response[["headers"]]
-  if (is.null(headers)) return(NULL)
+  if (is.null(headers)) {
+    return(NULL)
+  }
   parsed <- tryCatch(
     curl::parse_headers_list(headers),
     error = function(e) NULL
   )
   value <- parsed[["retry-after"]]
-  if (is.null(value)) return(NULL)
+  if (is.null(value)) {
+    return(NULL)
+  }
 
   secs <- suppressWarnings(as.numeric(value))
-  if (!is.na(secs)) return(max(secs, 0))
+  if (!is.na(secs)) {
+    return(max(secs, 0))
+  }
 
   when <- tryCatch(
     as.POSIXct(value, format = "%a, %d %b %Y %H:%M:%S", tz = "GMT"),
     error = function(e) NA
   )
-  if (is.na(when)) return(NULL)
+  if (is.na(when)) {
+    return(NULL)
+  }
   max(as.numeric(difftime(when, Sys.time(), units = "secs")), 0)
 }
 
@@ -484,8 +567,12 @@ http_retry_after <- function(response) {
 #' }
 
 http_stop_for_status <- function(resp) {
-  if (!is.integer(resp$status_code)) stop("Not an HTTP response")
-  if (resp$status_code < 400) return(invisible(resp))
+  if (!is.integer(resp$status_code)) {
+    stop("Not an HTTP response")
+  }
+  if (resp$status_code < 400) {
+    return(invisible(resp))
+  }
   stop(http_error(resp))
 }
 
@@ -494,12 +581,18 @@ http_error <- function(resp, call = sys.call(-1)) {
   reason <- http_status(status)$reason
   message <- sprintf("%s (HTTP %d).", reason, status)
   status_type <- (status %/% 100) * 100
-  if (length(resp[["content"]]) == 0 && !is.null(resp$file) &&
-              file.exists(resp$file)) {
-    tryCatch({
-      n <- file.info(resp$file, extra_cols = FALSE)$size
-      resp$content <- readBin(resp$file, what = raw(), n = n)
-    }, error = identity)
+  if (
+    length(resp[["content"]]) == 0 &&
+      !is.null(resp$file) &&
+      file.exists(resp$file)
+  ) {
+    tryCatch(
+      {
+        n <- file.info(resp$file, extra_cols = FALSE)$size
+        resp$content <- readBin(resp$file, what = raw(), n = n)
+      },
+      error = identity
+    )
   }
   http_class <- paste0("async_http_", unique(c(status, status_type, "error")))
   structure(
@@ -514,8 +607,13 @@ http_status <- function(status) {
     stop("Unknown http status code: ", status, call. = FALSE)
   }
 
-  status_types <- c("Information", "Success", "Redirection", "Client error",
-    "Server error")
+  status_types <- c(
+    "Information",
+    "Success",
+    "Redirection",
+    "Client error",
+    "Server error"
+  )
   status_type <- status_types[[status %/% 100]]
 
   # create the final information message

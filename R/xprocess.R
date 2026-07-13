@@ -1,4 +1,3 @@
-
 #' External process via a process generator
 #'
 #' Wrap any [processx::process] object into a deferred value. The
@@ -46,17 +45,18 @@
 #' synchronise(afun())
 #' }
 
-external_process <- function(process_generator, error_on_status = TRUE,
-                             ...) {
-
-  process_generator; error_on_status; args <- list(...)
+external_process <- function(process_generator, error_on_status = TRUE, ...) {
+  process_generator
+  error_on_status
+  args <- list(...)
   args$encoding <- args$encoding %||% ""
   args$cleanup_tree <- args$cleanup_tree %||% TRUE
 
   id <- NULL
 
   deferred$new(
-    type = "external_process", call = sys.call(),
+    type = "external_process",
+    call = sys.call(),
     action = function(resolve) {
       resolve
       reject <- environment(resolve)$private$reject
@@ -67,8 +67,13 @@ external_process <- function(process_generator, error_on_status = TRUE,
       id <<- get_default_event_loop()$add_process(
         list(pipe),
         function(err, res) if (is.null(err)) resolve(res) else reject(err),
-        list(process = px, stdout = stdout, stderr = stderr,
-             error_on_status = error_on_status, encoding = args$encoding)
+        list(
+          process = px,
+          stdout = stdout,
+          stderr = stderr,
+          error_on_status = error_on_status,
+          encoding = args$encoding
+        )
       )
     },
     on_cancel = function(reason) {

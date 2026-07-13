@@ -1,4 +1,3 @@
-
 #' Asynchronous function call, in a worker pool
 #'
 #' The function will be called on another process, very much like
@@ -12,18 +11,21 @@
 #' @export
 
 call_function <- function(func, args = list()) {
-  func; args
+  func
+  args
 
   id <- NULL
 
   deferred$new(
-    type = "pool-task", call = sys.call(),
+    type = "pool-task",
+    call = sys.call(),
     action = function(resolve) {
       resolve
       reject <- environment(resolve)$private$reject
       id <<- get_default_event_loop()$add_pool_task(
         function(err, res) if (is.null(err)) resolve(res) else reject(err),
-        list(func = func, args = args))
+        list(func = func, args = args)
+      )
     },
     on_cancel = function(reason) {
       if (!is.null(id)) {

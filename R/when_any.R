@@ -1,4 +1,3 @@
-
 #' Resolve a deferred as soon as some deferred from a list resolve
 #'
 #' `when_some` creates a deferred value that is resolved as soon as the
@@ -55,7 +54,8 @@ when_some_internal <- function(count, ..., .list, .race) {
   cancel_all <- function() lapply(defs[ifdef], function(x) x$cancel())
 
   deferred$new(
-    type = "when_some", call = sys.call(),
+    type = "when_some",
+    call = sys.call(),
     parents = defs[ifdef],
     action = function(resolve) {
       if (num_defs < count) {
@@ -79,7 +79,8 @@ when_some_internal <- function(count, ..., .list, .race) {
       if (num_failed + count == num_defs + 1L) {
         err <- structure(
           list(errors = errors, message = "when_some / when_any failed"),
-          class = c("async_rejected", "error", "condition"))
+          class = c("async_rejected", "error", "condition")
+        )
         stop(err)
       }
     }

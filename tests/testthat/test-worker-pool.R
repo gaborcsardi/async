@@ -1,4 +1,3 @@
-
 test_that("simple CRUD", {
   skip_on_cran()
 
@@ -40,14 +39,17 @@ test_that("simple CRUD", {
     ## Results are in, four more tasks should be queued
     expect_equal(
       sort(wp$notify_event(pids = pids, event_loop = 42)),
-      as.character(1:4))
+      as.character(1:4)
+    )
     res <- lapply(as.character(1:4), function(i) wp$get_result(i))
     pids <- viapply(res, "[[", "result")
     expect_equal(pids, wp$list_workers()$pid)
     expect_equal(sum(wp$list_tasks()$status == "running"), 4)
 
     ## Cancel the rest
-    for (i in 5:10) wp$cancel_task(as.character(i))
+    for (i in 5:10) {
+      wp$cancel_task(as.character(i))
+    }
 
     ## Workers are idle, no tasks
     expect_equal(is.na(wp$list_workers()$task), rep(TRUE, 4))

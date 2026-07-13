@@ -16,3 +16,5 @@
 ^dev-lib$
 ^\.cache$
 ^CLAUDE\.md$
+^[.]?air[.]toml$
+^\.vscode$

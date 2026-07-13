@@ -1,4 +1,3 @@
-
 #' Worker pool
 #'
 #' The worker pool functions are independent of the event loop, to allow
@@ -12,32 +11,45 @@ NULL
 
 worker_pool <- R6Class(
   public = list(
-    initialize = function()
-      wp_init(self, private),
-    add_task = function(func, args, id, event_loop)
-      wp_add_task(self, private, func, args, id, event_loop),
-    get_fds = function()
-      wp_get_fds(self, private),
-    get_pids = function()
-      wp_get_pids(self, private),
-    get_poll_connections = function()
-      wp_get_poll_connections(self, private),
-    notify_event = function(pids, event_loop)
-      wp_notify_event(self, private, pids, event_loop),
-    start_workers = function()
-      wp_start_workers(self, private),
-    kill_workers = function()
-      wp_kill_workers(self, private),
-    cancel_task = function(id)
-      wp_cancel_task(self, private, id),
-    cancel_all_tasks = function()
-      wp_cancel_all_tasks(self, private),
-    get_result = function(id)
-      wp_get_result(self, private, id),
-    list_workers = function()
-      wp_list_workers(self, private),
-    list_tasks = function(event_loop = NULL, status = NULL)
+    initialize = function() {
+      wp_init(self, private)
+    },
+    add_task = function(func, args, id, event_loop) {
+      wp_add_task(self, private, func, args, id, event_loop)
+    },
+    get_fds = function() {
+      wp_get_fds(self, private)
+    },
+    get_pids = function() {
+      wp_get_pids(self, private)
+    },
+    get_poll_connections = function() {
+      wp_get_poll_connections(self, private)
+    },
+    notify_event = function(pids, event_loop) {
+      wp_notify_event(self, private, pids, event_loop)
+    },
+    start_workers = function() {
+      wp_start_workers(self, private)
+    },
+    kill_workers = function() {
+      wp_kill_workers(self, private)
+    },
+    cancel_task = function(id) {
+      wp_cancel_task(self, private, id)
+    },
+    cancel_all_tasks = function() {
+      wp_cancel_all_tasks(self, private)
+    },
+    get_result = function(id) {
+      wp_get_result(self, private, id)
+    },
+    list_workers = function() {
+      wp_list_workers(self, private)
+    },
+    list_tasks = function(event_loop = NULL, status = NULL) {
       wp_list_tasks(self, private, event_loop, status)
+    }
   ),
 
   private = list(
@@ -45,10 +57,12 @@ worker_pool <- R6Class(
     tasks = list(),
 
     finalize = function() self$kill_workers(),
-    try_start = function()
-      wp__try_start(self, private),
-    interrupt_worker = function(pid)
+    try_start = function() {
+      wp__try_start(self, private)
+    },
+    interrupt_worker = function(pid) {
       wp__interrupt_worker(self, private, pid)
+    }
   )
 )
 
@@ -61,12 +75,16 @@ wp_start_workers <- function(self, private) {
   num <- worker_pool_size()
 
   ## See if we need to start more
-  if (NROW(private$workers) >= num) return(invisible())
+  if (NROW(private$workers) >= num) {
+    return(invisible())
+  }
 
   ## Yeah, start some more
   to_start <- num - NROW(private$workers)
   sess <- lapply(1:to_start, function(x) callr::r_session$new(wait = FALSE))
-  fd <- viapply(sess, function(x) processx::conn_get_fileno(x$get_poll_connection()))
+  fd <- viapply(sess, function(x) {
+    processx::conn_get_fileno(x$get_poll_connection())
+  })
   new_workers <- data.frame(
     stringsAsFactors = FALSE,
     session = I(sess),
@@ -85,8 +103,13 @@ wp_add_task <- function(self, private, func, args, id, event_loop) {
     private$tasks,
     data.frame(
       stringsAsFactors = FALSE,
-      event_loop = event_loop, id = id, func = I(list(func)),
-      args = I(list(args)), status = "waiting", result = I(list(NULL)))
+      event_loop = event_loop,
+      id = id,
+      func = I(list(func)),
+      args = I(list(args)),
+      status = "waiting",
+      result = I(list(NULL))
+    )
   )
 
   private$try_start()
@@ -109,9 +132,9 @@ wp_get_poll_connections <- function(self, private) {
   sts <- vcapply(private$workers$session, function(x) x$get_state())
   busy <- sts %in% c("starting", "busy")
   structure(
-    lapply(private$workers$session[busy],
-           function(x) x$get_poll_connection()),
-    names = private$workers$pid[busy])
+    lapply(private$workers$session[busy], function(x) x$get_poll_connection()),
+    names = private$workers$pid[busy]
+  )
 }
 
 wp_notify_event <- function(self, private, pids, event_loop) {
@@ -120,11 +143,17 @@ wp_notify_event <- function(self, private, pids, event_loop) {
   which <- match(pids, private$workers$pid)
   for (w in which) {
     msg <- private$workers$session[[w]]$read()
-    if (is.null(msg)) next
+    if (is.null(msg)) {
+      next
+    }
     if (msg$code == 200 || (msg$code >= 500 && msg$code < 600)) {
-      if (msg$code >= 500 && msg$code < 600) dead <- c(dead, w)
+      if (msg$code >= 500 && msg$code < 600) {
+        dead <- c(dead, w)
+      }
       wt <- match(private$workers$task[[w]], private$tasks$id)
-      if (is.na(wt)) stop("Internal error, no such task")
+      if (is.na(wt)) {
+        stop("Internal error, no such task")
+      }
       private$tasks$result[[wt]] <- msg
       private$tasks$status[[wt]] <- "done"
       private$workers$task[[w]] <- NA_character_
@@ -132,7 +161,7 @@ wp_notify_event <- function(self, private, pids, event_loop) {
     }
   }
   if (length(dead)) {
-    private$workers <- private$workers[-dead,]
+    private$workers <- private$workers[-dead, ]
     self$start_workers()
   }
 
@@ -154,7 +183,9 @@ wp_kill_workers <- function(self, private) {
 
 wp_cancel_task <- function(self, private, id) {
   wt <- match(id, private$tasks$id)
-  if (is.na(wt)) stop("Unknown task")
+  if (is.na(wt)) {
+    stop("Unknown task")
+  }
 
   if (private$tasks$status[[wt]] == "running") {
     wk <- match(id, private$workers$task)
@@ -170,9 +201,13 @@ wp_cancel_all_tasks <- function(self, private) {
 
 wp_get_result <- function(self, private, id) {
   wt <- match(id, private$tasks$id)
-  if (is.na(wt)) stop("Unknown task")
+  if (is.na(wt)) {
+    stop("Unknown task")
+  }
 
-  if (private$tasks$status[[wt]] != "done") stop("Task not done yet")
+  if (private$tasks$status[[wt]] != "done") {
+    stop("Task not done yet")
+  }
   result <- private$tasks$result[[wt]]
   private$tasks <- private$tasks[-wt, ]
   result
@@ -185,8 +220,12 @@ wp_list_workers <- function(self, private) {
 wp_list_tasks <- function(self, private, event_loop, status) {
   dont_show <- c("func", "args", "result")
   ret <- private$tasks
-  if (!is.null(event_loop)) ret <- ret[ret$event_loop %in% event_loop, ]
-  if (!is.null(status)) ret <- ret[ret$status %in% status, ]
+  if (!is.null(event_loop)) {
+    ret <- ret[ret$event_loop %in% event_loop, ]
+  }
+  if (!is.null(status)) {
+    ret <- ret[ret$status %in% status, ]
+  }
   ret[, setdiff(colnames(private$tasks), dont_show)]
 }
 
@@ -196,7 +235,9 @@ wp_list_tasks <- function(self, private, event_loop, status) {
 
 wp__try_start <- function(self, private) {
   sts <- vcapply(private$workers$session, function(x) x$get_state())
-  if (all(sts != "idle")) return()
+  if (all(sts != "idle")) {
+    return()
+  }
   can_work <- sts == "idle"
 
   can_run <- private$tasks$status == "waiting"
@@ -249,7 +290,9 @@ wp__try_start <- function(self, private) {
 
 wp__interrupt_worker <- function(self, private, pid) {
   ww <- match(pid, private$workers$pid)
-  if (is.na(ww)) stop("Unknown task in interrupt_worker() method")
+  if (is.na(ww)) {
+    stop("Unknown task in interrupt_worker() method")
+  }
 
   kill <- FALSE
   sess <- private$workers$session[[ww]]
@@ -258,12 +301,15 @@ wp__interrupt_worker <- function(self, private, pid) {
 
   if (pr == "ready") {
     msg <- sess$read()
-    if (! inherits(msg, "interrupt")) {
-      tryCatch({
-        sess$write_input("base::Sys.sleep(0)\n")
-        sess$read_output()
-        sess$read_error()
-      }, error = function(e) kill <<- TRUE)
+    if (!inherits(msg, "interrupt")) {
+      tryCatch(
+        {
+          sess$write_input("base::Sys.sleep(0)\n")
+          sess$read_output()
+          sess$read_error()
+        },
+        error = function(e) kill <<- TRUE
+      )
     }
     private$workers$task[[ww]] <- NA_character_
   } else {

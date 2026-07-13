@@ -1,4 +1,3 @@
-
 get_uuid <- function() {
   async_env$pid <- async_env$pid %||% Sys.getpid()
   async_env$counter <- async_env$counter %||% 0

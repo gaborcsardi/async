@@ -1,4 +1,3 @@
-
 test_that("fail, success", {
   local_edition(3)
   did <- 0L
@@ -145,7 +144,6 @@ test_that("HTTP backoff example", {
   }
 
   fun <- function() {
-
     query <- function(url) {
       http_get(url, on_progress = cb_http)$then(http_stop_for_status)
     }

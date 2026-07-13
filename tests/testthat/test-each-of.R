@@ -1,6 +1,4 @@
-
 test_that("each_of", {
-
   done <- character()
   index <- integer()
 
@@ -10,7 +8,7 @@ test_that("each_of", {
     dx <- when_all(
       .list = lapply(seq_along(coll), function(i) {
         force(i)
-        delay(1/1000)$then(function(value) {
+        delay(1 / 1000)$then(function(value) {
           done <<- c(done, coll[[i]])
           index <<- c(index, i)
         })

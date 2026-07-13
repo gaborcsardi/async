@@ -1,4 +1,3 @@
-
 skip_without_package <- function(package, version = NULL) {
   if (!requireNamespace(package, quietly = TRUE)) {
     skip(paste0("Needs ", package, " package"))

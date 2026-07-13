@@ -1,4 +1,3 @@
-
 #' Apply an asynchronous function to each element of a vector
 #'
 #' @param .x A list or atomic vector.
@@ -18,7 +17,7 @@
 #' ))
 
 async_map <- function(.x, .f, ..., .args = list(), .limit = Inf) {
-  if (.limit < length(.x))  {
+  if (.limit < length(.x)) {
     async_map_limit(.x, .f, ..., .args = .args, .limit = .limit)
   } else {
     defs <- do.call(lapply, c(list(.x, async(.f), ...), .args))
@@ -43,18 +42,25 @@ async_map_limit <- function(.x, .f, ..., .args = list(), .limit = Inf) {
   )
 
   self <- deferred$new(
-    type = "async_map (limit)", call = sys.call(),
+    type = "async_map (limit)",
+    call = sys.call(),
     action = function(resolve) {
-      self; nx; firsts
+      self
+      nx
+      firsts
       lapply(seq_along(firsts), function(idx) {
         firsts[[idx]]$then(function(val) list(idx, val))$then(self)
       })
       if (nx == 0) resolve(result)
     },
     parent_resolve = function(value, resolve) {
-      self; nx; nextone; result; .f
+      self
+      nx
+      nextone
+      result
+      .f
       nx <<- nx - 1L
-      result[ value[[1]] ] <<- value[2]
+      result[value[[1]]] <<- value[2]
       if (nx == 0) {
         resolve(result)
       } else if (nextone <= len) {

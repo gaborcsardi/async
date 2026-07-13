@@ -1,16 +1,15 @@
-
 test_that("on_cancel callback is called", {
-
   dx <- NULL
   cancelled <- FALSE
   cancel_msg <- NULL
   do <- async(function() {
     dx <<- deferred$new(
-      action = function(resolve) { },
+      action = function(resolve) {},
       on_cancel = function(msg) {
         cancelled <<- TRUE
         cancel_msg <<- msg
-      })
+      }
+    )
     dx$cancel("changed my mind")
   })
 
@@ -23,10 +22,9 @@ test_that("on_cancel callback is called", {
 })
 
 test_that("then() is also rejected on cancel", {
-
   dx <- dx2 <- NULL
   do <- async(function() {
-    dx <<- deferred$new(action = function(resolve) { })
+    dx <<- deferred$new(action = function(resolve) {})
     dx2 <<- dx$then(function() "not this far")
     dx$cancel("changed my mind")
     dx2
@@ -42,10 +40,9 @@ test_that("then() is also rejected on cancel", {
 })
 
 test_that("can catch and handle cancellation", {
-
   err <- NULL
   do <- async(function() {
-    dx <- deferred$new(action = function(resolve) { })
+    dx <- deferred$new(action = function(resolve) {})
     dx2 <- dx$catch(error = function(e) err <<- e)
     dx$cancel("changed my mind")
     dx2
@@ -57,7 +54,6 @@ test_that("can catch and handle cancellation", {
 })
 
 test_that("cancel delay", {
-
   do <- function() {
     d1 <- delay(60)
     d1$cancel()
@@ -65,17 +61,18 @@ test_that("cancel delay", {
   tic <- Sys.time()
   expect_error(synchronise(do()), "Cancelled", class = "async_cancelled")
   tac <- Sys.time()
-  expect_true(tac - tic < as.difftime(30, units  =  "secs"))
+  expect_true(tac - tic < as.difftime(30, units = "secs"))
 })
 
 test_that("cancel delay after it has started", {
-
   cancelled <- NULL
   do <- function() {
     d1 <- delay(5)
     d1x <- d1$catch(error = identity)
-    d2 <- delay(1/100)$
-      then(function() { d1$cancel("nope"); "OK" })
+    d2 <- delay(1 / 100)$then(function() {
+      d1$cancel("nope")
+      "OK"
+    })
     when_all(d1x, d2)
   }
 
@@ -86,5 +83,5 @@ test_that("cancel delay after it has started", {
   expect_s3_class(res[[1]], "async_cancelled")
   expect_equal(conditionMessage(res[[1]]), "nope")
   expect_equal(res[[2]], "OK")
-  expect_true(tac - tic < as.difftime(4, units  =  "secs"))
+  expect_true(tac - tic < as.difftime(4, units = "secs"))
 })

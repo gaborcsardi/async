@@ -1,4 +1,3 @@
-
 #' Repeatedly call task until it its test function returns `TRUE`
 #'
 #' @param test Synchronous test function.
@@ -26,7 +25,8 @@ async_until <- function(test, task, ...) {
   task <- async(task)
 
   self <- deferred$new(
-    type = "async_until", call = sys.call(),
+    type = "async_until",
+    call = sys.call(),
     parents = list(task(...)),
     parent_resolve = function(value, resolve) {
       if (test()) {

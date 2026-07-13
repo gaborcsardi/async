@@ -1,4 +1,3 @@
-
 #' Retry an asynchronous function with exponential backoff
 #'
 #' Keeps trying until the function's deferred value resolves without
@@ -46,10 +45,16 @@
 #' tryCatch(synchronise(afun()), error = function(e) e)
 #' }
 
-async_backoff <- function(task, ..., .args = list(), times = Inf,
-                          time_limit = Inf, custom_backoff = NULL,
-                          on_progress = NULL, progress_data = NULL) {
-
+async_backoff <- function(
+  task,
+  ...,
+  .args = list(),
+  times = Inf,
+  time_limit = Inf,
+  custom_backoff = NULL,
+  on_progress = NULL,
+  progress_data = NULL
+) {
   task <- async(task)
   args <- c(list(...), .args)
   times <- times
@@ -63,7 +68,8 @@ async_backoff <- function(task, ..., .args = list(), times = Inf,
   limit <- NULL
 
   self <- deferred$new(
-    type = "backoff", call = sys.call(),
+    type = "backoff",
+    call = sys.call(),
     action = function(resolve) {
       started <<- Sys.time()
       limit <<- started + time_limit
@@ -75,26 +81,30 @@ async_backoff <- function(task, ..., .args = list(), times = Inf,
       if (did < times && now < limit) {
         wait <- custom_backoff(did)
         if (!is.null(on_progress)) {
-          on_progress(list(
-            event = "retry",
-            tries = did,
-            spent = now - started,
-            error = value,
-            retry_in = wait
-          ), progress_data)
+          on_progress(
+            list(
+              event = "retry",
+              tries = did,
+              spent = now - started,
+              error = value,
+              retry_in = wait
+            ),
+            progress_data
+          )
         }
-        delay(wait)$
-          then(function() do.call(task, args))$
-          then(self)
+        delay(wait)$then(function() do.call(task, args))$then(self)
       } else {
         if (!is.null(on_progress)) {
-          on_progress(list(
-            event = "givenup",
-            tries = did,
-            spent = now - started,
-            error = value,
-            retry_in = NA_real_
-          ), progress_data)
+          on_progress(
+            list(
+              event = "givenup",
+              tries = did,
+              spent = now - started,
+              error = value,
+              retry_in = NA_real_
+            ),
+            progress_data
+          )
         }
         stop(value)
       }

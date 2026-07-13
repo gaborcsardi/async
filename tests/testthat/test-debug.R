@@ -1,14 +1,16 @@
-
 test_that("async_next", {
-
   new_el <- push_event_loop()
-  on.exit({ new_el$cancel_all(); pop_event_loop() }, add = TRUE)
+  on.exit(
+    {
+      new_el$cancel_all()
+      pop_event_loop()
+    },
+    add = TRUE
+  )
   `__async_synchronise_frame__` <- TRUE
 
   eps <- 0
-  res <- delay(eps)$
-    then(function() delay(eps))$
-    then(function() delay(eps))
+  res <- delay(eps)$then(function() delay(eps))$then(function() delay(eps))
   priv <- get_private(res)
   priv$null()
   priv$run_action()
@@ -32,10 +34,16 @@ test_that("async_next", {
 
 test_that("async_list", {
   new_el <- push_event_loop()
-  on.exit({ new_el$cancel_all(); pop_event_loop() }, add = TRUE)
+  on.exit(
+    {
+      new_el$cancel_all()
+      pop_event_loop()
+    },
+    add = TRUE
+  )
   `__async_synchronise_frame__` <- TRUE
 
-  eps <- 1/100000
+  eps <- 1 / 100000
   p1 <- delay(eps)
   p2 <- p1$then(function() "foo")
   res <- p2$then(function() "bar")
@@ -51,9 +59,11 @@ test_that("async_list", {
   expect_equal(vcapply(al$call, typeof), rep("language", 3))
   expect_equal(
     as.character(al$call),
-    c("p2$then(function() \"bar\")",
+    c(
+      "p2$then(function() \"bar\")",
       "p1$then(function() \"foo\")",
-      "delay(eps)")
+      "delay(eps)"
+    )
   )
   expect_equal(unclass(al$children), list(integer(), 3L + sh, 2L + sh))
   expect_match(al$type[1], "^then-")
@@ -67,10 +77,16 @@ test_that("async_list", {
 
 test_that("async_tree", {
   new_el <- push_event_loop()
-  on.exit({ new_el$cancel_all(); pop_event_loop() }, add = TRUE)
+  on.exit(
+    {
+      new_el$cancel_all()
+      pop_event_loop()
+    },
+    add = TRUE
+  )
   `__async_synchronise_frame__` <- TRUE
 
-  eps <- 1/100000
+  eps <- 1 / 100000
   p1 <- delay(eps)
   p2 <- p1$then(function() "foo")
   res <- p2$then(function() "bar")
@@ -94,12 +110,18 @@ test_that("async_tree", {
 
 test_that("async_debug", {
   new_el <- push_event_loop()
-  on.exit({ new_el$cancel_all(); pop_event_loop() }, add = TRUE)
+  on.exit(
+    {
+      new_el$cancel_all()
+      pop_event_loop()
+    },
+    add = TRUE
+  )
   `__async_synchronise_frame__` <- TRUE
 
   eps <- 0
   p1 <- delay(eps)
-  tf  <- function() "foo"
+  tf <- function() "foo"
   p2 <- p1$then(tf)
   res <- p2$then(function() "bar")
 
@@ -119,18 +141,24 @@ test_that("async_debug", {
   priv$null()
   expect_message(async_debug(get_private(res)$id), "has no action")
 
-  res <- deferred$new(action = function() { })
-  priv <-  get_private(res)
+  res <- deferred$new(action = function() {})
+  priv <- get_private(res)
   priv$null()
   expect_message(async_debug(get_private(res)$id), "debugging action")
 })
 
 test_that("async_wait_for", {
   new_el <- push_event_loop()
-  on.exit({ new_el$cancel_all(); pop_event_loop() }, add = TRUE)
+  on.exit(
+    {
+      new_el$cancel_all()
+      pop_event_loop()
+    },
+    add = TRUE
+  )
   `__async_synchronise_frame__` <- TRUE
 
-  eps <- 1/100000
+  eps <- 1 / 100000
   p1 <- delay(eps)
   p2 <- p1$then(function() "foo")
   res <- p2$then(function() "bar")
@@ -146,12 +174,9 @@ test_that("async_wait_for", {
 })
 
 test_that("async_where", {
-
   id <- NULL
   do <- function() {
-    p <- delay(1/10000)$
-      then(function() "foo")$
-      then(function() async_where())
+    p <- delay(1 / 10000)$then(function() "foo")$then(function() async_where())
     id <<- get_private(p)$id
     p
   }
@@ -159,7 +184,7 @@ test_that("async_where", {
   res <- synchronise(do())
   expect_true(any(res$async))
   aframe <- utils::tail(which(res$async), 1)
-  expect_equal(res$def_id[aframe],  id)
+  expect_equal(res$def_id[aframe], id)
   expect_equal(res$def_cb_type[aframe], "parent")
   expect_equal(typeof(res$def_call[[aframe]]), "language")
 })
@@ -167,9 +192,7 @@ test_that("async_where", {
 test_that("format.async_where", {
   id <- NULL
   do <- function() {
-    p <- delay(1/10000)$
-      then(function() "foo")$
-      then(function() async_where())
+    p <- delay(1 / 10000)$then(function() "foo")$then(function() async_where())
     id <<- get_private(p)$id
     p
   }

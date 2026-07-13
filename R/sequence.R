@@ -1,4 +1,3 @@
-
 #' Compose asynchronous functions
 #'
 #' This is equivalent to using the `$then()` method of a deferred, but
@@ -22,11 +21,15 @@
 
 async_sequence <- function(..., .list = NULL) {
   funcs <- c(list(...), .list)
-  if (length(funcs) == 0) stop("Function list empty in `async_sequence`")
+  if (length(funcs) == 0) {
+    stop("Function list empty in `async_sequence`")
+  }
 
   function(...) {
     dx <- async(funcs[[1]])(...)
-    for (i in seq_along(funcs)[-1]) dx <- dx$then(funcs[[i]])
+    for (i in seq_along(funcs)[-1]) {
+      dx <- dx$then(funcs[[i]])
+    }
     dx
   }
 }

@@ -1,4 +1,3 @@
-
 test_that("GET file://", {
   tmp <- tempfile()
   on.exit(unlink(tmp), add = TRUE)

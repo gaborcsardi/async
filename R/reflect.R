@@ -1,4 +1,3 @@
-
 #' Make an asynchronous function that always succeeds
 #'
 #' This is sometimes useful, if the function is applied to entries in
@@ -21,9 +20,9 @@
 async_reflect <- function(task) {
   task <- async(task)
   function(...) {
-    task(...)$
-      then(function(value)  list(error = NULL, result = value))$
-      catch(error = function(reason) list(error = reason, result = NULL))
+    task(...)$then(function(value) list(error = NULL, result = value))$catch(
+      error = function(reason) list(error = reason, result = NULL)
+    )
   }
 }
 
