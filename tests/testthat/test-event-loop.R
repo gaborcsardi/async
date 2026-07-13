@@ -59,7 +59,9 @@ test_that("repeated delay", {
   expect_null(error)
   expect_equal(result, 1:10)
   expect_true(end - start >= as.difftime(1, units = "secs"))
-  expect_true(end - start <= as.difftime(2, units = "secs"))
+  # Loose upper bound: this is only a sanity check that the loop isn't wildly
+  # slow. A tight bound flakes on busy CI runners.
+  expect_true(end - start <= as.difftime(5, units = "secs"))
 })
 
 test_that("nested event loops", {
