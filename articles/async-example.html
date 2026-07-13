@@ -131,10 +131,10 @@ HTTP 404 status code.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">response_time</span><span class="op">(</span><span class="va">mirror_urls</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## https://cloud.r-project.org/ </span></span>
-<span><span class="co">##                     0.178282</span></span></code></pre>
+<span><span class="co">##                     0.052223</span></span></code></pre>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">response_time</span><span class="op">(</span><span class="va">httpbin</span><span class="op">$</span><span class="fu">url</span><span class="op">(</span><span class="st">"/status/404"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## http://127.0.0.1:39741/status/404 </span></span>
+<pre><code><span><span class="co">## http://127.0.0.1:38237/status/404 </span></span>
 <span><span class="co">##                               Inf</span></span></code></pre>
 <p><code>fastest_urls()</code> will run <code>response_time()</code> on
 all supplied URLs, and stop as soon as 10 of them respond. Then we sort
@@ -148,16 +148,16 @@ the results, so the fastest response is first.</p>
 <p>Let’s run it on the real data.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">fastest_urls</span><span class="op">(</span><span class="va">mirror_urls</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##           https://cloud.r-project.org/ https://mirror.chpc.utah.edu/pub/cran/ </span></span>
-<span><span class="co">##                               0.029449                               0.210315 </span></span>
-<span><span class="co">##       https://cran.mirrors.hoobly.com/         https://mirrors.cicku.me/cran/ </span></span>
-<span><span class="co">##                               0.220585                               0.240395 </span></span>
-<span><span class="co">##   https://mirror.las.iastate.edu/CRAN/       https://lib.stat.cmu.edu/R/CRAN/ </span></span>
-<span><span class="co">##                               0.273136                               0.288423 </span></span>
-<span><span class="co">##           http://ftp.ussg.iu.edu/CRAN/   https://archive.linux.duke.edu/cran/ </span></span>
-<span><span class="co">##                               0.335086                               0.368143 </span></span>
-<span><span class="co">##                 https://cran.case.edu/     https://mirrors.nics.utk.edu/cran/ </span></span>
-<span><span class="co">##                               0.428363                               0.437964</span></span></code></pre>
+<pre><code><span><span class="co">##           https://cloud.r-project.org/       https://lib.stat.cmu.edu/R/CRAN/ </span></span>
+<span><span class="co">##                               0.040515                               0.150367 </span></span>
+<span><span class="co">##         https://mirrors.cicku.me/cran/           http://ftp.ussg.iu.edu/CRAN/ </span></span>
+<span><span class="co">##                               0.183116                               0.187885 </span></span>
+<span><span class="co">##     https://mirror.its.umich.edu/cran/       https://cran.mirrors.hoobly.com/ </span></span>
+<span><span class="co">##                               0.232859                               0.250699 </span></span>
+<span><span class="co">##                https://cran.wustl.edu/   https://mirror.las.iastate.edu/CRAN/ </span></span>
+<span><span class="co">##                               0.272045                               0.274210 </span></span>
+<span><span class="co">##   https://archive.linux.duke.edu/cran/ https://mirror.chpc.utah.edu/pub/cran/ </span></span>
+<span><span class="co">##                               0.287580                               0.288580</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="resolve-packages-from-github-and-urls">Resolve packages from GitHub and URLs<a class="anchor" aria-label="anchor" href="#resolve-packages-from-github-and-urls"></a>
@@ -362,7 +362,7 @@ file.</p>
 <code class="sourceCode R"><span><span class="va">curl20_url</span> <span class="op">&lt;-</span> <span class="st">"https://cloud.r-project.org/src/contrib/Archive/curl/curl_2.0.tar.gz"</span></span>
 <span><span class="fu"><a href="../reference/synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">resolve_url</span><span class="op">(</span><span class="va">curl20_url</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $url</span></span>
-<span><span class="co">## [1] "file:// /tmp/RtmpLy140q/file1d362e020c10/curl_2.0.tar.gz"</span></span>
+<span><span class="co">## [1] "file:// /tmp/RtmpRlOWwn/file1d687e731071/curl_2.0.tar.gz"</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $description</span></span>
 <span><span class="co">## <span style="color: #0000BB;">Type</span>: Package</span></span>
@@ -430,7 +430,7 @@ error is thrown from <code><a href="../reference/synchronise.html">synchronise()
 <span>  error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="va">e</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning in readLines(file): incomplete final line found on</span></span>
-<span><span class="co">## '/tmp/RtmpLy140q/file1d36a98b2f5/2'</span></span></code></pre>
+<span><span class="co">## '/tmp/RtmpRlOWwn/file1d683e79b05b/2'</span></span></code></pre>
 <pre><code><span><span class="co">## &lt;async error: Line starting '{ ...' is malformed!</span></span>
 <span><span class="co">##  in *parent* callback of `http_get(url, file = dest)$then(http_stop_for_status)$then` at ?/?:?:?&gt;</span></span></code></pre>
 <p>But we can also handle errors locally, at any point we wish. E.g. we
