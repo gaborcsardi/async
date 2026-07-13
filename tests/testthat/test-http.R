@@ -395,7 +395,6 @@ test_that("http_retry_after parses the header", {
 })
 
 test_that("retryable status codes are retried", {
-  local_mocked_bindings(default_backoff = function(i) 0)
   app <- webfakes::new_app()
   app$locals$n <- 0L
   app$get("/flaky", function(req, res) {
@@ -410,23 +409,26 @@ test_that("retryable status codes are retried", {
   proc <- webfakes::new_app_process(app)
   on.exit(proc$stop(), add = TRUE)
 
-  # default limit is 2, so the third attempt (a 200) succeeds
-  resp <- synchronise(http_get(proc$url("/flaky")))
+  # default limit is 2, so the third attempt (a 200) succeeds.
+  # `backoff` is set to zero so the test does not sleep between retries.
+  resp <- synchronise(http_get(
+    proc$url("/flaky"),
+    retry = list(backoff = function(i) 0)
+  ))
   expect_equal(resp$status_code, 200L)
   expect_equal(rawToChar(resp$content), "3")
 })
 
 test_that("retries are exhausted and the last response is returned", {
-  local_mocked_bindings(default_backoff = function(i) 0)
   resp <- synchronise(http_get(
     http$url("/status/503"),
-    retry = list(limit = 1)
+    retry = list(limit = 1, backoff = function(i) 0)
   ))
   expect_equal(resp$status_code, 503L)
 })
 
 test_that("retry = FALSE and non-retryable codes do not retry", {
-  local_mocked_bindings(default_backoff = function(i) 0)
+  # neither request retries, so no backoff happens
   # 404 is not in the default status_codes
   resp <- synchronise(http_get(http$url("/status/404")))
   expect_equal(resp$status_code, 404L)
@@ -436,9 +438,11 @@ test_that("retry = FALSE and non-retryable codes do not retry", {
 })
 
 test_that("connection errors are retried unless disabled", {
-  local_mocked_bindings(default_backoff = function(i) 0)
   err <- tryCatch(
-    synchronise(http_get("http://127.0.0.1:1/nope", retry = list(limit = 1))),
+    synchronise(http_get(
+      "http://127.0.0.1:1/nope",
+      retry = list(limit = 1, backoff = function(i) 0)
+    )),
     error = identity
   )
   expect_s3_class(err, "async_rejected")

@@ -56,9 +56,13 @@
 #'     - `status_codes`: integer vector of HTTP status codes to retry on.
 #'       Defaults to 408, 413, 429, 500, 502, 503, 504, 521, 522 and 524.
 #'     - `errors`: whether to retry on connection errors, defaults to `TRUE`.
+#'     - `backoff`: a function that takes the (integer) retry attempt number
+#'       and returns the number of seconds to wait before the next attempt.
+#'       Defaults to an exponential backoff.
 #'
 #'   Between retries `async` waits with an exponential backoff, unless the
-#'   response has a `Retry-After` header, which is then honored.
+#'   response has a `Retry-After` header, which is then honored. Use the
+#'   `backoff` entry to customize the wait.
 #' @return Deferred object.
 #'
 #' @section Progress bars:
@@ -411,7 +415,7 @@ make_deferred_http <- function(cb, file, method = "GET", retry = TRUE) {
           value$status_code %in% retry$status_codes
       ) {
         did <<- did + 1L
-        wait <- http_retry_after(value) %||% default_backoff(did)
+        wait <- http_retry_after(value) %||% retry$backoff(did)
         delay(wait)$then(function() once())$then(self)
       } else {
         resolve(value)
@@ -420,7 +424,7 @@ make_deferred_http <- function(cb, file, method = "GET", retry = TRUE) {
     parent_reject = function(value, resolve) {
       if (retry$errors && did < retry$limit) {
         did <<- did + 1L
-        delay(default_backoff(did))$then(function() once())$then(self)
+        delay(retry$backoff(did))$then(function() once())$then(self)
       } else {
         stop(value)
       }
@@ -466,7 +470,8 @@ http_retry_defaults <- list(
   limit = 2L,
   methods = c("GET", "PUT", "HEAD", "DELETE", "OPTIONS", "TRACE", "QUERY"),
   status_codes = c(408L, 413L, 429L, 500L, 502L, 503L, 504L, 521L, 522L, 524L),
-  errors = TRUE
+  errors = TRUE,
+  backoff = default_backoff
 )
 
 get_default_http_retry <- function(retry, method) {

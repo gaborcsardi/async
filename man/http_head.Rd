@@ -42,11 +42,15 @@ default.
 \item \code{status_codes}: integer vector of HTTP status codes to retry on.
 Defaults to 408, 413, 429, 500, 502, 503, 504, 521, 522 and 524.
 \item \code{errors}: whether to retry on connection errors, defaults to \code{TRUE}.
+\item \code{backoff}: a function that takes the (integer) retry attempt number
+and returns the number of seconds to wait before the next attempt.
+Defaults to an exponential backoff.
 }
 }
 
 Between retries \code{async} waits with an exponential backoff, unless the
-response has a \code{Retry-After} header, which is then honored.}
+response has a \code{Retry-After} header, which is then honored. Use the
+\code{backoff} entry to customize the wait.}
 }
 \value{
 Deferred object.
