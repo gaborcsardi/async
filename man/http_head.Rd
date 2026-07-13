@@ -22,7 +22,7 @@ http_head(
 The body of the response is written to this file.}
 
 \item{options}{Options to set on the handle. Passed to
-\code{\link[curl:handle]{curl::handle_setopt()}}.}
+\code{\link[curl:handle_setopt]{curl::handle_setopt()}}.}
 
 \item{on_progress}{Progress handler function. It is only used if the
 response body is written to a file. See details below.}
@@ -73,8 +73,8 @@ synchronise(afun(urls))
 }
 }
 \seealso{
-Other asyncronous HTTP calls: 
-\code{\link{http_get}()},
-\code{\link{http_setopt}()}
+Other asyncronous HTTP calls:
+\code{\link[=http_get]{http_get()}},
+\code{\link[=http_setopt]{http_setopt()}}
 }
 \concept{asyncronous HTTP calls}

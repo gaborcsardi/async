@@ -48,7 +48,10 @@ application on windows. Ignored on other platforms.}
 \item{encoding}{The encoding to assume for \code{stdout} and
 \code{stderr}. By default the encoding of the current locale is
 used. Note that \code{processx} always reencodes the output of
-both streams in UTF-8 currently.}
+both streams in UTF-8 currently. Use \code{"binary"} to collect
+the raw bytes without any conversion: \code{stdout} and \code{stderr}
+in the return value will be raw vectors instead of character
+strings. Line callbacks are not supported in binary mode.}
 
 \item{...}{Extra arguments are passed to \code{process$new()}, see
 \link[processx]{process}. Note that you cannot pass \code{stout} or \code{stderr} here,

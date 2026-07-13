@@ -20,14 +20,14 @@ http_post(
 \item{url}{URL to connect to.}
 
 \item{data}{Data to send. Either a raw vector, or a character string
-that will be converted to raw with \link[base:rawConversion]{base::charToRaw}. At most one of
+that will be converted to raw with \link[base:charToRaw]{base::charToRaw}. At most one of
 \code{data}, \code{data_file} and \code{data_form} can be non \code{NULL}.}
 
 \item{data_file}{Data file to send. At most one of \code{data}, \code{data_file}
 and \code{data_form} can be non \code{NULL}.}
 
 \item{data_form}{Form data to send. A name list, where each element
-is created with either \code{\link[curl:multipart]{curl::form_data()}} or \code{\link[curl:multipart]{curl::form_file()}}.
+is created with either \code{\link[curl:form_data]{curl::form_data()}} or \code{\link[curl:form_file]{curl::form_file()}}.
 At most one of \code{data}, \code{data_file} and \code{data_form} can be non \code{NULL}.}
 
 \item{headers}{HTTP headers to send.}
@@ -36,7 +36,7 @@ At most one of \code{data}, \code{data_file} and \code{data_form} can be non \co
 The body of the response is written to this file.}
 
 \item{options}{Options to set on the handle. Passed to
-\code{\link[curl:handle]{curl::handle_setopt()}}.}
+\code{\link[curl:handle_setopt]{curl::handle_setopt()}}.}
 
 \item{on_progress}{Progress handler function. It is only used if the
 response body is written to a file. See details at \code{\link[=http_get]{http_get()}}.}

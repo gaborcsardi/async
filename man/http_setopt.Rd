@@ -8,7 +8,7 @@ http_setopt(total_con = NULL, host_con = NULL, multiplex = NULL)
 }
 \arguments{
 \item{total_con, host_con, multiplex}{They are passed to
-\code{\link[curl:multi]{curl::multi_set()}}. If an argument is \code{NULL} (the default) then it is
+\code{\link[curl:multi_set]{curl::multi_set()}}. If an argument is \code{NULL} (the default) then it is
 ignored.}
 }
 \description{
@@ -21,8 +21,8 @@ event loop is created, and they are taken from the \code{async_http_total_con},
 \code{async_http_host_con} and \code{async_http_multiplex} options.
 }
 \seealso{
-Other asyncronous HTTP calls: 
-\code{\link{http_get}()},
-\code{\link{http_head}()}
+Other asyncronous HTTP calls:
+\code{\link[=http_get]{http_get()}},
+\code{\link[=http_head]{http_head()}}
 }
 \concept{asyncronous HTTP calls}

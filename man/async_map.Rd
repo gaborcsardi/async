@@ -31,9 +31,9 @@ synchronise(async_map(
 ))
 }
 \seealso{
-Other async iterators: 
-\code{\link{async_detect}()},
-\code{\link{async_every}()},
-\code{\link{async_filter}()}
+Other async iterators:
+\code{\link[=async_detect]{async_detect()}},
+\code{\link[=async_every]{async_every()}},
+\code{\link[=async_filter]{async_filter()}}
 }
 \concept{async iterators}

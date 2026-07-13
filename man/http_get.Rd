@@ -22,7 +22,7 @@ http_get(
 The body of the response is written to this file.}
 
 \item{options}{Options to set on the handle. Passed to
-\code{\link[curl:handle]{curl::handle_setopt()}}.}
+\code{\link[curl:handle_setopt]{curl::handle_setopt()}}.}
 
 \item{on_progress}{Progress handler function. It is only used if the
 response body is written to a file. See details below.}
@@ -98,7 +98,7 @@ response <- synchronise(stream_http())
 \itemize{
 \item \code{url}: the specified url to download
 \item \code{handle}: the curl handle of the request. This can be queried using
-\code{\link[curl:handle]{curl::handle_data()}} to get the response status_code, the final
+\code{\link[curl:handle_data]{curl::handle_data()}} to get the response status_code, the final
 URL (after redirections), timings, etc.
 \item \code{file}: the \code{file} argument.
 \item \code{total}: total bytes of the response. If this is unknown, it is set
@@ -117,8 +117,8 @@ synchronise(afun())
 }
 }
 \seealso{
-Other asyncronous HTTP calls: 
-\code{\link{http_head}()},
-\code{\link{http_setopt}()}
+Other asyncronous HTTP calls:
+\code{\link[=http_head]{http_head()}},
+\code{\link[=http_setopt]{http_setopt()}}
 }
 \concept{asyncronous HTTP calls}

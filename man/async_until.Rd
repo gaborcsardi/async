@@ -33,13 +33,13 @@ synchronise(async_until(
 calls
 }
 \seealso{
-Other async control flow: 
-\code{\link{async_backoff}()},
-\code{\link{async_reflect}()},
-\code{\link{async_retry}()},
-\code{\link{async_retryable}()},
-\code{\link{async_sequence}()},
-\code{\link{async_try_each}()},
-\code{\link{async_whilst}()}
+Other async control flow:
+\code{\link[=async_backoff]{async_backoff()}},
+\code{\link[=async_reflect]{async_reflect()}},
+\code{\link[=async_retry]{async_retry()}},
+\code{\link[=async_retryable]{async_retryable()}},
+\code{\link[=async_sequence]{async_sequence()}},
+\code{\link[=async_try_each]{async_try_each()}},
+\code{\link[=async_whilst]{async_whilst()}}
 }
 \concept{async control flow}
