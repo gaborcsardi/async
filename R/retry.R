@@ -10,18 +10,17 @@
 #'
 #' @family async control flow
 #' @export
-#' @examples
-#' \donttest{
+#' @examplesIf async:::run_examples()
+#' httpbin <- webfakes::new_app_process(webfakes::httpbin_app())
 #' ## Try a download at most 5 times
 #' afun <- async(function() {
 #'   async_retry(
-#'     function() http_get("https://eu.httpbin.org"),
+#'     function() http_get(httpbin$url("/get")),
 #'     times = 5
 #'   )$then(function(x) x$status_code)
 #' })
 #'
 #' synchronise(afun())
-#' }
 
 async_retry <- function(task, times, ...) {
   task <- async(task)
@@ -53,16 +52,15 @@ async_retry <- mark_as_async(async_retry)
 #'
 #' @family async control flow
 #' @export
-#' @examples
-#' \donttest{
+#' @examplesIf async:::run_examples()
+#' httpbin <- webfakes::new_app_process(webfakes::httpbin_app())
 #' ## Create a downloader that retries five times
 #' http_get_5 <- async_retryable(http_get, times = 5)
 #' ret <- synchronise(
-#'   http_get_5("https://eu.httpbin.org/get?q=1")$
+#'   http_get_5(httpbin$url("/get?q=1"))$
 #'     then(function(x) rawToChar(x$content))
 #' )
 #' cat(ret)
-#' }
 
 async_retryable <- function(task, times) {
   task <- async(task)

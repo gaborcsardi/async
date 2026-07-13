@@ -19,12 +19,13 @@ errors. Note that this is different from the \code{httr} package, which
 considers the 3xx status code errors as well.
 }
 \examples{
-\donttest{
+\dontshow{if (async:::run_examples()) withAutoprint(\{ # examplesIf}
+httpbin <- webfakes::new_app_process(webfakes::httpbin_app())
 afun <- async(function() {
-  http_get("https://eu.httpbin.org/status/404")$
+  http_get(httpbin$url("/status/404"))$
     then(http_stop_for_status)
 })
 
 tryCatch(synchronise(afun()), error = function(e) e)
-}
+\dontshow{\}) # examplesIf}
 }

@@ -71,11 +71,13 @@ An async HTTP deferred object is also an event emitter, see
 \code{\link[=http_get]{http_get()}} for details, and also \link{event_emitter}.
 }
 \examples{
+\dontshow{if (async:::run_examples()) withAutoprint(\{ # examplesIf}
+httpbin <- webfakes::new_app_process(webfakes::httpbin_app())
 json <- jsonlite::toJSON(list(baz = 100, foo = "bar"))
 
 do <- function() {
   headers <- c("content-type" = "application/json")
-  http_post("https://eu.httpbin.org/post", data = json, headers = headers)$
+  http_post(httpbin$url("/post"), data = json, headers = headers)$
     then(http_stop_for_status)$
     then(function(x) {
       jsonlite::fromJSON(rawToChar(x$content))$json
@@ -83,4 +85,5 @@ do <- function() {
 }
 
 synchronise(do())
+\dontshow{\}) # examplesIf}
 }

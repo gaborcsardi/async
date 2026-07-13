@@ -18,15 +18,16 @@ Asynchronous retryable function.
 Make an asynchronous funcion retryable
 }
 \examples{
-\donttest{
+\dontshow{if (async:::run_examples()) withAutoprint(\{ # examplesIf}
+httpbin <- webfakes::new_app_process(webfakes::httpbin_app())
 ## Create a downloader that retries five times
 http_get_5 <- async_retryable(http_get, times = 5)
 ret <- synchronise(
-  http_get_5("https://eu.httpbin.org/get?q=1")$
+  http_get_5(httpbin$url("/get?q=1"))$
     then(function(x) rawToChar(x$content))
 )
 cat(ret)
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other async control flow:

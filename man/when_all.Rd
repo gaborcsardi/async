@@ -25,16 +25,20 @@ async has auto-cancellation, so if one deferred value errors, the rest
 of them will be automatically cancelled.
 }
 \examples{
-\donttest{
+\dontshow{if (async:::run_examples()) withAutoprint(\{ # examplesIf}
+httpbin <- webfakes::new_app_process(
+  webfakes::httpbin_app(),
+  opts = webfakes::server_opts(num_threads = 3)
+)
 ## Check that the contents of two URLs are the same
 afun <- async(function() {
-  u1 <- http_get("https://eu.httpbin.org")
-  u2 <- http_get("https://eu.httpbin.org/get")
+  u1 <- http_get(httpbin$url("/get"))
+  u2 <- http_get(httpbin$url("/get"))
   when_all(u1, u2)$
     then(function(x) identical(x[[1]]$content, x[[2]]$content))
 })
 synchronise(afun())
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=when_any]{when_any()}}, \code{\link[=when_some]{when_some()}}

@@ -56,9 +56,13 @@ An async HTTP deferred object is also an event emitter, see
 \code{\link[=http_get]{http_get()}} for details, and also \link{event_emitter}.
 }
 \examples{
-\donttest{
+\dontshow{if (async:::run_examples()) withAutoprint(\{ # examplesIf}
+httpbin <- webfakes::new_app_process(
+  webfakes::httpbin_app(),
+  opts = webfakes::server_opts(num_threads = 3)
+)
 afun <- async(function() {
-  dx <- http_head("https://eu.httpbin.org/status/200")$
+  dx <- http_head(httpbin$url("/status/200"))$
     then(function(x) x$status_code)
 })
 synchronise(afun())
@@ -68,9 +72,9 @@ afun <- function(urls) {
   when_all(.list = lapply(urls, http_head))$
     then(function(x) lapply(x, "[[", "status_code"))
 }
-urls <- c("https://google.com", "https://eu.httpbin.org")
+urls <- c(httpbin$url("/get"), httpbin$url("/status/200"))
 synchronise(afun(urls))
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other asyncronous HTTP calls:

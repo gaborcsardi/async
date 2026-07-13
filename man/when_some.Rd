@@ -39,15 +39,19 @@ are returned in the \code{errors} member of the error object thrown by
 \code{when_any}.
 }
 \examples{
-\donttest{
+\dontshow{if (async:::run_examples()) withAutoprint(\{ # examplesIf}
+httpbin <- webfakes::new_app_process(
+  webfakes::httpbin_app(),
+  opts = webfakes::server_opts(num_threads = 3)
+)
 ## Use the URL that returns first
 afun <- function() {
-  u1 <- http_get("https://eu.httpbin.org")
-  u2 <- http_get("https://eu.httpbin.org/get")
+  u1 <- http_get(httpbin$url("/get"))
+  u2 <- http_get(httpbin$url("/get"))
   when_any(u1, u2)$then(function(x) x$url)
 }
 synchronise(afun())
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=when_all]{when_all()}}

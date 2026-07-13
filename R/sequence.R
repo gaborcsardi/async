@@ -11,13 +11,12 @@
 #'
 #' @family async control flow
 #' @export
-#' @examples
-#' \donttest{
+#' @examplesIf async:::run_examples()
+#' httpbin <- webfakes::new_app_process(webfakes::httpbin_app())
 #' check_url <- async_sequence(
 #'   http_head, function(x) identical(x$status_code, 200L))
-#' synchronise(check_url("https://eu.httpbin.org/status/404"))
-#' synchronise(check_url("https://eu.httpbin.org/status/200"))
-#' }
+#' synchronise(check_url(httpbin$url("/status/404")))
+#' synchronise(check_url(httpbin$url("/status/200")))
 
 async_sequence <- function(..., .list = NULL) {
   funcs <- c(list(...), .list)

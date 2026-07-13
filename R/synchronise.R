@@ -15,15 +15,14 @@
 #' to a deferred value, then it is just returned.
 #'
 #' @export
-#' @examples
-#' \donttest{
+#' @examplesIf async:::run_examples()
+#' httpbin <- webfakes::new_app_process(webfakes::httpbin_app())
 #' http_status <- function(url, ...) {
 #'   http_get(url, ...)$
 #'     then(function(x) x$status_code)
 #' }
 #'
-#' synchronise(http_status("https://eu.httpbin.org/status/418"))
-#' }
+#' synchronise(http_status(httpbin$url("/status/418")))
 
 synchronise <- function(expr) {
   new_el <- push_event_loop()

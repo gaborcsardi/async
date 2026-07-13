@@ -12,14 +12,16 @@
 #'
 #' @family async iterators
 #' @export
-#' @examples
-#' \donttest{
+#' @examplesIf async:::run_examples()
+#' httpbin <- webfakes::new_app_process(
+#'   webfakes::httpbin_app(),
+#'   opts = webfakes::server_opts(num_threads = 3)
+#' )
 #' synchronise(async_detect(
-#'   c("https://eu.httpbin.org/status/404", "https://eu.httpbin.org",
-#'     "https://eu.httpbin.org/status/403"),
+#'   c(httpbin$url("/status/404"), httpbin$url("/get"),
+#'     httpbin$url("/status/403")),
 #'   async_sequence(http_head, function(x) x$status_code == 200)
 #' ))
-#' }
 
 async_detect <- function(.x, .p, ..., .limit = Inf) {
   if (.limit < length(.x)) {

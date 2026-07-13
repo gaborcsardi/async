@@ -14,17 +14,19 @@
 #'
 #' @seealso [when_any()], [when_some()]
 #' @export
-#' @examples
-#' \donttest{
+#' @examplesIf async:::run_examples()
+#' httpbin <- webfakes::new_app_process(
+#'   webfakes::httpbin_app(),
+#'   opts = webfakes::server_opts(num_threads = 3)
+#' )
 #' ## Check that the contents of two URLs are the same
 #' afun <- async(function() {
-#'   u1 <- http_get("https://eu.httpbin.org")
-#'   u2 <- http_get("https://eu.httpbin.org/get")
+#'   u1 <- http_get(httpbin$url("/get"))
+#'   u2 <- http_get(httpbin$url("/get"))
 #'   when_all(u1, u2)$
 #'     then(function(x) identical(x[[1]]$content, x[[2]]$content))
 #' })
 #' synchronise(afun())
-#' }
 
 when_all <- function(..., .list = list()) {
   defs <- c(list(...), .list)

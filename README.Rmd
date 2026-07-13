@@ -11,6 +11,12 @@ knitr::opts_chunk$set(
   error = FALSE,
   fig.width = 8,
   fig.height = 8)
+
+# A local webfakes httpbin server, so the examples are fast and reliable.
+httpbin <- webfakes::new_app_process(
+  webfakes::httpbin_app(),
+  opts = webfakes::server_opts(num_threads = 3)
+)
 ```
 
 # async
@@ -111,7 +117,7 @@ http_status <- function(url) {
   def <- http_get(url)$
 	then(function(response) response$status_code)
 }
-synchronise(http_status("https://httpbin.org"))
+synchronise(http_status(httpbin$url("/get")))
 ```
 
 `http_status()` is an async function that returns the status code of a GET
@@ -165,9 +171,9 @@ http_status3 <- function() {
   http_status <- function(url) {
     http_get(url)$then(function(response) response$status_code)
   }
-  r1 <- http_status("https://httpbin.org/status/403")
-  r2 <- http_status("https://httpbin.org/status/404")
-  r3 <- http_status("https://httpbin.org/status/200")
+  r1 <- http_status(httpbin$url("/status/403"))
+  r2 <- http_status(httpbin$url("/status/404"))
+  r3 <- http_status(httpbin$url("/status/200"))
   when_all(r1, r2, r3)
 }
 synchronise(http_status3())
@@ -189,7 +195,7 @@ response_time <- async(function(url) {
     catch(error = function(...) setNames(Inf, url))
 })
 synchronise(response_time("https://google.com"))
-synchronise(response_time("https://httpbin.org/status/401"))
+synchronise(response_time(httpbin$url("/status/401")))
 ```
 
 Errors can also be handled synchronously. If an error is not handled

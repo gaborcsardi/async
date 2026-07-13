@@ -24,12 +24,13 @@ re-throw that error.
 error.
 }
 \examples{
-\donttest{
+\dontshow{if (async:::run_examples()) withAutoprint(\{ # examplesIf}
+httpbin <- webfakes::new_app_process(webfakes::httpbin_app())
 http_status <- function(url, ...) {
   http_get(url, ...)$
     then(function(x) x$status_code)
 }
 
-synchronise(http_status("https://eu.httpbin.org/status/418"))
-}
+synchronise(http_status(httpbin$url("/status/418")))
+\dontshow{\}) # examplesIf}
 }

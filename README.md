@@ -99,7 +99,7 @@ http_status <- function(url) {
   def <- http_get(url)$
     then(function(response) response$status_code)
 }
-synchronise(http_status("https://httpbin.org"))
+synchronise(http_status(httpbin$url("/get")))
 ```
 
     #> [1] 200
@@ -155,9 +155,9 @@ http_status3 <- function() {
   http_status <- function(url) {
     http_get(url)$then(function(response) response$status_code)
   }
-  r1 <- http_status("https://httpbin.org/status/403")
-  r2 <- http_status("https://httpbin.org/status/404")
-  r3 <- http_status("https://httpbin.org/status/200")
+  r1 <- http_status(httpbin$url("/status/403"))
+  r2 <- http_status(httpbin$url("/status/404"))
+  r3 <- http_status(httpbin$url("/status/200"))
   when_all(r1, r2, r3)
 }
 synchronise(http_status3())
@@ -194,11 +194,11 @@ synchronise(response_time("https://google.com"))
     #>           0.213394
 
 ``` r
-synchronise(response_time("https://httpbin.org/status/401"))
+synchronise(response_time(httpbin$url("/status/401")))
 ```
 
-    #> https://httpbin.org/status/401 
-    #>                            Inf
+    #> http://127.0.0.1:3000/status/401 
+    #>                              Inf
 
 Errors can also be handled synchronously. If an error is not handled
 asynchronously, then the deferred value will throw an error when itself

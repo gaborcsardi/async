@@ -76,14 +76,13 @@
 #'
 #' @family asyncronous HTTP calls
 #' @export
-#' @examples
-#' \donttest{
+#' @examplesIf async:::run_examples()
+#' httpbin <- webfakes::new_app_process(webfakes::httpbin_app())
 #' afun <- async(function() {
-#'   http_get("https://eu.httpbin.org/status/200")$
+#'   http_get(httpbin$url("/status/200"))$
 #'     then(function(x) x$status_code)
 #' })
 #' synchronise(afun())
-#' }
 
 http_get <- function(
   url,
@@ -145,10 +144,13 @@ http_get <- mark_as_async(http_get)
 #'
 #' @family asyncronous HTTP calls
 #' @export
-#' @examples
-#' \donttest{
+#' @examplesIf async:::run_examples()
+#' httpbin <- webfakes::new_app_process(
+#'   webfakes::httpbin_app(),
+#'   opts = webfakes::server_opts(num_threads = 3)
+#' )
 #' afun <- async(function() {
-#'   dx <- http_head("https://eu.httpbin.org/status/200")$
+#'   dx <- http_head(httpbin$url("/status/200"))$
 #'     then(function(x) x$status_code)
 #' })
 #' synchronise(afun())
@@ -158,9 +160,8 @@ http_get <- mark_as_async(http_get)
 #'   when_all(.list = lapply(urls, http_head))$
 #'     then(function(x) lapply(x, "[[", "status_code"))
 #' }
-#' urls <- c("https://google.com", "https://eu.httpbin.org")
+#' urls <- c(httpbin$url("/get"), httpbin$url("/status/200"))
 #' synchronise(afun(urls))
-#' }
 
 http_head <- function(
   url,
@@ -220,12 +221,13 @@ http_head <- mark_as_async(http_head)
 #'   response body is written to a file. See details at [http_get()].
 #'
 #' @export
-#' @examples
+#' @examplesIf async:::run_examples()
+#' httpbin <- webfakes::new_app_process(webfakes::httpbin_app())
 #' json <- jsonlite::toJSON(list(baz = 100, foo = "bar"))
 #'
 #' do <- function() {
 #'   headers <- c("content-type" = "application/json")
-#'   http_post("https://eu.httpbin.org/post", data = json, headers = headers)$
+#'   http_post(httpbin$url("/post"), data = json, headers = headers)$
 #'     then(http_stop_for_status)$
 #'     then(function(x) {
 #'       jsonlite::fromJSON(rawToChar(x$content))$json
@@ -556,15 +558,14 @@ http_retry_after <- function(response) {
 #'   Otherwise an error is thrown.
 #'
 #' @export
-#' @examples
-#' \donttest{
+#' @examplesIf async:::run_examples()
+#' httpbin <- webfakes::new_app_process(webfakes::httpbin_app())
 #' afun <- async(function() {
-#'   http_get("https://eu.httpbin.org/status/404")$
+#'   http_get(httpbin$url("/status/404"))$
 #'     then(http_stop_for_status)
 #' })
 #'
 #' tryCatch(synchronise(afun()), error = function(e) e)
-#' }
 
 http_stop_for_status <- function(resp) {
   if (!is.integer(resp$status_code)) {

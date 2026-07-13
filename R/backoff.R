@@ -30,8 +30,7 @@
 #'
 #' @family async control flow
 #' @export
-#' @examples
-#' \donttest{
+#' @examplesIf async:::run_examples()
 #' afun <- function() {
 #'   wait_100_ms <- function(i) 0.1
 #'   async_backoff(
@@ -43,7 +42,6 @@
 #'
 #' # There is a slight chance that it fails
 #' tryCatch(synchronise(afun()), error = function(e) e)
-#' }
 
 async_backoff <- function(
   task,

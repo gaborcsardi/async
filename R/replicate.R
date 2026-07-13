@@ -11,15 +11,17 @@
 #' @return Resolves to a list of the results of the `n` `task` calls.
 #'
 #' @export
-#' @examples
-#' \donttest{
+#' @examplesIf async:::run_examples()
+#' httpbin <- webfakes::new_app_process(
+#'   webfakes::httpbin_app(),
+#'   opts = webfakes::server_opts(num_threads = 3)
+#' )
 #' ## perform an HTTP request three times, and list the reponse times
 #' do <- function() {
 #'   async_replicate(3,
-#'     function() http_get("https://eu.httpbin.org")$then(function(x) x$times))
+#'     function() http_get(httpbin$url("/get"))$then(function(x) x$times))
 #' }
 #' synchronise(do())
-#' }
 
 async_replicate <- function(n, task, ..., .limit = Inf) {
   assert_that(

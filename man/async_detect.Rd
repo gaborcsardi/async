@@ -24,13 +24,17 @@ All predicates are running in parallel, and the returned match
 is not guaranteed to be the first one.
 }
 \examples{
-\donttest{
+\dontshow{if (async:::run_examples()) withAutoprint(\{ # examplesIf}
+httpbin <- webfakes::new_app_process(
+  webfakes::httpbin_app(),
+  opts = webfakes::server_opts(num_threads = 3)
+)
 synchronise(async_detect(
-  c("https://eu.httpbin.org/status/404", "https://eu.httpbin.org",
-    "https://eu.httpbin.org/status/403"),
+  c(httpbin$url("/status/404"), httpbin$url("/get"),
+    httpbin$url("/status/403")),
   async_sequence(http_head, function(x) x$status_code == 200)
 ))
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other async iterators:

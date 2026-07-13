@@ -26,12 +26,16 @@ Similar to \code{\link[base:replicate]{base::replicate()}}, with some difference
 }
 }
 \examples{
-\donttest{
+\dontshow{if (async:::run_examples()) withAutoprint(\{ # examplesIf}
+httpbin <- webfakes::new_app_process(
+  webfakes::httpbin_app(),
+  opts = webfakes::server_opts(num_threads = 3)
+)
 ## perform an HTTP request three times, and list the reponse times
 do <- function() {
   async_replicate(3,
-    function() http_get("https://eu.httpbin.org")$then(function(x) x$times))
+    function() http_get(httpbin$url("/get"))$then(function(x) x$times))
 }
 synchronise(do())
-}
+\dontshow{\}) # examplesIf}
 }

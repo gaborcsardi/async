@@ -24,16 +24,18 @@
 #'
 #' @seealso [when_all()]
 #' @export
-#' @examples
-#' \donttest{
+#' @examplesIf async:::run_examples()
+#' httpbin <- webfakes::new_app_process(
+#'   webfakes::httpbin_app(),
+#'   opts = webfakes::server_opts(num_threads = 3)
+#' )
 #' ## Use the URL that returns first
 #' afun <- function() {
-#'   u1 <- http_get("https://eu.httpbin.org")
-#'   u2 <- http_get("https://eu.httpbin.org/get")
+#'   u1 <- http_get(httpbin$url("/get"))
+#'   u2 <- http_get(httpbin$url("/get"))
 #'   when_any(u1, u2)$then(function(x) x$url)
 #' }
 #' synchronise(afun())
-#' }
 
 when_some <- function(count, ..., .list = list()) {
   when_some_internal(count, ..., .list = .list, .race = FALSE)

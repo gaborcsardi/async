@@ -58,7 +58,7 @@ have passed since the start of the first try.
 Note that all unnamed arguments are passed to \code{task}.
 }
 \examples{
-\donttest{
+\dontshow{if (async:::run_examples()) withAutoprint(\{ # examplesIf}
 afun <- function() {
   wait_100_ms <- function(i) 0.1
   async_backoff(
@@ -70,7 +70,7 @@ afun <- function() {
 
 # There is a slight chance that it fails
 tryCatch(synchronise(afun()), error = function(e) e)
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other async control flow:

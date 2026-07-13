@@ -11,6 +11,16 @@ library(desc)
 library(jsonlite)
 ```
 
+We use a local [webfakes](https://webfakes.r-lib.org) httpbin server
+throughout, instead of a public one, so the examples are fast and reliable.
+
+```{r}
+httpbin <- webfakes::new_app_process(
+  webfakes::httpbin_app(),
+  opts = webfakes::server_opts(num_threads = 3)
+)
+```
+
 ### Find the fastest CRAN mirror in the US
 
 Get the URLs of all US CRAN mirrors, we'll use this later.
@@ -44,7 +54,7 @@ an HTTP 404 status code.
 
 ```{r}
 synchronise(response_time(mirror_urls[[1]]))
-synchronise(response_time("https://httpbin.org/status/404"))
+synchronise(response_time(httpbin$url("/status/404")))
 ```
 
 `fastest_urls()` will run `response_time()` on all supplied
@@ -243,7 +253,7 @@ tryCatch(
     resolve_gh("jeroen/curl"),
     resolve_gh("ropensci/magick"),
     resolve_url(curl20_url),
-    resolve_url("https://httpbin.org/delay/2")
+    resolve_url(httpbin$url("/delay/2"))
   )),
   error = function(e) e
 )
@@ -257,7 +267,7 @@ res <- synchronise(when_all(
   resolve_gh("jeroen/curl"),
   resolve_gh("ropensci/magickfoooooobar")$catch(error = function(e) NULL),
   resolve_url(curl20_url),
-  resolve_url("https://httpbin.org/status/401")$catch(error = function(e) NULL)
+  resolve_url(httpbin$url("/status/401"))$catch(error = function(e) NULL)
 ))
 res[[1]]$description$get("Package")
 res[[2]]

@@ -21,17 +21,18 @@ Keeps trying until the function's deferred value resolves without
 error, or \code{times} tries have been performed.
 }
 \examples{
-\donttest{
+\dontshow{if (async:::run_examples()) withAutoprint(\{ # examplesIf}
+httpbin <- webfakes::new_app_process(webfakes::httpbin_app())
 ## Try a download at most 5 times
 afun <- async(function() {
   async_retry(
-    function() http_get("https://eu.httpbin.org"),
+    function() http_get(httpbin$url("/get")),
     times = 5
   )$then(function(x) x$status_code)
 })
 
 synchronise(afun())
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other async control flow:

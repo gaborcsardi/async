@@ -10,18 +10,20 @@
 #'
 #' @family async iterators
 #' @export
-#' @examples
-#' \donttest{
+#' @examplesIf async:::run_examples()
+#' httpbin <- webfakes::new_app_process(
+#'   webfakes::httpbin_app(),
+#'   opts = webfakes::server_opts(num_threads = 3)
+#' )
 #' ## Filter out non-working URLs
 #' afun <- async(function(urls) {
 #'   test_url <- async_sequence(
 #'      http_head, function(x) identical(x$status_code, 200L))
 #'   async_filter(urls, test_url)
 #' })
-#' urls <- c("https://eu.httpbin.org/get",
-#'           "https://eu.httpbin.org/status/404")
+#' urls <- c(httpbin$url("/get"),
+#'           httpbin$url("/status/404"))
 #' synchronise(afun(urls))
-#' }
 
 async_filter <- function(.x, .p, ...) {
   when_all(.list = lapply(.x, async(.p), ...))$then(function(res) {

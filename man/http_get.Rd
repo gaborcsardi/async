@@ -108,13 +108,14 @@ to zero.
 }
 
 \examples{
-\donttest{
+\dontshow{if (async:::run_examples()) withAutoprint(\{ # examplesIf}
+httpbin <- webfakes::new_app_process(webfakes::httpbin_app())
 afun <- async(function() {
-  http_get("https://eu.httpbin.org/status/200")$
+  http_get(httpbin$url("/status/200"))$
     then(function(x) x$status_code)
 })
 synchronise(afun())
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other asyncronous HTTP calls:

@@ -24,17 +24,21 @@ A deferred value for the result.
 via \code{isTRUE()}. \code{async_reject} is the opposite, it drops them.
 }
 \examples{
-\donttest{
+\dontshow{if (async:::run_examples()) withAutoprint(\{ # examplesIf}
+httpbin <- webfakes::new_app_process(
+  webfakes::httpbin_app(),
+  opts = webfakes::server_opts(num_threads = 3)
+)
 ## Filter out non-working URLs
 afun <- async(function(urls) {
   test_url <- async_sequence(
      http_head, function(x) identical(x$status_code, 200L))
   async_filter(urls, test_url)
 })
-urls <- c("https://eu.httpbin.org/get",
-          "https://eu.httpbin.org/status/404")
+urls <- c(httpbin$url("/get"),
+          httpbin$url("/status/404"))
 synchronise(afun(urls))
-}
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other async iterators:
