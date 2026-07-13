@@ -117,9 +117,13 @@ default.</p></li>
 <li><p><code>status_codes</code>: integer vector of HTTP status codes to retry on.
 Defaults to 408, 413, 429, 500, 502, 503, 504, 521, 522 and 524.</p></li>
 <li><p><code>errors</code>: whether to retry on connection errors, defaults to <code>TRUE</code>.</p></li>
+<li><p><code>backoff</code>: a function that takes the (integer) retry attempt number
+and returns the number of seconds to wait before the next attempt.
+Defaults to an exponential backoff.</p></li>
 </ul></li>
 </ul><p>Between retries <code>async</code> waits with an exponential backoff, unless the
-response has a <code>Retry-After</code> header, which is then honored.</p></dd>
+response has a <code>Retry-After</code> header, which is then honored. Use the
+<code>backoff</code> entry to customize the wait.</p></dd>
 
 </dl></div>
     <div id="value">
