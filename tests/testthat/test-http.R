@@ -438,9 +438,11 @@ test_that("retry = FALSE and non-retryable codes do not retry", {
 })
 
 test_that("connection errors are retried unless disabled", {
+  # RFC 2606 reserves `.invalid`, a refused port is slow on windows.
+  url <- "http://nao.invalid/nope"
   err <- tryCatch(
     synchronise(http_get(
-      "http://127.0.0.1:1/nope",
+      url,
       retry = list(limit = 1, backoff = function(i) 0)
     )),
     error = identity
@@ -449,7 +451,7 @@ test_that("connection errors are retried unless disabled", {
 
   err2 <- tryCatch(
     synchronise(http_get(
-      "http://127.0.0.1:1/nope",
+      url,
       retry = list(limit = 5, errors = FALSE)
     )),
     error = identity
