@@ -44,6 +44,22 @@
 #'   [curl::handle_setopt()].
 #' @param on_progress Progress handler function. It is only used if the
 #'   response body is written to a file. See details below.
+#' @param retry Whether and how to retry failed requests. It can be:
+#'   * `TRUE` (the default) to retry with the default settings,
+#'   * `FALSE` or `NULL` to never retry,
+#'   * a single number to set the maximum number of retries, or
+#'   * a named list to configure retries, with entries (all optional):
+#'     - `limit`: maximum number of retries, defaults to 2.
+#'     - `methods`: character vector of HTTP methods to retry. Defaults to
+#'       the idempotent methods `GET`, `PUT`, `HEAD`, `DELETE`, `OPTIONS`,
+#'       `TRACE` and `QUERY`. In particular `POST` is not retried by
+#'       default.
+#'     - `status_codes`: integer vector of HTTP status codes to retry on.
+#'       Defaults to 408, 413, 429, 500, 502, 503, 504, 521, 522 and 524.
+#'     - `errors`: whether to retry on connection errors, defaults to `TRUE`.
+#'
+#'   Between retries `async` waits with an exponential backoff, unless the
+#'   response has a `Retry-After` header, which is then honored.
 #' @return Deferred object.
 #'
 #' @section Progress bars:
@@ -71,13 +87,15 @@
 #' }
 
 http_get <- function(url, headers = character(), file = NULL,
-                     options = list(), on_progress = NULL) {
+                     options = list(), on_progress = NULL, retry = TRUE) {
 
-  url; headers; file; options; on_progress
+  url; headers; file; options; on_progress; retry
   options <- get_default_curl_options(options)
 
   make_deferred_http(
-    function() {
+    method = "GET",
+    retry = retry,
+    cb = function() {
       assert_that(is_string(url))
       handle <- curl::new_handle(url = url)
       curl::handle_setheaders(handle, .list = headers)
@@ -102,7 +120,7 @@ http_get <- function(url, headers = character(), file = NULL,
       curl::handle_setopt(handle, .list = options)
       list(handle = handle, options = options)
     },
-    file
+    file = file
   )
 }
 
@@ -136,13 +154,15 @@ http_get <- mark_as_async(http_get)
 #' }
 
 http_head <- function(url, headers = character(), file = NULL,
-                      options = list(), on_progress = NULL) {
+                      options = list(), on_progress = NULL, retry = TRUE) {
 
-  url; headers; file; options; on_progress
+  url; headers; file; options; on_progress; retry
   options <- get_default_curl_options(options)
 
   make_deferred_http(
-    function() {
+    method = "HEAD",
+    retry = retry,
+    cb = function() {
       assert_that(is_string(url))
       handle <- curl::new_handle(url = url)
       curl::handle_setheaders(handle, .list = headers)
@@ -150,7 +170,7 @@ http_head <- function(url, headers = character(), file = NULL,
                     .list = options)
       list(handle = handle, options = options)
     },
-    file
+    file = file
   )
 }
 
@@ -193,9 +213,9 @@ http_head <- mark_as_async(http_head)
 
 http_post <- function(url, data = NULL, data_file = NULL,
                       data_form = NULL, headers = character(), file = NULL,
-                      options = list(), on_progress = NULL) {
+                      options = list(), on_progress = NULL, retry = TRUE) {
 
-  url; data; data_file; data_form; headers; file; options; on_progress
+  url; data; data_file; data_form; headers; file; options; on_progress; retry
   if ((!is.null(data) + !is.null(data_file) + !is.null(data_form)) > 1) {
     stop(
       "At most one of `data`, `data_file` and `data_form` ",
@@ -209,7 +229,9 @@ http_post <- function(url, data = NULL, data_file = NULL,
   options <- get_default_curl_options(options)
 
   make_deferred_http(
-    function() {
+    method = "POST",
+    retry = retry,
+    cb = function() {
       assert_that(is_string(url))
       handle <- curl::new_handle(url = url)
       curl::handle_setheaders(handle, .list = headers)
@@ -221,25 +243,27 @@ http_post <- function(url, data = NULL, data_file = NULL,
       }
       list(handle = handle, options = options)
     },
-    file
+    file = file
   )
 }
 
 http_post <- mark_as_async(http_post)
 
 http_delete <- function(url, headers = character(), file = NULL,
-                        options = list()) {
-  url; headers; options;
+                        options = list(), retry = TRUE) {
+  url; headers; options; retry
 
   make_deferred_http(
-    function() {
+    method = "DELETE",
+    retry = retry,
+    cb = function() {
       assert_that(is_string(url))
       handle <- curl::new_handle(url = url)
       curl::handle_setheaders(handle, .list = headers)
       curl::handle_setopt(handle, customrequest = "DELETE", .list = options)
       list(handle = handle, options = options)
     },
-    file
+    file = file
   )
 }
 
@@ -299,10 +323,51 @@ http_events <- R6Class(
   )
 )
 
-make_deferred_http <- function(cb, file) {
-  cb; file
-  id <- NULL
+make_deferred_http <- function(cb, file, method = "GET", retry = TRUE) {
+  cb; file; method; retry
+  retry <- get_default_http_retry(retry, method)
   ee <- http_events$new()
+
+  ## A single HTTP attempt, sharing the event emitter across retries.
+  once <- function() make_deferred_http_once(cb, file, ee)
+
+  if (is.null(retry)) {
+    return(once())
+  }
+
+  did <- 0L
+  self <- deferred$new(
+    type = "http", call = sys.call(),
+    action = function(resolve) {
+      resolve
+      once()$then(self)
+    },
+    parent_resolve = function(value, resolve) {
+      if (did < retry$limit && is.integer(value$status_code) &&
+          value$status_code %in% retry$status_codes) {
+        did <<- did + 1L
+        wait <- http_retry_after(value) %||% default_backoff(did)
+        delay(wait)$then(function() once())$then(self)
+      } else {
+        resolve(value)
+      }
+    },
+    parent_reject = function(value, resolve) {
+      if (retry$errors && did < retry$limit) {
+        did <<- did + 1L
+        delay(default_backoff(did))$then(function() once())$then(self)
+      } else {
+        stop(value)
+      }
+    },
+    event_emitter = ee
+  )
+  self
+}
+
+make_deferred_http_once <- function(cb, file, ee) {
+  cb; file; ee
+  id <- NULL
   deferred$new(
     type = "http", call = sys.call(),
     action = function(resolve, progress) {
@@ -322,9 +387,79 @@ make_deferred_http <- function(cb, file) {
     },
     on_cancel = function(reason) {
       if (!is.null(id)) get_default_event_loop()$cancel(id)
-    },
-    event_emitter = ee
+    }
   )
+}
+
+## Default retry configuration, and normalization of the `retry` argument.
+
+http_retry_defaults <- list(
+  limit = 2L,
+  methods = c("GET", "PUT", "HEAD", "DELETE", "OPTIONS", "TRACE", "QUERY"),
+  status_codes = c(408L, 413L, 429L, 500L, 502L, 503L, 504L, 521L, 522L, 524L),
+  errors = TRUE
+)
+
+get_default_http_retry <- function(retry, method) {
+  if (is.null(retry) || isFALSE(retry)) return(NULL)
+
+  if (isTRUE(retry)) {
+    spec <- http_retry_defaults
+  } else if (is.numeric(retry) && length(retry) == 1) {
+    spec <- modifyList(http_retry_defaults, list(limit = retry))
+  } else if (is.list(retry)) {
+    unknown <- setdiff(names(retry), names(http_retry_defaults))
+    if (length(unknown)) {
+      stop(
+        "Unknown `retry` entry/entries: ",
+        paste0("`", unknown, "`", collapse = ", "), ". ",
+        "Allowed entries are: ",
+        paste0("`", names(http_retry_defaults), "`", collapse = ", "), "."
+      )
+    }
+    spec <- modifyList(http_retry_defaults, retry)
+  } else {
+    stop(
+      "Invalid `retry` argument, it must be `TRUE`, `FALSE`, `NULL`, ",
+      "a count, or a named list."
+    )
+  }
+
+  spec$limit <- as.integer(spec$limit)
+  spec$methods <- toupper(as.character(spec$methods))
+  spec$status_codes <- as.integer(spec$status_codes)
+  spec$errors <- as.logical(spec$errors)
+
+  ## No retries if the limit is not positive, or the method is not retryable.
+  if (is.na(spec$limit) || spec$limit <= 0) return(NULL)
+  if (!toupper(method) %in% spec$methods) return(NULL)
+
+  spec
+}
+
+## Number of seconds to wait according to the `Retry-After` response header,
+## or `NULL` if there is no (usable) such header. `Retry-After` is either a
+## number of seconds, or an HTTP date.
+
+http_retry_after <- function(response) {
+  headers <- response[["headers"]]
+  if (is.null(headers)) return(NULL)
+  parsed <- tryCatch(
+    curl::parse_headers_list(headers),
+    error = function(e) NULL
+  )
+  value <- parsed[["retry-after"]]
+  if (is.null(value)) return(NULL)
+
+  secs <- suppressWarnings(as.numeric(value))
+  if (!is.na(secs)) return(max(secs, 0))
+
+  when <- tryCatch(
+    as.POSIXct(value, format = "%a, %d %b %Y %H:%M:%S", tz = "GMT"),
+    error = function(e) NA
+  )
+  if (is.na(when)) return(NULL)
+  max(as.numeric(difftime(when, Sys.time(), units = "secs")), 0)
 }
 
 #' Throw R errors for HTTP errors

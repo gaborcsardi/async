@@ -11,7 +11,6 @@ Description: The 'async' package brings asynchronous ('async') computation
 License: MIT + file LICENSE
 URL: https://github.com/gaborcsardi/async#readme
 BugReports: https://github.com/gaborcsardi/async/issues
-RoxygenNote: 7.3.1.9000
 Depends: R (>= 3.2.0)
 Suggests:
     cli,
@@ -33,3 +32,4 @@ Imports:
 Roxygen: list(markdown = TRUE, r6 = FALSE)
 KeepSource: yes
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0

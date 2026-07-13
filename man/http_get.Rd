@@ -9,7 +9,8 @@ http_get(
   headers = character(),
   file = NULL,
   options = list(),
-  on_progress = NULL
+  on_progress = NULL,
+  retry = TRUE
 )
 }
 \arguments{
@@ -25,6 +26,27 @@ The body of the response is written to this file.}
 
 \item{on_progress}{Progress handler function. It is only used if the
 response body is written to a file. See details below.}
+
+\item{retry}{Whether and how to retry failed requests. It can be:
+\itemize{
+\item \code{TRUE} (the default) to retry with the default settings,
+\item \code{FALSE} or \code{NULL} to never retry,
+\item a single number to set the maximum number of retries, or
+\item a named list to configure retries, with entries (all optional):
+\itemize{
+\item \code{limit}: maximum number of retries, defaults to 2.
+\item \code{methods}: character vector of HTTP methods to retry. Defaults to
+the idempotent methods \code{GET}, \code{PUT}, \code{HEAD}, \code{DELETE}, \code{OPTIONS},
+\code{TRACE} and \code{QUERY}. In particular \code{POST} is not retried by
+default.
+\item \code{status_codes}: integer vector of HTTP status codes to retry on.
+Defaults to 408, 413, 429, 500, 502, 503, 504, 521, 522 and 524.
+\item \code{errors}: whether to retry on connection errors, defaults to \code{TRUE}.
+}
+}
+
+Between retries \code{async} waits with an exponential backoff, unless the
+response has a \code{Retry-After} header, which is then honored.}
 }
 \value{
 Deferred object.
