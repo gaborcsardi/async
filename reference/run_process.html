@@ -131,7 +131,10 @@ application on windows. Ignored on other platforms.</p></dd>
 <dd><p>The encoding to assume for <code>stdout</code> and
 <code>stderr</code>. By default the encoding of the current locale is
 used. Note that <code>processx</code> always reencodes the output of
-both streams in UTF-8 currently.</p></dd>
+both streams in UTF-8 currently. Use <code>"binary"</code> to collect
+the raw bytes without any conversion: <code>stdout</code> and <code>stderr</code>
+in the return value will be raw vectors instead of character
+strings. Line callbacks are not supported in binary mode.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

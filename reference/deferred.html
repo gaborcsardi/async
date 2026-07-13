@@ -300,16 +300,20 @@ operation on the leaked deferred value.</p>
 then used synchronously by the interactive user, or another piece of
 synchronous code, via <code><a href="synchronise.html">synchronise()</a></code> calls. The following example makes
 three HTTP requests in parallel:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>http_status3 <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  http_status <span class="ot">&lt;-</span> <span class="cf">function</span>(url) {</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    <span class="fu">http_get</span>(url)<span class="sc">$</span><span class="fu">then</span>(<span class="cf">function</span>(response) response<span class="sc">$</span>status_code)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  }</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  r1 <span class="ot">&lt;-</span> <span class="fu">http_status</span>(<span class="st">"https://eu.httpbin.org/status/403"</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  r2 <span class="ot">&lt;-</span> <span class="fu">http_status</span>(<span class="st">"https://eu.httpbin.org/status/404"</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  r3 <span class="ot">&lt;-</span> <span class="fu">http_status</span>(<span class="st">"https://eu.httpbin.org/status/200"</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  <span class="fu">when_all</span>(r1, r2, r3)</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>}</span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">synchronise</span>(<span class="fu">http_status3</span>())</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>httpbin <span class="ot">&lt;-</span> webfakes<span class="sc">::</span><span class="fu">new_app_process</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  webfakes<span class="sc">::</span><span class="fu">httpbin_app</span>(),</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="at">opts =</span> webfakes<span class="sc">::</span><span class="fu">server_opts</span>(<span class="at">num_threads =</span> <span class="dv">3</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>http_status3 <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  http_status <span class="ot">&lt;-</span> <span class="cf">function</span>(url) {</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>    <span class="fu">http_get</span>(url)<span class="sc">$</span><span class="fu">then</span>(<span class="cf">function</span>(response) response<span class="sc">$</span>status_code)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  }</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>  r1 <span class="ot">&lt;-</span> <span class="fu">http_status</span>(httpbin<span class="sc">$</span><span class="fu">url</span>(<span class="st">"/status/403"</span>))</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>  r2 <span class="ot">&lt;-</span> <span class="fu">http_status</span>(httpbin<span class="sc">$</span><span class="fu">url</span>(<span class="st">"/status/404"</span>))</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>  r3 <span class="ot">&lt;-</span> <span class="fu">http_status</span>(httpbin<span class="sc">$</span><span class="fu">url</span>(<span class="st">"/status/200"</span>))</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>  <span class="fu">when_all</span>(r1, r2, r3)</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>}</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="fu">synchronise</span>(<span class="fu">http_status3</span>())</span></code></pre><p></p></div>
 <p>This async function can also be used asychronously, as a parent of
 another deferred value, in an async phase.</p>
     </div>

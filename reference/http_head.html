@@ -135,9 +135,12 @@ response has a <code>Retry-After</code> header, which is then honored.</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">httpbin</span> <span class="op">&lt;-</span> <span class="fu">webfakes</span><span class="fu">::</span><span class="fu"><a href="https://webfakes.r-lib.org/reference/new_app_process.html" class="external-link">new_app_process</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">webfakes</span><span class="fu">::</span><span class="fu"><a href="https://webfakes.r-lib.org/reference/httpbin_app.html" class="external-link">httpbin_app</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  opts <span class="op">=</span> <span class="fu">webfakes</span><span class="fu">::</span><span class="fu"><a href="https://webfakes.r-lib.org/reference/server_opts.html" class="external-link">server_opts</a></span><span class="op">(</span>num_threads <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">afun</span> <span class="op">&lt;-</span> <span class="fu"><a href="async.html">async</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="va">dx</span> <span class="op">&lt;-</span> <span class="fu">http_head</span><span class="op">(</span><span class="st">"https://eu.httpbin.org/status/200"</span><span class="op">)</span><span class="op">$</span></span></span>
+<span class="r-in"><span>  <span class="va">dx</span> <span class="op">&lt;-</span> <span class="fu">http_head</span><span class="op">(</span><span class="va">httpbin</span><span class="op">$</span><span class="fu">url</span><span class="op">(</span><span class="st">"/status/200"</span><span class="op">)</span><span class="op">)</span><span class="op">$</span></span></span>
 <span class="r-in"><span>    <span class="fu">then</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">status_code</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">afun</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -148,7 +151,7 @@ response has a <code>Retry-After</code> header, which is then honored.</p></dd>
 <span class="r-in"><span>  <span class="fu"><a href="when_all.html">when_all</a></span><span class="op">(</span>.list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">urls</span>, <span class="va">http_head</span><span class="op">)</span><span class="op">)</span><span class="op">$</span></span></span>
 <span class="r-in"><span>    <span class="fu">then</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="st">"[["</span>, <span class="st">"status_code"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-in"><span><span class="va">urls</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://google.com"</span>, <span class="st">"https://eu.httpbin.org"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">urls</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">httpbin</span><span class="op">$</span><span class="fu">url</span><span class="op">(</span><span class="st">"/get"</span><span class="op">)</span>, <span class="va">httpbin</span><span class="op">$</span><span class="fu">url</span><span class="op">(</span><span class="st">"/status/200"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">afun</span><span class="op">(</span><span class="va">urls</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 200</span>
@@ -156,7 +159,6 @@ response has a <code>Retry-After</code> header, which is then honored.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 200</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>

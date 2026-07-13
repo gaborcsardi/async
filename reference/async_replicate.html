@@ -101,32 +101,34 @@ it always returns a list.
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">httpbin</span> <span class="op">&lt;-</span> <span class="fu">webfakes</span><span class="fu">::</span><span class="fu"><a href="https://webfakes.r-lib.org/reference/new_app_process.html" class="external-link">new_app_process</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">webfakes</span><span class="fu">::</span><span class="fu"><a href="https://webfakes.r-lib.org/reference/httpbin_app.html" class="external-link">httpbin_app</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  opts <span class="op">=</span> <span class="fu">webfakes</span><span class="fu">::</span><span class="fu"><a href="https://webfakes.r-lib.org/reference/server_opts.html" class="external-link">server_opts</a></span><span class="op">(</span>num_threads <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co">## perform an HTTP request three times, and list the reponse times</span></span></span>
 <span class="r-in"><span><span class="va">do</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu">async_replicate</span><span class="op">(</span><span class="fl">3</span>,</span></span>
-<span class="r-in"><span>    <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="fu"><a href="http_get.html">http_get</a></span><span class="op">(</span><span class="st">"https://eu.httpbin.org"</span><span class="op">)</span><span class="op">$</span><span class="fu">then</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">times</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="fu"><a href="http_get.html">http_get</a></span><span class="op">(</span><span class="va">httpbin</span><span class="op">$</span><span class="fu">url</span><span class="op">(</span><span class="st">"/get"</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">then</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">times</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="synchronise.html">synchronise</a></span><span class="op">(</span><span class="fu">do</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      redirect    namelookup       connect   pretransfer starttransfer </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      0.000000      0.054616      0.107666      0.148752     47.729013 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      0.000000      0.000022      0.001748      0.001804      0.015030 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         total </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     47.729220 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      0.015180 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      redirect    namelookup       connect   pretransfer starttransfer </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      0.000000      0.054565      0.074023      0.143756     26.443770 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      0.000000      0.000008      0.001666      0.001706      0.017103 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         total </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     26.443975 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      0.017181 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      redirect    namelookup       connect   pretransfer starttransfer </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      0.000000      0.054558      0.090378      0.143768     56.417576 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      0.000000      0.000012      0.001650      0.001687      0.017155 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         total </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     56.417829 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      0.017236 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>

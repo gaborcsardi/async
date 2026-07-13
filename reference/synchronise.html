@@ -94,15 +94,14 @@ error.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">httpbin</span> <span class="op">&lt;-</span> <span class="fu">webfakes</span><span class="fu">::</span><span class="fu"><a href="https://webfakes.r-lib.org/reference/new_app_process.html" class="external-link">new_app_process</a></span><span class="op">(</span><span class="fu">webfakes</span><span class="fu">::</span><span class="fu"><a href="https://webfakes.r-lib.org/reference/httpbin_app.html" class="external-link">httpbin_app</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">http_status</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">url</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="http_get.html">http_get</a></span><span class="op">(</span><span class="va">url</span>, <span class="va">...</span><span class="op">)</span><span class="op">$</span></span></span>
 <span class="r-in"><span>    <span class="fu">then</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">status_code</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">synchronise</span><span class="op">(</span><span class="fu">http_status</span><span class="op">(</span><span class="st">"https://eu.httpbin.org/status/418"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">synchronise</span><span class="op">(</span><span class="fu">http_status</span><span class="op">(</span><span class="va">httpbin</span><span class="op">$</span><span class="fu">url</span><span class="op">(</span><span class="st">"/status/418"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 418</span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
