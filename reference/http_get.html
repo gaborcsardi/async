@@ -73,7 +73,8 @@ via a deferred.</p>
 <span>  headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  file <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  on_progress <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  on_progress <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  retry <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -102,6 +103,23 @@ The body of the response is written to this file.</p></dd>
 <dt id="arg-on-progress">on_progress<a class="anchor" aria-label="anchor" href="#arg-on-progress"></a></dt>
 <dd><p>Progress handler function. It is only used if the
 response body is written to a file. See details below.</p></dd>
+
+
+<dt id="arg-retry">retry<a class="anchor" aria-label="anchor" href="#arg-retry"></a></dt>
+<dd><p>Whether and how to retry failed requests. It can be:</p><ul><li><p><code>TRUE</code> (the default) to retry with the default settings,</p></li>
+<li><p><code>FALSE</code> or <code>NULL</code> to never retry,</p></li>
+<li><p>a single number to set the maximum number of retries, or</p></li>
+<li><p>a named list to configure retries, with entries (all optional):</p><ul><li><p><code>limit</code>: maximum number of retries, defaults to 2.</p></li>
+<li><p><code>methods</code>: character vector of HTTP methods to retry. Defaults to
+the idempotent methods <code>GET</code>, <code>PUT</code>, <code>HEAD</code>, <code>DELETE</code>, <code>OPTIONS</code>,
+<code>TRACE</code> and <code>QUERY</code>. In particular <code>POST</code> is not retried by
+default.</p></li>
+<li><p><code>status_codes</code>: integer vector of HTTP status codes to retry on.
+Defaults to 408, 413, 429, 500, 502, 503, 504, 521, 522 and 524.</p></li>
+<li><p><code>errors</code>: whether to retry on connection errors, defaults to <code>TRUE</code>.</p></li>
+</ul></li>
+</ul><p>Between retries <code>async</code> waits with an exponential backoff, unless the
+response has a <code>Retry-After</code> header, which is then honored.</p></dd>
 
 </dl></div>
     <div id="value">
